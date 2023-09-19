@@ -11,4 +11,11 @@
 #define DPA__G(T, V) _Generic((V), T: (V), default: (T){0})
 #define DPA__GS(T, V) T: DPA__G(T, (V))
 
+#define DPA_U_CONCAT(A,B) A ## B
+#define DPA_U_CONCAT_E(A,B) DPA_U_CONCAT(A, B)
+
+#define DPA_U_UNPACK(...) __VA_ARGS__
+
+#define DPA_U_EXPORT __attribute__((visibility("default")))
+
 #endif
