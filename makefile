@@ -39,7 +39,7 @@ endif
 
 CFLAGS  += --std=c17
 CFLAGS  += -Iinclude
-CFLAGS  += -Wall -Wextra -pedantic # -Werror
+CFLAGS  += -Wall -Wextra -pedantic -Werror
 CFLAGS  += -fstack-protector-all
 CFLAGS  += -Wno-missing-field-initializers
 
