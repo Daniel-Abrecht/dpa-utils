@@ -14,6 +14,9 @@ TYPE := release
 
 unexport LD_PRELOAD
 
+# GCC has an anoying false positive warning for 0 initializing and braces, so for the time being, I test this using clang
+CC = clang
+
 ifdef debug
 TYPE := debug
 CFLAGS  += -O0 -g
@@ -36,7 +39,7 @@ endif
 
 CFLAGS  += --std=c17
 CFLAGS  += -Iinclude
-CFLAGS  += -Wall -Wextra -pedantic -Werror
+CFLAGS  += -Wall -Wextra -pedantic # -Werror
 CFLAGS  += -fstack-protector-all
 CFLAGS  += -Wno-missing-field-initializers
 
@@ -92,7 +95,7 @@ build/$(TYPE)/o/%.c.o: %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
 	$(CC) -fPIC -c -o $@ $(DFLAGS) $(CFLAGS) $<
 
-clean: clean//docs
+clean:
 	rm -rf build/$(TYPE)/ bin/$(TYPE)/ lib/$(TYPE)/
 
 install:

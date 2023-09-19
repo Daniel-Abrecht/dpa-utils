@@ -1,5 +1,5 @@
-#ifndef DPA_UTILS_BO_SIMPLE_H
-#define DPA_UTILS_BO_SIMPLE_H
+#ifndef DPA_UTILS_BO_H
+#define DPA_UTILS_BO_H
 
 #include <dpa/utils/common.h>
 
@@ -9,16 +9,26 @@
 #include <limits.h>
 #include <assert.h>
 
-enum dpa_u_bo_type {
-  DPA_U_BO_INLINE,
-  DPA_U_BO_SIMPLE,
-//  DPA_U_BO_UNIQUE,
-};
+
+/////////////////////////////////
+//////      Constants      //////
+/////////////////////////////////
 
 enum { DPA__U_BO_COMMON_SIZE = sizeof(size_t) + sizeof(void*) };
 enum { DPA_U_BO_INLINE_MAX_SIZE = DPA__U_BO_COMMON_SIZE-1 };
 #define DPA_U_BO_MAX_SIZE (((size_t)1)<<((sizeof(size_t)-1)*CHAR_BIT))
 #define DPA__U_BO_ALIGN alignas(DPA__U_BO_COMMON_SIZE)
+
+
+//////////////////////////////////
+//////      Data types      //////
+//////////////////////////////////
+
+enum dpa_u_bo_type {
+  DPA_U_BO_INLINE,
+  DPA_U_BO_SIMPLE,
+//  DPA_U_BO_UNIQUE,
+};
 
 #define DPA__U_BO_META(...) \
   struct __attribute__((packed)) { \
@@ -26,16 +36,18 @@ enum { DPA_U_BO_INLINE_MAX_SIZE = DPA__U_BO_COMMON_SIZE-1 };
     unsigned __VA_ARGS__ : 4; \
   }
 
-// Note: There is no `dpa_u_bo_inline_t`. Just use const `dpa_u_bo_inline_t` instead.
+typedef struct { char all[DPA__U_BO_COMMON_SIZE]; } dpa__u_bo_a_t;
+
 typedef struct {
   union {
     struct {
       DPA__U_BO_META(size);
       char data[DPA__U_BO_COMMON_SIZE-1];
     };
-    DPA__U_BO_ALIGN struct { char all[DPA__U_BO_COMMON_SIZE]; } all;
+    DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
 } dpa_u_bo_inline_t;
+typedef const dpa_u_bo_inline_t dpa_u_bo_inline_ro_t;
 static_assert(sizeof(dpa_u_bo_inline_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_inline_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_inline_t,data) == 1, "Expected data to be at byte 1");
 
@@ -48,10 +60,10 @@ static_assert(offsetof(dpa_u_bo_inline_t,data) == 1, "Expected data to be at byt
       }; \
       __VA_ARGS__ void* data; \
     }; \
-    DPA__U_BO_ALIGN struct { char all[DPA__U_BO_COMMON_SIZE]; } all; \
+    DPA__U_BO_ALIGN dpa__u_bo_a_t all; \
   }
 
-typedef const struct {
+typedef const struct dpa__u_bo_simple_ro {
   DPA__U_BO_SIMPLE_MEMBERS(const);
 } dpa_u_bo_simple_ro_t;
 static_assert(sizeof(dpa_u_bo_simple_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_ro_t has an unexpected size");
@@ -66,12 +78,12 @@ typedef struct {
 static_assert(sizeof(dpa_u_bo_simple_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_simple_t,data) == sizeof(size_t), "Expected data to be at a different offset");
 
-typedef const struct {
+typedef const struct dpa__u_bo_ro {
   union {
     struct { DPA__U_BO_META(); char _[DPA__U_BO_COMMON_SIZE-1]; };
     const dpa_u_bo_inline_t bo_inline;
     dpa_u_bo_simple_ro_t bo_simple;
-    DPA__U_BO_ALIGN struct { char all[DPA__U_BO_COMMON_SIZE]; } all;
+    DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
 } dpa_u_bo_ro_t;
 static_assert(sizeof(dpa_u_bo_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_ro_t has an unexpected size");
@@ -83,21 +95,26 @@ typedef struct {
     dpa_u_bo_ro_t ro;
     dpa_u_bo_inline_t bo_inline;
     dpa_u_bo_simple_t bo_simple;
-    DPA__U_BO_ALIGN struct { char all[DPA__U_BO_COMMON_SIZE]; } all;
+    DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
 } dpa_u_bo_t;
 static_assert(sizeof(dpa_u_bo_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_t,_) == 1, "Expected _ to be at a different offset");
 
+
+///////////////////////////////////////////////
+//////      Member access functions      //////
+///////////////////////////////////////////////
+
 #define dpa_u_bo_data(X) _Generic((X), \
-    DPA__GS(      dpa_u_bo_inline_t,     (X)).data, \
-    DPA__GS(const dpa_u_bo_inline_t,     (X)).data, \
-    DPA__GS(      dpa_u_bo_simple_t,     (X)).data, \
-    DPA__GS(const dpa_u_bo_simple_t,     (X)).data, \
-    DPA__GS(      dpa_u_bo_simple_ro_t,  (X)).data, \
-          dpa_u_bo_t: dpa__u_bo_data(&DPA__G(dpa_u_bo_t,(X))), \
-    const dpa_u_bo_t: dpa__u_cbo_data(&DPA__G(const dpa_u_bo_t,(X))), \
-          dpa_u_bo_ro_t: dpa__u_bo_ro_data(&DPA__G(dpa_u_bo_ro_t,(X))), \
+    DPA__GS(       dpa_u_bo_inline_t,     (X)).data, \
+    DPA__GS(       dpa_u_bo_simple_t,     (X)).data, \
+    DPA__GS(struct dpa__u_bo_simple_ro,  (X)).data, \
+    dpa_u_bo_t: _Generic(&DPA__G(dpa_u_bo_t,(X)), \
+            dpa_u_bo_t*: dpa__u_bo_data(&DPA__G(dpa_u_bo_t,(X))), \
+      const dpa_u_bo_t*: dpa__u_cbo_data(&DPA__G(dpa_u_bo_t,(X))) \
+    ), \
+    struct dpa__u_bo_ro: dpa__u_bo_ro_data(&DPA__G(struct dpa__u_bo_ro,(X))), \
     \
     DPA__GS(      dpa_u_bo_inline_t*,    (X))->data, \
     DPA__GS(const dpa_u_bo_inline_t*,    (X))->data, \
@@ -144,14 +161,20 @@ static inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size)
 }
 
 #define dpa_u_bo_get_size(X) ((size_t)_Generic((X), \
-    DPA__GS(      dpa_u_bo_inline_t,(X)).size, \
-    DPA__GS(const dpa_u_bo_inline_t,(X)).size, \
-    DPA__GS(      dpa_u_bo_simple_t,(X)).size, \
-    DPA__GS(const dpa_u_bo_simple_t,(X)).size, \
-    DPA__GS(      dpa_u_bo_simple_ro_t,(X)).size, \
-          dpa_u_bo_t: dpa__u_bo_get_size(DPA__G(dpa_u_bo_t, (X))), \
-    const dpa_u_bo_t: dpa__u_bo_get_size(DPA__G(const dpa_u_bo_t, (X))), \
-          dpa_u_bo_ro_t: dpa__u_bo_ro_get_size(DPA__G(dpa_u_bo_ro_t, (X))) \
+    DPA__GS(       dpa_u_bo_inline_t,(X)).size, \
+    DPA__GS(       dpa_u_bo_simple_t,(X)).size, \
+    DPA__GS(struct dpa__u_bo_simple_ro,(X)).size, \
+           dpa_u_bo_t: dpa__u_bo_get_size(DPA__G(dpa_u_bo_t, (X))), \
+    struct dpa__u_bo_ro: dpa__u_bo_ro_get_size(DPA__G(struct dpa__u_bo_ro, (X))), \
+    \
+    DPA__GS(      dpa_u_bo_inline_t*,(X))->size, \
+    DPA__GS(const dpa_u_bo_inline_t*,(X))->size, \
+    DPA__GS(      dpa_u_bo_simple_t*,(X))->size, \
+    DPA__GS(const dpa_u_bo_simple_t*,(X))->size, \
+    DPA__GS(      dpa_u_bo_simple_ro_t*,(X))->size, \
+          dpa_u_bo_t*: dpa__u_bo_get_size(*DPA__G(dpa_u_bo_t*, (X))), \
+    const dpa_u_bo_t*: dpa__u_bo_get_size(*DPA__G(const dpa_u_bo_t*, (X))), \
+          dpa_u_bo_ro_t*: dpa__u_bo_ro_get_size(*DPA__G(dpa_u_bo_ro_t*, (X))) \
   ))
 
 #define X \
@@ -165,14 +188,11 @@ static inline size_t dpa__u_bo_ro_get_size(dpa_u_bo_ro_t bo){ X }
 #undef X
 
 #define dpa_u_bo_get_type(X) ((const enum dpa_u_bo_type)_Generic((X), \
-    DPA__GS(      dpa_u_bo_t, (X)).type, \
-    DPA__GS(const dpa_u_bo_t, (X)).type, \
-    DPA__GS(      dpa_u_bo_ro_t, (X)).type, \
-    DPA__GS(      dpa_u_bo_inline_t, (X)).type, \
-    DPA__GS(const dpa_u_bo_inline_t, (X)).type, \
-    DPA__GS(      dpa_u_bo_simple_t, (X)).type, \
-    DPA__GS(const dpa_u_bo_simple_t, (X)).type, \
-    DPA__GS(      dpa_u_bo_simple_ro_t, (X)).type, \
+    DPA__GS(       dpa_u_bo_t, (X)).type, \
+    DPA__GS(struct dpa__u_bo_ro, (X)).type, \
+    DPA__GS(       dpa_u_bo_inline_t, (X)).type, \
+    DPA__GS(       dpa_u_bo_simple_t, (X)).type, \
+    DPA__GS(struct dpa__u_bo_simple_ro, (X)).type, \
     \
     DPA__GS(      dpa_u_bo_t*, (X))->type, \
     DPA__GS(const dpa_u_bo_t*, (X))->type, \
@@ -183,5 +203,25 @@ static inline size_t dpa__u_bo_ro_get_size(dpa_u_bo_ro_t bo){ X }
     DPA__GS(const dpa_u_bo_simple_t*, (X))->type, \
     DPA__GS(      dpa_u_bo_simple_ro_t*, (X))->type \
   ))
+
+
+
+///////////////////////////////////////////////
+//////      Member access functions      //////
+///////////////////////////////////////////////
+
+#define dpa_u_v_bo_ro(X) _Generic((X), \
+    DPA__GS(dpa_u_bo_t, (X)).ro, \
+    DPA__GS(struct dpa__u_bo_ro, (X)), \
+    dpa_u_bo_inline_t: (dpa_u_bo_ro_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
+    dpa_u_bo_simple_t: (dpa_u_bo_ro_t){ .bo_simple = DPA__G(dpa_u_bo_simple_t, (X)).ro }, \
+    struct dpa__u_bo_simple_ro: (dpa_u_bo_ro_t){ .bo_simple = DPA__G(struct dpa__u_bo_simple_ro, (X)) }, \
+    \
+    DPA__GS(dpa_u_bo_t*, (X))->ro, \
+    DPA__GS(dpa_u_bo_ro_t*, (X))[0], \
+    dpa_u_bo_inline_t*: (dpa_u_bo_ro_t){ .bo_inline = *DPA__G(dpa_u_bo_inline_t*, (X)) }, \
+    dpa_u_bo_simple_t*: (dpa_u_bo_ro_t){ .bo_simple = DPA__G(dpa_u_bo_simple_t*, (X))->ro }, \
+    dpa_u_bo_simple_ro_t*: (dpa_u_bo_ro_t){ .bo_simple = *DPA__G(dpa_u_bo_simple_ro_t*, (X)) } \
+  )
 
 #endif
