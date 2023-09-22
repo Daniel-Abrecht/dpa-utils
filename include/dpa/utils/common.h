@@ -34,9 +34,6 @@
 #define DPA_U__B36 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" ///< Digits for base36 numbers. Also suitable for bases < 36.
 #define DPA_U__B64 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=" ///< Digits for base64 encoded content
 
-#define DPA_U_FNV_PRIME        ((uint64_t)0x100000001B3llu)      ///< This is the FNV Prime used for 64 bit hashs by the FNV algorithm
-#define DPA_U_FNV_OFFSET_BASIS ((uint64_t)0xCBF29CE484222325llu) ///< This is the initial hash value used when calculating the 64 bit FNV hash
-
 /////////////////////////////////////////////
 //////      Interopability macros      //////
 /////////////////////////////////////////////
