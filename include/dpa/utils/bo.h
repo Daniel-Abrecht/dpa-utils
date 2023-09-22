@@ -4,6 +4,7 @@
 #include <dpa/utils/common.h>
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdalign.h>
 #include <limits.h>
@@ -203,8 +204,6 @@ static inline size_t dpa__u_bo_ro_get_size(dpa_u_bo_ro_t bo){ X }
     DPA__GS(const dpa_u_bo_simple_t*, (X))->type, \
     DPA__GS(      dpa_u_bo_simple_ro_t*, (X))->type \
   ))
-
-
 
 /////////////////////////////////////////
 //////      Conversion macros      //////

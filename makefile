@@ -14,9 +14,6 @@ TYPE := release
 
 unexport LD_PRELOAD
 
-# GCC has an anoying false positive warning for 0 initializing and braces, so for the time being, I test this using clang
-CC = clang
-
 ifdef debug
 TYPE := debug
 CFLAGS  += -O0 -g
@@ -41,7 +38,7 @@ CFLAGS  += --std=c17
 CFLAGS  += -Iinclude
 CFLAGS  += -Wall -Wextra -pedantic -Werror
 CFLAGS  += -fstack-protector-all
-CFLAGS  += -Wno-missing-field-initializers
+CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces
 
 CFLAGS  += -fvisibility=hidden
 
@@ -105,6 +102,7 @@ install:
 	ln -sf "lib$(SONAME).so.$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so"
 	cp "lib/$(TYPE)/lib$(SONAME).a" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).a"
 	cp -a include/dpa/utils/./ "$(DESTDIR)$(prefix)/include/dpa/utils/"
+	cp include/dpa/utils.h "$(DESTDIR)$(prefix)/include/dpa/"
 	ldconfig
 
 uninstall:
@@ -114,6 +112,7 @@ uninstall:
 	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so"
 	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME).a"
 	rm -rf "$(DESTDIR)$(prefix)/include/dpa/utils/"
+	rm -f "$(DESTDIR)$(prefix)/include/dpa/utils.h"
 
 shell:
 	if [ -z "$$SHELL" ]; then SHELL="$$(getent passwd $$(id -u) | cut -d : -f 7)"; fi; \
