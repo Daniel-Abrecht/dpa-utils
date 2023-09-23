@@ -18,7 +18,7 @@
 enum { DPA__U_BO_COMMON_SIZE = sizeof(size_t) + sizeof(void*) };
 enum { DPA_U_BO_INLINE_MAX_SIZE = DPA__U_BO_COMMON_SIZE-1 };
 #define DPA_U_BO_MAX_SIZE (((size_t)1)<<((sizeof(size_t)-1)*CHAR_BIT))
-#define DPA__U_BO_ALIGN alignas(DPA__U_BO_COMMON_SIZE)
+#define DPA__U_BO_ALIGN alignas(struct{size_t a; void* b;})
 
 
 //////////////////////////////////
