@@ -49,7 +49,7 @@ endif
 
 OBJECTS := $(patsubst %,build/$(TYPE)/o/%.o,$(SOURCES))
 
-B-TS := bin/$(TYPE)/testsuite
+B-TS := bin/$(TYPE)/dpa-testsuite
 
 BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%,$(filter src/main/%.c,$(SOURCES)))
 TESTS := $(patsubst test/%.c,%,$(filter test/%.c,$(SOURCES)))
