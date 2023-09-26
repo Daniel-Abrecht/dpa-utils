@@ -56,6 +56,8 @@ TESTS := $(patsubst test/%.c,%,$(filter test/%.c,$(SOURCES)))
 
 export LD_LIBRARY_PATH=$(shell realpath "lib/$(TYPE)/")
 
+SHELL_CMD="$$SHELL"
+
 .PHONY: all bin lib clean get//bin get//lib install uninstall shell test
 
 all: bin lib
@@ -120,4 +122,4 @@ shell:
 	PROMPT_COMMAND='if [ -z "$$PS_SET" ]; then PS_SET=1; PS1="(dpa-utils) $$PS1"; fi' \
 	PATH="$$PWD/bin/$(TYPE)/:scripts/:$$PATH" \
 	MANPATH="$$PWD/build/docs/api/man/:$$(man -w)" \
-	  "$$SHELL"
+	  $(SHELL_CMD)

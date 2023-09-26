@@ -65,7 +65,7 @@ static_assert(offsetof(dpa_u_bo_inline_t,data) == 1, "Expected data to be at byt
     DPA__U_BO_ALIGN dpa__u_bo_a_t all; \
   }
 
-typedef const struct dpa__u_bo_simple_ro {
+typedef struct {
   DPA__U_BO_SIMPLE_MEMBERS(const);
 } dpa_u_bo_simple_ro_t;
 static_assert(sizeof(dpa_u_bo_simple_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_ro_t has an unexpected size");
@@ -86,7 +86,7 @@ enum {
   DPA_U_BO_UNIQUE__SIZE_BITS = sizeof(void*)*CHAR_BIT - DPA_U_BO_UNIQUE__ID_BITS,
 };
 
-typedef const struct dpa__u_bo_unique {
+typedef struct {
   union {
     struct {
       DPA__U_BO_META();
@@ -104,20 +104,21 @@ static_assert(sizeof(dpa_u_bo_unique_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_uniq
 DPA_U_EXPORT const void* dpa__u_bo_unique_get_data(dpa_u_bo_unique_t bo);
 DPA_U_EXPORT void dpa__u_bo_unique_ref(dpa_u_bo_unique_t bo);
 DPA_U_EXPORT bool dpa__u_bo_unique_put(dpa_u_bo_unique_t bo);
+DPA_U_EXPORT dpa_u_bo_unique_t dpa__u_bo_do_intern(const dpa_u_bo_simple_ro_t bo);
 
-typedef const struct dpa__u_bo_any_unique {
+typedef struct {
   union {
     struct { DPA__U_BO_META(); char _[DPA__U_BO_COMMON_SIZE-1]; };
-    const dpa_u_bo_inline_t bo_inline;
+    dpa_u_bo_inline_ro_t bo_inline;
     dpa_u_bo_unique_t bo_unique;
     DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
 } dpa_u_bo_any_unique_t;
 
-typedef const struct dpa__u_bo_ro {
+typedef struct {
   union {
     struct { DPA__U_BO_META(); char _[DPA__U_BO_COMMON_SIZE-1]; };
-    const dpa_u_bo_inline_t bo_inline;
+    dpa_u_bo_inline_ro_t bo_inline;
     dpa_u_bo_simple_ro_t bo_simple;
     dpa_u_bo_unique_t bo_unique;
     dpa_u_bo_any_unique_t bo_any_unique;
@@ -145,43 +146,65 @@ static_assert(offsetof(dpa_u_bo_t,_) == 1, "Expected _ to be at a different offs
 ///////////////////////////////////////////////
 
 #define dpa_u_bo_data(X) _Generic((X), \
-    DPA__GS(       dpa_u_bo_inline_t,     (X)).data, \
-    DPA__GS(       dpa_u_bo_simple_t,     (X)).data, \
-    DPA__GS(struct dpa__u_bo_simple_ro,  (X)).data, \
+    DPA__GS(dpa_u_bo_inline_t,     (X)).data, \
+    DPA__GS(dpa_u_bo_simple_t,     (X)).data, \
+    DPA__GS(dpa_u_bo_simple_ro_t,  (X)).data, \
     dpa_u_bo_t: _Generic(&DPA__G(dpa_u_bo_t,(X)), \
             dpa_u_bo_t*: dpa__u_bo_data(&DPA__G(dpa_u_bo_t,(X))), \
       const dpa_u_bo_t*: dpa__u_cbo_data(&DPA__G(dpa_u_bo_t,(X))) \
     ), \
-    struct dpa__u_bo_ro: dpa__u_bo_ro_data(&DPA__G(struct dpa__u_bo_ro,(X))), \
-    struct dpa__u_bo_unique: dpa__u_bo_unique_get_data(DPA__G(struct dpa__u_bo_unique,(X))), \
+    dpa_u_bo_ro_t: dpa__u_bo_ro_data(&DPA__G(dpa_u_bo_ro_t,(X))), \
+    dpa_u_bo_unique_t: dpa__u_bo_unique_get_data(DPA__G(dpa_u_bo_unique_t,(X))), \
+    dpa_u_bo_any_unique_t: dpa__u_bo_any_unique_data(&DPA__G(dpa_u_bo_any_unique_t,(X))), \
     \
     DPA__GS(      dpa_u_bo_inline_t*,    (X))->data, \
     DPA__GS(const dpa_u_bo_inline_t*,    (X))->data, \
     DPA__GS(      dpa_u_bo_simple_t*,    (X))->data, \
     DPA__GS(const dpa_u_bo_simple_t*,    (X))->data, \
     DPA__GS(      dpa_u_bo_simple_ro_t*, (X))->data, \
+    DPA__GS(const dpa_u_bo_simple_ro_t*, (X))->data, \
           dpa_u_bo_t*: dpa__u_bo_data(DPA__G(dpa_u_bo_t*,(X))), \
     const dpa_u_bo_t*: dpa__u_cbo_data(DPA__G(const dpa_u_bo_t*,(X))), \
           dpa_u_bo_ro_t*: dpa__u_bo_ro_data(DPA__G(dpa_u_bo_ro_t*,(X))), \
-          dpa_u_bo_unique_t*: dpa__u_bo_unique_get_data(*DPA__G(dpa_u_bo_unique_t*,(X))) \
+    const dpa_u_bo_ro_t*: dpa__u_bo_ro_data(DPA__G(const dpa_u_bo_ro_t*,(X))), \
+          dpa_u_bo_unique_t*: dpa__u_bo_unique_get_data(*DPA__G(dpa_u_bo_unique_t*,(X))), \
+    const dpa_u_bo_unique_t*: dpa__u_bo_unique_get_data(*DPA__G(const dpa_u_bo_unique_t*,(X))), \
+          dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_data(DPA__G(dpa_u_bo_any_unique_t*,(X))), \
+    const dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_data(DPA__G(const dpa_u_bo_any_unique_t*,(X))) \
   )
 
-#define Y \
-  case DPA_U_BO_INLINE: return bo->bo_inline.data; \
-  case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
-#define X \
-  switch(bo->type){ Y case DPA_U_BO_UNIQUE: break; } \
+static inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
+  switch(bo->type){
+    case DPA_U_BO_INLINE: return bo->bo_inline.data;
+    case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
+    case DPA_U_BO_UNIQUE: break;
+  }
   abort();
-static inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){ X }
-static inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const bo){ X }
-static inline const void* dpa__u_bo_ro_data(dpa_u_bo_ro_t*restrict const bo){
-  switch(bo->type){ Y
+}
+static inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const bo){
+  switch(bo->type){
+    case DPA_U_BO_INLINE: return bo->bo_inline.data;
+    case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
+    case DPA_U_BO_UNIQUE: break;
+  }
+  abort();
+}
+static inline const void* dpa__u_bo_ro_data(const dpa_u_bo_ro_t*restrict const bo){
+  switch(bo->type){
+    case DPA_U_BO_INLINE: return bo->bo_inline.data;
+    case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
     case DPA_U_BO_UNIQUE: return dpa__u_bo_unique_get_data(bo->bo_unique);
   }
   abort();
 }
-#undef X
-#undef Y
+static inline const void* dpa__u_bo_any_unique_data(const dpa_u_bo_any_unique_t*restrict const bo){
+  switch(bo->type){
+    case DPA_U_BO_INLINE: return bo->bo_inline.data;
+    case DPA_U_BO_SIMPLE: break;
+    case DPA_U_BO_UNIQUE: return dpa__u_bo_unique_get_data(bo->bo_unique);
+  }
+  abort();
+}
 
 #define dpa_u_bo_set_size(X,S) ((void)_Generic((X), \
     dpa_u_bo_inline_t   : (assert((S) <= DPA_U_BO_INLINE_MAX_SIZE),(DPA__G(dpa_u_bo_inline_t,(X)).size=(S)&0xF)), \
@@ -208,35 +231,50 @@ static inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size)
 }
 
 #define dpa_u_bo_get_size(X) ((size_t)_Generic((X), \
-    DPA__GS(       dpa_u_bo_inline_t,(X)).size, \
-    DPA__GS(       dpa_u_bo_simple_t,(X)).size, \
-    DPA__GS(struct dpa__u_bo_simple_ro,(X)).size, \
-    DPA__GS(struct dpa__u_bo_unique, (X)).size, \
-           dpa_u_bo_t: dpa__u_bo_get_size(DPA__G(dpa_u_bo_t, (X))), \
-    struct dpa__u_bo_ro: dpa__u_bo_ro_get_size(DPA__G(struct dpa__u_bo_ro, (X))), \
+    DPA__GS(dpa_u_bo_inline_t,(X)).size, \
+    DPA__GS(dpa_u_bo_simple_t,(X)).size, \
+    DPA__GS(dpa_u_bo_simple_ro_t,(X)).size, \
+    DPA__GS(dpa_u_bo_unique_t, (X)).size, \
+    dpa_u_bo_t: dpa__u_bo_get_size(DPA__G(dpa_u_bo_t, (X))), \
+    dpa_u_bo_ro_t: dpa__u_bo_ro_get_size(DPA__G(dpa_u_bo_ro_t, (X))), \
+    dpa_u_bo_any_unique_t: dpa__u_bo_any_unique_get_size(DPA__G(dpa_u_bo_any_unique_t, (X))), \
     \
     DPA__GS(      dpa_u_bo_inline_t*,(X))->size, \
     DPA__GS(const dpa_u_bo_inline_t*,(X))->size, \
     DPA__GS(      dpa_u_bo_simple_t*,(X))->size, \
     DPA__GS(const dpa_u_bo_simple_t*,(X))->size, \
     DPA__GS(      dpa_u_bo_simple_ro_t*,(X))->size, \
+    DPA__GS(const dpa_u_bo_simple_ro_t*,(X))->size, \
     DPA__GS(      dpa_u_bo_unique_t*,(X))->size, \
+    DPA__GS(const dpa_u_bo_unique_t*,(X))->size, \
           dpa_u_bo_t*: dpa__u_bo_get_size(*DPA__G(dpa_u_bo_t*, (X))), \
     const dpa_u_bo_t*: dpa__u_bo_get_size(*DPA__G(const dpa_u_bo_t*, (X))), \
-          dpa_u_bo_ro_t*: dpa__u_bo_ro_get_size(*DPA__G(dpa_u_bo_ro_t*, (X))) \
+          dpa_u_bo_ro_t*: dpa__u_bo_ro_get_size(*DPA__G(dpa_u_bo_ro_t*, (X))), \
+    const dpa_u_bo_ro_t*: dpa__u_bo_ro_get_size(*DPA__G(const dpa_u_bo_ro_t*, (X))), \
+          dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_get_size(*DPA__G(dpa_u_bo_any_unique_t*, (X))), \
+    const dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_get_size(*DPA__G(const dpa_u_bo_any_unique_t*, (X))) \
   ))
 
-#define X \
-  case DPA_U_BO_INLINE: return bo.bo_inline.size; \
-  case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
 static inline size_t dpa__u_bo_get_size(const dpa_u_bo_t bo){
-  switch(bo.type){ X
+  switch(bo.type){
+    case DPA_U_BO_INLINE: return bo.bo_inline.size;
+    case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
     case DPA_U_BO_UNIQUE: break;
   }
   abort();
 }
-static inline size_t dpa__u_bo_ro_get_size(dpa_u_bo_ro_t bo){
-  switch(bo.type){ X
+static inline size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo){
+  switch(bo.type){
+    case DPA_U_BO_INLINE: return bo.bo_inline.size;
+    case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
+    case DPA_U_BO_UNIQUE: return bo.bo_unique.size;
+  }
+  abort();
+}
+static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t bo){
+  switch(bo.type){
+    case DPA_U_BO_INLINE: return bo.bo_inline.size;
+    case DPA_U_BO_SIMPLE: break;
     case DPA_U_BO_UNIQUE: return bo.bo_unique.size;
   }
   abort();
@@ -244,20 +282,22 @@ static inline size_t dpa__u_bo_ro_get_size(dpa_u_bo_ro_t bo){
 #undef X
 
 #define dpa_u_bo_get_type(X) ((const enum dpa_u_bo_type)_Generic((X), \
-    DPA__GS(       dpa_u_bo_t, (X)).type, \
-    DPA__GS(struct dpa__u_bo_ro, (X)).type, \
-    DPA__GS(       dpa_u_bo_inline_t, (X)).type, \
-    DPA__GS(       dpa_u_bo_simple_t, (X)).type, \
-    DPA__GS(struct dpa__u_bo_simple_ro, (X)).type, \
+    DPA__GS(dpa_u_bo_t, (X)).type, \
+    DPA__GS(dpa_u_bo_ro_t, (X)).type, \
+    DPA__GS(dpa_u_bo_inline_t, (X)).type, \
+    DPA__GS(dpa_u_bo_simple_t, (X)).type, \
+    DPA__GS(dpa_u_bo_simple_ro_t, (X)).type, \
     \
     DPA__GS(      dpa_u_bo_t*, (X))->type, \
     DPA__GS(const dpa_u_bo_t*, (X))->type, \
     DPA__GS(      dpa_u_bo_ro_t*, (X))->type, \
+    DPA__GS(const dpa_u_bo_ro_t*, (X))->type, \
     DPA__GS(      dpa_u_bo_inline_t*, (X))->type, \
     DPA__GS(const dpa_u_bo_inline_t*, (X))->type, \
     DPA__GS(      dpa_u_bo_simple_t*, (X))->type, \
     DPA__GS(const dpa_u_bo_simple_t*, (X))->type, \
-    DPA__GS(      dpa_u_bo_simple_ro_t*, (X))->type \
+    DPA__GS(      dpa_u_bo_simple_ro_t*, (X))->type, \
+    DPA__GS(const dpa_u_bo_simple_ro_t*, (X))->type \
   ))
 
 /////////////////////////////////////////
@@ -265,9 +305,9 @@ static inline size_t dpa__u_bo_ro_get_size(dpa_u_bo_ro_t bo){
 /////////////////////////////////////////
 
 #define dpa_u_v_bo_any_unique(X) _Generic((X), \
-    dpa_u_bo_inline_t: (dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
-    struct dpa__u_bo_unique: (dpa_u_bo_any_unique_t){ .bo_unique = DPA__G(struct dpa__u_bo_unique, (X)) }, \
-    struct dpa__u_bo_any_unique: (X) \
+    dpa_u_bo_inline_t: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
+    dpa_u_bo_unique_t: (const dpa_u_bo_any_unique_t){ .bo_unique = DPA__G(dpa_u_bo_unique_t, (X)) }, \
+    dpa_u_bo_any_unique_t: (X) \
   )
 
 /**
@@ -277,15 +317,15 @@ static inline size_t dpa__u_bo_ro_get_size(dpa_u_bo_ro_t bo){
  */
 #define dpa_u_temp_bo_simple(X) _Generic((X), \
     DPA__GS(dpa_u_bo_simple_t, (X)), \
-    dpa_u_bo_inline_t: (dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t,(X))) }, \
-    dpa_u_bo_t: (dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t,(X))) }, \
+    dpa_u_bo_inline_t: (const dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t,(X))) }, \
+    dpa_u_bo_t: (const dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t,(X))) }, \
     \
     DPA__GS(dpa_u_bo_simple_t*, (X))[0], \
     DPA__GS(const dpa_u_bo_simple_t*, (X))[0], \
-    dpa_u_bo_inline_t*: (dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t*,(X))) }, \
-    const dpa_u_bo_inline_t*: (dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_inline_t*,(X))) }, \
-    dpa_u_bo_t*: (dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t*,(X))) }, \
-    const dpa_u_bo_t*: (dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_t*,(X))) } \
+    dpa_u_bo_inline_t*: (const dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t*,(X))) }, \
+    const dpa_u_bo_inline_t*: (const dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_inline_t*,(X))) }, \
+    dpa_u_bo_t*: (const dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t*,(X))) }, \
+    const dpa_u_bo_t*: (const dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_t*,(X))) } \
   )
 
 /**
@@ -295,25 +335,29 @@ static inline size_t dpa__u_bo_ro_get_size(dpa_u_bo_ro_t bo){
 #define dpa_u_temp_bo_simple_ro(X) _Generic((X), \
     DPA__GS(dpa_u_bo_simple_t, (X)).ro, \
     DPA__GS(dpa_u_bo_simple_ro_t, (X)), \
-    dpa_u_bo_inline_t: (dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t,(X))) }, \
-    dpa_u_bo_t: (dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t,(X))) }, \
-    struct dpa__u_bo_ro: (dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(struct dpa__u_bo_ro,(X))), .data=dpa_u_bo_data(DPA__G(struct dpa__u_bo_ro,(X))) }, \
-    struct dpa__u_bo_unique: (dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(struct dpa__u_bo_unique,(X))), .data=dpa_u_bo_data(DPA__G(struct dpa__u_bo_unique,(X))) }, \
+    dpa_u_bo_inline_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t,(X))) }, \
+    dpa_u_bo_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t,(X))) }, \
+    dpa_u_bo_ro_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_ro_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_ro_t,(X))) }, \
+    dpa_u_bo_unique_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_unique_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_unique_t,(X))) }, \
+    dpa_u_bo_any_unique_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_any_unique_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_any_unique_t,(X))) }, \
     \
     DPA__GS(dpa_u_bo_simple_t*, (X))->ro, \
     DPA__GS(const dpa_u_bo_simple_t*, (X))->ro, \
     DPA__GS(dpa_u_bo_simple_ro_t*, (X))[0], \
-    dpa_u_bo_inline_t*: (dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t*,(X))) }, \
-    const dpa_u_bo_inline_t*: (dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_inline_t*,(X))) }, \
-    dpa_u_bo_t*: (dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t*,(X))) }, \
-    const dpa_u_bo_t*: (dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_t*,(X))) }, \
-    dpa_u_bo_ro_t*: (dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_ro_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_ro_t*,(X))) }, \
-    dpa_u_bo_unique_t*: (dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_unique_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_unique_t*,(X))) } \
+    DPA__GS(const dpa_u_bo_simple_ro_t*, (X))[0], \
+    dpa_u_bo_inline_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t*,(X))) }, \
+    const dpa_u_bo_inline_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_inline_t*,(X))) }, \
+    dpa_u_bo_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t*,(X))) }, \
+    const dpa_u_bo_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_t*,(X))) }, \
+    dpa_u_bo_ro_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_ro_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_ro_t*,(X))) }, \
+    const dpa_u_bo_ro_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_ro_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_ro_t*,(X))) }, \
+    dpa_u_bo_unique_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_unique_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_unique_t*,(X))) }, \
+    const dpa_u_bo_unique_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_unique_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_unique_t*,(X))) }, \
+    dpa_u_bo_any_unique_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_any_unique_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_any_unique_t*,(X))) }, \
+    const dpa_u_bo_any_unique_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_any_unique_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_any_unique_t*,(X))) } \
   )
 
-DPA_U_EXPORT dpa_u_bo_unique_t dpa__u_bo_do_intern(dpa_u_bo_simple_ro_t bo);
-
-static inline dpa_u_bo_any_unique_t dpa__u_bo_intern(dpa_u_bo_ro_t bo){
+static inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return (dpa_u_bo_any_unique_t){ .bo_inline = bo.bo_inline };
     case DPA_U_BO_UNIQUE: return (dpa_u_bo_any_unique_t){ .bo_unique = bo.bo_unique };
@@ -333,23 +377,27 @@ static inline dpa_u_bo_any_unique_t dpa__u_bo_intern(dpa_u_bo_ro_t bo){
 
 #define dpa_u_v_bo_ro(X) _Generic((X), \
     DPA__GS(dpa_u_bo_t, (X)).ro, \
-    DPA__GS(struct dpa__u_bo_ro, (X)), \
-    dpa_u_bo_inline_t: (dpa_u_bo_ro_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
-    dpa_u_bo_simple_t: (dpa_u_bo_ro_t){ .bo_simple = DPA__G(dpa_u_bo_simple_t, (X)).ro }, \
-    struct dpa__u_bo_simple_ro: (dpa_u_bo_ro_t){ .bo_simple = DPA__G(struct dpa__u_bo_simple_ro, (X)) }, \
-    struct dpa__u_bo_unique: (dpa_u_bo_ro_t){ .bo_unique = DPA__G(struct dpa__u_bo_unique, (X)) }, \
-    struct dpa__u_bo_any_unique: (dpa_u_bo_ro_t){ .bo_any_unique = DPA__G(struct dpa__u_bo_any_unique, (X)) }, \
+    DPA__GS(dpa_u_bo_ro_t, (X)), \
+    dpa_u_bo_inline_t: (const dpa_u_bo_ro_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
+    dpa_u_bo_simple_t: (const dpa_u_bo_ro_t){ .bo_simple = DPA__G(dpa_u_bo_simple_t, (X)).ro }, \
+    dpa_u_bo_simple_ro_t: (const dpa_u_bo_ro_t){ .bo_simple = DPA__G(dpa_u_bo_simple_ro_t, (X)) }, \
+    dpa_u_bo_unique_t: (const dpa_u_bo_ro_t){ .bo_unique = DPA__G(dpa_u_bo_unique_t, (X)) }, \
+    dpa_u_bo_any_unique_t: (const dpa_u_bo_ro_t){ .bo_any_unique = DPA__G(dpa_u_bo_any_unique_t, (X)) }, \
     \
     DPA__GS(dpa_u_bo_t*, (X))->ro, \
     DPA__GS(const dpa_u_bo_t*, (X))->ro, \
     DPA__GS(dpa_u_bo_ro_t*, (X))[0], \
-    dpa_u_bo_inline_t*: (dpa_u_bo_ro_t){ .bo_inline = *DPA__G(dpa_u_bo_inline_t*, (X)) }, \
-    const dpa_u_bo_inline_t*: (dpa_u_bo_ro_t){ .bo_inline = *DPA__G(const dpa_u_bo_inline_t*, (X)) }, \
-    dpa_u_bo_simple_t*: (dpa_u_bo_ro_t){ .bo_simple = DPA__G(dpa_u_bo_simple_t*, (X))->ro }, \
-    const dpa_u_bo_simple_t*: (dpa_u_bo_ro_t){ .bo_simple = DPA__G(const dpa_u_bo_simple_t*, (X))->ro }, \
-    dpa_u_bo_simple_ro_t*: (dpa_u_bo_ro_t){ .bo_simple = *DPA__G(dpa_u_bo_simple_ro_t*, (X)) }, \
-    dpa_u_bo_unique_t*: (dpa_u_bo_ro_t){ .bo_unique = *DPA__G(dpa_u_bo_unique_t*, (X)) }, \
-    dpa_u_bo_any_unique_t*: (dpa_u_bo_ro_t){ .bo_any_unique = *DPA__G(dpa_u_bo_any_unique_t*, (X)) } \
+    DPA__GS(const dpa_u_bo_ro_t*, (X))[0], \
+    dpa_u_bo_inline_t*: (const dpa_u_bo_ro_t){ .bo_inline = *DPA__G(dpa_u_bo_inline_t*, (X)) }, \
+    const dpa_u_bo_inline_t*: (const dpa_u_bo_ro_t){ .bo_inline = *DPA__G(const dpa_u_bo_inline_t*, (X)) }, \
+    dpa_u_bo_simple_t*: (const dpa_u_bo_ro_t){ .bo_simple = DPA__G(dpa_u_bo_simple_t*, (X))->ro }, \
+    const dpa_u_bo_simple_t*: (const dpa_u_bo_ro_t){ .bo_simple = DPA__G(const dpa_u_bo_simple_t*, (X))->ro }, \
+    dpa_u_bo_simple_ro_t*: (const dpa_u_bo_ro_t){ .bo_simple = *DPA__G(dpa_u_bo_simple_ro_t*, (X)) }, \
+    const dpa_u_bo_simple_ro_t*: (const dpa_u_bo_ro_t){ .bo_simple = *DPA__G(const dpa_u_bo_simple_ro_t*, (X)) }, \
+    dpa_u_bo_unique_t*: (const dpa_u_bo_ro_t){ .bo_unique = *DPA__G(dpa_u_bo_unique_t*, (X)) }, \
+    const dpa_u_bo_unique_t*: (const dpa_u_bo_ro_t){ .bo_unique = *DPA__G(const dpa_u_bo_unique_t*, (X)) }, \
+    dpa_u_bo_any_unique_t*: (const dpa_u_bo_ro_t){ .bo_any_unique = *DPA__G(dpa_u_bo_any_unique_t*, (X)) }, \
+    const dpa_u_bo_any_unique_t*: (const dpa_u_bo_ro_t){ .bo_any_unique = *DPA__G(const dpa_u_bo_any_unique_t*, (X)) } \
   )
 
 #endif
