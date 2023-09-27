@@ -307,7 +307,14 @@ static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t b
 #define dpa_u_v_bo_any_unique(X) _Generic((X), \
     dpa_u_bo_inline_t: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
     dpa_u_bo_unique_t: (const dpa_u_bo_any_unique_t){ .bo_unique = DPA__G(dpa_u_bo_unique_t, (X)) }, \
-    dpa_u_bo_any_unique_t: (X) \
+    DPA__GS(dpa_u_bo_any_unique_t, (X)), \
+    \
+    dpa_u_bo_inline_t*: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
+    const dpa_u_bo_inline_t*: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
+    dpa_u_bo_unique_t*: (const dpa_u_bo_any_unique_t){ .bo_unique = DPA__G(dpa_u_bo_unique_t, (X)) }, \
+    const dpa_u_bo_unique_t*: (const dpa_u_bo_any_unique_t){ .bo_unique = DPA__G(dpa_u_bo_unique_t, (X)) }, \
+    DPA__GS(dpa_u_bo_any_unique_t*, (X))[0], \
+    DPA__GS(const dpa_u_bo_any_unique_t*, (X))[0] \
   )
 
 /**
@@ -357,24 +364,6 @@ static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t b
     const dpa_u_bo_any_unique_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_any_unique_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_any_unique_t*,(X))) } \
   )
 
-static inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
-  switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_INLINE: return (dpa_u_bo_any_unique_t){ .bo_inline = bo.bo_inline };
-    case DPA_U_BO_UNIQUE: return (dpa_u_bo_any_unique_t){ .bo_unique = bo.bo_unique };
-    default: {
-      if(dpa_u_bo_get_size(bo) <= DPA_U_BO_INLINE_MAX_SIZE){
-        dpa_u_bo_inline_t boi = {
-          .type = DPA_U_BO_INLINE,
-          .size = dpa_u_bo_get_size(bo),
-        };
-        memcpy(boi.data, dpa_u_bo_data(bo), dpa_u_bo_get_size(bo));
-        return (dpa_u_bo_any_unique_t){ .bo_inline = boi };
-      }
-      return (dpa_u_bo_any_unique_t){ .bo_unique = dpa__u_bo_do_intern(dpa_u_temp_bo_simple_ro(bo)) };
-    }
-  }
-}
-
 #define dpa_u_v_bo_ro(X) _Generic((X), \
     DPA__GS(dpa_u_bo_t, (X)).ro, \
     DPA__GS(dpa_u_bo_ro_t, (X)), \
@@ -398,6 +387,40 @@ static inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
     const dpa_u_bo_unique_t*: (const dpa_u_bo_ro_t){ .bo_unique = *DPA__G(const dpa_u_bo_unique_t*, (X)) }, \
     dpa_u_bo_any_unique_t*: (const dpa_u_bo_ro_t){ .bo_any_unique = *DPA__G(dpa_u_bo_any_unique_t*, (X)) }, \
     const dpa_u_bo_any_unique_t*: (const dpa_u_bo_ro_t){ .bo_any_unique = *DPA__G(const dpa_u_bo_any_unique_t*, (X)) } \
+  )
+
+
+static inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
+  switch(dpa_u_bo_get_type(bo)){
+    case DPA_U_BO_INLINE: return (dpa_u_bo_any_unique_t){ .bo_inline = bo.bo_inline };
+    case DPA_U_BO_UNIQUE: dpa__u_bo_unique_ref(bo.bo_unique); return (dpa_u_bo_any_unique_t){ .bo_unique = bo.bo_unique };
+    default: {
+      if(dpa_u_bo_get_size(bo) <= DPA_U_BO_INLINE_MAX_SIZE){
+        dpa_u_bo_inline_t boi = {
+          .type = DPA_U_BO_INLINE,
+          .size = dpa_u_bo_get_size(bo),
+        };
+        memcpy(boi.data, dpa_u_bo_data(bo), dpa_u_bo_get_size(bo));
+        return (dpa_u_bo_any_unique_t){ .bo_inline = boi };
+      }
+      return (dpa_u_bo_any_unique_t){ .bo_unique = dpa__u_bo_do_intern(dpa_u_temp_bo_simple_ro(bo)) };
+    }
+  }
+}
+
+#define dpa_u_bo_intern(X) _Generic((X)), \
+    dpa_u_bo_inline_t: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
+    dpa_u_bo_inline_t*: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
+    const dpa_u_bo_inline_t*: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
+    /* TODO \
+    dpa_u_bo_unique_t:, \
+    dpa_u_bo_any_unique_t:, \
+    dpa_u_bo_unique_t*:, \
+    const dpa_u_bo_unique_t*:, \
+    dpa_u_bo_any_unique_t*:, \
+    const dpa_u_bo_any_unique_t*:, \
+    */ \
+    default: dpa__u_bo_intern(dpa_u_v_bo_ro(X)) \
   )
 
 #endif
