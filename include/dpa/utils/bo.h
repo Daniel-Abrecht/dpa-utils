@@ -426,6 +426,12 @@ static inline void dpa__u_bo_any_unique_ref(dpa_u_bo_any_unique_t ubo){
     dpa__u_bo_unique_ref(ubo.bo_unique);
 }
 
+static inline bool dpa__u_bo_any_unique_put(dpa_u_bo_any_unique_t ubo){
+  if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE)
+    return dpa__u_bo_unique_put(ubo.bo_unique);
+  return false;
+}
+
 /**
  * Increments the refcount of the buffer. The refcount acts on the data of the buffer
  * rather than the buffer itself. For dpa_u_bo_inline_t, this is a noop, because
@@ -445,6 +451,21 @@ static inline void dpa__u_bo_any_unique_ref(dpa_u_bo_any_unique_t ubo){
     dpa_u_bo_any_unique_t: dpa__u_bo_any_unique_ref(DPA__G(dpa_u_bo_any_unique_t,(X))), \
     dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_ref(*DPA__G(dpa_u_bo_any_unique_t*,(X))), \
     const dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_ref(*DPA__G(const dpa_u_bo_any_unique_t*,(X))) \
+  )
+
+#define dpa_u_bo_put(...) dpa_assert_selection(dpa_u_bo_put_g(__VA_ARGS__))
+#define dpa_u_bo_put_g(X) dpa_generic((X), \
+    dpa_u_bo_inline_t: (void)0, \
+    dpa_u_bo_inline_t*: (void)0, \
+    const dpa_u_bo_inline_t*: (void)0, \
+    \
+    dpa_u_bo_unique_t: dpa__u_bo_unique_put(DPA__G(dpa_u_bo_unique_t,(X))), \
+    dpa_u_bo_unique_t*: dpa__u_bo_unique_put(*DPA__G(dpa_u_bo_unique_t*,(X))), \
+    const dpa_u_bo_unique_t*: dpa__u_bo_unique_put(*DPA__G(const dpa_u_bo_unique_t*,(X))), \
+    \
+    dpa_u_bo_any_unique_t: dpa__u_bo_any_unique_put(DPA__G(dpa_u_bo_any_unique_t,(X))), \
+    dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_put(*DPA__G(dpa_u_bo_any_unique_t*,(X))), \
+    const dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_put(*DPA__G(const dpa_u_bo_any_unique_t*,(X))) \
   )
 
 /**
