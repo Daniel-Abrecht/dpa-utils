@@ -27,6 +27,14 @@
 
 #define DPA_U_EXPORT __attribute__((visibility("default")))
 
+typedef struct { int x; } invalid_selection_t;
+#define dpa_generic(X, ...) _Generic((X), default: (invalid_selection_t){0}, __VA_ARGS__)
+#define dpa_assert_selection(X) _Generic(0, \
+    invalid_selection_t: (void)(struct{ int x; static_assert( _Generic((X), invalid_selection_t: 0, default: 1 ), "Unsupported type combination");}){0}, \
+    default: (X) \
+  )
+#define dpa_generic_if_selection(X, Y) _Generic((X), invalid_selection_t: (invalid_selection_t){0}, default: (Y))
+
 /////////////////////////////////
 //////      Constants      //////
 /////////////////////////////////

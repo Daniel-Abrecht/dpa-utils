@@ -24,8 +24,8 @@ endif
 
 ifdef asan
 TYPE := $(TYPE)-asan
-CFLAGS  += -fsanitize=address,undefined
-LDFLAGS += -fsanitize=address,undefined
+CFLAGS  += -fsanitize=address,undefined,bounds,enum
+LDFLAGS += -fsanitize=address,undefined,bounds,enum
 endif
 
 ifdef coverage

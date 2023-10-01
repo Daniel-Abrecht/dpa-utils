@@ -145,11 +145,12 @@ static_assert(offsetof(dpa_u_bo_t,_) == 1, "Expected _ to be at a different offs
 //////      Member access functions      //////
 ///////////////////////////////////////////////
 
-#define dpa_u_bo_data(X) _Generic((X), \
+#define dpa_u_bo_data(...) dpa_assert_selection(dpa_u_bo_data_g(__VA_ARGS__))
+#define dpa_u_bo_data_g(X) dpa_generic((X), \
     DPA__GS(dpa_u_bo_inline_t,     (X)).data, \
     DPA__GS(dpa_u_bo_simple_t,     (X)).data, \
     DPA__GS(dpa_u_bo_simple_ro_t,  (X)).data, \
-    dpa_u_bo_t: _Generic(&DPA__G(dpa_u_bo_t,(X)), \
+    dpa_u_bo_t: dpa_generic(&DPA__G(dpa_u_bo_t,(X)), \
             dpa_u_bo_t*: dpa__u_bo_data(&DPA__G(dpa_u_bo_t,(X))), \
       const dpa_u_bo_t*: dpa__u_cbo_data(&DPA__G(dpa_u_bo_t,(X))) \
     ), \
@@ -206,7 +207,8 @@ static inline const void* dpa__u_bo_any_unique_data(const dpa_u_bo_any_unique_t*
   abort();
 }
 
-#define dpa_u_bo_set_size(X,S) ((void)_Generic((X), \
+#define dpa_u_bo_set_size(...) dpa_assert_selection(dpa_u_bo_set_size_g(__VA_ARGS__))
+#define dpa_u_bo_set_size_g(X,S) ((void)dpa_generic((X), \
     dpa_u_bo_inline_t   : (assert((S) <= DPA_U_BO_INLINE_MAX_SIZE),(DPA__G(dpa_u_bo_inline_t,(X)).size=(S)&0xF)), \
     dpa_u_bo_simple_t   : (assert((S) <= DPA_U_BO_MAX_SIZE       ),(DPA__G(dpa_u_bo_simple_t,(X)).size=(S))), \
     dpa_u_bo_t: dpa__u_bo_set_size(&DPA__G(dpa_u_bo_t,(X)),(S)), \
@@ -230,7 +232,8 @@ static inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size)
   abort();
 }
 
-#define dpa_u_bo_get_size(X) ((size_t)_Generic((X), \
+#define dpa_u_bo_get_size(...) dpa_assert_selection(dpa_u_bo_get_size_g(__VA_ARGS__))
+#define dpa_u_bo_get_size_g(X) ((size_t)dpa_generic((X), \
     DPA__GS(dpa_u_bo_inline_t,(X)).size, \
     DPA__GS(dpa_u_bo_simple_t,(X)).size, \
     DPA__GS(dpa_u_bo_simple_ro_t,(X)).size, \
@@ -281,12 +284,15 @@ static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t b
 }
 #undef X
 
-#define dpa_u_bo_get_type(X) ((const enum dpa_u_bo_type)_Generic((X), \
+#define dpa_u_bo_get_type(...) dpa_assert_selection(dpa_u_bo_get_type_g(__VA_ARGS__))
+#define dpa_u_bo_get_type_g(X) dpa_generic((X), \
     DPA__GS(dpa_u_bo_t, (X)).type, \
     DPA__GS(dpa_u_bo_ro_t, (X)).type, \
     DPA__GS(dpa_u_bo_inline_t, (X)).type, \
     DPA__GS(dpa_u_bo_simple_t, (X)).type, \
     DPA__GS(dpa_u_bo_simple_ro_t, (X)).type, \
+    DPA__GS(dpa_u_bo_unique_t, (X)).type, \
+    DPA__GS(dpa_u_bo_any_unique_t, (X)).type, \
     \
     DPA__GS(      dpa_u_bo_t*, (X))->type, \
     DPA__GS(const dpa_u_bo_t*, (X))->type, \
@@ -297,14 +303,19 @@ static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t b
     DPA__GS(      dpa_u_bo_simple_t*, (X))->type, \
     DPA__GS(const dpa_u_bo_simple_t*, (X))->type, \
     DPA__GS(      dpa_u_bo_simple_ro_t*, (X))->type, \
-    DPA__GS(const dpa_u_bo_simple_ro_t*, (X))->type \
-  ))
+    DPA__GS(const dpa_u_bo_simple_ro_t*, (X))->type, \
+    DPA__GS(      dpa_u_bo_unique_t*, (X))->type, \
+    DPA__GS(const dpa_u_bo_unique_t*, (X))->type, \
+    DPA__GS(      dpa_u_bo_any_unique_t*, (X))->type, \
+    DPA__GS(const dpa_u_bo_any_unique_t*, (X))->type \
+  )
 
 /////////////////////////////////////////
 //////      Conversion macros      //////
 /////////////////////////////////////////
 
-#define dpa_u_v_bo_any_unique(X) _Generic((X), \
+#define dpa_u_v_bo_any_unique(...) dpa_assert_selection(dpa_u_v_bo_any_unique_g(__VA_ARGS__))
+#define dpa_u_v_bo_any_unique_g(X) dpa_generic((X), \
     dpa_u_bo_inline_t: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
     dpa_u_bo_unique_t: (const dpa_u_bo_any_unique_t){ .bo_unique = DPA__G(dpa_u_bo_unique_t, (X)) }, \
     DPA__GS(dpa_u_bo_any_unique_t, (X)), \
@@ -322,7 +333,8 @@ static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t b
  * then the lifetime will not exceed the source BOs scope! It's fine for passing to other functions,
  * but not for much else.
  */
-#define dpa_u_temp_bo_simple(X) _Generic((X), \
+#define dpa_u_temp_bo_simple(...) dpa_assert_selection(dpa_u_temp_bo_simple_g(__VA_ARGS__))
+#define dpa_u_temp_bo_simple_g(X) dpa_generic((X), \
     DPA__GS(dpa_u_bo_simple_t, (X)), \
     dpa_u_bo_inline_t: (const dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t,(X))) }, \
     dpa_u_bo_t: (const dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t,(X))) }, \
@@ -339,7 +351,8 @@ static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t b
  * Note: If the source buffer was a DPA_U_BO_INLINE (which can also be the case for dpa_u_bo_t and dpa_u_bo_ro_t too),
  * then the lifetime will not exceed the source BOs scope! It's fine for passing to other functions, but not for much else.
  */
-#define dpa_u_temp_bo_simple_ro(X) _Generic((X), \
+#define dpa_u_temp_bo_simple_ro(...) dpa_assert_selection(dpa_u_temp_bo_simple_ro_g(__VA_ARGS__))
+#define dpa_u_temp_bo_simple_ro_g(X) dpa_generic((X), \
     DPA__GS(dpa_u_bo_simple_t, (X)).ro, \
     DPA__GS(dpa_u_bo_simple_ro_t, (X)), \
     dpa_u_bo_inline_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t,(X))) }, \
@@ -364,7 +377,8 @@ static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t b
     const dpa_u_bo_any_unique_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_any_unique_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_any_unique_t*,(X))) } \
   )
 
-#define dpa_u_v_bo_ro(X) _Generic((X), \
+#define dpa_u_v_bo_ro(...) dpa_assert_selection(dpa_u_v_bo_ro_g(__VA_ARGS__))
+#define dpa_u_v_bo_ro_g(X) dpa_generic((X), \
     DPA__GS(dpa_u_bo_t, (X)).ro, \
     DPA__GS(dpa_u_bo_ro_t, (X)), \
     dpa_u_bo_inline_t: (const dpa_u_bo_ro_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
@@ -389,7 +403,6 @@ static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t b
     const dpa_u_bo_any_unique_t*: (const dpa_u_bo_ro_t){ .bo_any_unique = *DPA__G(const dpa_u_bo_any_unique_t*, (X)) } \
   )
 
-
 static inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return (dpa_u_bo_any_unique_t){ .bo_inline = bo.bo_inline };
@@ -408,19 +421,51 @@ static inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
   }
 }
 
-#define dpa_u_bo_intern(X) _Generic((X)), \
+static inline void dpa__u_bo_any_unique_ref(dpa_u_bo_any_unique_t ubo){
+  if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE)
+    dpa__u_bo_unique_ref(ubo.bo_unique);
+}
+
+/**
+ * Increments the refcount of the buffer. The refcount acts on the data of the buffer
+ * rather than the buffer itself. For dpa_u_bo_inline_t, this is a noop, because
+ * the buffer contains the data directly instead of referencing it, therefore, having
+ * an instance of a dpa_u_bo_inline_t means having the data.
+ */
+#define dpa_u_bo_ref(...) dpa_assert_selection(dpa_u_bo_ref_g(__VA_ARGS__))
+#define dpa_u_bo_ref_g(X) dpa_generic((X), \
+    dpa_u_bo_inline_t: (void)0, \
+    dpa_u_bo_inline_t*: (void)0, \
+    const dpa_u_bo_inline_t*: (void)0, \
+    \
+    dpa_u_bo_unique_t: dpa__u_bo_unique_ref(DPA__G(dpa_u_bo_unique_t,(X))), \
+    dpa_u_bo_unique_t*: dpa__u_bo_unique_ref(*DPA__G(dpa_u_bo_unique_t*,(X))), \
+    const dpa_u_bo_unique_t*: dpa__u_bo_unique_ref(*DPA__G(const dpa_u_bo_unique_t*,(X))), \
+    \
+    dpa_u_bo_any_unique_t: dpa__u_bo_any_unique_ref(DPA__G(dpa_u_bo_any_unique_t,(X))), \
+    dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_ref(*DPA__G(dpa_u_bo_any_unique_t*,(X))), \
+    const dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_ref(*DPA__G(const dpa_u_bo_any_unique_t*,(X))) \
+  )
+
+/**
+ * Interns a buffer. The refcount of the buffer will be increased.
+ * \returns dpa_u_bo_any_unique_t
+ */
+#define dpa_u_bo_intern(...) dpa_assert_selection(dpa_u_bo_intern_g(__VA_ARGS__))
+#define dpa_u_bo_intern_g(X) dpa_generic((X), \
     dpa_u_bo_inline_t: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
     dpa_u_bo_inline_t*: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
     const dpa_u_bo_inline_t*: (const dpa_u_bo_any_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
-    /* TODO \
-    dpa_u_bo_unique_t:, \
-    dpa_u_bo_any_unique_t:, \
-    dpa_u_bo_unique_t*:, \
-    const dpa_u_bo_unique_t*:, \
-    dpa_u_bo_any_unique_t*:, \
-    const dpa_u_bo_any_unique_t*:, \
-    */ \
-    default: dpa__u_bo_intern(dpa_u_v_bo_ro(X)) \
+    \
+    dpa_u_bo_unique_t: (dpa__u_bo_unique_ref(DPA__G(dpa_u_bo_unique_t,(X))),(const dpa_u_bo_any_unique_t){ .bo_unique = DPA__G(dpa_u_bo_unique_t,(X)) }), \
+    dpa_u_bo_unique_t*: (dpa__u_bo_unique_ref(*DPA__G(dpa_u_bo_unique_t*,(X))),(const dpa_u_bo_any_unique_t){ .bo_unique = *DPA__G(dpa_u_bo_unique_t*,(X)) }), \
+    const dpa_u_bo_unique_t*: (dpa__u_bo_unique_ref(*DPA__G(const dpa_u_bo_unique_t*,(X))),(const dpa_u_bo_any_unique_t){ .bo_unique = *DPA__G(const dpa_u_bo_unique_t*,(X)) }), \
+    \
+    dpa_u_bo_any_unique_t: (dpa__u_bo_any_unique_ref(DPA__G(dpa_u_bo_any_unique_t,(X))),(X)), \
+    dpa_u_bo_any_unique_t*: (dpa__u_bo_any_unique_ref(*DPA__G(dpa_u_bo_any_unique_t*,(X))),*DPA__G(dpa_u_bo_any_unique_t*,(X))), \
+    const dpa_u_bo_any_unique_t*: (dpa__u_bo_any_unique_ref(*DPA__G(const dpa_u_bo_any_unique_t*,(X))),*DPA__G(const dpa_u_bo_any_unique_t*,(X))), \
+    \
+    default: dpa_generic_if_selection( dpa_u_v_bo_ro_g(X), dpa__u_bo_intern(DPA__G(dpa_u_bo_ro_t,dpa_u_v_bo_ro_g(X))) ) \
   )
 
 #endif
