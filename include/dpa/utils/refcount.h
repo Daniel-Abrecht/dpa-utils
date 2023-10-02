@@ -71,7 +71,7 @@ static_assert(offsetof(struct dpa_u_refcount_callback, freeable) == 0, "Unexpect
 /**
  * \see dpa_u_refcount_type
  */
-static inline enum dpa_u_refcount_type dpa_u_refcount_get_type(const struct dpa_u_refcount*const rc){
+inline enum dpa_u_refcount_type dpa_u_refcount_get_type(const struct dpa_u_refcount*const rc){
   // We only care about the sign bit, and it's not going to change
   return atomic_load_explicit(&rc->value, memory_order_relaxed) >> DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR;
 }
@@ -79,7 +79,7 @@ static inline enum dpa_u_refcount_type dpa_u_refcount_get_type(const struct dpa_
 /**
  * Increment the dpa_u_refcount
  */
-static inline void dpa_u_refcount_increment_p(struct dpa_u_refcount*const rc){
+inline void dpa_u_refcount_increment_p(struct dpa_u_refcount*const rc){
   atomic_fetch_add_explicit(&rc->value, 1, memory_order_relaxed);
 }
 
@@ -96,7 +96,7 @@ static inline void dpa_u_refcount_increment_p(struct dpa_u_refcount*const rc){
  * Decrement the dpa_u_refcount
  * \returns false if the reference count has hit 0, true otherwise
  */
-static inline bool dpa_u_refcount_decrement(struct dpa_u_refcount*const rc){
+inline bool dpa_u_refcount_decrement(struct dpa_u_refcount*const rc){
   return atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1;
 }
 
@@ -104,7 +104,7 @@ static inline bool dpa_u_refcount_decrement(struct dpa_u_refcount*const rc){
  * Decrement the dpa_u_refcount and free the referenced resource when it hits 0.
  * \returns false if the reference count has hit 0, true otherwise
  */
-static inline bool dpa_u_refcount_put_p(struct dpa_u_refcount_freeable*const rc){
+inline bool dpa_u_refcount_put_p(struct dpa_u_refcount_freeable*const rc){
   if(!((atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1) & DPA__U_REFCOUNT_MASK))
   switch(dpa_u_refcount_get_type(&rc->refcount)){
     case DPA_U_REFCOUNT_NONE: abort();
@@ -127,7 +127,7 @@ static inline bool dpa_u_refcount_put_p(struct dpa_u_refcount_freeable*const rc)
  * Checks if the dpa_u_refcount is 1. This usually means we have the only existing reference.
  * \returns true if the dpa_u_refcount is 1, 0 otherwise.
  */
-static inline bool dpa_u_refcount_is_last(const struct dpa_u_refcount*const rc){
+inline bool dpa_u_refcount_is_last(const struct dpa_u_refcount*const rc){
   return (atomic_load_explicit(&rc->value, memory_order_acquire) & DPA__U_REFCOUNT_MASK) == 1;
 }
 
@@ -136,28 +136,28 @@ static inline bool dpa_u_refcount_is_last(const struct dpa_u_refcount*const rc){
  * This may be useful when conditionally allocating datastructures, although such cases usually still need some additional locking.
  * \returns true if the dpa_u_refcount is 1, 0 otherwise.
  */
-static inline bool dpa_u_refcount_is_zero(const struct dpa_u_refcount*const rc){
+inline bool dpa_u_refcount_is_zero(const struct dpa_u_refcount*const rc){
   return (atomic_load_explicit(&rc->value, memory_order_acquire) & DPA__U_REFCOUNT_MASK) == 0;
 }
 
 /**
  * If something takes a refcounted object, but it's actually statically allocated
  */
-static inline bool dpa_u_refcount_is_static(struct dpa_u_refcount* rc){
+inline bool dpa_u_refcount_is_static(struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_STATIC;
 }
 
 /**
  * This object will be freed with free() when the refcount hits 0.
  */
-static inline bool dpa_u_refcount_is_freeable(struct dpa_u_refcount* rc){
+inline bool dpa_u_refcount_is_freeable(struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_FREEABLE;
 }
 
 /**
  * This object can be freed with a callback when the refcount hits 0.
  */
-static inline bool dpa_u_refcount_has_callback(struct dpa_u_refcount* rc){
+inline bool dpa_u_refcount_has_callback(struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_CALLBACK;
 }
 

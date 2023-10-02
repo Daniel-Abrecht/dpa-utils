@@ -174,7 +174,7 @@ static_assert(offsetof(dpa_u_bo_t,_) == 1, "Expected _ to be at a different offs
     const dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_data(DPA__G(const dpa_u_bo_any_unique_t*,(X))) \
   )
 
-static inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
+inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
@@ -182,7 +182,7 @@ static inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
   }
   abort();
 }
-static inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const bo){
+inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const bo){
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
@@ -190,7 +190,7 @@ static inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const bo){
   }
   abort();
 }
-static inline const void* dpa__u_bo_ro_data(const dpa_u_bo_ro_t*restrict const bo){
+inline const void* dpa__u_bo_ro_data(const dpa_u_bo_ro_t*restrict const bo){
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
@@ -198,7 +198,7 @@ static inline const void* dpa__u_bo_ro_data(const dpa_u_bo_ro_t*restrict const b
   }
   abort();
 }
-static inline const void* dpa__u_bo_any_unique_data(const dpa_u_bo_any_unique_t*restrict const bo){
+inline const void* dpa__u_bo_any_unique_data(const dpa_u_bo_any_unique_t*restrict const bo){
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: break;
@@ -218,7 +218,7 @@ static inline const void* dpa__u_bo_any_unique_data(const dpa_u_bo_any_unique_t*
     dpa_u_bo_t*: dpa__u_bo_set_size(DPA__G(dpa_u_bo_t*,(X)),(S)) \
   ))
 
-static inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size){
+inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size){
   switch(bo->type){
     case DPA_U_BO_INLINE: {
       assert(size <= DPA_U_BO_INLINE_MAX_SIZE);
@@ -258,7 +258,7 @@ static inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size)
     const dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_get_size(*DPA__G(const dpa_u_bo_any_unique_t*, (X))) \
   ))
 
-static inline size_t dpa__u_bo_get_size(const dpa_u_bo_t bo){
+inline size_t dpa__u_bo_get_size(const dpa_u_bo_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
@@ -266,7 +266,7 @@ static inline size_t dpa__u_bo_get_size(const dpa_u_bo_t bo){
   }
   abort();
 }
-static inline size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo){
+inline size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
@@ -274,7 +274,7 @@ static inline size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo){
   }
   abort();
 }
-static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t bo){
+inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: break;
@@ -403,7 +403,7 @@ static inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t b
     const dpa_u_bo_any_unique_t*: (const dpa_u_bo_ro_t){ .bo_any_unique = *DPA__G(const dpa_u_bo_any_unique_t*, (X)) } \
   )
 
-static inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
+inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return (dpa_u_bo_any_unique_t){ .bo_inline = bo.bo_inline };
     case DPA_U_BO_UNIQUE: dpa__u_bo_unique_ref(bo.bo_unique); return (dpa_u_bo_any_unique_t){ .bo_unique = bo.bo_unique };
@@ -421,12 +421,12 @@ static inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
   }
 }
 
-static inline void dpa__u_bo_any_unique_ref(dpa_u_bo_any_unique_t ubo){
+inline void dpa__u_bo_any_unique_ref(dpa_u_bo_any_unique_t ubo){
   if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE)
     dpa__u_bo_unique_ref(ubo.bo_unique);
 }
 
-static inline bool dpa__u_bo_any_unique_put(dpa_u_bo_any_unique_t ubo){
+inline bool dpa__u_bo_any_unique_put(dpa_u_bo_any_unique_t ubo){
   if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE)
     return dpa__u_bo_unique_put(ubo.bo_unique);
   return false;

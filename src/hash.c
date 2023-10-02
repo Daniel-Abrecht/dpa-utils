@@ -3,6 +3,10 @@
 #include <errno.h>
 #include <stdio.h>
 
+DPA_U_EXPORT extern uint64_t dpa_u_hash_FNV_1a_append_p(dpa_u_bo_ro_t bo, uint_fast64_t hash);
+DPA_U_EXPORT extern uint64_t dpa_u_hash_FNV_1a_p(dpa_u_bo_ro_t bo);
+DPA_U_EXPORT extern uint64_t dpa_u_bo_get_hash_p(const struct dpa__u_default_hash_args args);
+
 uint_fast64_t dpa_hash_offset_basis;
 
 __attribute__((used,constructor(101)))

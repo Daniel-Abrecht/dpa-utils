@@ -14,7 +14,7 @@
  * \param hash The old hash to be updated
  * \returns the new Hash
  */
-static inline uint64_t dpa_u_hash_FNV_1a_append_p(dpa_u_bo_ro_t bo, uint_fast64_t hash){
+inline uint64_t dpa_u_hash_FNV_1a_append_p(dpa_u_bo_ro_t bo, uint_fast64_t hash){
   const uint8_t* data = dpa_u_bo_data(bo);
   for(size_t i=0, n=dpa_u_bo_get_size(bo); i<n; i++)
     hash = (hash ^ data[i]) * DPA_U_FNV_PRIME;
@@ -22,7 +22,7 @@ static inline uint64_t dpa_u_hash_FNV_1a_append_p(dpa_u_bo_ro_t bo, uint_fast64_
 }
 #define dpa_u_hash_FNV_1a_append(bo, old_hash) dpa_u_hash_FNV_1a_append_p(dpa_u_v_bo_ro((bo)), (old_hash))
 
-static inline uint64_t dpa_u_hash_FNV_1a_p(dpa_u_bo_ro_t bo){
+inline uint64_t dpa_u_hash_FNV_1a_p(dpa_u_bo_ro_t bo){
   return dpa_u_hash_FNV_1a_append(bo, DPA_U_FNV_OFFSET_BASIS);
 }
 #define dpa_u_hash_FNV_1a(bo) dpa_u_hash_FNV_1a_p(dpa_u_v_bo_ro((bo)))
@@ -33,7 +33,7 @@ struct dpa__u_default_hash_args {
   dpa_u_bo_ro_t bo;
   uint_fast64_t old_hash;
 };
-static inline uint64_t dpa_u_bo_get_hash_p(const struct dpa__u_default_hash_args args){
+inline uint64_t dpa_u_bo_get_hash_p(const struct dpa__u_default_hash_args args){
   // The xor is to allow an initial old_hash of 0.
   const uint_fast64_t basis = dpa_hash_offset_basis;
   return dpa_u_hash_FNV_1a_append(args.bo, args.old_hash ^ basis) ^ basis;
