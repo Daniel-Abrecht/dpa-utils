@@ -80,21 +80,11 @@ typedef struct {
 static_assert(sizeof(dpa_u_bo_simple_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_simple_t,data) == sizeof(size_t), "Expected data to be at a different offset");
 
-enum {
-  DPA_U_BO_UNIQUE__HASH_BITS = (sizeof(size_t)-1)*CHAR_BIT,
-  DPA_U_BO_UNIQUE__ID_BITS = sizeof(void*)*CHAR_BIT / 4,
-  DPA_U_BO_UNIQUE__SIZE_BITS = sizeof(void*)*CHAR_BIT - DPA_U_BO_UNIQUE__ID_BITS,
-};
-
 typedef struct {
   union {
     struct {
       DPA__U_BO_META();
-      struct __attribute__((packed)) {
-        size_t hash : DPA_U_BO_UNIQUE__HASH_BITS;
-        size_t size : DPA_U_BO_UNIQUE__SIZE_BITS;
-        size_t id   : DPA_U_BO_UNIQUE__ID_BITS;
-      };
+      struct dpa__hash_entry* entry;
     };
     DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
@@ -102,6 +92,7 @@ typedef struct {
 static_assert(sizeof(dpa_u_bo_unique_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_unique_t has an unexpected size");
 
 DPA_U_EXPORT const void* dpa__u_bo_unique_get_data(dpa_u_bo_unique_t bo);
+DPA_U_EXPORT size_t dpa__u_bo_unique_get_size(dpa_u_bo_unique_t bo);
 DPA_U_EXPORT void dpa__u_bo_unique_ref(dpa_u_bo_unique_t bo);
 DPA_U_EXPORT bool dpa__u_bo_unique_put(dpa_u_bo_unique_t bo);
 DPA_U_EXPORT dpa_u_bo_unique_t dpa__u_bo_do_intern(const dpa_u_bo_simple_ro_t bo);
@@ -237,9 +228,9 @@ inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size){
     DPA__GS(dpa_u_bo_inline_t,(X)).size, \
     DPA__GS(dpa_u_bo_simple_t,(X)).size, \
     DPA__GS(dpa_u_bo_simple_ro_t,(X)).size, \
-    DPA__GS(dpa_u_bo_unique_t, (X)).size, \
     dpa_u_bo_t: dpa__u_bo_get_size(DPA__G(dpa_u_bo_t, (X))), \
     dpa_u_bo_ro_t: dpa__u_bo_ro_get_size(DPA__G(dpa_u_bo_ro_t, (X))), \
+    dpa_u_bo_unique_t: dpa__u_bo_unique_get_size(DPA__G(dpa_u_bo_unique_t,(X))), \
     dpa_u_bo_any_unique_t: dpa__u_bo_any_unique_get_size(DPA__G(dpa_u_bo_any_unique_t, (X))), \
     \
     DPA__GS(      dpa_u_bo_inline_t*,(X))->size, \
@@ -248,12 +239,12 @@ inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size){
     DPA__GS(const dpa_u_bo_simple_t*,(X))->size, \
     DPA__GS(      dpa_u_bo_simple_ro_t*,(X))->size, \
     DPA__GS(const dpa_u_bo_simple_ro_t*,(X))->size, \
-    DPA__GS(      dpa_u_bo_unique_t*,(X))->size, \
-    DPA__GS(const dpa_u_bo_unique_t*,(X))->size, \
           dpa_u_bo_t*: dpa__u_bo_get_size(*DPA__G(dpa_u_bo_t*, (X))), \
     const dpa_u_bo_t*: dpa__u_bo_get_size(*DPA__G(const dpa_u_bo_t*, (X))), \
           dpa_u_bo_ro_t*: dpa__u_bo_ro_get_size(*DPA__G(dpa_u_bo_ro_t*, (X))), \
     const dpa_u_bo_ro_t*: dpa__u_bo_ro_get_size(*DPA__G(const dpa_u_bo_ro_t*, (X))), \
+          dpa_u_bo_unique_t*: dpa__u_bo_unique_get_size(*DPA__G(dpa_u_bo_unique_t*,(X))), \
+    const dpa_u_bo_unique_t*: dpa__u_bo_unique_get_size(*DPA__G(const dpa_u_bo_unique_t*,(X))), \
           dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_get_size(*DPA__G(dpa_u_bo_any_unique_t*, (X))), \
     const dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_get_size(*DPA__G(const dpa_u_bo_any_unique_t*, (X))) \
   ))
@@ -270,7 +261,7 @@ inline size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
-    case DPA_U_BO_UNIQUE: return bo.bo_unique.size;
+    case DPA_U_BO_UNIQUE: return dpa__u_bo_unique_get_size(bo.bo_unique);
   }
   abort();
 }
@@ -278,7 +269,7 @@ inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: break;
-    case DPA_U_BO_UNIQUE: return bo.bo_unique.size;
+    case DPA_U_BO_UNIQUE: return dpa__u_bo_unique_get_size(bo.bo_unique);
   }
   abort();
 }

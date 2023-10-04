@@ -10,7 +10,7 @@ DPA_U_EXPORT extern uint64_t dpa_u_bo_get_hash_p(const struct dpa__u_default_has
 uint_fast64_t dpa_hash_offset_basis;
 
 __attribute__((used,constructor(101)))
-void init_hash_basis(void){
+static inline void init(void){
   dpa_u_bo_inline_t buf;
   if(getrandom(buf.data, sizeof(buf.data), 0) != sizeof(buf.data)){
     perror("getrandom failed");

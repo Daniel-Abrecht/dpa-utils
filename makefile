@@ -38,7 +38,7 @@ CFLAGS  += --std=c17
 CFLAGS  += -Iinclude
 CFLAGS  += -Wall -Wextra -pedantic -Werror
 CFLAGS  += -fstack-protector-all
-CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces -Wno-ignored-qualifiers
+CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces
 
 CFLAGS  += -fvisibility=hidden
 
