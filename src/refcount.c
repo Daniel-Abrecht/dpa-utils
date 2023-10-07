@@ -9,3 +9,4 @@ DPA_U_EXPORT extern bool dpa_u_refcount_is_zero(const struct dpa_u_refcount*cons
 DPA_U_EXPORT extern bool dpa_u_refcount_is_static(struct dpa_u_refcount* rc);
 DPA_U_EXPORT extern bool dpa_u_refcount_is_freeable(struct dpa_u_refcount* rc);
 DPA_U_EXPORT extern bool dpa_u_refcount_has_callback(struct dpa_u_refcount* rc);
+DPA_U_EXPORT extern bool dpa_u_refcount_is_bo_unique(struct dpa_u_refcount* rc);

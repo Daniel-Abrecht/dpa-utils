@@ -2,6 +2,7 @@
 #define DPA_UTILS_TEST_H
 
 #include <dpa/utils/common.h>
+
 #include <stdbool.h>
 
 /**

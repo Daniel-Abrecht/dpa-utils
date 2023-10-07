@@ -1,6 +1,8 @@
 #ifndef DPA_UTILS_REFCOUNT_H
 #define DPA_UTILS_REFCOUNT_H
 
+#include <dpa/utils/common.h>
+
 #include <assert.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -21,12 +23,13 @@ pid_t gettid(void);
 #if __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
 #include <stdatomic.h>
 
-#define DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR 62
+#define DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR 61
 enum dpa_u_refcount_type {
-  DPA_U_REFCOUNT_NONE     = 0, //< It's not specified what happens when the refcount hits 0, it probably shouldn't be messed with directly.
-  DPA_U_REFCOUNT_STATIC   = 1, //< This refcount will never hit 0, it only exists for compatibility.
-  DPA_U_REFCOUNT_FREEABLE = 2, //< This refcount is at the start of an allocated object and can be freed using free()
-  DPA_U_REFCOUNT_CALLBACK = 3, //< When this refcount hits 0, it'll call a callback.
+  DPA_U_REFCOUNT_NONE      = 0, //< It's not specified what happens when the refcount hits 0, it probably shouldn't be messed with directly.
+  DPA_U_REFCOUNT_STATIC    = 1, //< This refcount will never hit 0, it only exists for compatibility.
+  DPA_U_REFCOUNT_FREEABLE  = 2, //< This refcount is at the start of an allocated object and can be freed using free()
+  DPA_U_REFCOUNT_CALLBACK  = 3, //< When this refcount hits 0, it'll call a callback.
+  DPA_U_REFCOUNT_BO_UNIQUE = 4, //< Refcount of dpa_u_bo_unique. Because this is an essential internal type, we can special case it here to safe a bit of memory.
 };
 #define DPA__U_REFCOUNT_GUARD_BIT (((uint64_t)1)<<(DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR-1))
 #define DPA__U_REFCOUNT_MASK      (DPA__U_REFCOUNT_GUARD_BIT-1)
@@ -58,15 +61,27 @@ static_assert(offsetof(struct dpa_u_refcount_callback, value) == 0, "Unexpected 
 static_assert(offsetof(struct dpa_u_refcount_callback, refcount) == 0, "Unexpected offset of member .refcount");
 static_assert(offsetof(struct dpa_u_refcount_callback, freeable) == 0, "Unexpected offset of member .freeable");
 
+struct dpa_u_refcount_bo_unique {
+  union {
+    atomic_uint_fast64_t value;
+    struct dpa_u_refcount refcount;
+    struct dpa_u_refcount_freeable freeable;
+  };
+};
+static_assert(offsetof(struct dpa_u_refcount_callback, value) == 0, "Unexpected offset of member .value");
+static_assert(offsetof(struct dpa_u_refcount_callback, refcount) == 0, "Unexpected offset of member .refcount");
+static_assert(offsetof(struct dpa_u_refcount_callback, freeable) == 0, "Unexpected offset of member .freeable");
+
 #define DPA_U_REFCOUNT_INIT(X) ((((uint64_t)(X))<<DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR)|DPA__U_REFCOUNT_GUARD_BIT)
 
 #define dpa_u_refcount_i_none     {0}
 /**
  * No matter how often it's incremened or decremented, it's never going to hit positive numbers
  */
-#define dpa_u_refcount_i_static   {.value=DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_STATIC)}
-#define dpa_u_refcount_i_freeable {{DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_FREEABLE)}}
-#define dpa_u_refcount_i_callback {{DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_CALLBACK)}}
+#define dpa_u_refcount_i_static       {.value=DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_STATIC)}
+#define dpa_u_refcount_i_freeable(N)  {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_FREEABLE)}}
+#define dpa_u_refcount_i_callback(N)  {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_CALLBACK)}}
+#define dpa_u_refcount_i_bo_unique(N) {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE)}}
 
 /**
  * \see dpa_u_refcount_type
@@ -84,9 +99,13 @@ inline void dpa_u_refcount_increment_p(struct dpa_u_refcount*const rc){
 }
 
 #define dpa_u_refcount_increment_s(X) _Generic((X), \
+    struct dpa_u_refcount: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount,(X))), \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
+    struct dpa_u_refcount_callback: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
+    struct dpa_u_refcount_bo_unique: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount_bo_unique,(X)).refcount), \
     struct dpa_u_refcount*: dpa_u_refcount_increment_p(DPA__G(struct dpa_u_refcount*,(X))), \
     struct dpa_u_refcount_freeable*: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
-    struct dpa_u_refcount_callback*: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount) \
+    struct dpa_u_refcount_bo_unique*: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount_bo_unique*,(X))->refcount) \
   )
 
 #define dpa_u_refcount_increment(X) dpa_u_refcount_increment_s((X))
@@ -111,13 +130,18 @@ inline bool dpa_u_refcount_put_p(struct dpa_u_refcount_freeable*const rc){
     case DPA_U_REFCOUNT_STATIC: return false;
     case DPA_U_REFCOUNT_FREEABLE: free(rc); return false;
     case DPA_U_REFCOUNT_CALLBACK: ((struct dpa_u_refcount_callback*)rc)->free((struct dpa_u_refcount_callback*)rc); return false;
+    case DPA_U_REFCOUNT_BO_UNIQUE: return false;
   }
   return true;
 }
 
 #define dpa_u_refcount_put_s(X) _Generic((X), \
-    struct dpa_u_refcount_freeable*: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))), \
-    struct dpa_u_refcount_callback*: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->freeable) \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_freeable,(X))), \
+    struct dpa_u_refcount_callback: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback,(X)).freeable), \
+    struct dpa_u_refcount_bo_unique: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback,(X)).freeable), \
+    struct dpa_u_refcount_freeable*: dpa_u_refcount_put_p(DPA__G(struct dpa_u_refcount_freeable*,(X))), \
+    struct dpa_u_refcount_callback*: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->freeable), \
+    struct dpa_u_refcount_bo_unique*: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->freeable) \
   )
 
 #define dpa_u_refcount_put(X) dpa_u_refcount_put_s((X))
@@ -159,6 +183,13 @@ inline bool dpa_u_refcount_is_freeable(struct dpa_u_refcount* rc){
  */
 inline bool dpa_u_refcount_has_callback(struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_CALLBACK;
+}
+
+/**
+ * This object is a dpa_u_bo_unique.
+ */
+inline bool dpa_u_refcount_is_bo_unique(struct dpa_u_refcount* rc){
+  return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_BO_UNIQUE;
 }
 
 #else

@@ -4,3 +4,8 @@ lib/
 *.o
 *.so
 *.a
+*.bak
+*.old
+*.*swap*
+*~
+src/main/t-*
