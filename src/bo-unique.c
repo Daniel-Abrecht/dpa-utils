@@ -30,7 +30,7 @@ mtx_t lock_table[LOCK_COUNT];
 
 struct hash_map {
   _Atomic size_t bmask;
-  struct bucket*_Atomic restrict bucket[BUCKET_LIST_COUNT];
+  struct bucket*_Atomic bucket[BUCKET_LIST_COUNT];
 };
 static struct hash_map hash_map;
 
@@ -48,7 +48,7 @@ static inline struct bucket* get_bucket(dpa_u_hash_t hash){
   return &atomic_load(&hash_map.bucket[i-(BUCKET_BASE-1)])[((size_t)1)<<i];
 }
 
-static inline size_t entry_get_offset(const struct dpa_u_bo_unique*const e){
+/*static inline size_t entry_get_offset(const struct dpa_u_bo_unique*const e){
   size_t type_offset = e->type_offset;
   switch(type_offset){
     case DPA__U_BO_UNIQUE__ENTRY_TYPE_INLINE: return 0;
@@ -56,7 +56,7 @@ static inline size_t entry_get_offset(const struct dpa_u_bo_unique*const e){
     case DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED: return ((struct dpa__u_bo_entry_refcounted*)e)->offset;
   }
   return type_offset - 2;
-}
+}*/
 
 static inline struct dpa_u_refcount_freeable* entry_get_ext_refcount(const struct dpa_u_bo_unique*const e){
   switch(e->type_offset){

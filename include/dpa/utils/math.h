@@ -3,7 +3,7 @@
 
 #include <dpa/utils/common.h>
 
-inline int dpa_u_log2(long long unsigned int x){
+DPA_U_EXPORT inline int dpa_u_log2(long long unsigned int x){
 #if __has_builtin(__builtin_clzll) && 0
   return 63 - __builtin_clzll(x);
 #else

@@ -193,7 +193,7 @@ static_assert(offsetof(dpa_u_bo_t,_) == 1, "Expected _ to be at a different offs
     const dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_data(DPA__G(const dpa_u_bo_any_unique_t*,(X))) \
   )
 
-inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
+DPA_U_EXPORT inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
@@ -201,7 +201,7 @@ inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
   }
   abort();
 }
-inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const bo){
+DPA_U_EXPORT inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const bo){
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
@@ -209,7 +209,7 @@ inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const bo){
   }
   abort();
 }
-inline const void* dpa__u_bo_unique_get_data(const struct dpa_u_bo_unique*const e){
+DPA_U_EXPORT inline const void* dpa__u_bo_unique_get_data(const struct dpa_u_bo_unique*const e){
   size_t type_offset = e->type_offset;
   switch(type_offset){
     case DPA__U_BO_UNIQUE__ENTRY_TYPE_INLINE: return ((struct dpa__u_bo_entry_inline*)e)->data;
@@ -221,7 +221,7 @@ inline const void* dpa__u_bo_unique_get_data(const struct dpa_u_bo_unique*const 
   }
   return ((char*)(((struct dpa__u_bo_entry_refcounted_2*)e)->refcount+1)) + (type_offset - DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED_2);
 }
-inline const void* dpa__u_bo_ro_data(const dpa_u_bo_ro_t*restrict const bo){
+DPA_U_EXPORT inline const void* dpa__u_bo_ro_data(const dpa_u_bo_ro_t*restrict const bo){
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
@@ -229,7 +229,7 @@ inline const void* dpa__u_bo_ro_data(const dpa_u_bo_ro_t*restrict const bo){
   }
   abort();
 }
-inline const void* dpa__u_bo_any_unique_data(const dpa_u_bo_any_unique_t*restrict const bo){
+DPA_U_EXPORT inline const void* dpa__u_bo_any_unique_data(const dpa_u_bo_any_unique_t*restrict const bo){
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: break;
@@ -249,7 +249,7 @@ inline const void* dpa__u_bo_any_unique_data(const dpa_u_bo_any_unique_t*restric
     dpa_u_bo_t*: dpa__u_bo_set_size(DPA__G(dpa_u_bo_t*,(X)),(S)) \
   ))
 
-inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size){
+DPA_U_EXPORT inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size){
   switch(bo->type){
     case DPA_U_BO_INLINE: {
       assert(size <= DPA_U_BO_INLINE_MAX_SIZE);
@@ -263,7 +263,7 @@ inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size){
   abort();
 }
 
-inline size_t dpa__u_bo_unique_get_size(const struct dpa_u_bo_unique* bo){
+DPA_U_EXPORT inline size_t dpa__u_bo_unique_get_size(const struct dpa_u_bo_unique* bo){
   return bo->size;
 }
 
@@ -291,7 +291,7 @@ inline size_t dpa__u_bo_unique_get_size(const struct dpa_u_bo_unique* bo){
     const dpa_u_bo_any_unique_t*: dpa__u_bo_any_unique_get_size(*DPA__G(const dpa_u_bo_any_unique_t*, (X))) \
   ))
 
-inline size_t dpa__u_bo_get_size(const dpa_u_bo_t bo){
+DPA_U_EXPORT inline size_t dpa__u_bo_get_size(const dpa_u_bo_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
@@ -299,7 +299,7 @@ inline size_t dpa__u_bo_get_size(const dpa_u_bo_t bo){
   }
   abort();
 }
-inline size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo){
+DPA_U_EXPORT inline size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
@@ -307,7 +307,7 @@ inline size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo){
   }
   abort();
 }
-inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t bo){
+DPA_U_EXPORT inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: break;
@@ -426,7 +426,7 @@ inline size_t dpa__u_bo_any_unique_get_size(const dpa_u_bo_any_unique_t bo){
     const dpa_u_bo_any_unique_t*: (const dpa_u_bo_ro_t){ .bo_any_unique = *DPA__G(const dpa_u_bo_any_unique_t*, (X)) } \
   )
 
-inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
+DPA_U_EXPORT inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return (dpa_u_bo_any_unique_t){ .bo_inline = bo.bo_inline };
     case DPA_U_BO_UNIQUE: dpa__u_bo_unique_ref(bo.bo_unique); return (dpa_u_bo_any_unique_t){ .bo_unique = bo.bo_unique };
@@ -444,12 +444,12 @@ inline dpa_u_bo_any_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
   }
 }
 
-inline void dpa__u_bo_any_unique_ref(dpa_u_bo_any_unique_t ubo){
+DPA_U_EXPORT inline void dpa__u_bo_any_unique_ref(dpa_u_bo_any_unique_t ubo){
   if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE)
     dpa__u_bo_unique_ref(ubo.bo_unique);
 }
 
-inline bool dpa__u_bo_any_unique_put(dpa_u_bo_any_unique_t ubo){
+DPA_U_EXPORT inline bool dpa__u_bo_any_unique_put(dpa_u_bo_any_unique_t ubo){
   if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE)
     return dpa__u_bo_unique_put(ubo.bo_unique);
   return false;
