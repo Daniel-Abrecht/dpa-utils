@@ -10,49 +10,12 @@
 #include <stdatomic.h>
 #include <threads.h>
 
+DPA_U_EXPORT const void* dpa__u_bo_unique_get_data(dpa_u_bo_unique_t bo);
+DPA_U_EXPORT size_t dpa__u_bo_unique_get_size(dpa_u_bo_unique_t bo);
+
 struct bucket {
-  struct dpa__hash_entry* next;
+  struct dpa_u_bo_unique* next;
 };
-
-enum {
-  ENTRY_TYPE_INLINE,
-  ENTRY_TYPE_STATIC,
-  ENTRY_TYPE_REFCOUNTED,
-  ENTRY_TYPE_REFCOUNTED_2,
-};
-
-// This has, in the best case, the size of 4 size_t. In the worst case, it has the size of 6 size_t
-struct dpa__hash_entry {
-  struct dpa__hash_entry* next;
-  dpa_u_hash_t hash;
-  struct {
-    size_t size : (sizeof(size_t)-1) * CHAR_BIT;
-    size_t type_offset : CHAR_BIT; // >=3: entry_refcounted_2. offset is type_offset - 3. <3: see entry_inline..2
-  };
-  struct dpa_u_refcount_bo_unique refcount; // If the data gets referenced by another entry, the referee probably won't have to store an offset.
-};
-
-struct entry_inline {
-  struct dpa__hash_entry entry;
-  char data[];
-};
-
-struct entry_static {
-  struct dpa__hash_entry entry;
-  const void* data;
-};
-
-struct entry_refcounted {
-  struct dpa__hash_entry entry;
-  size_t offset;
-  struct dpa_u_refcount_freeable* refcount;
-};
-
-struct entry_refcounted_2 {
-  struct dpa__hash_entry entry;
-  struct dpa_u_refcount_freeable* refcount;
-};
-
 
 // The first 2 bucket lists will have 2**BUCKET_BASE entries (usually 256).
 // Each bucket will have twice the size of the previous one.
@@ -85,36 +48,23 @@ static inline struct bucket* get_bucket(dpa_u_hash_t hash){
   return &atomic_load(&hash_map.bucket[i-(BUCKET_BASE-1)])[((size_t)1)<<i];
 }
 
-static inline size_t entry_get_offset(const struct dpa__hash_entry*const e){
+static inline size_t entry_get_offset(const struct dpa_u_bo_unique*const e){
   size_t type_offset = e->type_offset;
   switch(type_offset){
-    case ENTRY_TYPE_INLINE: return 0;
-    case ENTRY_TYPE_STATIC: return 0;
-    case ENTRY_TYPE_REFCOUNTED: return ((struct entry_refcounted*)e)->offset;
+    case DPA__U_BO_UNIQUE__ENTRY_TYPE_INLINE: return 0;
+    case DPA__U_BO_UNIQUE__ENTRY_TYPE_STATIC: return 0;
+    case DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED: return ((struct dpa__u_bo_entry_refcounted*)e)->offset;
   }
   return type_offset - 2;
 }
 
-static inline struct dpa_u_refcount_freeable* entry_get_ext_refcount(const struct dpa__hash_entry*const e){
+static inline struct dpa_u_refcount_freeable* entry_get_ext_refcount(const struct dpa_u_bo_unique*const e){
   switch(e->type_offset){
-    case ENTRY_TYPE_INLINE: return 0;
-    case ENTRY_TYPE_STATIC: return 0;
-    case ENTRY_TYPE_REFCOUNTED: return ((struct entry_refcounted*)e)->refcount;
+    case DPA__U_BO_UNIQUE__ENTRY_TYPE_INLINE: return 0;
+    case DPA__U_BO_UNIQUE__ENTRY_TYPE_STATIC: return 0;
+    case DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED: return ((struct dpa__u_bo_entry_refcounted*)e)->refcount;
   }
-  return ((struct entry_refcounted_2*)e)->refcount;
-}
-
-static inline const void* entry_get_data(const struct dpa__hash_entry*const e){
-  size_t type_offset = e->type_offset;
-  switch(type_offset){
-    case ENTRY_TYPE_INLINE: return ((struct entry_inline*)e)->data;
-    case ENTRY_TYPE_STATIC: return ((struct entry_static*)e)->data;
-    case ENTRY_TYPE_REFCOUNTED: {
-      const struct entry_refcounted*const t = (const struct entry_refcounted*const)e;
-      return ((char*)(t->refcount+1)) + t->offset;
-    }
-  }
-  return ((char*)(((struct entry_refcounted_2*)e)->refcount+1)) + (type_offset - ENTRY_TYPE_REFCOUNTED_2);
+  return ((struct dpa__u_bo_entry_refcounted_2*)e)->refcount;
 }
 
 static inline void lock_entry(dpa_u_hash_t hash){
@@ -125,45 +75,32 @@ static inline void unlock_entry(dpa_u_hash_t hash){
   mtx_unlock(&lock_table[hash&(LOCK_COUNT)]);
 }
 
-const void* dpa__u_bo_unique_get_data(dpa_u_bo_unique_t bo){
-  (void)bo;
-  // TODO
-  return 0;
+void dpa__u_bo_unique_ref(const struct dpa_u_bo_unique* _bo){
+  struct dpa_u_bo_unique* bo = (struct dpa_u_bo_unique*)_bo;
+  dpa_u_refcount_ref(&bo->refcount);
 }
 
-size_t dpa__u_bo_unique_get_size(dpa_u_bo_unique_t bo){
-  (void)bo;
-  // TODO
-  return 0;
+bool dpa__u_bo_unique_put(const struct dpa_u_bo_unique* _bo){
+  struct dpa_u_bo_unique* bo = (struct dpa_u_bo_unique*)_bo;
+  return dpa_u_refcount_put(&bo->refcount);
 }
 
-void dpa__u_bo_unique_ref(dpa_u_bo_unique_t bo){
-  (void)bo;
-  // TODO
-}
-
-bool dpa__u_bo_unique_put(dpa_u_bo_unique_t bo){
-  (void)bo;
-  // TODO
-  return false;
-}
-
-dpa_u_bo_unique_t dpa__u_bo_do_intern(const dpa_u_bo_simple_ro_t bo){
+const struct dpa_u_bo_unique* dpa__u_bo_do_intern(const dpa_u_bo_simple_ro_t bo){
   const dpa_u_hash_t hash = dpa_u_bo_hash(bo);
   const size_t size = dpa_u_bo_get_size(bo);
   const void*const data = dpa_u_bo_data(bo);
   struct dpa_u_refcount_freeable* refcount = 0; // dpa_u_bo_get_refcount(bo);
   lock_entry(hash);
   struct bucket* bucket = get_bucket(hash);
-  struct dpa__hash_entry** it = &bucket->next;
-  for(struct dpa__hash_entry*restrict e; (e=*it); it=&e->next){
+  struct dpa_u_bo_unique** it = &bucket->next;
+  for(struct dpa_u_bo_unique*restrict e; (e=*it); it=&e->next){
     const dpa_u_hash_t e_hash = e->hash;
     const size_t e_size = e->size;
     if(e_hash < hash) continue;
     if(e_size > size) continue;
     if(e_hash > hash) break;
     if(e_size < size) break;
-    const void*const e_data = entry_get_data(e);
+    const void*const e_data = dpa__u_bo_unique_get_data(e);
     if(e_data != data){
       int diff = memcmp(e_data, data, size);
       if(diff < 0) continue;
@@ -171,29 +108,26 @@ dpa_u_bo_unique_t dpa__u_bo_do_intern(const dpa_u_bo_simple_ro_t bo){
     }
     dpa_u_refcount_ref(&e->refcount);
     unlock_entry(hash);
-    return (dpa_u_bo_unique_t){
-      .type = DPA_U_BO_UNIQUE,
-      .entry = e,
-    };
+    return e;
   }
-  struct dpa__hash_entry* new_entry;
+  struct dpa_u_bo_unique* new_entry;
   if(refcount){
     enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&refcount->refcount);
     if(type == DPA_U_REFCOUNT_BO_UNIQUE){
-      struct dpa__hash_entry* old = dpa_u_container_of(refcount, struct dpa__hash_entry, refcount.freeable);
+      struct dpa_u_bo_unique* old = dpa_u_container_of(refcount, struct dpa_u_bo_unique, refcount.freeable);
       struct dpa_u_refcount_freeable*const true_refcount = entry_get_ext_refcount(old);
-      if(old->type_offset >= ENTRY_TYPE_REFCOUNTED)
+      if(old->type_offset >= DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED)
         refcount = true_refcount;
     }
     dpa_u_refcount_ref(refcount);
     if(type == DPA_U_REFCOUNT_STATIC){
-      struct entry_static*const new = malloc(sizeof(*new));
-      *new = (struct entry_static){
+      struct dpa__u_bo_entry_static*const new = malloc(sizeof(*new));
+      *new = (struct dpa__u_bo_entry_static){
         .entry = {
           .next = *it,
           .hash = hash,
           .size = size,
-          .type_offset = ENTRY_TYPE_STATIC,
+          .type_offset = DPA__U_BO_UNIQUE__ENTRY_TYPE_STATIC,
           // dpa_u_refcount_i_static means the entry will never be freed again.
           // This isn't necessary, but seams sensible for data that will never be freed either.
           .refcount = dpa_u_refcount_i_static,
@@ -203,27 +137,27 @@ dpa_u_bo_unique_t dpa__u_bo_do_intern(const dpa_u_bo_simple_ro_t bo){
       new_entry = &new->entry;
     }else{
       const size_t offset = (const char*)data - (const char*)(refcount + 1);
-      if(offset < (((size_t)1)<<CHAR_BIT) - ENTRY_TYPE_REFCOUNTED_2){
-        struct entry_refcounted_2*const new = malloc(sizeof(*new));
-        *new = (struct entry_refcounted_2){
+      if(offset < (((size_t)1)<<CHAR_BIT) - DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED_2){
+        struct dpa__u_bo_entry_refcounted_2*const new = malloc(sizeof(*new));
+        *new = (struct dpa__u_bo_entry_refcounted_2){
           .entry = {
             .next = *it,
             .hash = hash,
             .size = size,
-            .type_offset = ENTRY_TYPE_REFCOUNTED_2 + offset,
+            .type_offset = DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED_2 + offset,
             .refcount = dpa_u_refcount_i_bo_unique(1),
           },
           .refcount = refcount,
         };
         new_entry = &new->entry;
       }else{
-        struct entry_refcounted*const new = malloc(sizeof(*new));
-        *new = (struct entry_refcounted){
+        struct dpa__u_bo_entry_refcounted*const new = malloc(sizeof(*new));
+        *new = (struct dpa__u_bo_entry_refcounted){
           .entry = {
             .next = *it,
             .hash = hash,
             .size = size,
-            .type_offset = ENTRY_TYPE_REFCOUNTED,
+            .type_offset = DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED,
             .refcount = dpa_u_refcount_i_bo_unique(1),
           },
           .offset = offset,
@@ -233,13 +167,13 @@ dpa_u_bo_unique_t dpa__u_bo_do_intern(const dpa_u_bo_simple_ro_t bo){
       }
     }
   }else{
-    struct entry_inline*const new = malloc(sizeof(*new) + size);
-    *new = (struct entry_inline){
+    struct dpa__u_bo_entry_inline*const new = malloc(sizeof(*new) + size);
+    *new = (struct dpa__u_bo_entry_inline){
       .entry = {
         .next = *it,
         .hash = hash,
         .size = size,
-        .type_offset = ENTRY_TYPE_INLINE,
+        .type_offset = DPA__U_BO_UNIQUE__ENTRY_TYPE_INLINE,
         .refcount = dpa_u_refcount_i_bo_unique(1),
       },
     };
@@ -248,8 +182,5 @@ dpa_u_bo_unique_t dpa__u_bo_do_intern(const dpa_u_bo_simple_ro_t bo){
   }
   *it = new_entry;
   unlock_entry(hash);
-  return (dpa_u_bo_unique_t){
-    .type = DPA_U_BO_UNIQUE,
-    .entry = new_entry,
-  };
+  return new_entry;
 }
