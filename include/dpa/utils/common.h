@@ -28,19 +28,19 @@
 #define DPA_U_EXPORT __attribute__((visibility("default")))
 
 #ifdef __llvm__
-#define STATIC_ASSERT_IN_STRUCT_BUGGY
+#define DPA__U_STATIC_ASSERT_IN_STRUCT_BUGGY
 #endif
 
-#ifndef STATIC_ASSERT_IN_STRUCT_BUGGY
-#define static_assert_as_expr(EXPR, ...) (void)(struct{ int x; _Static_assert((EXPR), __VA_ARGS__); }){0}
+#ifndef DPA__U_STATIC_ASSERT_IN_STRUCT_BUGGY
+#define dpa_u_static_assert_as_expr(EXPR, ...) (void)(struct{ int x; _Static_assert((EXPR), __VA_ARGS__); }){0}
 #else
-#define static_assert_as_expr(EXPR, ...) (void)(char*[(!!(EXPR))*2-1]){(__VA_ARGS__)}
+#define dpa_u_static_assert_as_expr(EXPR, ...) (void)(char*[(!!(EXPR))*2-1]){(__VA_ARGS__)}
 #endif
 
 typedef struct { int x; } invalid_selection_t;
 #define dpa_u_generic(X, ...) _Generic((X), default: (invalid_selection_t){0}, __VA_ARGS__)
 #define dpa_u_assert_selection(X) _Generic(0, \
-    invalid_selection_t: static_assert_as_expr(_Generic((X), invalid_selection_t: 0, default: 1 ), "Unsupported type combination"), \
+    invalid_selection_t: dpa_u_static_assert_as_expr(_Generic((X), invalid_selection_t: 0, default: 1 ), "Unsupported type combination"), \
     default: (X) \
   )
 #define dpa_u_generic_if_selection(X, Y) _Generic((X), invalid_selection_t: (invalid_selection_t){0}, default: (Y))
