@@ -60,7 +60,10 @@ SHELL_CMD="$$SHELL"
 
 .PHONY: all bin lib clean get//bin get//lib install uninstall shell test
 
-all: bin lib
+all: check-headers bin lib
+
+check-headers:
+	find include/dpa/ -iname "*.h" -print -exec $(CC) -x c -fPIC -c -o /dev/null $(CFLAGS) {} \;
 
 bin: $(BINS)
 
@@ -92,7 +95,7 @@ lib/$(TYPE)/lib$(SONAME).a: $(filter-out build/$(TYPE)/o/src/main/%,$(filter-out
 
 build/$(TYPE)/o/%.c.o: %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
-	$(CC) -fPIC -c -o $@ $(DFLAGS) $(CFLAGS) $<
+	$(CC) -fPIC -c -o $@ $(CFLAGS) $<
 
 clean:
 	rm -rf build/$(TYPE)/ bin/$(TYPE)/ lib/$(TYPE)/
