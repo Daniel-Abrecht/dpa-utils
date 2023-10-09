@@ -54,6 +54,11 @@ typedef struct { int x; } invalid_selection_t;
 #define dpa_u_container_of(ptr, type, member) \
   ((type*)( (ptr) ? (char*)((dpa_u_typeof(((type*)0)->member)*){ptr}) - offsetof(type, member) : 0 ))
 
+
+// TODO: This is currently not a very safe macro
+#define DPA_U_MIN(X,Y) ((X)<(Y)?(X):(Y))
+#define DPA_U_MAX(X,Y) ((X)>(Y)?(X):(Y))
+
 /////////////////////////////////
 //////      Constants      //////
 /////////////////////////////////
