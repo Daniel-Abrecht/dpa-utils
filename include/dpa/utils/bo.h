@@ -32,8 +32,10 @@ typedef size_t dpa_u_hash_t;
 enum dpa_u_bo_type {
   DPA_U_BO_INLINE,
   DPA_U_BO_SIMPLE,
-  DPA_U_BO_UNIQUE,
+  DPA_U_BO_UNIQUE_HASHMAP,
 };
+
+#define case_DPA_U_BO_UNIQUE case DPA_U_BO_INLINE: case DPA_U_BO_UNIQUE_HASHMAP
 
 #define DPA__U_BO_META(...) \
   struct __attribute__((packed)) { \
@@ -85,7 +87,7 @@ static_assert(offsetof(dpa_u_bo_simple_t,data) == sizeof(size_t), "Expected data
 
 
 ////// Unique hashmap string entries, these are not meant to be used directly.
-// Just use dpa_u_bo_unique_hashmap instead
+// Just use dpa_u_bo_unique_t instead
 
 // This has, in the best case, the size of 4 size_t. In the worst case, it has the size of 6 size_t
 struct dpa__u_bo_unique_hashmap_entry {
@@ -206,7 +208,7 @@ DPA_U_EXPORT inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
-    case DPA_U_BO_UNIQUE: break;
+    case DPA_U_BO_UNIQUE_HASHMAP: break;
   }
   abort();
 }
@@ -214,7 +216,7 @@ DPA_U_EXPORT inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const 
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
-    case DPA_U_BO_UNIQUE: break;
+    case DPA_U_BO_UNIQUE_HASHMAP: break;
   }
   abort();
 }
@@ -234,7 +236,7 @@ DPA_U_EXPORT inline const void* dpa__u_bo_ro_data(const dpa_u_bo_ro_t*restrict c
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
-    case DPA_U_BO_UNIQUE: return dpa__u_bo_unique_hashmap_get_data(bo->bo_unique_hashmap);
+    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_bo_unique_hashmap_get_data(bo->bo_unique_hashmap);
   }
   abort();
 }
@@ -242,7 +244,7 @@ DPA_U_EXPORT inline const void* dpa__u_bo_unique_data(const dpa_u_bo_unique_t*re
   switch(bo->type){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: break;
-    case DPA_U_BO_UNIQUE: return dpa__u_bo_unique_hashmap_get_data(bo->bo_unique_hashmap);
+    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_bo_unique_hashmap_get_data(bo->bo_unique_hashmap);
   }
   abort();
 }
@@ -267,7 +269,7 @@ DPA_U_EXPORT inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t
     case DPA_U_BO_SIMPLE: {
       bo->bo_simple.size = size;
     } return;
-    case DPA_U_BO_UNIQUE: break;
+    case DPA_U_BO_UNIQUE_HASHMAP: break;
   }
   abort();
 }
@@ -304,7 +306,7 @@ DPA_U_EXPORT inline size_t dpa__u_bo_get_size(const dpa_u_bo_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
-    case DPA_U_BO_UNIQUE: break;
+    case DPA_U_BO_UNIQUE_HASHMAP: break;
   }
   abort();
 }
@@ -312,7 +314,7 @@ DPA_U_EXPORT inline size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
-    case DPA_U_BO_UNIQUE: return dpa__u_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
+    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
   }
   abort();
 }
@@ -320,7 +322,7 @@ DPA_U_EXPORT inline size_t dpa__u_bo_unique_get_size(const dpa_u_bo_unique_t bo)
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: break;
-    case DPA_U_BO_UNIQUE: return dpa__u_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
+    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
   }
   abort();
 }
@@ -333,7 +335,7 @@ DPA_U_EXPORT inline size_t dpa__u_bo_unique_get_size(const dpa_u_bo_unique_t bo)
     dpa_u_bo_inline_t: DPA_U_BO_INLINE, \
     DPA__GS(dpa_u_bo_simple_t, (X)).type, \
     DPA__GS(dpa_u_bo_simple_ro_t, (X)).type, \
-    dpa_u_bo_unique_hashmap_t: DPA_U_BO_UNIQUE, \
+    dpa_u_bo_unique_hashmap_t: DPA_U_BO_UNIQUE_HASHMAP, \
     DPA__GS(dpa_u_bo_unique_t, (X)).type, \
     \
     DPA__GS(      dpa_u_bo_t*, (X))->type, \
@@ -356,7 +358,7 @@ DPA_U_EXPORT inline size_t dpa__u_bo_unique_get_size(const dpa_u_bo_unique_t bo)
 
 #define dpa_u_v_bo_unique(...) dpa_u_assert_selection(dpa_u_v_bo_unique_g(__VA_ARGS__))
 #define dpa_u_v_bo_unique_g(X) dpa_u_generic((X), \
-    dpa_u_bo_unique_hashmap_t: (const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE, .bo_unique_hashmap = DPA__G(dpa_u_bo_unique_hashmap_t, (X)) }, \
+    dpa_u_bo_unique_hashmap_t: (const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = DPA__G(dpa_u_bo_unique_hashmap_t, (X)) }, \
     DPA__GS(dpa_u_bo_unique_t, (X)), \
     dpa_u_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *DPA__G(dpa_u_bo_inline_t*, (X)) }, \
     const dpa_u_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *DPA__G(const dpa_u_bo_inline_t*, (X)) }, \
@@ -418,7 +420,7 @@ DPA_U_EXPORT inline size_t dpa__u_bo_unique_get_size(const dpa_u_bo_unique_t bo)
     dpa_u_bo_inline_t: (const dpa_u_bo_ro_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
     dpa_u_bo_simple_t: (const dpa_u_bo_ro_t){ .bo_simple = DPA__G(dpa_u_bo_simple_t, (X)).ro }, \
     dpa_u_bo_simple_ro_t: (const dpa_u_bo_ro_t){ .bo_simple = DPA__G(dpa_u_bo_simple_ro_t, (X)) }, \
-    dpa_u_bo_unique_hashmap_t: (const dpa_u_bo_ro_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE, .bo_unique_hashmap = DPA__G(dpa_u_bo_unique_hashmap_t, (X)) }, \
+    dpa_u_bo_unique_hashmap_t: (const dpa_u_bo_ro_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = DPA__G(dpa_u_bo_unique_hashmap_t, (X)) }, \
     dpa_u_bo_unique_t: (const dpa_u_bo_ro_t){ .bo_unique = DPA__G(dpa_u_bo_unique_t, (X)) }, \
     \
     DPA__GS(dpa_u_bo_t*, (X))->ro, \
@@ -438,7 +440,7 @@ DPA_U_EXPORT inline size_t dpa__u_bo_unique_get_size(const dpa_u_bo_unique_t bo)
 DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return (dpa_u_bo_unique_t){ .bo_inline = bo.bo_inline };
-    case DPA_U_BO_UNIQUE: dpa__u_bo_unique_hashmap_ref(bo.bo_unique_hashmap); return (dpa_u_bo_unique_t){ .bo_unique_hashmap = bo.bo_unique_hashmap };
+    case DPA_U_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_ref(bo.bo_unique_hashmap); return (dpa_u_bo_unique_t){ .bo_unique_hashmap = bo.bo_unique_hashmap };
     default: {
       if(dpa_u_bo_get_size(bo) <= DPA_U_BO_INLINE_MAX_SIZE){
         dpa_u_bo_inline_t boi = {
@@ -454,12 +456,12 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
 }
 
 DPA_U_EXPORT inline void dpa__u_bo_unique_ref(dpa_u_bo_unique_t ubo){
-  if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE)
+  if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE_HASHMAP)
     dpa__u_bo_unique_hashmap_ref(ubo.bo_unique_hashmap);
 }
 
 DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
-  if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE)
+  if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE_HASHMAP)
     return dpa__u_bo_unique_hashmap_put(ubo.bo_unique_hashmap);
   return false;
 }
