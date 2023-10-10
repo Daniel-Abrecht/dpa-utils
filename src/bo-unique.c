@@ -10,8 +10,10 @@
 #include <stdatomic.h>
 #include <threads.h>
 
-DPA_U_EXPORT const void* dpa__u_bo_unique_hashmap_get_data(dpa_u_bo_unique_hashmap_t bo);
-DPA_U_EXPORT size_t dpa__u_bo_unique_hashmap_get_size(dpa_u_bo_unique_hashmap_t bo);
+extern const void* dpa__u_bo_unique_hashmap_get_data(dpa_u_bo_unique_hashmap_t);
+extern size_t dpa__u_bo_unique_hashmap_get_size(dpa_u_bo_unique_hashmap_t);
+extern void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t);
+extern bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t);
 
 #define LOAD_FACTOR_EXPAND 2
 #define LOAD_FACTOR_SHRINK 0.5
@@ -83,16 +85,6 @@ static inline void lock_entry(dpa_u_hash_t hash){
 
 static inline void unlock_entry(dpa_u_hash_t hash){
   mtx_unlock(&lock_table[hash&(LOCK_COUNT-1)]);
-}
-
-void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t _bo){
-  dpa__u_bo_unique_hashmap_entry_t* bo = (dpa__u_bo_unique_hashmap_entry_t*)_bo;
-  dpa_u_refcount_ref(&bo->refcount);
-}
-
-bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t _bo){
-  dpa__u_bo_unique_hashmap_entry_t* bo = (dpa__u_bo_unique_hashmap_entry_t*)_bo;
-  return dpa_u_refcount_put(&bo->refcount);
 }
 
 static void grow(void){
@@ -167,7 +159,8 @@ static void shrink(void){
   free(old_bucket);
 }
 
-void dpa__u_bo_unique_hashmap_destroy(dpa_u_bo_unique_hashmap_t bo){
+DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable* _bo){
+  const dpa__u_bo_unique_hashmap_entry_t* bo = dpa_u_container_of(_bo, const dpa__u_bo_unique_hashmap_entry_t, refcount.freeable);
   const dpa_u_hash_t hash = bo->hash;
   lock_entry(hash);
   if(!dpa_u_refcount_is_zero(&bo->refcount.refcount)){
@@ -193,11 +186,11 @@ void dpa__u_bo_unique_hashmap_destroy(dpa_u_bo_unique_hashmap_t bo){
   abort();
 }
 
-dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(const dpa_u_bo_simple_ro_t bo){
+dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(const dpa_u_bo_ro_t* bo){
   const dpa_u_hash_t hash = dpa_u_bo_hash(bo);
   const size_t size = dpa_u_bo_get_size(bo);
   const void*const data = dpa_u_bo_data(bo);
-  struct dpa_u_refcount_freeable* refcount = 0; // dpa_u_bo_get_refcount(bo);
+  struct dpa_u_refcount_freeable* refcount = dpa_u_bo_get_refcount(bo);
   lock_entry(hash);
   struct bucket* bucket = get_bucket(hash);
   dpa__u_bo_unique_hashmap_entry_t** it = &bucket->next;

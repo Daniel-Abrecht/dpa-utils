@@ -134,10 +134,6 @@ enum {
   DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED_2,
 };
 
-DPA_U_EXPORT void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t bo);
-DPA_U_EXPORT bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t bo);
-DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(const dpa_u_bo_simple_ro_t bo);
-
 typedef struct dpa_u_bo_unique {
   union {
     struct { DPA__U_BO_META(); char _[DPA__U_BO_COMMON_SIZE-1]; };
@@ -172,6 +168,13 @@ typedef struct dpa_u_bo {
 static_assert(sizeof(dpa_u_bo_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_t,_) == 1, "Expected _ to be at a different offset");
 
+DPA_U_EXPORT inline void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t bo){
+  dpa_u_refcount_ref(&bo->refcount);
+}
+
+DPA_U_EXPORT inline bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t bo){
+  return dpa_u_refcount_put(&bo->refcount);
+}
 
 ///////////////////////////////////////////////
 //////      Member access functions      //////
@@ -437,10 +440,16 @@ DPA_U_EXPORT inline size_t dpa__u_bo_unique_get_size(const dpa_u_bo_unique_t bo)
     const dpa_u_bo_unique_t*: (const dpa_u_bo_ro_t){ .bo_unique = *DPA__G(const dpa_u_bo_unique_t*, (X)) } \
   )
 
-DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
+DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(const dpa_u_bo_ro_t* bo);
+
+DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t*const bo){
+  // We allow the simple cases to be inlined, and the complicated one is handled in dpa__u_bo_do_intern instead
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_INLINE: return (dpa_u_bo_unique_t){ .bo_inline = bo.bo_inline };
-    case DPA_U_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_ref(bo.bo_unique_hashmap); return (dpa_u_bo_unique_t){ .bo_unique_hashmap = bo.bo_unique_hashmap };
+    case DPA_U_BO_INLINE:
+      return (dpa_u_bo_unique_t){ .bo_inline = bo->bo_inline };
+    case DPA_U_BO_UNIQUE_HASHMAP:
+      dpa__u_bo_unique_hashmap_ref(bo->bo_unique_hashmap);
+      return bo->bo_unique;
     default: {
       if(dpa_u_bo_get_size(bo) <= DPA_U_BO_INLINE_MAX_SIZE){
         dpa_u_bo_inline_t boi = {
@@ -450,7 +459,10 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t bo){
         memcpy(boi.data, dpa_u_bo_data(bo), dpa_u_bo_get_size(bo));
         return (dpa_u_bo_unique_t){ .bo_inline = boi };
       }
-      return (dpa_u_bo_unique_t){ .bo_unique_hashmap = dpa__u_bo_do_intern(dpa_u_temp_bo_simple_ro(bo)) };
+      return (dpa_u_bo_unique_t){
+        .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
+        .bo_unique_hashmap = dpa__u_bo_do_intern(bo),
+      };
     }
   }
 }
@@ -498,12 +510,67 @@ DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
     const dpa_u_bo_unique_t*: dpa__u_bo_unique_put(*DPA__G(const dpa_u_bo_unique_t*,(X))) \
   )
 
+DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_unique_get_refcount(const dpa_u_bo_unique_t ubo){
+  switch(dpa_u_bo_get_type(ubo)){
+    case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&ubo.bo_unique_hashmap->refcount.freeable;
+    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
+    case DPA_U_BO_SIMPLE: break;
+  }
+  abort();
+}
+
+DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_ro_p_get_refcount(const dpa_u_bo_ro_t* ubo){
+  switch(dpa_u_bo_get_type(ubo)){
+    case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&ubo->bo_unique_hashmap->refcount.freeable;
+    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
+    case DPA_U_BO_SIMPLE: return 0;
+  }
+  abort();
+}
+
+DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_ro_get_refcount(const dpa_u_bo_ro_t ubo){
+  switch(dpa_u_bo_get_type(ubo)){
+    case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&ubo.bo_unique_hashmap->refcount.freeable;
+    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
+    case DPA_U_BO_SIMPLE: return 0;
+  }
+  abort();
+}
+
+DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(const dpa_u_bo_t* ubo){
+  switch(dpa_u_bo_get_type(ubo)){
+    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
+    case DPA_U_BO_SIMPLE: return 0;
+    case DPA_U_BO_UNIQUE_HASHMAP: break;
+  }
+  abort();
+}
+
+#define dpa__u_bo_unique_hashmap_get_refcount(X) ((struct dpa_u_refcount_freeable*)&(X)->refcount.freeable)
+
+#define dpa_u_bo_get_refcount(...) dpa_u_assert_selection(dpa_u_bo_get_refcount_g(__VA_ARGS__))
+#define dpa_u_bo_get_refcount_g(X) dpa_u_generic((X), \
+    dpa_u_bo_ro_t: dpa__u_bo_ro_get_refcount(DPA__G(dpa_u_bo_ro_t,(X))), \
+    dpa_u_bo_inline_t: &dpa_u_refcount_static_v_freeable, \
+    dpa_u_bo_unique_t: dpa__u_bo_unique_get_refcount(DPA__G(dpa_u_bo_unique_t,(X))), \
+    dpa_u_bo_unique_hashmap_t: dpa__u_bo_unique_hashmap_get_refcount(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
+    \
+          dpa_u_bo_unique_t*: dpa__u_bo_unique_get_refcount(*DPA__G(dpa_u_bo_unique_t*,(X))), \
+    const dpa_u_bo_unique_t*: dpa__u_bo_unique_get_refcount(*DPA__G(const dpa_u_bo_unique_t*,(X))), \
+          dpa_u_bo_inline_t*: &dpa_u_refcount_static_v_freeable, \
+    const dpa_u_bo_inline_t*: &dpa_u_refcount_static_v_freeable, \
+          dpa_u_bo_ro_t*: dpa__u_bo_ro_p_get_refcount(DPA__G(dpa_u_bo_ro_t*,(X))), \
+    const dpa_u_bo_ro_t*: dpa__u_bo_ro_p_get_refcount(DPA__G(const dpa_u_bo_ro_t*,(X))), \
+          dpa_u_bo_t*: dpa__u_bo_p_get_refcount(DPA__G(dpa_u_bo_t*,(X))), \
+    const dpa_u_bo_t*: dpa__u_bo_p_get_refcount(DPA__G(const dpa_u_bo_t*,(X))) \
+  )
+
 /**
  * Interns a buffer. The refcount of the buffer will be increased.
  * \returns dpa_u_bo_unique_t
  */
 #define dpa_u_bo_intern(...) dpa_u_assert_selection(dpa_u_bo_intern_g(__VA_ARGS__))
-#define dpa_u_bo_intern_g(X) dpa_u_generic((X), \
+#define dpa_u_bo_intern_g(X) _Generic((X), \
     dpa_u_bo_inline_t: (const dpa_u_bo_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
     dpa_u_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
     const dpa_u_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
@@ -514,7 +581,7 @@ DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
     dpa_u_bo_unique_t*: (dpa__u_bo_unique_ref(*DPA__G(dpa_u_bo_unique_t*,(X))),*DPA__G(dpa_u_bo_unique_t*,(X))), \
     const dpa_u_bo_unique_t*: (dpa__u_bo_unique_ref(*DPA__G(const dpa_u_bo_unique_t*,(X))),*DPA__G(const dpa_u_bo_unique_t*,(X))), \
     \
-    default: dpa_u_generic_if_selection( dpa_u_v_bo_ro_g(X), dpa__u_bo_intern(DPA__G(dpa_u_bo_ro_t,dpa_u_v_bo_ro_g(X))) ) \
+    default: dpa_u_generic_if_selection( dpa_u_p_bo_ro_g(X), dpa__u_bo_intern(DPA__G(dpa_u_bo_ro_t,dpa_u_v_bo_ro_g(X))) ) \
   )
 
 #endif
