@@ -19,7 +19,7 @@ TYPE := debug
 CFLAGS  += -O0 -g
 LDFLAGS += -g
 else
-CFLAGS  += -O3
+CFLAGS  += -O2
 endif
 
 ifdef asan
@@ -37,7 +37,7 @@ endif
 CFLAGS  += --std=c17
 CFLAGS  += -Iinclude
 CFLAGS  += -Wall -Wextra -pedantic -Werror
-CFLAGS  += -fstack-protector-all
+#CFLAGS  += -fstack-protector-all
 CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces
 
 CFLAGS  += -fvisibility=hidden
@@ -48,6 +48,7 @@ LDFLAGS += -Wl,--gc-sections
 endif
 
 OBJECTS := $(patsubst %,build/$(TYPE)/o/%.o,$(SOURCES))
+ASMOUT  := $(patsubst %,build/$(TYPE)/s/%.s,$(SOURCES))
 
 B-TS := bin/$(TYPE)/dpa-testsuite
 
@@ -58,7 +59,7 @@ export LD_LIBRARY_PATH=$(shell realpath "lib/$(TYPE)/")
 
 SHELL_CMD="$$SHELL"
 
-.PHONY: all bin lib clean get//bin get//lib install uninstall shell test
+.PHONY: all bin lib clean get//bin get//lib install uninstall shell test asm
 
 all: check-headers bin lib
 
@@ -66,6 +67,8 @@ check-headers:
 	find include/dpa/ -iname "*.h" -print -exec $(CC) -x c -fPIC -c -o /dev/null $(CFLAGS) {} \;
 
 bin: $(BINS)
+
+asm: $(ASMOUT)
 
 lib: lib/$(TYPE)/lib$(SONAME).a \
      lib/$(TYPE)/lib$(SONAME).so
@@ -92,6 +95,10 @@ lib/$(TYPE)/lib$(SONAME).a: $(filter-out build/$(TYPE)/o/src/main/%,$(filter-out
 	mkdir -p $(dir $@)
 	rm -f $@
 	$(AR) q $@ $^
+
+build/$(TYPE)/s/%.c.s: %.c makefile $(HEADERS)
+	mkdir -p $(dir $@)
+	$(CC) -fPIC -S -o $@ $(CFLAGS) $< # -fverbose-asm
 
 build/$(TYPE)/o/%.c.o: %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
