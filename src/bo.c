@@ -8,7 +8,7 @@ extern void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size);
 extern size_t dpa__u_bo_get_size(const dpa_u_bo_t bo);
 extern size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo);
 extern size_t dpa__u_bo_unique_get_size(const dpa_u_bo_unique_t bo);
-extern dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t* bo);
+extern dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_p_bo_ro_t*const _bo);
 extern void dpa__u_bo_unique_ref(dpa_u_bo_unique_t ubo);
 extern bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo);
 extern struct dpa_u_refcount_freeable* dpa__u_bo_unique_get_refcount(const dpa_u_bo_unique_t ubo);

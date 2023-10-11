@@ -93,6 +93,8 @@ typedef const dpa_u_bo_inline_t dpa_u_bo_inline_ro_t;
 static_assert(sizeof(dpa_u_bo_inline_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_inline_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_inline_t,data) == 1, "Expected data to be at byte 1");
 
+typedef struct dpa_u_p_bo_inline dpa_u_p_bo_inline_t;
+
 #define DPA__U_BO_SIMPLE_MEMBERS(...) \
   union { \
     struct { \
@@ -111,6 +113,8 @@ typedef struct dpa_u_bo_simple_ro {
 static_assert(sizeof(dpa_u_bo_simple_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_ro_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_simple_ro_t,data) == sizeof(size_t), "Expected data to be at a different offset");
 
+typedef struct dpa_u_p_bo_simple_ro dpa_u_p_bo_simple_ro_t;
+
 typedef struct dpa_u_bo_simple {
   union {
     dpa_u_bo_simple_ro_t ro;
@@ -120,6 +124,7 @@ typedef struct dpa_u_bo_simple {
 static_assert(sizeof(dpa_u_bo_simple_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_simple_t,data) == sizeof(size_t), "Expected data to be at a different offset");
 
+typedef struct dpa_u_p_bo_simple dpa_u_p_bo_simple_t;
 
 ////// Unique hashmap string entries, these are not meant to be used directly.
 // Just use dpa_u_bo_unique_t instead
@@ -160,7 +165,7 @@ struct dpa__u_bo_entry_refcounted_2 {
 
 // This is currently just a pointer to a dpa__u_bo_unique_hashmap_entry, but it may be changed to a struct in the future, so don't rely on that.
 typedef const struct dpa__u_bo_unique_hashmap_entry* dpa_u_bo_unique_hashmap_t;
-
+typedef struct dpa_u_p_bo_unique_hashmap_t dpa_u_p_bo_unique_hashmap_t;
 
 enum {
   DPA__U_BO_UNIQUE__ENTRY_TYPE_INLINE,
@@ -177,6 +182,7 @@ typedef struct dpa_u_bo_unique {
     DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
 } dpa_u_bo_unique_t;
+typedef struct dpa_u_p_bo_unique_t dpa_u_p_bo_unique_t;
 
 typedef struct dpa_u_bo_ro {
   union {
@@ -191,6 +197,8 @@ typedef struct dpa_u_bo_ro {
 static_assert(sizeof(dpa_u_bo_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_ro_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_ro_t,_) == 1, "Expected _ to be at a different offset");
 
+typedef struct dpa_u_p_bo_ro_t dpa_u_p_bo_ro_t;
+
 typedef struct dpa_u_bo {
   union {
     struct { DPA__U_BO_META(); char _[DPA__U_BO_COMMON_SIZE-1]; };
@@ -202,6 +210,8 @@ typedef struct dpa_u_bo {
 } dpa_u_bo_t;
 static_assert(sizeof(dpa_u_bo_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_t,_) == 1, "Expected _ to be at a different offset");
+
+typedef struct dpa_u_p_bo_t dpa_u_p_bo_t;
 
 DPA_U_EXPORT inline void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t bo){
   dpa_u_refcount_ref(&bo->refcount);
@@ -472,9 +482,10 @@ DPA_U_EXPORT inline size_t dpa__u_bo_unique_get_size(const dpa_u_bo_unique_t bo)
     const dpa_u_bo_unique_t*: (const dpa_u_bo_ro_t){ .bo_unique = *DPA__G(const dpa_u_bo_unique_t*, (X)) } \
   )
 
-DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(const dpa_u_bo_ro_t* bo);
+DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(const dpa_u_p_bo_ro_t* bo);
 
-DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t*const bo){
+DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_p_bo_ro_t*const _bo){
+  const dpa_u_bo_ro_t*const bo = (const dpa_u_bo_ro_t*)_bo;
   // We allow the simple cases to be inlined, and the complicated one is handled in dpa__u_bo_do_intern instead
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
@@ -493,7 +504,7 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_bo_ro_t*const
       }
       return (dpa_u_bo_unique_t){
         .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
-        .bo_unique_hashmap = dpa__u_bo_do_intern(bo),
+        .bo_unique_hashmap = dpa__u_bo_do_intern(_bo),
       };
     }
   }
@@ -616,7 +627,7 @@ DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(con
     dpa_u_bo_unique_t*: (dpa__u_bo_unique_ref(*DPA__G(dpa_u_bo_unique_t*,(X))),*DPA__G(dpa_u_bo_unique_t*,(X))), \
     const dpa_u_bo_unique_t*: (dpa__u_bo_unique_ref(*DPA__G(const dpa_u_bo_unique_t*,(X))),*DPA__G(const dpa_u_bo_unique_t*,(X))), \
     \
-    default: dpa_u_generic_if_selection( dpa_u_p_bo_ro_g(X), dpa__u_bo_intern(DPA__G(dpa_u_bo_ro_t,dpa_u_v_bo_ro_g(X))) ) \
+    default: dpa_u_generic_if_selection( dpa_u_p_bo_ro_g(X), dpa__u_bo_intern((const dpa_u_p_bo_ro_t*)dpa_u_p_bo_ro_g(X)))) ) \
   )
 
 #endif
