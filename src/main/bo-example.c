@@ -34,4 +34,9 @@ int main(void){
     dpa_u_puts(my_bo);
     my_puts(my_bo);
   }
+  {
+    dpa_u_bo_unique_t my_bo = {0};
+    dpa_u_puts(my_bo);
+    my_puts(my_bo);
+  }
 }

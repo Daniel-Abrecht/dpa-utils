@@ -106,7 +106,7 @@ DPA_U_EXPORT inline dpa_u_hash_t dpa_u_bo_hash_p(const struct dpa__u_default_has
 #define dpa__u_bo_hash(bo,...) dpa_u_bo_hash_p((const struct dpa__u_default_hash_args){dpa_u_v_bo_ro((bo)),__VA_ARGS__});
 /**
  * This function returns a platform dependent, non-cryptografic hash, intended for use in hash maps and similar datastructures.
- * The hash will change between program executions, this is intended to make it harder to pre-compute colliding hashed.
+ * The hash will change between program executions, this is intended to make it harder to pre-compute colliding hashes.
  * The old hash can be passed as the second argument.
  */
 #define dpa_u_bo_hash(...) dpa__u_bo_hash(__VA_ARGS__,)

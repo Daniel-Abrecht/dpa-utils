@@ -21,14 +21,16 @@ pid_t gettid(void);
 #if __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
 #include <stdatomic.h>
 
+#define dpa_u_refcount_type_list(X) \
+  X((DPA_U_REFCOUNT_NONE))      /* It's not specified what happens when the refcount hits 0, it probably shouldn't be messed with directly. */ \
+  X((DPA_U_REFCOUNT_STATIC))    /* This refcount will never hit 0, it only exists for compatibility. */ \
+  X((DPA_U_REFCOUNT_FREEABLE))  /* This refcount is at the start of an allocated object and can be freed using free() */ \
+  X((DPA_U_REFCOUNT_CALLBACK))  /* When this refcount hits 0, it'll call a callback. */ \
+  X((DPA_U_REFCOUNT_BO_UNIQUE)) /* Refcount of dpa_u_bo_unique. Because this is an essential internal type, we can special case it here to safe a bit of memory. */
+
+DPA_U_ENUM(dpa_u_refcount_type)
+
 #define DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR 61
-enum dpa_u_refcount_type {
-  DPA_U_REFCOUNT_NONE      = 0, //< It's not specified what happens when the refcount hits 0, it probably shouldn't be messed with directly.
-  DPA_U_REFCOUNT_STATIC    = 1, //< This refcount will never hit 0, it only exists for compatibility.
-  DPA_U_REFCOUNT_FREEABLE  = 2, //< This refcount is at the start of an allocated object and can be freed using free()
-  DPA_U_REFCOUNT_CALLBACK  = 3, //< When this refcount hits 0, it'll call a callback.
-  DPA_U_REFCOUNT_BO_UNIQUE = 4, //< Refcount of dpa_u_bo_unique. Because this is an essential internal type, we can special case it here to safe a bit of memory.
-};
 #define DPA__U_REFCOUNT_GUARD_BIT (((uint64_t)1)<<(DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR-1))
 #define DPA__U_REFCOUNT_MASK      (DPA__U_REFCOUNT_GUARD_BIT-1)
 
@@ -135,13 +137,16 @@ DPA_U_EXPORT inline bool dpa_u_refcount_decrement(const struct dpa_u_refcount*co
 DPA_U_EXPORT inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeable*const _rc){
   void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable*);
   struct dpa_u_refcount_freeable*const rc = (struct dpa_u_refcount_freeable*)_rc;
-  if(!((atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1) & DPA__U_REFCOUNT_MASK))
-  switch(dpa_u_refcount_get_type(&rc->refcount)){
-    case DPA_U_REFCOUNT_NONE: abort();
-    case DPA_U_REFCOUNT_STATIC: return false;
-    case DPA_U_REFCOUNT_FREEABLE: free(rc); return false;
-    case DPA_U_REFCOUNT_CALLBACK: ((struct dpa_u_refcount_callback*)rc)->free((struct dpa_u_refcount_callback*)rc); return false;
-    case DPA_U_REFCOUNT_BO_UNIQUE: dpa__u_bo_unique_hashmap_destroy(rc); return false;
+  if(!((atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1) & DPA__U_REFCOUNT_MASK)){
+    const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
+    switch(type){
+      case DPA_U_REFCOUNT_NONE: break;
+      case DPA_U_REFCOUNT_STATIC: return false;
+      case DPA_U_REFCOUNT_FREEABLE: free(rc); return false;
+      case DPA_U_REFCOUNT_CALLBACK: ((struct dpa_u_refcount_callback*)rc)->free((struct dpa_u_refcount_callback*)rc); return false;
+      case DPA_U_REFCOUNT_BO_UNIQUE: dpa__u_bo_unique_hashmap_destroy(rc); return false;
+    }
+    dpa_u_abort("dpa_u_refcount_freeable can't be of type %s", dpa_u_enum_get_name(dpa_u_refcount_type, type));
   }
   return true;
 }

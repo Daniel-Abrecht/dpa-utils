@@ -7,13 +7,15 @@ extern uint64_t dpa_u_hash_64_FNV_1a_append_p(dpa_u_bo_ro_t bo, uint_fast64_t ha
 extern uint64_t dpa_u_hash_64_FNV_1a_p(dpa_u_bo_ro_t bo);
 extern uint32_t dpa_u_hash_32_FNV_1a_append_p(dpa_u_bo_ro_t bo, uint_fast32_t hash);
 extern uint32_t dpa_u_hash_32_FNV_1a_p(dpa_u_bo_ro_t bo);
-extern uint64_t dpa_u_bo_get_hash_p(const struct dpa__u_default_hash_args args);
+extern dpa_u_hash_t dpa_u_bo_hash_p(const struct dpa__u_default_hash_args args);
 
 uint_fast64_t dpa_hash_offset_basis;
 
 __attribute__((used,constructor(101)))
 static inline void init(void){
-  dpa_u_bo_inline_t buf;
+  dpa_u_bo_inline_t buf = {
+    .type = DPA_U_BO_INLINE,
+  };
   if(getrandom(buf.data, sizeof(buf.data), 0) != sizeof(buf.data)){
     perror("getrandom failed");
     abort();
