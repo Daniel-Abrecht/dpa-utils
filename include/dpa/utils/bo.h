@@ -504,22 +504,15 @@ DPA_U_EXPORT inline void dpa__u_bo_unique_ref(dpa_u_bo_unique_t ubo){
     case DPA_U_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_ref(ubo.bo_unique_hashmap); return;
     case DPA_U_BO_INLINE: return;
   }
-  abort();
+  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
 }
 
-/*
 DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
   switch(dpa_u_bo_get_type(ubo)){
     case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_bo_unique_hashmap_put(ubo.bo_unique_hashmap);
     case DPA_U_BO_INLINE: return false;
   }
-  abort();
-}*/
-
-DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
-  if(dpa_u_bo_get_type(ubo) == DPA_U_BO_UNIQUE_HASHMAP)
-    return dpa__u_bo_unique_hashmap_put(ubo.bo_unique_hashmap);
-  return false;
+  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
 }
 
 /**
