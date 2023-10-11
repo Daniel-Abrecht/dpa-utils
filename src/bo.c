@@ -15,4 +15,8 @@ extern struct dpa_u_refcount_freeable* dpa__u_bo_unique_get_refcount(const dpa_u
 extern struct dpa_u_refcount_freeable* dpa__u_bo_ro_p_get_refcount(const dpa_u_bo_ro_t* ubo);
 extern struct dpa_u_refcount_freeable* dpa__u_bo_ro_get_refcount(const dpa_u_bo_ro_t ubo);
 
+#undef DPA_U_BO_INLINE
+#undef DPA_U_BO_SIMPLE
+#undef DPA_U_BO_UNIQUE_HASHMAP
+
 const char*const dpa_u_bo_type_s[] = { DPA_U_ENUM_STR(dpa_u_bo_type_list) };
