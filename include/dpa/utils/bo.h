@@ -422,7 +422,90 @@ DPA_U_EXPORT inline size_t dpa__u_bo_unique_get_size(const dpa_u_bo_unique_t bo)
   }
   dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
-#undef X
+
+DPA_U_EXPORT inline void dpa__u_bo_unique_ref(dpa_u_bo_unique_t ubo){
+  switch(dpa_u_bo_get_type(ubo)){
+    case DPA_U_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_ref(ubo.bo_unique_hashmap); return;
+    case DPA_U_BO_INLINE: return;
+  }
+  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
+}
+
+DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
+  switch(dpa_u_bo_get_type(ubo)){
+    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_bo_unique_hashmap_put(ubo.bo_unique_hashmap);
+    case DPA_U_BO_INLINE: return false;
+  }
+  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
+}
+
+/**
+ * Increments the refcount of the buffer. The refcount acts on the data of the buffer
+ * rather than the buffer itself. For dpa_u_bo_inline_t, this is a noop, because
+ * the buffer contains the data directly instead of referencing it, therefore, having
+ * an instance of a dpa_u_bo_inline_t means having the data.
+ */
+#define dpa_u_bo_ref(...) dpa_u_assert_selection(dpa_u_bo_ref_g(__VA_ARGS__))
+#define dpa_u_bo_ref_g(X) dpa_u_generic(dpa__u_p_helper_g((X)), \
+    dpa_u_bo_inline_t: (void)0, \
+    dpa_u_bo_inline_t*: (void)0, \
+    const dpa_u_bo_inline_t*: (void)0, \
+    \
+    dpa_u_bo_unique_hashmap_t: dpa__u_bo_unique_hashmap_ref(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
+    \
+    dpa_u_bo_unique_t: dpa__u_bo_unique_ref(DPA__G(dpa_u_bo_unique_t,(X))), \
+    dpa_u_bo_unique_t*: dpa__u_bo_unique_ref(*DPA__G(dpa_u_bo_unique_t*,(X))), \
+    const dpa_u_bo_unique_t*: dpa__u_bo_unique_ref(*DPA__G(const dpa_u_bo_unique_t*,(X))) \
+  )
+
+#define dpa_u_bo_put(...) dpa_u_assert_selection(dpa_u_bo_put_g(__VA_ARGS__))
+#define dpa_u_bo_put_g(X) dpa_u_generic(dpa__u_p_helper_g((X)), \
+    dpa_u_bo_inline_t: (void)0, \
+    dpa_u_bo_inline_t*: (void)0, \
+    const dpa_u_bo_inline_t*: (void)0, \
+    \
+    dpa_u_bo_unique_hashmap_t: dpa__u_bo_unique_hashmap_put(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
+    \
+    dpa_u_bo_unique_t: dpa__u_bo_unique_put(DPA__G(dpa_u_bo_unique_t,(X))), \
+    dpa_u_bo_unique_t*: dpa__u_bo_unique_put(*DPA__G(dpa_u_bo_unique_t*,(X))), \
+    const dpa_u_bo_unique_t*: dpa__u_bo_unique_put(*DPA__G(const dpa_u_bo_unique_t*,(X))) \
+  )
+
+DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_unique_get_refcount(const dpa_u_bo_unique_t ubo){
+  switch(dpa_u_bo_get_type(ubo)){
+    case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&ubo.bo_unique_hashmap->refcount.freeable;
+    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
+  }
+  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
+}
+
+DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_ro_p_get_refcount(const dpa_u_bo_ro_t* bo){
+  switch(dpa_u_bo_get_type(bo)){
+    case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&bo->bo_unique_hashmap->refcount.freeable;
+    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
+    case DPA_U_BO_SIMPLE: return 0;
+  }
+  dpa_u_abort("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+}
+
+DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_ro_get_refcount(const dpa_u_bo_ro_t bo){
+  switch(dpa_u_bo_get_type(bo)){
+    case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&bo.bo_unique_hashmap->refcount.freeable;
+    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
+    case DPA_U_BO_SIMPLE: return 0;
+  }
+  dpa_u_abort("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+}
+
+DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(const dpa_u_bo_t* bo){
+  switch(dpa_u_bo_get_type(bo)){
+    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
+    case DPA_U_BO_SIMPLE: return 0;
+  }
+  dpa_u_abort("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+}
+
+#define dpa__u_bo_unique_hashmap_get_refcount(X) ((struct dpa_u_refcount_freeable*)&(X)->refcount.freeable)
 
 /////////////////////////////////////////
 //////      Conversion macros      //////
@@ -568,90 +651,6 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_p_bo_ro_t*const _bo
     }
   }
 }
-
-DPA_U_EXPORT inline void dpa__u_bo_unique_ref(dpa_u_bo_unique_t ubo){
-  switch(dpa_u_bo_get_type(ubo)){
-    case DPA_U_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_ref(ubo.bo_unique_hashmap); return;
-    case DPA_U_BO_INLINE: return;
-  }
-  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
-}
-
-DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
-  switch(dpa_u_bo_get_type(ubo)){
-    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_bo_unique_hashmap_put(ubo.bo_unique_hashmap);
-    case DPA_U_BO_INLINE: return false;
-  }
-  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
-}
-
-/**
- * Increments the refcount of the buffer. The refcount acts on the data of the buffer
- * rather than the buffer itself. For dpa_u_bo_inline_t, this is a noop, because
- * the buffer contains the data directly instead of referencing it, therefore, having
- * an instance of a dpa_u_bo_inline_t means having the data.
- */
-#define dpa_u_bo_ref(...) dpa_u_assert_selection(dpa_u_bo_ref_g(__VA_ARGS__))
-#define dpa_u_bo_ref_g(X) dpa_u_generic(dpa__u_p_helper_g((X)), \
-    dpa_u_bo_inline_t: (void)0, \
-    dpa_u_bo_inline_t*: (void)0, \
-    const dpa_u_bo_inline_t*: (void)0, \
-    \
-    dpa_u_bo_unique_hashmap_t: dpa__u_bo_unique_hashmap_ref(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
-    \
-    dpa_u_bo_unique_t: dpa__u_bo_unique_ref(DPA__G(dpa_u_bo_unique_t,(X))), \
-    dpa_u_bo_unique_t*: dpa__u_bo_unique_ref(*DPA__G(dpa_u_bo_unique_t*,(X))), \
-    const dpa_u_bo_unique_t*: dpa__u_bo_unique_ref(*DPA__G(const dpa_u_bo_unique_t*,(X))) \
-  )
-
-#define dpa_u_bo_put(...) dpa_u_assert_selection(dpa_u_bo_put_g(__VA_ARGS__))
-#define dpa_u_bo_put_g(X) dpa_u_generic(dpa__u_p_helper_g((X)), \
-    dpa_u_bo_inline_t: (void)0, \
-    dpa_u_bo_inline_t*: (void)0, \
-    const dpa_u_bo_inline_t*: (void)0, \
-    \
-    dpa_u_bo_unique_hashmap_t: dpa__u_bo_unique_hashmap_put(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
-    \
-    dpa_u_bo_unique_t: dpa__u_bo_unique_put(DPA__G(dpa_u_bo_unique_t,(X))), \
-    dpa_u_bo_unique_t*: dpa__u_bo_unique_put(*DPA__G(dpa_u_bo_unique_t*,(X))), \
-    const dpa_u_bo_unique_t*: dpa__u_bo_unique_put(*DPA__G(const dpa_u_bo_unique_t*,(X))) \
-  )
-
-DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_unique_get_refcount(const dpa_u_bo_unique_t ubo){
-  switch(dpa_u_bo_get_type(ubo)){
-    case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&ubo.bo_unique_hashmap->refcount.freeable;
-    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
-  }
-  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
-}
-
-DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_ro_p_get_refcount(const dpa_u_bo_ro_t* bo){
-  switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&bo->bo_unique_hashmap->refcount.freeable;
-    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
-    case DPA_U_BO_SIMPLE: return 0;
-  }
-  dpa_u_abort("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
-}
-
-DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_ro_get_refcount(const dpa_u_bo_ro_t bo){
-  switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&bo.bo_unique_hashmap->refcount.freeable;
-    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
-    case DPA_U_BO_SIMPLE: return 0;
-  }
-  dpa_u_abort("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
-}
-
-DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(const dpa_u_bo_t* bo){
-  switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
-    case DPA_U_BO_SIMPLE: return 0;
-  }
-  dpa_u_abort("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
-}
-
-#define dpa__u_bo_unique_hashmap_get_refcount(X) ((struct dpa_u_refcount_freeable*)&(X)->refcount.freeable)
 
 #define dpa_u_bo_get_refcount(...) dpa_u_assert_selection(dpa_u_bo_get_refcount_g(__VA_ARGS__))
 #define dpa_u_bo_get_refcount_g(X) dpa_u_generic(dpa__u_p_helper_g((X)), \

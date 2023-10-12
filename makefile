@@ -84,12 +84,14 @@ source-checks:
 	@echo "Checking DPA__G macros"
 
 	@set -e; \
+	trap 'echo "$$f"' EXIT; \
 	for f in include/dpa/utils/*.h; \
-	do perl -pe 's/\\\n/\xFF/' <"$$f" | grep -a '#define .*\(dpa_u_generic\|_Generic\)' | \
+	do \
+	  perl -pe 's/\\\n/\xFF/' <"$$f" | grep -a '#define .*\(dpa_u_generic\|_Generic\)' | \
 	  while IFS= read -r line; \
 	  do \
 	    macro="$$(printf "%s\n" "$$line" | sed 's/\xFF/\n/g')"; \
-	    line="$$(printf "%s\n" "$$macro" | grep -a ': .*DPA__G(')"; \
+	    line="$$(printf "%s\n" "$$macro" | grep -a ': .*DPA__G(')" || true; \
 	    printf '%s\n' "$$line" | while IFS=':' read -r T V; \
 	    do \
 	      l="$$( ( \
@@ -106,7 +108,8 @@ source-checks:
 	      fi; \
 	    done; \
 	  done; \
-	done
+	done; \
+	f=
 
 	@echo "Source code checks passed"
 

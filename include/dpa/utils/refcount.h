@@ -154,13 +154,13 @@ DPA_U_EXPORT inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeab
 #define dpa_u_refcount_put_s(X) _Generic((X), \
     struct dpa_u_refcount_freeable: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_freeable,(X))), \
     struct dpa_u_refcount_callback: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback,(X)).freeable), \
-    struct dpa_u_refcount_bo_unique: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback,(X)).freeable), \
+    struct dpa_u_refcount_bo_unique: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_bo_unique,(X)).freeable), \
           struct dpa_u_refcount_freeable*: dpa_u_refcount_put_p(DPA__G(struct dpa_u_refcount_freeable*,(X))), \
     const struct dpa_u_refcount_freeable*: dpa_u_refcount_put_p(DPA__G(const struct dpa_u_refcount_freeable*,(X))), \
           struct dpa_u_refcount_callback*: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->freeable), \
     const struct dpa_u_refcount_callback*: dpa_u_refcount_put_p(&DPA__G(const struct dpa_u_refcount_callback*,(X))->freeable), \
-          struct dpa_u_refcount_bo_unique*: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->freeable), \
-    const struct dpa_u_refcount_bo_unique*: dpa_u_refcount_put_p(&DPA__G(const struct dpa_u_refcount_callback*,(X))->freeable) \
+          struct dpa_u_refcount_bo_unique*: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_bo_unique*,(X))->freeable), \
+    const struct dpa_u_refcount_bo_unique*: dpa_u_refcount_put_p(&DPA__G(const struct dpa_u_refcount_bo_unique*,(X))->freeable) \
   )
 
 #define dpa_u_refcount_put(X) dpa_u_refcount_put_s((X))
