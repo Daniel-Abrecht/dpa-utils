@@ -26,7 +26,7 @@ pid_t gettid(void);
   X((DPA_U_REFCOUNT_STATIC))    /* This refcount will never hit 0, it only exists for compatibility. */ \
   X((DPA_U_REFCOUNT_FREEABLE))  /* This refcount is at the start of an allocated object and can be freed using free() */ \
   X((DPA_U_REFCOUNT_CALLBACK))  /* When this refcount hits 0, it'll call a callback. */ \
-  X((DPA_U_REFCOUNT_BO_UNIQUE)) /* Refcount of dpa_u_bo_unique. Because this is an essential internal type, we can special case it here to safe a bit of memory. */
+  X((DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP)) /* Refcount of dpa_u_bo_unique. Because this is an essential internal type, we can special case it here to safe a bit of memory. */
 
 DPA_U_ENUM(dpa_u_refcount_type)
 
@@ -81,7 +81,7 @@ static_assert(offsetof(struct dpa_u_refcount_callback, freeable) == 0, "Unexpect
 #define dpa_u_refcount_i_static       {.value=DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_STATIC)}
 #define dpa_u_refcount_i_freeable(N)  {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_FREEABLE)}}
 #define dpa_u_refcount_i_callback(N)  {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_CALLBACK)}}
-#define dpa_u_refcount_i_bo_unique(N) {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE)}}
+#define dpa_u_refcount_i_bo_unique(N) {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP)}}
 
 extern struct dpa_u_refcount dpa_u_refcount_v_static;
 extern struct dpa_u_refcount_freeable dpa_u_refcount_static_v_freeable;
@@ -144,7 +144,7 @@ DPA_U_EXPORT inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeab
       case DPA_U_REFCOUNT_STATIC: return false;
       case DPA_U_REFCOUNT_FREEABLE: free(rc); return false;
       case DPA_U_REFCOUNT_CALLBACK: ((struct dpa_u_refcount_callback*)rc)->free((struct dpa_u_refcount_callback*)rc); return false;
-      case DPA_U_REFCOUNT_BO_UNIQUE: dpa__u_bo_unique_hashmap_destroy(rc); return false;
+      case DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_destroy(rc); return false;
     }
     dpa_u_abort("dpa_u_refcount_freeable can't be of type %s", dpa_u_enum_get_name(dpa_u_refcount_type, type));
   }
@@ -208,7 +208,7 @@ DPA_U_EXPORT inline bool dpa_u_refcount_has_callback(const struct dpa_u_refcount
  * This object is a dpa_u_bo_unique.
  */
 DPA_U_EXPORT inline bool dpa_u_refcount_is_bo_unique(const struct dpa_u_refcount* rc){
-  return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_BO_UNIQUE;
+  return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP;
 }
 
 #else

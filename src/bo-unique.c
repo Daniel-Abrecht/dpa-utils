@@ -215,7 +215,7 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_p_bo_ro_t* _bo)
   dpa__u_bo_unique_hashmap_entry_t* new_entry;
   if(refcount){
     enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&refcount->refcount);
-    if(type == DPA_U_REFCOUNT_BO_UNIQUE){
+    if(type == DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP){
       dpa__u_bo_unique_hashmap_entry_t* old = dpa_u_container_of(refcount, dpa__u_bo_unique_hashmap_entry_t, refcount.freeable);
       struct dpa_u_refcount_freeable*const true_refcount = entry_get_ext_refcount(old);
       if(old->type_offset >= DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED)
