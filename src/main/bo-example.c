@@ -26,6 +26,7 @@ int main(void){
       .size = sizeof("Hello World!")-1,
       .data = "Hello World!",
     };
+    printf("Type: %s\n", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(my_bo)));
     dpa_u_puts(my_bo);
     my_puts(my_bo);
   }
@@ -35,12 +36,30 @@ int main(void){
       .size = sizeof("The quick brown fox jumps over the lazy dog")-1,
       .data = "The quick brown fox jumps over the lazy dog",
     };
+    printf("Type: %s\n", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(my_bo)));
     dpa_u_puts(my_bo);
     my_puts(my_bo);
   }
   {
-    dpa_u_bo_unique_t my_bo = {0};
+    dpa_u_bo_unique_t my_bo = dpa_u_bo_intern(((dpa_u_bo_simple_ro_t){
+      .type = DPA_U_BO_SIMPLE,
+      .size = sizeof("Meow")-1,
+      .data = "Meow",
+    }));
+    printf("Type: %s\n", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(my_bo))); // Probably DPA_U_BO_INLINE
     dpa_u_puts(my_bo);
     my_puts(my_bo);
+    dpa_u_bo_put(my_bo);
+  }
+  {
+    dpa_u_bo_unique_t my_bo = dpa_u_bo_intern(((dpa_u_bo_simple_ro_t){
+      .type = DPA_U_BO_SIMPLE,
+      .size = sizeof("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")-1,
+      .data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    }));
+    printf("Type: %s\n", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(my_bo))); // Probably DPA_U_BO_UNIQUE_HASHMAP
+    dpa_u_puts(my_bo);
+    my_puts(my_bo);
+    dpa_u_bo_put(my_bo);
   }
 }

@@ -43,13 +43,15 @@
 #define dpa_u_static_assert_as_expr(EXPR, ...) (void)(char*[(!!(EXPR))*2-1]){(__VA_ARGS__)}
 #endif
 
-typedef struct { int x; } invalid_selection_t;
-#define dpa_u_generic(X, ...) _Generic((X), default: (invalid_selection_t){0}, __VA_ARGS__)
+#define dpa_u_invalid_selection (dpa_u_invalid_selection_t){0}
+
+typedef struct { int x; } dpa_u_invalid_selection_t;
+#define dpa_u_generic(X, ...) _Generic((X), default: dpa_u_invalid_selection, __VA_ARGS__)
 #define dpa_u_assert_selection(X) _Generic(0, \
-    invalid_selection_t: dpa_u_static_assert_as_expr(_Generic((X), invalid_selection_t: 0, default: 1 ), "Unsupported type combination"), \
+    dpa_u_invalid_selection_t: dpa_u_static_assert_as_expr(_Generic((X), dpa_u_invalid_selection_t: 0, default: 1 ), "Unsupported type combination"), \
     default: (X) \
   )
-#define dpa_u_generic_if_selection(X, Y) _Generic((X), invalid_selection_t: (invalid_selection_t){0}, default: (Y))
+#define dpa_u_generic_if_selection(X, Y) _Generic((X), dpa_u_invalid_selection_t: dpa_u_invalid_selection, default: (Y))
 
 #if __STDC_VERSION__ >= 202311 || defined(typeof) || defined(HAVE_TYPEOF)
 #define dpa_u_typeof typeof
@@ -111,13 +113,15 @@ DPA_U_EXPORT dpa_u_format_param(printf, 3, 4)
 #define DPA__U_ENUM_CONST(...) DPA__U_ENUM_CONST_2(__VA_ARGS__,1)
 #define DPA_U_ENUM_CONST(ENUM) ENUM(DPA__U_ENUM_CONST)
 
-#define DPA__U_ENUM_STR_2(X, ...) [X] = #X,
-#define DPA__U_ENUM_STR(...) DPA__U_ENUM_STR_2(DPA_U_FIRST __VA_ARGS__,1)
+#define DPA__U_ENUM_STR_3(X, ...) [X] = #X,
+#define DPA__U_ENUM_STR_2(X) DPA__U_ENUM_STR_3 X
+#define DPA__U_ENUM_STR(...) DPA__U_ENUM_STR_2((DPA_U_FIRST __VA_ARGS__,1))
 #define DPA_U_ENUM_STR(ENUM) ENUM(DPA__U_ENUM_STR)
 
 // A simple comma expression would be nicer here, but then the compiler will be clever enough to warn about the unseless expressions.
-#define DPA__U_ENUM_COUNT_2(X, ...) &0)+(X
-#define DPA__U_ENUM_COUNT(...) DPA__U_ENUM_COUNT_2(DPA_U_FIRST __VA_ARGS__,1)
+#define DPA__U_ENUM_COUNT_3(X, ...) &0)+(X
+#define DPA__U_ENUM_COUNT_2(X) DPA__U_ENUM_COUNT_3 X
+#define DPA__U_ENUM_COUNT(...) DPA__U_ENUM_COUNT_2((DPA_U_FIRST __VA_ARGS__,1))
 #define DPA_U_ENUM_COUNT(ENUM) (((-1 ENUM(DPA__U_ENUM_COUNT)))+1)
 
 #define DPA_U_ENUM(ENUM) \

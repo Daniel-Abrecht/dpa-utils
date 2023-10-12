@@ -39,7 +39,7 @@ CFLAGS  += -Iinclude
 CFLAGS  += -Wall -Wextra -pedantic -Werror
 #CFLAGS  += -fstack-protector-all
 CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces
-CFLAGS  += -fmax-errors=2
+#CFLAGS  += -fmax-errors=2
 
 CFLAGS  += -fvisibility=hidden
 

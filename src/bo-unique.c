@@ -175,7 +175,7 @@ DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_f
     unlock_entry(hash);
     struct dpa_u_refcount_freeable* rc = entry_get_ext_refcount(e);
     free(e);
-    dpa_u_refcount_put(rc);
+    if(rc) dpa_u_refcount_put(rc);
     const size_t count = atomic_fetch_sub(&hash_map.count, 1) - 1;
     const size_t total_buckets = ((size_t)1) << atomic_load(&hash_map.shift_size);
     if( total_buckets > (((size_t)1) << BUCKET_BASE) && (float)count / total_buckets <= LOAD_FACTOR_SHRINK )
