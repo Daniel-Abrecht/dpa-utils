@@ -17,6 +17,10 @@ static inline size_t my_puts_p(dpa_u_bo_ro_t bo){
 
 int main(void){
   {
+    // Note: The size of dpa_u_bo_inline_t isn't fixed. It matches the size of dpa_u_bo_ro_t and dpa_u_bo_simple_ro_t, which matches the combined size of a size_t + void*, and one byte is used for size & type information.
+    // This means that the following will work on most 64bit machines, but not on on 32bit platforms, you shouldn't do this in practice.
+    // The main use of dpa_u_bo_inline_t is as a variant of dpa_u_bo_unique_t, for small strings, where putting them in a hash map nor allocating space would make any sense.
+    // There are also the dpa_u_cstrbo_* macros for creating appropriate BOs from string constants. 
     dpa_u_bo_inline_t my_bo = {
       .type = DPA_U_BO_INLINE,
       .size = sizeof("Hello World!")-1,

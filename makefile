@@ -55,16 +55,61 @@ B-TS := bin/$(TYPE)/dpa-testsuite
 BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%,$(filter src/main/%.c,$(SOURCES)))
 TESTS := $(patsubst test/%.c,%,$(filter test/%.c,$(SOURCES)))
 
-export LD_LIBRARY_PATH=$(shell realpath "lib/$(TYPE)/")
+export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 
 SHELL_CMD="$$SHELL"
 
-.PHONY: all bin lib clean get//bin get//lib install uninstall shell test asm
+all: source-checks bin lib
 
-all: check-headers bin lib
+.PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm
 
-check-headers:
+
+source-checks:
+	mkdir -p build
+
+	@echo "Verifying that headers compile on their own..."
+
 	find include/dpa/ -iname "*.h" -print -exec $(CC) -x c -fPIC -c -o /dev/null $(CFLAGS) {} \;
+
+	@echo "Serching for inline functions which have not been exported with DPA_U_EXPORT..."
+
+	! grep -r "^inline" include/
+
+	@echo "Serching for inline functions without a following extern declaration..."
+
+	grep -r --no-filename -o ' inline [^(]*(' include/ | sed -n 's/.* \([^( ]\+\) *(.*/\1/p' | sort -u > build/inline-functions.txt
+	grep -r --no-filename -o '^extern [^(]*(' src/ | sed -n 's/.* \([^( ]\+\) *(.*/\1/p' | sort -u > build/extern-src-decs.txt
+	diff build/inline-functions.txt build/extern-src-decs.txt
+
+	@echo "Checking DPA__G macros"
+
+	@set -e; \
+	for f in include/dpa/utils/*.h; \
+	do perl -pe 's/\\\n/\xFF/' <"$$f" | grep -a '#define .*\(dpa_u_generic\|_Generic\)' | \
+	  while IFS= read -r line; \
+	  do \
+	    macro="$$(printf "%s\n" "$$line" | sed 's/\xFF/\n/g')"; \
+	    line="$$(printf "%s\n" "$$macro" | grep -a ': .*DPA__G(')"; \
+	    printf '%s\n' "$$line" | while IFS=':' read -r T V; \
+	    do \
+	      l="$$( ( \
+	          printf '%s\n' "$$T"; \
+	          printf '%s\n' "$$V" | grep -o 'DPA__G([^,]*' | sed 's/DPA__G(//'; \
+	        ) | sed 's/^\s*\|\s*$$//' | sed 's/\([a-zA-Z0-9_]\)  *\([a-zA-Z_]\)/\1 \2/' \
+	          | sed 's/ \([^a-zA-Z_]\)/\1/' | sed 's/\([^a-zA-Z_]\) /\1/' \
+	          | sort -u \
+	      )"; \
+	      if [ "$$(printf "%s\n" "$$l" | wc -l)" != 1 ]; \
+	      then \
+	        printf "Mismatching types.\nLine: %s\n%s\n" "$$T:$$V" "$$macro"; \
+	        exit 1; \
+	      fi; \
+	    done; \
+	  done; \
+	done
+
+	@echo "Source code checks passed"
+
 
 bin: $(BINS)
 
@@ -89,7 +134,7 @@ build/$(TYPE)/bin/%: build/$(TYPE)/o/test/%.c.o lib/$(TYPE)/lib$(SONAME).so
 
 lib/$(TYPE)/lib$(SONAME).so: lib/$(TYPE)/lib$(SONAME).a
 	ln -sf "lib$(SONAME).so" "$@.0"
-	$(CC) -o $@ -Wl,--no-undefined -Wl,-soname,lib$(SONAME).so.$(MAJOR) --shared -fPIC $(LDFLAGS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+	$(CC) -o $@ -Wl,-Map=$@.map -Wl,--no-undefined -Wl,-soname,lib$(SONAME).so.$(MAJOR) --shared -fPIC $(LDFLAGS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
 lib/$(TYPE)/lib$(SONAME).a: $(filter-out build/$(TYPE)/o/src/main/%,$(filter-out build/$(TYPE)/o/test/%,$(OBJECTS)))
 	mkdir -p $(dir $@)
