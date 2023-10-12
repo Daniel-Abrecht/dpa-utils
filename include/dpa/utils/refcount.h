@@ -137,26 +137,25 @@ DPA_U_EXPORT inline bool dpa_u_refcount_decrement(const struct dpa_u_refcount*co
 DPA_U_EXPORT inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeable*const _rc){
   void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable*);
   struct dpa_u_refcount_freeable*const rc = (struct dpa_u_refcount_freeable*)_rc;
-  if(!((atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1) & DPA__U_REFCOUNT_MASK)){
-    const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
+  if(likely(((atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1) & DPA__U_REFCOUNT_MASK)))
+    return true;
+  const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
 #ifdef __GNUC__
 // GCC will get confused about which branchs are reachable and warn. All we can do about it is disable the warning.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfree-nonheap-object"
 #endif
-    switch(type){
-      case DPA_U_REFCOUNT_NONE: break;
-      case DPA_U_REFCOUNT_STATIC: return false;
-      case DPA_U_REFCOUNT_FREEABLE: free(rc); return false;
-      case DPA_U_REFCOUNT_CALLBACK: ((struct dpa_u_refcount_callback*)rc)->free((struct dpa_u_refcount_callback*)rc); return false;
-      case DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_destroy(rc); return false;
-    }
+  switch(type){
+    case DPA_U_REFCOUNT_NONE: break;
+    case DPA_U_REFCOUNT_STATIC: return false;
+    case DPA_U_REFCOUNT_FREEABLE: free(rc); return false;
+    case DPA_U_REFCOUNT_CALLBACK: ((struct dpa_u_refcount_callback*)rc)->free((struct dpa_u_refcount_callback*)rc); return false;
+    case DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_destroy(rc); return false;
+  }
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-    dpa_u_abort("dpa_u_refcount_freeable can't be of type %s", dpa_u_enum_get_name(dpa_u_refcount_type, type));
-  }
-  return true;
+  dpa_u_abort("dpa_u_refcount_freeable can't be of type %s", dpa_u_enum_get_name(dpa_u_refcount_type, type));
 }
 
 #define dpa_u_refcount_put_s(X) _Generic((X), \

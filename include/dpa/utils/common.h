@@ -65,6 +65,14 @@ typedef struct { int x; } invalid_selection_t;
   ((type*)( (ptr) ? (char*)(ptr) - offsetof(type, member) : 0 ))
 #endif
 
+#if defined(__has_builtin) && __has_builtin(__builtin_expect)
+#define likely(x)   __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+#else
+#define likely(x)
+#define unlikely(x)
+#endif
+
 #if defined(__GNUC__) || defined(__llvm__)
 #define dpa_u_format_param(...) __attribute__ ((format (__VA_ARGS__)))
 #else
