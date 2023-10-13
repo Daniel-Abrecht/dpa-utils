@@ -70,7 +70,7 @@ source-checks:
 
 	@echo "Verifying that headers compile on their own..."
 
-	find include/dpa/ -iname "*.h" -print -exec $(CC) -x c -fPIC -c -o /dev/null $(CFLAGS) {} \;
+	find include/dpa/ -type f -iname "*.h" -print0 | xargs -0tL1 $(CC) -x c -fPIC -c -o /dev/null $(CFLAGS)
 
 	@echo "Serching for inline functions which have not been exported with DPA_U_EXPORT..."
 
