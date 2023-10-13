@@ -93,8 +93,8 @@ typedef const dpa_u_bo_inline_t dpa_u_bo_inline_ro_t;
 static_assert(sizeof(dpa_u_bo_inline_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_inline_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_inline_t,data) == 1, "Expected data to be at byte 1");
 
-typedef const struct dpa_u_p_bo_inline dpa_u_p_bo_inline_t;
-typedef dpa_u_p_bo_inline_t dpa_u_p_bo_inline_ro_t;
+typedef const struct dpa_u_any_bo_inline dpa_u_any_bo_inline_t;
+typedef dpa_u_any_bo_inline_t dpa_u_any_bo_inline_ro_t;
 
 #define DPA__U_BO_SIMPLE_MEMBERS(...) \
   union { \
@@ -114,7 +114,7 @@ typedef struct dpa_u_bo_simple_ro {
 static_assert(sizeof(dpa_u_bo_simple_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_ro_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_simple_ro_t,data) == sizeof(size_t), "Expected data to be at a different offset");
 
-typedef const struct dpa_u_p_bo_simple_ro dpa_u_p_bo_simple_ro_t;
+typedef const struct dpa_u_any_bo_simple_ro dpa_u_any_bo_simple_ro_t;
 
 typedef struct dpa_u_bo_simple {
   union {
@@ -125,7 +125,7 @@ typedef struct dpa_u_bo_simple {
 static_assert(sizeof(dpa_u_bo_simple_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_simple_t,data) == sizeof(size_t), "Expected data to be at a different offset");
 
-typedef const struct dpa_u_p_bo_simple dpa_u_p_bo_simple_t;
+typedef const struct dpa_u_any_bo_simple dpa_u_any_bo_simple_t;
 
 ////// Unique hashmap string entries, these are not meant to be used directly.
 // Just use dpa_u_bo_unique_t instead
@@ -166,7 +166,7 @@ struct dpa__u_bo_entry_refcounted_2 {
 
 // This is currently just a pointer to a dpa__u_bo_unique_hashmap_entry, but it may be changed to a struct in the future, so don't rely on that.
 typedef const struct dpa__u_bo_unique_hashmap_entry* dpa_u_bo_unique_hashmap_t;
-typedef const struct dpa_u_p_bo_unique_hashmap_t dpa_u_p_bo_unique_hashmap_t;
+typedef const struct dpa_u_any_bo_unique_hashmap_t dpa_u_any_bo_unique_hashmap_t;
 
 enum {
   DPA__U_BO_UNIQUE__ENTRY_TYPE_INLINE,
@@ -183,7 +183,7 @@ typedef struct dpa_u_bo_unique {
     DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
 } dpa_u_bo_unique_t;
-typedef const struct dpa_u_p_bo_unique_t dpa_u_p_bo_unique_t;
+typedef const struct dpa_u_any_bo_unique_t dpa_u_any_bo_unique_t;
 
 typedef struct dpa_u_bo_ro {
   union {
@@ -198,7 +198,7 @@ typedef struct dpa_u_bo_ro {
 static_assert(sizeof(dpa_u_bo_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_ro_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_ro_t,_) == 1, "Expected _ to be at a different offset");
 
-typedef const struct dpa_u_p_bo_ro_t dpa_u_p_bo_ro_t;
+typedef const struct dpa_u_any_bo_ro_t dpa_u_any_bo_ro_t;
 
 typedef struct dpa_u_bo {
   union {
@@ -212,7 +212,7 @@ typedef struct dpa_u_bo {
 static_assert(sizeof(dpa_u_bo_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_t has an unexpected size");
 static_assert(offsetof(dpa_u_bo_t,_) == 1, "Expected _ to be at a different offset");
 
-typedef const struct dpa_u_p_bo_t dpa_u_p_bo_t;
+typedef const struct dpa_u_any_bo_t dpa_u_any_bo_t;
 
 DPA_U_EXPORT inline void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t bo){
   dpa_u_refcount_ref(&bo->refcount);
@@ -222,15 +222,81 @@ DPA_U_EXPORT inline bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t 
   return dpa_u_refcount_put(&bo->refcount);
 }
 
+////////////////////////////////////////////
+//////      Special helper macro      //////
+////////////////////////////////////////////
+
+#define dpa__u_helper_g(T,P,S,X) \
+    T: dpa__u_ ## P ## _ ## S(DPA__G(T,(X)))
+
+#define dpa__u_helper_v_g(T,S,X) \
+    dpa__u_helper_g(dpa_u_ ## T ## _t, v_ ## T, S, (X)), \
+    dpa__u_helper_g(dpa_u_ ## T ## _t*, p_ ## T, S, (X)), \
+    dpa__u_helper_g(const dpa_u_ ## T ## _t*, cp_ ## T, S, (X)), \
+    dpa_u_any_ ## T ## _t*: dpa__u_any_ ## T ## _ ## S((const dpa_u_ ## T ## _t*)DPA__G(dpa_u_any_ ## T ## _t*,(X)))
+
+#define dpa__u_helper_all_g(S,X) \
+    dpa__u_helper_v_g(bo_inline, S, (X)), \
+    dpa__u_helper_g(dpa_u_bo_unique_hashmap_t, v_bo_unique_hashmap, S, (X)), \
+    dpa_u_any_bo_unique_hashmap_t*: dpa__u_any_bo_unique_hashmap_ ## S((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X))), \
+    dpa__u_helper_v_g(bo_unique, S, (X)), \
+    dpa__u_helper_v_g(bo_simple, S, (X)), \
+    dpa__u_helper_v_g(bo_simple_ro, S, (X)), \
+    dpa__u_helper_v_g(bo, S, (X)), \
+    dpa__u_helper_v_g(bo_ro, S, (X))
+
+////
+
+#define dpa__u_sort__priority_g(X) _Generic((X), \
+    dpa_u_bo_inline_t: 0x10, \
+    dpa_u_bo_inline_t*: 0x11, \
+    const dpa_u_bo_inline_t*: 0x12, \
+    dpa_u_any_bo_inline_t*: 0x14, \
+    dpa_u_bo_unique_hashmap_t: 0x20, \
+    dpa_u_any_bo_unique_hashmap_t*: 0x24, \
+    dpa_u_bo_unique_t: 0x30, \
+    dpa_u_bo_unique_t*: 0x31, \
+    const dpa_u_bo_unique_t*: 0x32, \
+    dpa_u_any_bo_unique_t*: 0x34, \
+    dpa_u_bo_simple_t: 0x40, \
+    dpa_u_bo_simple_t*: 0x41, \
+    const dpa_u_bo_simple_t*: 0x42, \
+    dpa_u_any_bo_simple_t*: 0x44, \
+    dpa_u_bo_simple_ro_t: 0x50, \
+    dpa_u_bo_simple_ro_t*: 0x51, \
+    const dpa_u_bo_simple_ro_t*: 0x52, \
+    dpa_u_any_bo_simple_ro_t*: 0x54, \
+    dpa_u_bo_t: 0x60, \
+    dpa_u_bo_t*: 0x61, \
+    const dpa_u_bo_t*: 0x62, \
+    dpa_u_any_bo_t*: 0x64, \
+    dpa_u_bo_ro_t: 0x70, \
+    dpa_u_bo_ro_t*: 0x71, \
+    const dpa_u_bo_ro_t*: 0x72, \
+    dpa_u_any_bo_ro_t*: 0x74, \
+    default: 0xFFF \
+  )
+
+// This cuts down the number of type combinations I need to handle.
+// For any type in the first argument, only the preceeding or same types in dpa__u_sort__priority_g are possible to appear in the second.
+// Because otherwise, the arguments are swapped
+// This means we can't rely on argument order anymore, but we only have to deal with each type combination once.
+#define dpa__u_sort_param_by_type_g(F,X,Y) _Generic((char(*)[1+(dpa__u_sort__priority_g((X))<dpa__u_sort__priority_g((Y)))]){0}, \
+    char(*)[1]: F((X),(Y), 1), \
+    char(*)[2]: F((Y),(X),-1) \
+  )
+
+
 ///////////////////////////////////////////////
 //////      Member access functions      //////
 ///////////////////////////////////////////////
 
+
 /**
- * The dpa_u_p_* types are const opaque types. They are to be passed to functions expecting a variant or derived type of the corresponding dpa_u_* type.
- * Some of the dpa_u_p_ typs may not have a correspondng true type, and may just be there to indicate a refcountable bo, or a bo with a (trivially / quickly obtainable) hash.
+ * The dpa_u_any_* types are const opaque types. They are to be passed to functions expecting a variant or derived type of the corresponding dpa_u_* type.
+ * Some of the dpa_u_any_ typs may not have a correspondng true type, and may just be there to indicate a refcountable bo, or a bo with a (trivially / quickly obtainable) hash.
  * If a pointer to an dpa_u_ is passed to a function, that usually means the function is to return a bo of that type.
- * If a pointer to an dpa_u_p_ is passed to a function, that usually means the function will just use, but not change, the bo in question.
+ * If a pointer to an dpa_u_any_ is passed to a function, that usually means the function will just use, but not change, the bo in question.
  * This is to make sure pointers to dpa_u_ won't point to derived types. That way, a = *b will be a safe operation for dpa_u_ pointers.
  * Some of these types may not be very useful and are just provided for consistency / completeness.
  * 
@@ -240,66 +306,85 @@ DPA_U_EXPORT inline bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t 
  * and it's recommended to always use the constants in that struct.
  */
 #define dpa_u_bo_get_type(...) dpa_u_assert_selection(dpa_u_bo_get_type_g(__VA_ARGS__))
-#define dpa_u_bo_get_type_g(X) dpa_u_generic((X), \
-    dpa_u_bo_t: (enum dpa_u_bo_s_type)DPA__G(dpa_u_bo_t, (X)).type, \
-    dpa_u_bo_ro_t: (enum dpa_u_bo_s_ro_type)DPA__G(dpa_u_bo_ro_t, (X)).type, \
-    dpa_u_bo_inline_t: DPA_U_BO_INLINE_1, \
-    dpa_u_bo_simple_t: DPA_U_BO_SIMPLE_2, \
-    dpa_u_bo_simple_ro_t: DPA_U_BO_SIMPLE_2, \
-    dpa_u_bo_unique_hashmap_t: DPA_U_BO_UNIQUE_HASHMAP_3, \
-    dpa_u_p_bo_unique_hashmap_t*: DPA_U_BO_UNIQUE_HASHMAP_3, \
-    dpa_u_bo_unique_t: (enum dpa_u_bo_s_unique_type)DPA__G(dpa_u_bo_unique_t, (X)).type, \
-    \
-          dpa_u_bo_t*: (enum dpa_u_bo_s_type)DPA__G(      dpa_u_bo_t*, (X))->type, \
-    const dpa_u_bo_t*: (enum dpa_u_bo_s_type)DPA__G(const dpa_u_bo_t*, (X))->type, \
-          dpa_u_bo_ro_t*: (enum dpa_u_bo_s_ro_type)DPA__G(      dpa_u_bo_ro_t*, (X))->type, \
-    const dpa_u_bo_ro_t*: (enum dpa_u_bo_s_ro_type)DPA__G(const dpa_u_bo_ro_t*, (X))->type, \
-          dpa_u_bo_inline_t*: DPA_U_BO_INLINE_1, \
-    const dpa_u_bo_inline_t*: DPA_U_BO_INLINE_1, \
-        dpa_u_p_bo_inline_t*: DPA_U_BO_INLINE_1, \
-          dpa_u_bo_simple_t*: DPA_U_BO_SIMPLE_2, \
-    const dpa_u_bo_simple_t*: DPA_U_BO_SIMPLE_2, \
-          dpa_u_bo_simple_ro_t*: DPA_U_BO_SIMPLE_4, \
-    const dpa_u_bo_simple_ro_t*: DPA_U_BO_SIMPLE_4, \
-          dpa_u_bo_unique_t*: (enum dpa_u_bo_s_unique_type)DPA__G(      dpa_u_bo_unique_t*, (X))->type, \
-    const dpa_u_bo_unique_t*: (enum dpa_u_bo_s_unique_type)DPA__G(const dpa_u_bo_unique_t*, (X))->type, \
-        dpa_u_p_bo_unique_t*: (enum dpa_u_bo_s_unique_type)((const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*, (X)))->type, \
-    \
-    dpa_u_p_bo_t*: (enum dpa_u_bo_s_type)((dpa_u_bo_t*)DPA__G(dpa_u_p_bo_t*, (X)))->type, \
-    dpa_u_p_bo_ro_t*: (enum dpa_u_bo_s_ro_type)((dpa_u_bo_ro_t*)DPA__G(dpa_u_p_bo_ro_t*, (X)))->type, \
-    dpa_u_p_bo_simple_t*: (enum dpa_u_bo_s_simple_type)((dpa_u_bo_simple_t*)DPA__G(dpa_u_p_bo_simple_t*, (X)))->type, \
-    dpa_u_p_bo_simple_ro_t*: (enum dpa_u_bo_s_simple_ro_type)((dpa_u_bo_simple_ro_t*)DPA__G(dpa_u_p_bo_simple_ro_t*, (X)))->type \
-  )
+#define dpa_u_bo_get_type_g(X) dpa_u_generic((X),dpa__u_helper_all_g(get_type,(X)))
+
+#define dpa__u_v_bo_unique_hashmap_get_type(X)   DPA_U_BO_UNIQUE_HASHMAP_3
+#define dpa__u_p_bo_unique_hashmap_get_type(X)   DPA_U_BO_UNIQUE_HASHMAP_3
+#define dpa__u_cp_bo_unique_hashmap_get_type(X)  DPA_U_BO_UNIQUE_HASHMAP_3
+#define dpa__u_any_bo_unique_hashmap_get_type(X) DPA_U_BO_UNIQUE_HASHMAP_3
+
+#define dpa__u_v_bo_inline_get_type(X)   DPA_U_BO_INLINE_1
+#define dpa__u_p_bo_inline_get_type(X)   DPA_U_BO_INLINE_1
+#define dpa__u_cp_bo_inline_get_type(X)  DPA_U_BO_INLINE_1
+#define dpa__u_any_bo_inline_get_type(X) DPA_U_BO_INLINE_1
+
+#define dpa__u_v_bo_simple_get_type(X)   DPA_U_BO_SIMPLE_2
+#define dpa__u_p_bo_simple_get_type(X)   DPA_U_BO_SIMPLE_2
+#define dpa__u_cp_bo_simple_get_type(X)  DPA_U_BO_SIMPLE_2
+#define dpa__u_any_bo_simple_get_type(X) ((enum dpa_u_bo_s_simple_type)((X)->type))
+
+#define dpa__u_v_bo_simple_ro_get_type(X)   DPA_U_BO_SIMPLE_4
+#define dpa__u_p_bo_simple_ro_get_type(X)   DPA_U_BO_SIMPLE_4
+#define dpa__u_cp_bo_simple_ro_get_type(X)  DPA_U_BO_SIMPLE_4
+#define dpa__u_any_bo_simple_ro_get_type(X) ((enum dpa_u_bo_s_simple_ro_type)((X)->type))
+
+#define dpa__u_v_bo_unique_get_type(X)   ((enum dpa_u_bo_s_unique_type)((X).type))
+#define dpa__u_p_bo_unique_get_type(X)   ((enum dpa_u_bo_s_unique_type)((X)->type))
+#define dpa__u_cp_bo_unique_get_type(X)  ((enum dpa_u_bo_s_unique_type)((X)->type))
+#define dpa__u_any_bo_unique_get_type(X) ((enum dpa_u_bo_s_unique_type)((X)->type))
+
+#define dpa__u_v_bo_get_type(X)   ((enum dpa_u_bo_s_type)((X).type))
+#define dpa__u_p_bo_get_type(X)   ((enum dpa_u_bo_s_type)((X)->type))
+#define dpa__u_cp_bo_get_type(X)  ((enum dpa_u_bo_s_type)((X)->type))
+#define dpa__u_any_bo_get_type(X) ((enum dpa_u_bo_s_type)((X)->type))
+
+#define dpa__u_v_bo_ro_get_type(X)   ((enum dpa_u_bo_s_ro_type)((X).type))
+#define dpa__u_p_bo_ro_get_type(X)   ((enum dpa_u_bo_s_ro_type)((X)->type))
+#define dpa__u_cp_bo_ro_get_type(X)  ((enum dpa_u_bo_s_ro_type)((X)->type))
+#define dpa__u_any_bo_ro_get_type(X) ((enum dpa_u_bo_s_ro_type)((X)->type))
+
+////
 
 #define dpa_u_bo_data(...) dpa_u_assert_selection(dpa_u_bo_data_g(__VA_ARGS__))
-#define dpa_u_bo_data_g(X) dpa_u_generic((X), \
-    DPA__GS(dpa_u_bo_inline_t,     (X)).data, \
-    DPA__GS(dpa_u_bo_simple_t,     (X)).data, \
-    DPA__GS(dpa_u_bo_simple_ro_t,  (X)).data, \
-    dpa_u_bo_t: dpa_u_generic(&DPA__G(dpa_u_bo_t,(X)), \
-            dpa_u_bo_t*: dpa__u_bo_data(&DPA__G (dpa_u_bo_t,(X))), \
-      const dpa_u_bo_t*: dpa__u_cbo_data(&DPA__G (dpa_u_bo_t,(X))) \
-    ), \
-    dpa_u_bo_ro_t: dpa__u_bo_ro_data(&DPA__G(dpa_u_bo_ro_t,(X))), \
-    dpa_u_bo_unique_hashmap_t: dpa__u_bo_unique_hashmap_get_data(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
-    dpa_u_p_bo_unique_hashmap_t*: dpa__u_bo_unique_hashmap_get_data((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))), \
-    dpa_u_bo_unique_t: dpa__u_bo_unique_data(&DPA__G(dpa_u_bo_unique_t,(X))), \
-    \
-    DPA__GS(      dpa_u_bo_inline_t*,    (X))->data, \
-    DPA__GS(const dpa_u_bo_inline_t*,    (X))->data, \
-    dpa_u_p_bo_inline_t*: ((const dpa_u_bo_inline_t*)DPA__G(dpa_u_p_bo_inline_t*, (X)))->data, \
-    DPA__GS(      dpa_u_bo_simple_t*,    (X))->data, \
-    DPA__GS(const dpa_u_bo_simple_t*,    (X))->data, \
-    DPA__GS(      dpa_u_bo_simple_ro_t*, (X))->data, \
-    DPA__GS(const dpa_u_bo_simple_ro_t*, (X))->data, \
-          dpa_u_bo_t*: dpa__u_bo_data(DPA__G(dpa_u_bo_t*,(X))), \
-    const dpa_u_bo_t*: dpa__u_cbo_data(DPA__G(const dpa_u_bo_t*,(X))), \
-          dpa_u_bo_ro_t*: dpa__u_bo_ro_data(DPA__G(dpa_u_bo_ro_t*,(X))), \
-    const dpa_u_bo_ro_t*: dpa__u_bo_ro_data(DPA__G(const dpa_u_bo_ro_t*,(X))), \
-          dpa_u_bo_unique_t*: dpa__u_bo_unique_data(DPA__G(dpa_u_bo_unique_t*,(X))), \
-    const dpa_u_bo_unique_t*: dpa__u_bo_unique_data(DPA__G(const dpa_u_bo_unique_t*,(X))), \
-    dpa_u_p_bo_unique_t*: dpa__u_bo_unique_data((const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*,(X))) \
+#define dpa_u_bo_data_g(X) dpa_u_generic((X),dpa__u_helper_all_g(data,(X)))
+
+#define dpa__u_v_bo_unique_hashmap_data(X)   dpa__u_bo_unique_hashmap_get_data((X))
+#define dpa__u_p_bo_unique_hashmap_data(X)   dpa__u_bo_unique_hashmap_get_data((X))
+#define dpa__u_cp_bo_unique_hashmap_data(X)  dpa__u_bo_unique_hashmap_get_data((X))
+#define dpa__u_any_bo_unique_hashmap_data(X) dpa__u_bo_unique_hashmap_get_data((X))
+
+#define dpa__u_v_bo_inline_data(X)   ((X).data)
+#define dpa__u_p_bo_inline_data(X)   ((X)->data)
+#define dpa__u_cp_bo_inline_data(X)  ((X)->data)
+#define dpa__u_any_bo_inline_data(X) ((X)->data)
+
+#define dpa__u_v_bo_simple_data(X)   ((X).data)
+#define dpa__u_p_bo_simple_data(X)   ((X)->data)
+#define dpa__u_cp_bo_simple_data(X)  ((X)->data)
+#define dpa__u_any_bo_simple_data(X) ((X)->data)
+
+#define dpa__u_v_bo_simple_ro_data(X)   ((X).data)
+#define dpa__u_p_bo_simple_ro_data(X)   ((X)->data)
+#define dpa__u_cp_bo_simple_ro_data(X)  ((X)->data)
+#define dpa__u_any_bo_simple_ro_data(X) ((X)->data)
+
+#define dpa__u_v_bo_unique_data(X)   dpa__u_bo_unique_data(&(X))
+#define dpa__u_p_bo_unique_data(X)   dpa__u_bo_unique_data((X))
+#define dpa__u_cp_bo_unique_data(X)  dpa__u_bo_unique_data((X))
+#define dpa__u_any_bo_unique_data(X) dpa__u_bo_unique_data((X))
+
+#define dpa__u_v_bo_data(X) dpa_u_generic(&(X), \
+          dpa_u_bo_t*: dpa__u_bo_data(&(X)), \
+    const dpa_u_bo_t*: dpa__u_cbo_data(&(X)) \
   )
+#define dpa__u_p_bo_data(X)   dpa__u_bo_data((X))
+#define dpa__u_cp_bo_data(X)  dpa__u_cbo_data((X))
+#define dpa__u_any_bo_data(X) dpa__u_cbo_data((X))
+
+#define dpa__u_v_bo_ro_data(X)   dpa__u_bo_ro_data(&(X))
+#define dpa__u_p_bo_ro_data(X)   dpa__u_bo_ro_data((X))
+#define dpa__u_cp_bo_ro_data(X)  dpa__u_bo_ro_data((X))
+#define dpa__u_any_bo_ro_data(X) dpa__u_bo_ro_data((X))
 
 DPA_U_EXPORT inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
   switch(dpa_u_bo_get_type(bo)){
@@ -343,6 +428,8 @@ DPA_U_EXPORT inline const void* dpa__u_bo_unique_data(const dpa_u_bo_unique_t*re
   dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 
+////
+
 #define dpa_u_bo_set_size(...) dpa_u_assert_selection(dpa_u_bo_set_size_g(__VA_ARGS__))
 #define dpa_u_bo_set_size_g(X,S) ((void)dpa_u_generic((X), \
     dpa_u_bo_inline_t: (assert((S) <= DPA_U_BO_INLINE_MAX_SIZE),(DPA__G(dpa_u_bo_inline_t,(X)).size=(S)&0xF)), \
@@ -370,38 +457,46 @@ DPA_U_EXPORT inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t
   dpa_u_abort("Can't set size on bo of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 
-DPA_U_EXPORT inline size_t dpa__u_bo_unique_hashmap_get_size(dpa_u_bo_unique_hashmap_t  bo){
-  return bo->size;
-}
+///
 
 #define dpa_u_bo_get_size(...) dpa_u_assert_selection(dpa_u_bo_get_size_g(__VA_ARGS__))
-#define dpa_u_bo_get_size_g(X) ((size_t)dpa_u_generic((X), \
-    DPA__GS(dpa_u_bo_inline_t,(X)).size, \
-    DPA__GS(dpa_u_bo_simple_t,(X)).size, \
-    DPA__GS(dpa_u_bo_simple_ro_t,(X)).size, \
-    dpa_u_bo_t: dpa__u_bo_get_size(DPA__G(dpa_u_bo_t, (X))), \
-    dpa_u_bo_ro_t: dpa__u_bo_ro_get_size(DPA__G(dpa_u_bo_ro_t, (X))), \
-    dpa_u_bo_unique_hashmap_t: dpa__u_bo_unique_hashmap_get_size(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
-    dpa_u_p_bo_unique_hashmap_t*: dpa__u_bo_unique_hashmap_get_size((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))), \
-    dpa_u_bo_unique_t: dpa__u_bo_unique_get_size(DPA__G(dpa_u_bo_unique_t, (X))), \
-    \
-    DPA__GS(      dpa_u_bo_inline_t*,(X))->size, \
-    DPA__GS(const dpa_u_bo_inline_t*,(X))->size, \
-    dpa_u_p_bo_inline_t*: ((const dpa_u_bo_inline_t*)DPA__G(dpa_u_p_bo_inline_t*,(X)))->size, \
-    DPA__GS(      dpa_u_bo_simple_t*,(X))->size, \
-    DPA__GS(const dpa_u_bo_simple_t*,(X))->size, \
-    DPA__GS(      dpa_u_bo_simple_ro_t*,(X))->size, \
-    DPA__GS(const dpa_u_bo_simple_ro_t*,(X))->size, \
-          dpa_u_bo_t*: dpa__u_bo_get_size(*DPA__G(dpa_u_bo_t*, (X))), \
-    const dpa_u_bo_t*: dpa__u_bo_get_size(*DPA__G(const dpa_u_bo_t*, (X))), \
-          dpa_u_bo_ro_t*: dpa__u_bo_ro_get_size(*DPA__G(dpa_u_bo_ro_t*, (X))), \
-    const dpa_u_bo_ro_t*: dpa__u_bo_ro_get_size(*DPA__G(const dpa_u_bo_ro_t*, (X))), \
-          dpa_u_bo_unique_t*: dpa__u_bo_unique_get_size(*DPA__G(dpa_u_bo_unique_t*, (X))), \
-    const dpa_u_bo_unique_t*: dpa__u_bo_unique_get_size(*DPA__G(const dpa_u_bo_unique_t*, (X))), \
-        dpa_u_p_bo_unique_t*: dpa__u_bo_unique_get_size(*(const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*, (X))) \
-  ))
+#define dpa_u_bo_get_size_g(X) dpa_u_generic((X),dpa__u_helper_all_g(get_size,(X)))
 
-DPA_U_EXPORT inline size_t dpa__u_bo_get_size(const dpa_u_bo_t bo){
+#define dpa__u_v_bo_unique_hashmap_get_size(X) ((X)->size)
+#define dpa__u_p_bo_unique_hashmap_get_size(X) ((X)->size)
+#define dpa__u_cp_bo_unique_hashmap_get_size(X) ((X)->size)
+#define dpa__u_any_bo_unique_hashmap_get_size(X) ((X)->size)
+
+#define dpa__u_v_bo_inline_get_size(X) ((X).size)
+#define dpa__u_p_bo_inline_get_size(X) ((X)->size)
+#define dpa__u_cp_bo_inline_get_size(X) ((X)->size)
+#define dpa__u_any_bo_inline_get_size(X) ((X)->size)
+
+#define dpa__u_v_bo_simple_get_size(X) ((X).size)
+#define dpa__u_p_bo_simple_get_size(X) ((X)->size)
+#define dpa__u_cp_bo_simple_get_size(X) ((X)->size)
+#define dpa__u_any_bo_simple_get_size(X) ((X)->size)
+
+#define dpa__u_v_bo_simple_ro_get_size(X) ((X).size)
+#define dpa__u_p_bo_simple_ro_get_size(X) ((X)->size)
+#define dpa__u_cp_bo_simple_ro_get_size(X) ((X)->size)
+#define dpa__u_any_bo_simple_ro_get_size(X) ((X)->size)
+
+#define dpa__u_p_bo_unique_get_size(X) dpa__u_v_bo_unique_get_size(*(X))
+#define dpa__u_cp_bo_unique_get_size(X) dpa__u_v_bo_unique_get_size(*(X))
+#define dpa__u_any_bo_unique_get_size(X) dpa__u_v_bo_unique_get_size(*(X))
+
+#define dpa__u_p_bo_get_size(X) dpa__u_v_bo_get_size(*(X))
+#define dpa__u_cp_bo_get_size(X) dpa__u_v_bo_get_size(*(X))
+#define dpa__u_any_bo_get_size(X) dpa__u_v_bo_get_size(*(X))
+
+#define dpa__u_p_bo_ro_get_size(X) dpa__u_v_bo_ro_get_size(*(X))
+#define dpa__u_cp_bo_ro_get_size(X) dpa__u_v_bo_ro_get_size(*(X))
+#define dpa__u_any_bo_ro_get_size(X) dpa__u_v_bo_ro_get_size(*(X))
+
+///
+
+DPA_U_EXPORT inline size_t dpa__u_v_bo_get_size(const dpa_u_bo_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
@@ -409,19 +504,19 @@ DPA_U_EXPORT inline size_t dpa__u_bo_get_size(const dpa_u_bo_t bo){
   }
   dpa_u_abort("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
-DPA_U_EXPORT inline size_t dpa__u_bo_ro_get_size(const dpa_u_bo_ro_t bo){
+DPA_U_EXPORT inline size_t dpa__u_v_bo_ro_get_size(const dpa_u_bo_ro_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
-    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
+    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_v_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
   }
   dpa_u_abort("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
-DPA_U_EXPORT inline size_t dpa__u_bo_unique_get_size(const dpa_u_bo_unique_t bo){
+DPA_U_EXPORT inline size_t dpa__u_v_bo_unique_get_size(const dpa_u_bo_unique_t bo){
   switch(bo.type){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: break;
-    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
+    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_v_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
   }
   dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
@@ -453,16 +548,16 @@ DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
     dpa_u_bo_inline_t: (void)0, \
     dpa_u_bo_inline_t*: (void)0, \
     const dpa_u_bo_inline_t*: (void)0, \
-    const dpa_u_p_bo_inline_t*: (void)0, \
+    const dpa_u_any_bo_inline_t*: (void)0, \
     \
     dpa_u_bo_unique_hashmap_t: dpa__u_bo_unique_hashmap_ref(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
-    dpa_u_p_bo_unique_hashmap_t*: dpa__u_bo_unique_hashmap_ref((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))), \
+    dpa_u_any_bo_unique_hashmap_t*: dpa__u_bo_unique_hashmap_ref((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X))), \
     \
     dpa_u_bo_unique_t: dpa__u_bo_unique_ref(DPA__G(dpa_u_bo_unique_t,(X))), \
     dpa_u_bo_unique_t*: dpa__u_bo_unique_ref(*DPA__G(dpa_u_bo_unique_t*,(X))), \
     const dpa_u_bo_unique_t*: dpa__u_bo_unique_ref(*DPA__G(const dpa_u_bo_unique_t*,(X))), \
     const dpa_u_bo_unique_t*: dpa__u_bo_unique_ref(*DPA__G(const dpa_u_bo_unique_t*,(X))), \
-        dpa_u_p_bo_unique_t*: dpa__u_bo_unique_ref(*(dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*,(X))) \
+        dpa_u_any_bo_unique_t*: dpa__u_bo_unique_ref(*(dpa_u_bo_unique_t*)DPA__G(dpa_u_any_bo_unique_t*,(X))) \
   )
 
 #define dpa_u_bo_put(...) dpa_u_assert_selection(dpa_u_bo_put_g(__VA_ARGS__))
@@ -470,15 +565,15 @@ DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
     dpa_u_bo_inline_t: (void)0, \
     dpa_u_bo_inline_t*: (void)0, \
     const dpa_u_bo_inline_t*: (void)0, \
-    const dpa_u_p_bo_inline_t*: (void)0, \
+    const dpa_u_any_bo_inline_t*: (void)0, \
     \
     dpa_u_bo_unique_hashmap_t: dpa__u_bo_unique_hashmap_put(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
-    dpa_u_p_bo_unique_hashmap_t*: dpa__u_bo_unique_hashmap_put((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))), \
+    dpa_u_any_bo_unique_hashmap_t*: dpa__u_bo_unique_hashmap_put((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X))), \
     \
     dpa_u_bo_unique_t: dpa__u_bo_unique_put(DPA__G(dpa_u_bo_unique_t,(X))), \
     dpa_u_bo_unique_t*: dpa__u_bo_unique_put(*DPA__G(dpa_u_bo_unique_t*,(X))), \
     const dpa_u_bo_unique_t*: dpa__u_bo_unique_put(*DPA__G(const dpa_u_bo_unique_t*,(X))), \
-        dpa_u_p_bo_unique_t*: dpa__u_bo_unique_put(*(dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*,(X))) \
+        dpa_u_any_bo_unique_t*: dpa__u_bo_unique_put(*(dpa_u_bo_unique_t*)DPA__G(dpa_u_any_bo_unique_t*,(X))) \
   )
 
 DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_unique_get_refcount(const dpa_u_bo_unique_t ubo){
@@ -524,14 +619,14 @@ DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(con
     dpa_u_bo_unique_t: dpa__u_bo_unique_get_refcount(DPA__G(dpa_u_bo_unique_t,(X))), \
     \
     dpa_u_bo_unique_hashmap_t: dpa__u_bo_unique_hashmap_get_refcount(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
-    dpa_u_p_bo_unique_hashmap_t*: dpa__u_bo_unique_hashmap_get_refcount((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))), \
+    dpa_u_any_bo_unique_hashmap_t*: dpa__u_bo_unique_hashmap_get_refcount((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X))), \
     \
           dpa_u_bo_unique_t*: dpa__u_bo_unique_get_refcount(*DPA__G(dpa_u_bo_unique_t*,(X))), \
     const dpa_u_bo_unique_t*: dpa__u_bo_unique_get_refcount(*DPA__G(const dpa_u_bo_unique_t*,(X))), \
-        dpa_u_p_bo_unique_t*: dpa__u_bo_unique_get_refcount(*(const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*,(X))), \
+        dpa_u_any_bo_unique_t*: dpa__u_bo_unique_get_refcount(*(const dpa_u_bo_unique_t*)DPA__G(dpa_u_any_bo_unique_t*,(X))), \
           dpa_u_bo_inline_t*: &dpa_u_refcount_static_v_freeable, \
     const dpa_u_bo_inline_t*: &dpa_u_refcount_static_v_freeable, \
-        dpa_u_p_bo_inline_t*: &dpa_u_refcount_static_v_freeable, \
+        dpa_u_any_bo_inline_t*: &dpa_u_refcount_static_v_freeable, \
           dpa_u_bo_ro_t*: dpa__u_bo_ro_p_get_refcount(DPA__G(dpa_u_bo_ro_t*,(X))), \
     const dpa_u_bo_ro_t*: dpa__u_bo_ro_p_get_refcount(DPA__G(const dpa_u_bo_ro_t*,(X))), \
           dpa_u_bo_t*: dpa__u_bo_p_get_refcount(DPA__G(dpa_u_bo_t*,(X))), \
@@ -545,14 +640,14 @@ DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(con
 #define dpa_u_v_bo_unique(...) dpa_u_assert_selection(dpa_u_v_bo_unique_g(__VA_ARGS__))
 #define dpa_u_v_bo_unique_g(X) dpa_u_generic((X), \
     dpa_u_bo_unique_hashmap_t: (const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = DPA__G(dpa_u_bo_unique_hashmap_t, (X)) }, \
-    dpa_u_p_bo_unique_hashmap_t*: (const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*, (X)) }, \
+    dpa_u_any_bo_unique_hashmap_t*: (const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*, (X)) }, \
     DPA__GS(dpa_u_bo_unique_t, (X)), \
     dpa_u_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *DPA__G(dpa_u_bo_inline_t*, (X)) }, \
     const dpa_u_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *DPA__G(const dpa_u_bo_inline_t*, (X)) }, \
-        dpa_u_p_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *(dpa_u_bo_inline_t*)DPA__G(dpa_u_p_bo_inline_t*, (X)) }, \
+        dpa_u_any_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *(dpa_u_bo_inline_t*)DPA__G(dpa_u_any_bo_inline_t*, (X)) }, \
     DPA__GS(dpa_u_bo_unique_t*, (X))[0], \
     DPA__GS(const dpa_u_bo_unique_t*, (X))[0], \
-    dpa_u_p_bo_unique_t*: *(const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*, (X)) \
+    dpa_u_any_bo_unique_t*: *(const dpa_u_bo_unique_t*)DPA__G(dpa_u_any_bo_unique_t*, (X)) \
   )
 
 /**
@@ -573,36 +668,61 @@ DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(con
     const dpa_u_bo_t*: (const dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_t*,(X))) } \
   )
 
+#define dpa__u_temp_bo_simple_ro_helper_g(T,P,X) \
+    T: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_ ## P ## _get_size(DPA__G(T,(X))), .data=dpa_u_ ## P ## _data__ ## T(DPA__G(T,(X))) }
+
+#define dpa__u_temp_bo_simple_ro_helper_2_g(T,X) \
+    dpa__u_temp_bo_simple_ro_helper_g(dpa_u_ ## T ## _t, v_ ## T, (X)), \
+    dpa__u_temp_bo_simple_ro_helper_g(dpa_u_ ## T ## _t*, p_ ## T, (X)), \
+    dpa__u_temp_bo_simple_ro_helper_g(const dpa_u_ ## T ## _t*, cp_ ## T, (X)), \
+    dpa__u_temp_bo_simple_ro_helper_g(dpa_u_p_ ## T ## _t*, any_ ## T, (X))
+
 /**
  * Note: If the source buffer was a DPA_U_BO_INLINE (which can also be the case for dpa_u_bo_t and dpa_u_bo_ro_t too),
- * then the lifetime will not exceed the source BOs scope! It's fine for passing to other functions, but not for much else.
+ * then the lifetime of the data will not exceed the current blocks scope! If you pass in a pointer, it'll at least match the source BOs lifetime.
+ * This is fine for passing to other functions, but not for much else. Don't try to return such a pointer.
  */
 #define dpa_u_temp_bo_simple_ro(...) dpa_u_assert_selection(dpa_u_temp_bo_simple_ro_g(__VA_ARGS__))
-#define dpa_u_temp_bo_simple_ro_g(X) dpa_u_generic((X), \
-    DPA__GS(dpa_u_bo_simple_t, (X)).ro, \
-    DPA__GS(dpa_u_bo_simple_ro_t, (X)), \
-    dpa_u_bo_inline_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t,(X))) }, \
-    dpa_u_bo_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t,(X))) }, \
-    dpa_u_bo_ro_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_ro_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_ro_t,(X))) }, \
-    dpa_u_bo_unique_hashmap_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_unique_hashmap_t,(X))) }, \
-    dpa_u_p_bo_unique_hashmap_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))) }, \
-    dpa_u_bo_unique_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_unique_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_unique_t,(X))) }, \
-    \
-    DPA__GS(dpa_u_bo_simple_t*, (X))->ro, \
-    DPA__GS(const dpa_u_bo_simple_t*, (X))->ro, \
-    DPA__GS(dpa_u_bo_simple_ro_t*, (X))[0], \
-    DPA__GS(const dpa_u_bo_simple_ro_t*, (X))[0], \
-    dpa_u_bo_inline_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_inline_t*,(X))) }, \
-    const dpa_u_bo_inline_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_inline_t*,(X))) }, \
-    dpa_u_p_bo_inline_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_p_bo_inline_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_p_bo_inline_t*,(X))) }, \
-    dpa_u_bo_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t*,(X))) }, \
-    const dpa_u_bo_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_t*,(X))) }, \
-    dpa_u_bo_ro_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_ro_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_ro_t*,(X))) }, \
-    const dpa_u_bo_ro_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_ro_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_ro_t*,(X))) }, \
-    dpa_u_bo_unique_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_unique_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_unique_t*,(X))) }, \
-    const dpa_u_bo_unique_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_unique_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_unique_t*,(X))) }, \
-    dpa_u_p_bo_unique_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_p_bo_unique_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_p_bo_unique_t*,(X))) } \
-  )
+#define dpa_u_temp_bo_simple_ro_g(X) dpa_u_generic((X),dpa__u_helper_all_g(_temp_bo_simple_ro,(X)))
+
+#define dpa__u_temp_bo_simple_ro__helper(P,X) (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa__u_ ## P ## _get_size((X)), .data=dpa__u_ ## P ## _data((X)) }
+
+#define dpa__u_v_bo_unique_hashmap__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(v_bo_unique_hashmap,(X))
+#define dpa__u_p_bo_unique_hashmap__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(p_bo_unique_hashmap,(X))
+#define dpa__u_cp_bo_unique_hashmap__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(cp_bo_unique_hashmap,(X))
+#define dpa__u_any_bo_unique_hashmap__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(any_bo_unique_hashmap,(X))
+
+#define dpa__u_v_bo_inline__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(v_bo_inline,(X))
+#define dpa__u_p_bo_inline__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(p_bo_inline,(X))
+#define dpa__u_cp_bo_inline__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(cp_bo_inline,(X))
+#define dpa__u_any_bo_inline__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(any_bo_inline,(X))
+
+#define dpa__u_v_bo_simple__temp_bo_simple_ro(X) (X).ro
+#define dpa__u_p_bo_simple__temp_bo_simple_ro(X) (X)->ro
+#define dpa__u_cp_bo_simple__temp_bo_simple_ro(X) (X)->ro
+#define dpa__u_any_bo_simple__temp_bo_simple_ro(X) (X)->ro
+
+#define dpa__u_v_bo_simple_ro__temp_bo_simple_ro(X) (X)
+#define dpa__u_p_bo_simple_ro__temp_bo_simple_ro(X) (X)
+#define dpa__u_cp_bo_simple_ro__temp_bo_simple_ro(X) (X)
+#define dpa__u_any_bo_simple_ro__temp_bo_simple_ro(X) (X)
+
+#define dpa__u_v_bo_unique__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(v_bo_unique,(X))
+#define dpa__u_p_bo_unique__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(p_bo_unique,(X))
+#define dpa__u_cp_bo_unique__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(cp_bo_unique,(X))
+#define dpa__u_any_bo_unique__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(any_bo_unique,(X))
+
+#define dpa__u_v_bo__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(v_bo,(X))
+#define dpa__u_p_bo__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(p_bo,(X))
+#define dpa__u_cp_bo__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(cp_bo,(X))
+#define dpa__u_any_bo__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(any_bo,(X))
+
+#define dpa__u_v_bo_ro__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(v_bo_ro,(X))
+#define dpa__u_p_bo_ro__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(p_bo_ro,(X))
+#define dpa__u_cp_bo_ro__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(cp_bo_ro,(X))
+#define dpa__u_any_bo_ro__temp_bo_simple_ro(X) dpa__u_temp_bo_simple_ro__helper(any_bo_ro,(X))
+
+////
 
 #define dpa_u_v_bo_ro(...) dpa_u_assert_selection(dpa_u_v_bo_ro_g(__VA_ARGS__))
 #define dpa_u_v_bo_ro_g(X) dpa_u_generic((X), \
@@ -620,50 +740,50 @@ DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(con
     DPA__GS(const dpa_u_bo_ro_t*, (X))[0], \
     dpa_u_bo_inline_t*: (const dpa_u_bo_ro_t){ .bo_inline = *DPA__G(dpa_u_bo_inline_t*, (X)) }, \
     const dpa_u_bo_inline_t*: (const dpa_u_bo_ro_t){ .bo_inline = *DPA__G(const dpa_u_bo_inline_t*, (X)) }, \
-    dpa_u_p_bo_inline_t*: (const dpa_u_bo_ro_t){ .bo_inline = *(const dpa_u_bo_inline_t*)DPA__G(dpa_u_p_bo_inline_t*, (X)) }, \
+    dpa_u_any_bo_inline_t*: (const dpa_u_bo_ro_t){ .bo_inline = *(const dpa_u_bo_inline_t*)DPA__G(dpa_u_any_bo_inline_t*, (X)) }, \
     dpa_u_bo_simple_t*: (const dpa_u_bo_ro_t){ .bo_simple = DPA__G(dpa_u_bo_simple_t*, (X))->ro }, \
     const dpa_u_bo_simple_t*: (const dpa_u_bo_ro_t){ .bo_simple = DPA__G(const dpa_u_bo_simple_t*, (X))->ro }, \
     dpa_u_bo_simple_ro_t*: (const dpa_u_bo_ro_t){ .bo_simple = *DPA__G(dpa_u_bo_simple_ro_t*, (X)) }, \
     const dpa_u_bo_simple_ro_t*: (const dpa_u_bo_ro_t){ .bo_simple = *DPA__G(const dpa_u_bo_simple_ro_t*, (X)) }, \
     dpa_u_bo_unique_t*: (const dpa_u_bo_ro_t){ .bo_unique = *DPA__G(dpa_u_bo_unique_t*, (X)) }, \
     const dpa_u_bo_unique_t*: (const dpa_u_bo_ro_t){ .bo_unique = *DPA__G(const dpa_u_bo_unique_t*, (X)) }, \
-    dpa_u_p_bo_unique_t*: (const dpa_u_bo_ro_t){ .bo_unique = *(const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*, (X)) } \
+    dpa_u_any_bo_unique_t*: (const dpa_u_bo_ro_t){ .bo_unique = *(const dpa_u_bo_unique_t*)DPA__G(dpa_u_any_bo_unique_t*, (X)) } \
   )
 
 #define dpa_u_bo_ptr(...) dpa_u_assert_selection(dpa_u_bo_ptr_g(__VA_ARGS__))
 #define dpa_u_bo_ptr_g(X) dpa_u_generic((X), \
-    dpa_u_p_bo_inline_t*: (X), \
-    dpa_u_p_bo_unique_hashmap_t*: (X), \
-    dpa_u_p_bo_unique_t*: (X), \
-    dpa_u_p_bo_simple_t*: (X), \
-    dpa_u_p_bo_simple_ro_t*: (X), \
-    dpa_u_p_bo_t*: (X), \
-    dpa_u_p_bo_ro_t*: (X), \
+    dpa_u_any_bo_inline_t*: (X), \
+    dpa_u_any_bo_unique_hashmap_t*: (X), \
+    dpa_u_any_bo_unique_t*: (X), \
+    dpa_u_any_bo_simple_t*: (X), \
+    dpa_u_any_bo_simple_ro_t*: (X), \
+    dpa_u_any_bo_t*: (X), \
+    dpa_u_any_bo_ro_t*: (X), \
     \
-    dpa_u_bo_inline_t: (dpa_u_p_bo_inline_t*)&DPA__G(dpa_u_bo_inline_t,(X)), \
-    dpa_u_bo_unique_hashmap_t: (dpa_u_p_bo_unique_hashmap_t*)&DPA__G(dpa_u_bo_unique_hashmap_t,(X)), \
-    dpa_u_bo_unique_t: (dpa_u_p_bo_unique_t*)&DPA__G(dpa_u_bo_unique_t,(X)), \
-    dpa_u_bo_simple_t: (dpa_u_p_bo_simple_t*)&DPA__G(dpa_u_bo_simple_t,(X)), \
-    dpa_u_bo_simple_ro_t: (dpa_u_p_bo_simple_ro_t*)&DPA__G(dpa_u_bo_simple_ro_t,(X)), \
-    dpa_u_bo_t: (dpa_u_p_bo_t*)&DPA__G(dpa_u_bo_t,(X)), \
-    dpa_u_bo_ro_t: (dpa_u_p_bo_ro_t*)&DPA__G(dpa_u_bo_ro_t,(X)), \
+    dpa_u_bo_inline_t: (dpa_u_any_bo_inline_t*)&DPA__G(dpa_u_bo_inline_t,(X)), \
+    dpa_u_bo_unique_hashmap_t: (dpa_u_any_bo_unique_hashmap_t*)&DPA__G(dpa_u_bo_unique_hashmap_t,(X)), \
+    dpa_u_bo_unique_t: (dpa_u_any_bo_unique_t*)&DPA__G(dpa_u_bo_unique_t,(X)), \
+    dpa_u_bo_simple_t: (dpa_u_any_bo_simple_t*)&DPA__G(dpa_u_bo_simple_t,(X)), \
+    dpa_u_bo_simple_ro_t: (dpa_u_any_bo_simple_ro_t*)&DPA__G(dpa_u_bo_simple_ro_t,(X)), \
+    dpa_u_bo_t: (dpa_u_any_bo_t*)&DPA__G(dpa_u_bo_t,(X)), \
+    dpa_u_bo_ro_t: (dpa_u_any_bo_ro_t*)&DPA__G(dpa_u_bo_ro_t,(X)), \
     \
-    dpa_u_bo_inline_t*: (dpa_u_p_bo_inline_t*)DPA__G(dpa_u_bo_inline_t*,(X)), \
-    dpa_u_bo_unique_t*: (dpa_u_p_bo_unique_t*)DPA__G(dpa_u_bo_unique_t*,(X)), \
-    dpa_u_bo_simple_t*: (dpa_u_p_bo_simple_t*)DPA__G(dpa_u_bo_simple_t*,(X)), \
-    dpa_u_bo_simple_ro_t*: (dpa_u_p_bo_simple_ro_t*)DPA__G(dpa_u_bo_simple_ro_t*,(X)), \
-    dpa_u_bo_t*: (dpa_u_p_bo_t*)DPA__G(dpa_u_bo_t*,(X)), \
-    dpa_u_bo_ro_t*: (dpa_u_p_bo_ro_t*)DPA__G(dpa_u_bo_ro_t*,(X)), \
+    dpa_u_bo_inline_t*: (dpa_u_any_bo_inline_t*)DPA__G(dpa_u_bo_inline_t*,(X)), \
+    dpa_u_bo_unique_t*: (dpa_u_any_bo_unique_t*)DPA__G(dpa_u_bo_unique_t*,(X)), \
+    dpa_u_bo_simple_t*: (dpa_u_any_bo_simple_t*)DPA__G(dpa_u_bo_simple_t*,(X)), \
+    dpa_u_bo_simple_ro_t*: (dpa_u_any_bo_simple_ro_t*)DPA__G(dpa_u_bo_simple_ro_t*,(X)), \
+    dpa_u_bo_t*: (dpa_u_any_bo_t*)DPA__G(dpa_u_bo_t*,(X)), \
+    dpa_u_bo_ro_t*: (dpa_u_any_bo_ro_t*)DPA__G(dpa_u_bo_ro_t*,(X)), \
     \
-    const dpa_u_bo_inline_t*: (dpa_u_p_bo_inline_t*)DPA__G(const dpa_u_bo_inline_t*,(X)), \
-    const dpa_u_bo_unique_t*: (dpa_u_p_bo_unique_t*)DPA__G(const dpa_u_bo_unique_t*,(X)), \
-    const dpa_u_bo_simple_t*: (dpa_u_p_bo_simple_t*)DPA__G(const dpa_u_bo_simple_t*,(X)), \
-    const dpa_u_bo_simple_ro_t*: (dpa_u_p_bo_simple_ro_t*)DPA__G(const dpa_u_bo_simple_ro_t*,(X)), \
-    const dpa_u_bo_t*: (dpa_u_p_bo_t*)DPA__G(const dpa_u_bo_t*,(X)), \
-    const dpa_u_bo_ro_t*: (dpa_u_p_bo_ro_t*)DPA__G(const dpa_u_bo_ro_t*,(X)) \
+    const dpa_u_bo_inline_t*: (dpa_u_any_bo_inline_t*)DPA__G(const dpa_u_bo_inline_t*,(X)), \
+    const dpa_u_bo_unique_t*: (dpa_u_any_bo_unique_t*)DPA__G(const dpa_u_bo_unique_t*,(X)), \
+    const dpa_u_bo_simple_t*: (dpa_u_any_bo_simple_t*)DPA__G(const dpa_u_bo_simple_t*,(X)), \
+    const dpa_u_bo_simple_ro_t*: (dpa_u_any_bo_simple_ro_t*)DPA__G(const dpa_u_bo_simple_ro_t*,(X)), \
+    const dpa_u_bo_t*: (dpa_u_any_bo_t*)DPA__G(const dpa_u_bo_t*,(X)), \
+    const dpa_u_bo_ro_t*: (dpa_u_any_bo_ro_t*)DPA__G(const dpa_u_bo_ro_t*,(X)) \
   )
 
-DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_p_bo_ro_t*const _bo){
+DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_any_bo_ro_t*const _bo){
   const dpa_u_bo_ro_t*const bo = (const dpa_u_bo_ro_t*)_bo;
   // We allow the simple cases to be inlined, and the complicated one is handled in dpa__u_bo_do_intern instead
   switch(dpa_u_bo_get_type(bo)){
@@ -681,7 +801,7 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_p_bo_ro_t*const _bo
         memcpy(boi.data, dpa_u_bo_data(bo), dpa_u_bo_get_size(bo));
         return (dpa_u_bo_unique_t){ .bo_inline = boi };
       }
-      extern dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_p_bo_ro_t* bo);
+      extern dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* bo);
       return (dpa_u_bo_unique_t){
         .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
         .bo_unique_hashmap = dpa__u_bo_do_intern(_bo),
@@ -690,11 +810,11 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_p_bo_ro_t*const _bo
   }
 }
 
-#define dpa_u_p_bo_ro(...) dpa_u_assert_selection(dpa_u_p_bo_ro_g(__VA_ARGS__))
-#define dpa_u_p_bo_ro_g(X) _Generic((X), \
-    dpa_u_bo_unique_hashmap_t: (dpa_u_p_bo_ro_t*)&(dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = DPA__G(dpa_u_bo_unique_hashmap_t, (X)) }, \
-    dpa_u_p_bo_unique_hashmap_t*: (dpa_u_p_bo_ro_t*)&(dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*, (X)) }, \
-    default: dpa_u_generic_if_selection(dpa_u_bo_ptr_g(X), (dpa_u_p_bo_ro_t*)dpa_u_bo_ptr((X))) \
+#define dpa_u_any_bo_ro(...) dpa_u_assert_selection(dpa_u_any_bo_ro_g(__VA_ARGS__))
+#define dpa_u_any_bo_ro_g(X) _Generic((X), \
+    dpa_u_bo_unique_hashmap_t: (dpa_u_any_bo_ro_t*)&(dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = DPA__G(dpa_u_bo_unique_hashmap_t, (X)) }, \
+    dpa_u_any_bo_unique_hashmap_t*: (dpa_u_any_bo_ro_t*)&(dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*, (X)) }, \
+    default: dpa_u_generic_if_selection(dpa_u_bo_ptr_g(X), (dpa_u_any_bo_ro_t*)dpa_u_bo_ptr((X))) \
   )
 
 /**
@@ -706,74 +826,35 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_p_bo_ro_t*const _bo
     dpa_u_bo_inline_t: (const dpa_u_bo_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
     dpa_u_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *DPA__G(dpa_u_bo_inline_t*, (X)) }, \
     const dpa_u_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *DPA__G(const dpa_u_bo_inline_t*, (X)) }, \
-    dpa_u_p_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *(const dpa_u_bo_inline_t*)DPA__G(dpa_u_p_bo_inline_t*, (X)) }, \
+    dpa_u_any_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *(const dpa_u_bo_inline_t*)DPA__G(dpa_u_any_bo_inline_t*, (X)) }, \
     \
     dpa_u_bo_unique_hashmap_t: (dpa__u_bo_unique_hashmap_ref(DPA__G(dpa_u_bo_unique_hashmap_t,(X))),(const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = DPA__G(dpa_u_bo_unique_hashmap_t,(X)) }), \
-    dpa_u_p_bo_unique_hashmap_t*: (dpa__u_bo_unique_hashmap_ref((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))),(const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X)) }), \
+    dpa_u_any_bo_unique_hashmap_t*: (dpa__u_bo_unique_hashmap_ref((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X))),(const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X)) }), \
     \
     dpa_u_bo_unique_t: (dpa__u_bo_unique_ref(DPA__G(dpa_u_bo_unique_t,(X))),(X)), \
     dpa_u_bo_unique_t*: (dpa__u_bo_unique_ref(*DPA__G(dpa_u_bo_unique_t*,(X))),*DPA__G(dpa_u_bo_unique_t*,(X))), \
     const dpa_u_bo_unique_t*: (dpa__u_bo_unique_ref(*DPA__G(const dpa_u_bo_unique_t*,(X))),*DPA__G(const dpa_u_bo_unique_t*,(X))), \
-    dpa_u_p_bo_unique_t*: (dpa__u_bo_unique_ref(*(const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*,(X))),*(const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*,(X))), \
+    dpa_u_any_bo_unique_t*: (dpa__u_bo_unique_ref(*(const dpa_u_bo_unique_t*)DPA__G(dpa_u_any_bo_unique_t*,(X))),*(const dpa_u_bo_unique_t*)DPA__G(dpa_u_any_bo_unique_t*,(X))), \
     \
-    default: dpa_u_generic_if_selection( dpa_u_p_bo_ro_g(X), dpa__u_bo_intern((dpa_u_p_bo_ro_t*)dpa_u_p_bo_ro_g(X)) ) \
+    default: dpa_u_generic_if_selection( dpa_u_any_bo_ro_g(X), dpa__u_bo_intern((dpa_u_any_bo_ro_t*)dpa_u_any_bo_ro_g(X)) ) \
   )
 
 /////////////////////////////////////////
 //////      Utility functions      //////
 /////////////////////////////////////////
 
-#define dpa__u_sort__priority_g(X) _Generic((X), \
-    dpa_u_bo_inline_t: 0x10, \
-    dpa_u_bo_inline_t*: 0x11, \
-    const dpa_u_bo_inline_t*: 0x12, \
-    dpa_u_p_bo_inline_t*: 0x14, \
-    dpa_u_bo_unique_hashmap_t: 0x20, \
-    dpa_u_p_bo_unique_hashmap_t*: 0x24, \
-    dpa_u_bo_unique_t: 0x30, \
-    dpa_u_bo_unique_t*: 0x31, \
-    const dpa_u_bo_unique_t*: 0x32, \
-    dpa_u_p_bo_unique_t*: 0x34, \
-    dpa_u_bo_simple_t: 0x40, \
-    dpa_u_bo_simple_t*: 0x41, \
-    const dpa_u_bo_simple_t*: 0x42, \
-    dpa_u_p_bo_simple_t*: 0x44, \
-    dpa_u_bo_simple_ro_t: 0x50, \
-    dpa_u_bo_simple_ro_t*: 0x51, \
-    const dpa_u_bo_simple_ro_t*: 0x52, \
-    dpa_u_p_bo_simple_ro_t*: 0x54, \
-    dpa_u_bo_t: 0x60, \
-    dpa_u_bo_t*: 0x61, \
-    const dpa_u_bo_t*: 0x62, \
-    dpa_u_p_bo_t*: 0x64, \
-    dpa_u_bo_ro_t: 0x70, \
-    dpa_u_bo_ro_t*: 0x71, \
-    const dpa_u_bo_ro_t*: 0x72, \
-    dpa_u_p_bo_ro_t*: 0x74, \
-    default: 0xFFF \
-  )
-
-// This cuts down the number of type combinations I need to handle.
-// For any type in the first argument, only the preceeding or same types in dpa__u_sort__priority_g are possible to appear in the second.
-// Because otherwise, the arguments are swapped
-// This means we can't rely on argument order anymore, but we only have to deal with each type combination once.
-#define dpa__u_sort_param_by_type_g(F,X,Y) _Generic((char(*)[1+(dpa__u_sort__priority_g((X))<dpa__u_sort__priority_g((Y)))]){0}, \
-    char(*)[1]: F((X),(Y), 1), \
-    char(*)[2]: F((Y),(X),-1) \
-  )
-
 #define DPA__U_BOCVHV(T,F,X,...) \
-  dpa_u_bo_ ## T ## _t: F(DPA__G(dpa_u_bo_ ## T ## _t,(X)), __VA_ARGS__), \
-  dpa_u_bo_ ## T ## _t*: F(*DPA__G(dpa_u_bo_ ## T ## _t*,(X)), __VA_ARGS__), \
-  const dpa_u_bo_ ## T ## _t*: F(*DPA__G(const dpa_u_bo_ ## T ## _t*,(X)), __VA_ARGS__), \
-  dpa_u_p_bo_ ## T ## _t*: F(*(dpa_u_bo_ ## T ## _t*)DPA__G(dpa_u_p_bo_ ## T ## _t*,(X)), __VA_ARGS__)
+  dpa_u_ ## T ## _t: F(DPA__G(dpa_u_ ## T ## _t,(X)), __VA_ARGS__), \
+  dpa_u_ ## T ## _t*: F(*DPA__G(dpa_u_ ## T ## _t*,(X)), __VA_ARGS__), \
+  const dpa_u_ ## T ## _t*: F(*DPA__G(const dpa_u_ ## T ## _t*,(X)), __VA_ARGS__), \
+  dpa_u_any_ ## T ## _t*: F(*(dpa_u_ ## T ## _t*)DPA__G(dpa_u_any_ ## T ## _t*,(X)), __VA_ARGS__)
 
 // This is the same as DPA__U_BOCVHV. It's a copy because I need to nest it, once, and the C preprocessor will not allow recursion.
 #define DPA__U_BOCVHV2(T,F,X,...) \
-  dpa_u_bo_ ## T ## _t: F(DPA__G(dpa_u_bo_ ## T ## _t,(X)), __VA_ARGS__), \
-  dpa_u_bo_ ## T ## _t*: F(*DPA__G(dpa_u_bo_ ## T ## _t*,(X)), __VA_ARGS__), \
-  const dpa_u_bo_ ## T ## _t*: F(*DPA__G(const dpa_u_bo_ ## T ## _t*,(X)), __VA_ARGS__), \
-  dpa_u_p_bo_ ## T ## _t*: F(*(dpa_u_bo_ ## T ## _t*)DPA__G(dpa_u_p_bo_ ## T ## _t*,(X)), __VA_ARGS__)
+  dpa_u_ ## T ## _t: F(DPA__G(dpa_u_ ## T ## _t,(X)), __VA_ARGS__), \
+  dpa_u_ ## T ## _t*: F(*DPA__G(dpa_u_ ## T ## _t*,(X)), __VA_ARGS__), \
+  const dpa_u_ ## T ## _t*: F(*DPA__G(const dpa_u_ ## T ## _t*,(X)), __VA_ARGS__), \
+  dpa_u_any_ ## T ## _t*: F(*(dpa_u_ ## T ## _t*)DPA__G(dpa_u_any_ ## T ## _t*,(X)), __VA_ARGS__)
 
 // This is mainly to keep the final dpa__u_bo_compare_g macro a bit shorter.
 // It's already insanely long even when including dpa_u_temp_bo_simple_ro just twice.
@@ -781,39 +862,39 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_p_bo_ro_t*const _bo
     dpa_u_bo_inline_t: (void)0, \
     dpa_u_bo_inline_t*: (void)0, \
     const dpa_u_bo_inline_t*: (void)0, \
-    dpa_u_p_bo_inline_t*: (void)0, \
+    dpa_u_any_bo_inline_t*: (void)0, \
     dpa_u_bo_unique_hashmap_t: (void)0, \
-    dpa_u_p_bo_unique_hashmap_t*: (void)0, \
+    dpa_u_any_bo_unique_hashmap_t*: (void)0, \
     dpa_u_bo_unique_t: (void)0, \
     dpa_u_bo_unique_t*: (void)0, \
     const dpa_u_bo_unique_t*: (void)0, \
-    dpa_u_p_bo_unique_t*: (void)0, \
+    dpa_u_any_bo_unique_t*: (void)0, \
     dpa_u_bo_simple_t: (void)0, \
     dpa_u_bo_simple_t*: (void)0, \
     const dpa_u_bo_simple_t*: (void)0, \
-    dpa_u_p_bo_simple_t*: (void)0, \
+    dpa_u_any_bo_simple_t*: (void)0, \
     dpa_u_bo_simple_ro_t: (void)0, \
     dpa_u_bo_simple_ro_t*: (void)0, \
     const dpa_u_bo_simple_ro_t*: (void)0, \
-    dpa_u_p_bo_simple_ro_t*: (void)0, \
+    dpa_u_any_bo_simple_ro_t*: (void)0, \
     dpa_u_bo_t: (void)0, \
     dpa_u_bo_t*: (void)0, \
     const dpa_u_bo_t*: (void)0, \
-    dpa_u_p_bo_t*: (void)0, \
+    dpa_u_any_bo_t*: (void)0, \
     dpa_u_bo_ro_t: (void)0, \
     dpa_u_bo_ro_t*: (void)0, \
     const dpa_u_bo_ro_t*: (void)0, \
-    dpa_u_p_bo_ro_t*: (void)0 \
+    dpa_u_any_bo_ro_t*: (void)0 \
   )
 
 #define dpa_u_bo_compare(...) dpa_u_assert_selection(dpa_u_bo_compare_g(__VA_ARGS__))
 #define dpa_u_bo_compare_g(X, Y) dpa__u_sort_param_by_type_g(dpa__u_bo_compare_g, (X), (Y))
 #define dpa__u_bo_compare_g(X, Y, S) \
   _Generic((X), \
-    DPA__U_BOCVHV(inline, dpa__u_bo_compare_inline_g, (X), (Y), (S)), \
+    DPA__U_BOCVHV(bo_inline, dpa__u_bo_compare_inline_g, (X), (Y), (S)), \
     dpa_u_bo_unique_hashmap_t: dpa__u_bo_compare_unique_hashmap_g(DPA__G(dpa_u_bo_unique_hashmap_t,(X)),(Y),(S)), \
-    dpa_u_p_bo_unique_hashmap_t*: dpa__u_bo_compare_unique_hashmap_g((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X)),(Y),(S)), \
-    DPA__U_BOCVHV(unique, dpa__u_bo_compare_unique_g, (X), (Y), (S)), \
+    dpa_u_any_bo_unique_hashmap_t*: dpa__u_bo_compare_unique_hashmap_g((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X)),(Y),(S)), \
+    DPA__U_BOCVHV(bo_unique, dpa__u_bo_compare_unique_g, (X), (Y), (S)), \
     default: dpa_u_generic_if_selection(dpa__u_bo_compare__default_for(X), \
       dpa_u_generic_if_selection(dpa__u_bo_compare__default_for(Y), \
         dpa__u_bo_compare_default(dpa_u_temp_bo_simple_ro(X), dpa_u_temp_bo_simple_ro(Y)) \
@@ -834,7 +915,7 @@ DPA_U_EXPORT inline int dpa__u_bo_compare_default(const dpa_u_bo_simple_ro_t a, 
 }
 
 // Note: S is always 1
-#define dpa__u_bo_compare_inline_g(X,Y,S) dpa_u_generic((Y), DPA__U_BOCVHV2(inline, (-S) * dpa__u_bo_compare_inline, (Y), (X)))
+#define dpa__u_bo_compare_inline_g(X,Y,S) dpa_u_generic((Y), DPA__U_BOCVHV2(bo_inline, (-S) * dpa__u_bo_compare_inline, (Y), (X)))
 DPA_U_EXPORT inline int dpa__u_bo_compare_inline(const dpa_u_bo_inline_t a, const dpa_u_bo_inline_t b){
   if(a.size != b.size)
     return (int)a.size - b.size;
@@ -845,18 +926,18 @@ DPA_U_EXPORT inline int dpa__u_bo_compare_inline(const dpa_u_bo_inline_t a, cons
 #define dpa__u_bo_compare_unique_hashmap_g(X,Y,S) \
   dpa_u_generic((Y), \
     dpa_u_bo_inline_t: -S, \
-    dpa_u_p_bo_inline_t*: -S, \
+    dpa_u_any_bo_inline_t*: -S, \
     dpa_u_bo_unique_hashmap_t: S * ((X) - DPA__G(dpa_u_bo_unique_hashmap_t,(Y))), \
-    dpa_u_p_bo_unique_hashmap_t*: S * ((X) - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(Y))) \
+    dpa_u_any_bo_unique_hashmap_t*: S * ((X) - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(Y))) \
   )
 
 #define dpa__u_bo_compare_unique_g(X,Y,S) \
   dpa_u_generic((Y), \
     dpa_u_bo_inline_t: -S, \
-    dpa_u_p_bo_inline_t*: -S, \
+    dpa_u_any_bo_inline_t*: -S, \
     dpa_u_bo_unique_hashmap_t: (X).type == DPA_U_BO_UNIQUE_HASHMAP ? (S * ((X).bo_unique_hashmap - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_bo_unique_hashmap_t,(Y)))) : -S, \
-    dpa_u_p_bo_unique_hashmap_t*: (X).type == DPA_U_BO_UNIQUE_HASHMAP ? (S * ((X).bo_unique_hashmap - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(Y)))) : -S, \
-    DPA__U_BOCVHV2(unique, (-S) * dpa__u_bo_compare_unique, (Y), (X)) \
+    dpa_u_any_bo_unique_hashmap_t*: (X).type == DPA_U_BO_UNIQUE_HASHMAP ? (S * ((X).bo_unique_hashmap - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(Y)))) : -S, \
+    DPA__U_BOCVHV2(bo_unique, (-S) * dpa__u_bo_compare_unique, (Y), (X)) \
   )
 DPA_U_EXPORT inline int dpa__u_bo_compare_unique(const dpa_u_bo_unique_t a, const dpa_u_bo_unique_t b){
   const enum dpa_u_bo_s_unique_type a_type = dpa_u_bo_get_type(a);

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+cd "$(dirname "$0")/.."
+
+(
+  cat include/dpa/utils/*.h
+  echo .
+  printf "%s\n" "$1"
+) | sed 's|#include *<dpa/utils/.*||g' \
+  | sed 's/\\$/\x01\\/' \
+  | sed 's/  / \x02 /g' \
+  | sed 's/  / \x02 /g' \
+  | cpp -x c -std=c17 -Wall -Wextra -pedantic - \
+  | tail -n 1 \
+  | sed 's/\x01/\n/g' \
+  | sed 's/\x02//g'

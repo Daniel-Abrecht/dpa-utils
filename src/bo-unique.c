@@ -11,7 +11,6 @@
 #include <threads.h>
 
 extern const void* dpa__u_bo_unique_hashmap_get_data(dpa_u_bo_unique_hashmap_t);
-extern size_t dpa__u_bo_unique_hashmap_get_size(dpa_u_bo_unique_hashmap_t);
 extern void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t);
 extern bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t);
 
@@ -186,7 +185,7 @@ DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_f
   abort();
 }
 
-DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_p_bo_ro_t* _bo){
+DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _bo){
   const dpa_u_bo_ro_t*const bo = (const dpa_u_bo_ro_t*)_bo;
   const dpa_u_hash_t hash = dpa_u_bo_hash(bo);
   const size_t size = dpa_u_bo_get_size(bo);
