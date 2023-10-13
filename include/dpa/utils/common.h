@@ -68,11 +68,11 @@ typedef struct { int x; } dpa_u_invalid_selection_t;
 #endif
 
 #if defined(__has_builtin) && __has_builtin(__builtin_expect)
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
+#define dpa_u_likely(x)   __builtin_expect(!!(x), 1)
+#define dpa_u_unlikely(x) __builtin_expect(!!(x), 0)
 #else
-#define likely(x)
-#define unlikely(x)
+#define dpa_u_likely(x)
+#define dpa_u_unlikely(x)
 #endif
 
 #if defined(__GNUC__) || defined(__llvm__)

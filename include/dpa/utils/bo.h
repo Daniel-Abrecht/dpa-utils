@@ -35,8 +35,8 @@ typedef size_t dpa_u_hash_t;
 
 #define dpa_u_bo_type_list(X) \
   X((DPA_U_BO_INLINE, 1)) \
-  X((DPA_U_BO_SIMPLE)) \
-  X((DPA_U_BO_UNIQUE_HASHMAP))
+  X((DPA_U_BO_UNIQUE_HASHMAP)) \
+  X((DPA_U_BO_SIMPLE))
 
 DPA_U_ENUM(dpa_u_bo_type)
 
@@ -52,8 +52,8 @@ enum dpa_u_bo_s_unique_hashmap_type { DPA_U_BO_UNIQUE_HASHMAP_3 = DPA_U_BO_UNIQU
 enum dpa_u_bo_s_simple_ro_type { DPA_U_BO_SIMPLE_4 = DPA_U_BO_SIMPLE };
 enum dpa_u_bo_s_ro_type {
   DPA_U_BO_INLINE_10 = DPA_U_BO_INLINE,
-  DPA_U_BO_SIMPLE_10 = DPA_U_BO_SIMPLE,
   DPA_U_BO_UNIQUE_HASHMAP_10 = DPA_U_BO_UNIQUE_HASHMAP,
+  DPA_U_BO_SIMPLE_10 = DPA_U_BO_SIMPLE,
 };
 enum dpa_u_bo_s_type {
   DPA_U_BO_INLINE_11 = DPA_U_BO_INLINE,
@@ -225,14 +225,6 @@ DPA_U_EXPORT inline bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t 
 ///////////////////////////////////////////////
 //////      Member access functions      //////
 ///////////////////////////////////////////////
-
-// For most macros, these cases are really all the same anyway
-#define dpa__u_p_helper_g(X) _Generic((X), \
-    dpa_u_p_bo_inline_t*: (const dpa_u_bo_inline_t*)DPA__G(dpa_u_p_bo_inline_t*, (X)), \
-    dpa_u_p_bo_unique_t*: (const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*, (X)), \
-    dpa_u_p_bo_unique_hashmap_t*: (const dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*, (X)), \
-    default: (X) \
-  )
 
 /**
  * The dpa_u_p_* types are const opaque types. They are to be passed to functions expecting a variant or derived type of the corresponding dpa_u_* type.
@@ -585,7 +577,7 @@ DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(con
  * Note: If the source buffer was a DPA_U_BO_INLINE (which can also be the case for dpa_u_bo_t and dpa_u_bo_ro_t too),
  * then the lifetime will not exceed the source BOs scope! It's fine for passing to other functions, but not for much else.
  */
-#define dpa_u_temp_bo_simple_ro(X) dpa_u_assert_selection(dpa_u_temp_bo_simple_ro_g(...))
+#define dpa_u_temp_bo_simple_ro(...) dpa_u_assert_selection(dpa_u_temp_bo_simple_ro_g(__VA_ARGS__))
 #define dpa_u_temp_bo_simple_ro_g(X) dpa_u_generic((X), \
     DPA__GS(dpa_u_bo_simple_t, (X)).ro, \
     DPA__GS(dpa_u_bo_simple_ro_t, (X)), \
@@ -593,7 +585,7 @@ DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(con
     dpa_u_bo_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_t,(X))) }, \
     dpa_u_bo_ro_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_ro_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_ro_t,(X))) }, \
     dpa_u_bo_unique_hashmap_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_unique_hashmap_t,(X))) }, \
-    dpa_u_p_bo_unique_hashmap_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_p_bo_unique_hashmap_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_p_bo_unique_hashmap_t,(X))) }, \
+    dpa_u_p_bo_unique_hashmap_t*: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))) }, \
     dpa_u_bo_unique_t: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(dpa_u_bo_unique_t,(X))), .data=dpa_u_bo_data(DPA__G(dpa_u_bo_unique_t,(X))) }, \
     \
     DPA__GS(dpa_u_bo_simple_t*, (X))->ro, \
@@ -709,17 +701,20 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_p_bo_ro_t*const _bo
  * Interns a buffer. The refcount of the buffer will be increased.
  * \returns dpa_u_bo_unique_t
  */
-#define dpa_u_bo_intern(...) dpa_u_assert_selection(dpa_u_bo_intern_g(dpa__u_p_helper_g(__VA_ARGS__)))
+#define dpa_u_bo_intern(...) dpa_u_assert_selection(dpa_u_bo_intern_g(__VA_ARGS__))
 #define dpa_u_bo_intern_g(X) _Generic((X), \
     dpa_u_bo_inline_t: (const dpa_u_bo_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
     dpa_u_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *DPA__G(dpa_u_bo_inline_t*, (X)) }, \
     const dpa_u_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *DPA__G(const dpa_u_bo_inline_t*, (X)) }, \
+    dpa_u_p_bo_inline_t*: (const dpa_u_bo_unique_t){ .bo_inline = *(const dpa_u_bo_inline_t*)DPA__G(dpa_u_p_bo_inline_t*, (X)) }, \
     \
     dpa_u_bo_unique_hashmap_t: (dpa__u_bo_unique_hashmap_ref(DPA__G(dpa_u_bo_unique_hashmap_t,(X))),(const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = DPA__G(dpa_u_bo_unique_hashmap_t,(X)) }), \
+    dpa_u_p_bo_unique_hashmap_t*: (dpa__u_bo_unique_hashmap_ref((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X))),(const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X)) }), \
     \
     dpa_u_bo_unique_t: (dpa__u_bo_unique_ref(DPA__G(dpa_u_bo_unique_t,(X))),(X)), \
     dpa_u_bo_unique_t*: (dpa__u_bo_unique_ref(*DPA__G(dpa_u_bo_unique_t*,(X))),*DPA__G(dpa_u_bo_unique_t*,(X))), \
     const dpa_u_bo_unique_t*: (dpa__u_bo_unique_ref(*DPA__G(const dpa_u_bo_unique_t*,(X))),*DPA__G(const dpa_u_bo_unique_t*,(X))), \
+    dpa_u_p_bo_unique_t*: (dpa__u_bo_unique_ref(*(const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*,(X))),*(const dpa_u_bo_unique_t*)DPA__G(dpa_u_p_bo_unique_t*,(X))), \
     \
     default: dpa_u_generic_if_selection( dpa_u_p_bo_ro_g(X), dpa__u_bo_intern((dpa_u_p_bo_ro_t*)dpa_u_p_bo_ro_g(X)) ) \
   )
@@ -728,6 +723,151 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_p_bo_ro_t*const _bo
 //////      Utility functions      //////
 /////////////////////////////////////////
 
-#define dpa_u_equal(X) dpa_u_generic(X, )
+#define dpa__u_sort__priority_g(X) _Generic((X), \
+    dpa_u_bo_inline_t: 0x10, \
+    dpa_u_bo_inline_t*: 0x11, \
+    const dpa_u_bo_inline_t*: 0x12, \
+    dpa_u_p_bo_inline_t*: 0x14, \
+    dpa_u_bo_unique_hashmap_t: 0x20, \
+    dpa_u_p_bo_unique_hashmap_t*: 0x24, \
+    dpa_u_bo_unique_t: 0x30, \
+    dpa_u_bo_unique_t*: 0x31, \
+    const dpa_u_bo_unique_t*: 0x32, \
+    dpa_u_p_bo_unique_t*: 0x34, \
+    dpa_u_bo_simple_t: 0x40, \
+    dpa_u_bo_simple_t*: 0x41, \
+    const dpa_u_bo_simple_t*: 0x42, \
+    dpa_u_p_bo_simple_t*: 0x44, \
+    dpa_u_bo_simple_ro_t: 0x50, \
+    dpa_u_bo_simple_ro_t*: 0x51, \
+    const dpa_u_bo_simple_ro_t*: 0x52, \
+    dpa_u_p_bo_simple_ro_t*: 0x54, \
+    dpa_u_bo_t: 0x60, \
+    dpa_u_bo_t*: 0x61, \
+    const dpa_u_bo_t*: 0x62, \
+    dpa_u_p_bo_t*: 0x64, \
+    dpa_u_bo_ro_t: 0x70, \
+    dpa_u_bo_ro_t*: 0x71, \
+    const dpa_u_bo_ro_t*: 0x72, \
+    dpa_u_p_bo_ro_t*: 0x74, \
+    default: 0xFFF \
+  )
+
+// This cuts down the number of type combinations I need to handle.
+// For any type in the first argument, only the preceeding or same types in dpa__u_sort__priority_g are possible to appear in the second.
+// Because otherwise, the arguments are swapped
+// This means we can't rely on argument order anymore, but we only have to deal with each type combination once.
+#define dpa__u_sort_param_by_type_g(F,X,Y) _Generic((char(*)[1+(dpa__u_sort__priority_g((X))<dpa__u_sort__priority_g((Y)))]){0}, \
+    char(*)[1]: F((X),(Y), 1), \
+    char(*)[2]: F((Y),(X),-1) \
+  )
+
+#define DPA__U_BOCVHV(T,F,X,...) \
+  dpa_u_bo_ ## T ## _t: F(DPA__G(dpa_u_bo_ ## T ## _t,(X)), __VA_ARGS__), \
+  dpa_u_bo_ ## T ## _t*: F(*DPA__G(dpa_u_bo_ ## T ## _t*,(X)), __VA_ARGS__), \
+  const dpa_u_bo_ ## T ## _t*: F(*DPA__G(const dpa_u_bo_ ## T ## _t*,(X)), __VA_ARGS__), \
+  dpa_u_p_bo_ ## T ## _t*: F(*(dpa_u_bo_ ## T ## _t*)DPA__G(dpa_u_p_bo_ ## T ## _t*,(X)), __VA_ARGS__)
+
+// This is the same as DPA__U_BOCVHV. It's a copy because I need to nest it, once, and the C preprocessor will not allow recursion.
+#define DPA__U_BOCVHV2(T,F,X,...) \
+  dpa_u_bo_ ## T ## _t: F(DPA__G(dpa_u_bo_ ## T ## _t,(X)), __VA_ARGS__), \
+  dpa_u_bo_ ## T ## _t*: F(*DPA__G(dpa_u_bo_ ## T ## _t*,(X)), __VA_ARGS__), \
+  const dpa_u_bo_ ## T ## _t*: F(*DPA__G(const dpa_u_bo_ ## T ## _t*,(X)), __VA_ARGS__), \
+  dpa_u_p_bo_ ## T ## _t*: F(*(dpa_u_bo_ ## T ## _t*)DPA__G(dpa_u_p_bo_ ## T ## _t*,(X)), __VA_ARGS__)
+
+// This is mainly to keep the final dpa__u_bo_compare_g macro a bit shorter.
+// It's already insanely long even when including dpa_u_temp_bo_simple_ro just twice.
+#define dpa__u_bo_compare__default_for(X) dpa_u_generic((X), \
+    dpa_u_bo_inline_t: (void)0, \
+    dpa_u_bo_inline_t*: (void)0, \
+    const dpa_u_bo_inline_t*: (void)0, \
+    dpa_u_p_bo_inline_t*: (void)0, \
+    dpa_u_bo_unique_hashmap_t: (void)0, \
+    dpa_u_p_bo_unique_hashmap_t*: (void)0, \
+    dpa_u_bo_unique_t: (void)0, \
+    dpa_u_bo_unique_t*: (void)0, \
+    const dpa_u_bo_unique_t*: (void)0, \
+    dpa_u_p_bo_unique_t*: (void)0, \
+    dpa_u_bo_simple_t: (void)0, \
+    dpa_u_bo_simple_t*: (void)0, \
+    const dpa_u_bo_simple_t*: (void)0, \
+    dpa_u_p_bo_simple_t*: (void)0, \
+    dpa_u_bo_simple_ro_t: (void)0, \
+    dpa_u_bo_simple_ro_t*: (void)0, \
+    const dpa_u_bo_simple_ro_t*: (void)0, \
+    dpa_u_p_bo_simple_ro_t*: (void)0, \
+    dpa_u_bo_t: (void)0, \
+    dpa_u_bo_t*: (void)0, \
+    const dpa_u_bo_t*: (void)0, \
+    dpa_u_p_bo_t*: (void)0, \
+    dpa_u_bo_ro_t: (void)0, \
+    dpa_u_bo_ro_t*: (void)0, \
+    const dpa_u_bo_ro_t*: (void)0, \
+    dpa_u_p_bo_ro_t*: (void)0 \
+  )
+
+#define dpa_u_bo_compare(...) dpa_u_assert_selection(dpa_u_bo_compare_g(__VA_ARGS__))
+#define dpa_u_bo_compare_g(X, Y) dpa__u_sort_param_by_type_g(dpa__u_bo_compare_g, (X), (Y))
+#define dpa__u_bo_compare_g(X, Y, S) \
+  _Generic((X), \
+    DPA__U_BOCVHV(inline, dpa__u_bo_compare_inline_g, (X), (Y), (S)), \
+    dpa_u_bo_unique_hashmap_t: dpa__u_bo_compare_unique_hashmap_g(DPA__G(dpa_u_bo_unique_hashmap_t,(X)),(Y),(S)), \
+    dpa_u_p_bo_unique_hashmap_t*: dpa__u_bo_compare_unique_hashmap_g((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(X)),(Y),(S)), \
+    DPA__U_BOCVHV(unique, dpa__u_bo_compare_unique_g, (X), (Y), (S)), \
+    default: dpa_u_generic_if_selection(dpa__u_bo_compare__default_for(X), \
+      dpa_u_generic_if_selection(dpa__u_bo_compare__default_for(Y), \
+        dpa__u_bo_compare_default(dpa_u_temp_bo_simple_ro(X), dpa_u_temp_bo_simple_ro(Y)) \
+      ) \
+    ) \
+  )
+
+DPA_U_EXPORT inline int dpa__u_bo_compare_default(const dpa_u_bo_simple_ro_t a, const dpa_u_bo_simple_ro_t b){
+  const size_t a_size = dpa_u_bo_get_size(a);
+  const size_t b_size = dpa_u_bo_get_size(b);
+  if(a_size < b_size) return -1;
+  if(a_size > b_size) return 1;
+  const void*const a_data = dpa_u_bo_data(a);
+  const void*const b_data = dpa_u_bo_data(b);
+  if(a_data == b_data)
+    return 0;
+  return memcmp(a_data, b_data, a_size);
+}
+
+// Note: S is always 1
+#define dpa__u_bo_compare_inline_g(X,Y,S) dpa_u_generic((Y), DPA__U_BOCVHV2(inline, (-S) * dpa__u_bo_compare_inline, (Y), (X)))
+DPA_U_EXPORT inline int dpa__u_bo_compare_inline(const dpa_u_bo_inline_t a, const dpa_u_bo_inline_t b){
+  if(a.size != b.size)
+    return (int)a.size - b.size;
+  return memcmp(a.data, b.data, a.size);
+}
+
+// Note: dpa_u_bo_intern will always return an inline bo if the string fits into it. Therefore, if we have an inline bo, it can not match a unique_hashmap bo.
+#define dpa__u_bo_compare_unique_hashmap_g(X,Y,S) \
+  dpa_u_generic((Y), \
+    dpa_u_bo_inline_t: -S, \
+    dpa_u_p_bo_inline_t*: -S, \
+    dpa_u_bo_unique_hashmap_t: S * ((X) - DPA__G(dpa_u_bo_unique_hashmap_t,(Y))), \
+    dpa_u_p_bo_unique_hashmap_t*: S * ((X) - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(Y))) \
+  )
+
+#define dpa__u_bo_compare_unique_g(X,Y,S) \
+  dpa_u_generic((Y), \
+    dpa_u_bo_inline_t: -S, \
+    dpa_u_p_bo_inline_t*: -S, \
+    dpa_u_bo_unique_hashmap_t: (X).type == DPA_U_BO_UNIQUE_HASHMAP ? (S * ((X).bo_unique_hashmap - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_bo_unique_hashmap_t,(Y)))) : -S, \
+    dpa_u_p_bo_unique_hashmap_t*: (X).type == DPA_U_BO_UNIQUE_HASHMAP ? (S * ((X).bo_unique_hashmap - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_p_bo_unique_hashmap_t*,(Y)))) : -S, \
+    DPA__U_BOCVHV2(unique, (-S) * dpa__u_bo_compare_unique, (Y), (X)) \
+  )
+DPA_U_EXPORT inline int dpa__u_bo_compare_unique(const dpa_u_bo_unique_t a, const dpa_u_bo_unique_t b){
+  const enum dpa_u_bo_s_unique_type a_type = dpa_u_bo_get_type(a);
+  const enum dpa_u_bo_s_unique_type b_type = dpa_u_bo_get_type(b);
+  if(a_type != b_type)
+    return a_type - b_type;
+  switch(a_type){
+    case DPA_U_BO_INLINE: return dpa__u_bo_compare_inline(a.bo_inline, b.bo_inline);
+    case DPA_U_BO_UNIQUE_HASHMAP: return a.bo_unique_hashmap - b.bo_unique_hashmap;
+  }
+  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(a)));
+}
 
 #endif

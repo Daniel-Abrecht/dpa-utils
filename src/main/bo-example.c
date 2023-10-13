@@ -60,6 +60,13 @@ int main(void){
     printf("Type: %s\n", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(my_bo))); // Probably DPA_U_BO_UNIQUE_HASHMAP
     dpa_u_puts(my_bo);
     my_puts(my_bo);
+    dpa_u_bo_unique_t my_bo2 = dpa_u_bo_intern(((dpa_u_bo_simple_ro_t){
+      .type = DPA_U_BO_SIMPLE,
+      .size = sizeof("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")-1,
+      .data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    }));
+    printf("dpa_u_bo_compare: %d\n", dpa_u_bo_compare(my_bo, my_bo2));
     dpa_u_bo_put(my_bo);
+    dpa_u_bo_put(my_bo2);
   }
 }

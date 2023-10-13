@@ -137,7 +137,7 @@ DPA_U_EXPORT inline bool dpa_u_refcount_decrement(const struct dpa_u_refcount*co
 DPA_U_EXPORT inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeable*const _rc){
   void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable*);
   struct dpa_u_refcount_freeable*const rc = (struct dpa_u_refcount_freeable*)_rc;
-  if(likely(((atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1) & DPA__U_REFCOUNT_MASK)))
+  if(dpa_u_likely(((atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1) & DPA__U_REFCOUNT_MASK)))
     return true;
   const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
 #ifdef __GNUC__
