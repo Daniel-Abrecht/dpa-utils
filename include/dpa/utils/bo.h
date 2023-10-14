@@ -299,37 +299,37 @@ typedef const struct dpa_u_any_bo_t dpa_u_any_bo_t;
 #define dpa__u_v_bo_unique_hashmap_get_type(X)   DPA_U_BO_UNIQUE_HASHMAP_3
 #define dpa__u_p_bo_unique_hashmap_get_type(X)   DPA_U_BO_UNIQUE_HASHMAP_3
 #define dpa__u_cp_bo_unique_hashmap_get_type(X)  DPA_U_BO_UNIQUE_HASHMAP_3
-#define dpa__u_any_bo_unique_hashmap_get_type(X) DPA_U_BO_UNIQUE_HASHMAP_3
+#define dpa__u_any_bo_unique_hashmap_get_type(X) DPA_U_BO_UNIQUE_HASHMAP_A3
 
 #define dpa__u_v_bo_inline_get_type(X)   DPA_U_BO_INLINE_1
 #define dpa__u_p_bo_inline_get_type(X)   DPA_U_BO_INLINE_1
 #define dpa__u_cp_bo_inline_get_type(X)  DPA_U_BO_INLINE_1
-#define dpa__u_any_bo_inline_get_type(X) DPA_U_BO_INLINE_1
+#define dpa__u_any_bo_inline_get_type(X) DPA_U_BO_INLINE_A1
 
 #define dpa__u_v_bo_simple_get_type(X)   DPA_U_BO_SIMPLE_2
 #define dpa__u_p_bo_simple_get_type(X)   DPA_U_BO_SIMPLE_2
 #define dpa__u_cp_bo_simple_get_type(X)  DPA_U_BO_SIMPLE_2
-#define dpa__u_any_bo_simple_get_type(X) ((enum dpa_u_bo_s_simple_type)((X)->type))
+#define dpa__u_any_bo_simple_get_type(X) ((enum dpa_u_any_bo_s_simple_type)((X)->type))
 
 #define dpa__u_v_bo_simple_ro_get_type(X)   DPA_U_BO_SIMPLE_4
 #define dpa__u_p_bo_simple_ro_get_type(X)   DPA_U_BO_SIMPLE_4
 #define dpa__u_cp_bo_simple_ro_get_type(X)  DPA_U_BO_SIMPLE_4
-#define dpa__u_any_bo_simple_ro_get_type(X) ((enum dpa_u_bo_s_simple_ro_type)((X)->type))
+#define dpa__u_any_bo_simple_ro_get_type(X) ((enum dpa_u_any_bo_s_simple_ro_type)((X)->type))
 
 #define dpa__u_v_bo_unique_get_type(X)   ((enum dpa_u_bo_s_unique_type)((X).type))
 #define dpa__u_p_bo_unique_get_type(X)   ((enum dpa_u_bo_s_unique_type)((X)->type))
 #define dpa__u_cp_bo_unique_get_type(X)  ((enum dpa_u_bo_s_unique_type)((X)->type))
-#define dpa__u_any_bo_unique_get_type(X) ((enum dpa_u_bo_s_unique_type)((X)->type))
+#define dpa__u_any_bo_unique_get_type(X) ((enum dpa_u_any_bo_s_unique_type)((X)->type))
 
 #define dpa__u_v_bo_get_type(X)   ((enum dpa_u_bo_s_type)((X).type))
 #define dpa__u_p_bo_get_type(X)   ((enum dpa_u_bo_s_type)((X)->type))
 #define dpa__u_cp_bo_get_type(X)  ((enum dpa_u_bo_s_type)((X)->type))
-#define dpa__u_any_bo_get_type(X) ((enum dpa_u_bo_s_type)((X)->type))
+#define dpa__u_any_bo_get_type(X) ((enum dpa_u_any_bo_s_type)((X)->type))
 
 #define dpa__u_v_bo_ro_get_type(X)   ((enum dpa_u_bo_s_ro_type)((X).type))
 #define dpa__u_p_bo_ro_get_type(X)   ((enum dpa_u_bo_s_ro_type)((X)->type))
 #define dpa__u_cp_bo_ro_get_type(X)  ((enum dpa_u_bo_s_ro_type)((X)->type))
-#define dpa__u_any_bo_ro_get_type(X) ((enum dpa_u_bo_s_ro_type)((X)->type))
+#define dpa__u_any_bo_ro_get_type(X) ((enum dpa_u_any_bo_s_ro_type)((X)->type))
 
 ////
 
