@@ -10,7 +10,6 @@
 #include <stdatomic.h>
 #include <threads.h>
 
-extern const void* dpa__u_bo_unique_hashmap_get_data(dpa_u_bo_unique_hashmap_t);
 extern void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t);
 extern bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t);
 
@@ -70,12 +69,9 @@ static inline struct bucket* get_bucket(dpa_u_hash_t hash){
 }
 
 static inline struct dpa_u_refcount_freeable* entry_get_ext_refcount(const dpa__u_bo_unique_hashmap_entry_t*const e){
-  switch(e->type_offset){
-    case DPA__U_BO_UNIQUE__ENTRY_TYPE_INLINE: return 0;
-    case DPA__U_BO_UNIQUE__ENTRY_TYPE_STATIC: return 0;
-    case DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED: return ((struct dpa__u_bo_entry_refcounted*)e)->refcount;
-  }
-  return ((struct dpa__u_bo_entry_refcounted_2*)e)->refcount;
+  if(e->has_ext_refcount)
+    return ((struct dpa__u_bo_entry_refcounted*)e)->refcount;
+  return 0;
 }
 
 static inline void lock_entry(dpa_u_hash_t hash){
@@ -201,7 +197,7 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
     if(e_size > size) continue;
     if(e_hash > hash) break;
     if(e_size < size) break;
-    const void*const e_data = dpa__u_bo_unique_hashmap_get_data(e);
+    const void*const e_data = e->data;
     if(e_data != data){
       int diff = memcmp(e_data, data, size);
       if(diff < 0) continue;
@@ -217,69 +213,53 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
     if(type == DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP){
       dpa__u_bo_unique_hashmap_entry_t* old = dpa_u_container_of(refcount, dpa__u_bo_unique_hashmap_entry_t, refcount.freeable);
       struct dpa_u_refcount_freeable*const true_refcount = entry_get_ext_refcount(old);
-      if(old->type_offset >= DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED)
+      if(old->has_ext_refcount)
         refcount = true_refcount;
     }
     dpa_u_refcount_ref(refcount);
     if(type == DPA_U_REFCOUNT_STATIC){
-      struct dpa__u_bo_entry_static*const new = malloc(sizeof(*new));
-      *new = (struct dpa__u_bo_entry_static){
-        .entry = {
-          .next = *it,
-          .hash = hash,
-          .size = size,
-          .type_offset = DPA__U_BO_UNIQUE__ENTRY_TYPE_STATIC,
-          // dpa_u_refcount_i_static means the entry will never be freed again.
-          // This isn't necessary, but seams sensible for data that will never be freed either.
-          .refcount = dpa_u_refcount_i_static,
-        },
+      struct dpa__u_bo_unique_hashmap_entry*const new = malloc(sizeof(*new));
+      *new = (struct dpa__u_bo_unique_hashmap_entry){
+        .type = DPA_U_BO_UNIQUE_HASHMAP,
+        .has_ext_refcount = false,
+        .size = size,
         .data = data,
-      };
-      new_entry = &new->entry;
-    }else{
-      const size_t offset = (const char*)data - (const char*)(refcount + 1);
-      if(offset < (((size_t)1)<<CHAR_BIT) - DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED_2){
-        struct dpa__u_bo_entry_refcounted_2*const new = malloc(sizeof(*new));
-        *new = (struct dpa__u_bo_entry_refcounted_2){
-          .entry = {
-            .next = *it,
-            .hash = hash,
-            .size = size,
-            .type_offset = DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED_2 + offset,
-            .refcount = dpa_u_refcount_i_bo_unique(1),
-          },
-          .refcount = refcount,
-        };
-        new_entry = &new->entry;
-      }else{
-        struct dpa__u_bo_entry_refcounted*const new = malloc(sizeof(*new));
-        *new = (struct dpa__u_bo_entry_refcounted){
-          .entry = {
-            .next = *it,
-            .hash = hash,
-            .size = size,
-            .type_offset = DPA__U_BO_UNIQUE__ENTRY_TYPE_REFCOUNTED,
-            .refcount = dpa_u_refcount_i_bo_unique(1),
-          },
-          .offset = offset,
-          .refcount = refcount,
-        };
-        new_entry = &new->entry;
-      }
-    }
-  }else{
-    struct dpa__u_bo_entry_inline*const new = malloc(sizeof(*new) + size);
-    *new = (struct dpa__u_bo_entry_inline){
-      .entry = {
+        // dpa_u_refcount_i_static means the entry will never be freed again.
+        // This isn't necessary, but seams sensible for data that will never be freed either.
+        .refcount = dpa_u_refcount_i_static,
         .next = *it,
         .hash = hash,
-        .size = size,
-        .type_offset = DPA__U_BO_UNIQUE__ENTRY_TYPE_INLINE,
-        .refcount = dpa_u_refcount_i_bo_unique(1),
-      },
+      };
+      new_entry = new;
+    }else{
+      struct dpa__u_bo_entry_refcounted*const new = malloc(sizeof(*new));
+      *new = (struct dpa__u_bo_entry_refcounted){
+        .entry = {
+          .type = DPA_U_BO_UNIQUE_HASHMAP,
+          .has_ext_refcount = true,
+          .size = size,
+          .data = data,
+          .refcount = dpa_u_refcount_i_bo_unique(1),
+          .next = *it,
+          .hash = hash,
+        },
+        .refcount = refcount,
+      };
+      new_entry = &new->entry;
+    }
+  }else{
+    struct dpa__u_bo_unique_hashmap_entry*const new = malloc(sizeof(*new) + size);
+    *new = (struct dpa__u_bo_unique_hashmap_entry){
+      .type = DPA_U_BO_UNIQUE_HASHMAP,
+      .has_ext_refcount = false,
+      .size = size,
+      .data = new+1,
+      .refcount = dpa_u_refcount_i_bo_unique(1),
+      .next = *it,
+      .hash = hash,
     };
-    memcpy(new->data, data, size);
-    new_entry = &new->entry;
+    memcpy(new+1, data, size);
+    new_entry = new;
   }
   *it = new_entry;
   unlock_entry(hash);
