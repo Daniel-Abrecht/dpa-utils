@@ -144,10 +144,6 @@ static_assert(offsetof(dpa_u_bo_simple_t,data) == sizeof(size_t), "Expected data
 
 typedef const struct dpa_u_any_bo_simple dpa_u_any_bo_simple_t;
 
-////// Unique hashmap string entries, these are not meant to be used directly.
-// Just use dpa_u_bo_unique_t instead
-
-// This has, in the best case, the size of 4 size_t. In the worst case, it has the size of 6 size_t
 struct dpa__u_bo_unique_hashmap_entry {
   struct {
     DPA__U_BO_META(has_ext_refcount);
@@ -482,14 +478,14 @@ DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_v_bo_ro_get_size(const dp
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
-    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_v_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
+    case DPA_U_BO_UNIQUE_HASHMAP: return bo.bo_unique_hashmap->size;
   }
   dpa_u_unreachable("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_v_bo_unique_get_size(const dpa_u_bo_unique_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
-    case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_v_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
+    case DPA_U_BO_UNIQUE_HASHMAP: return bo.bo_unique_hashmap->size;
   }
   dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
@@ -733,7 +729,7 @@ DPA_U_EXPORT inline dpa__u_really_inline struct dpa_u_refcount_freeable* dpa__u_
     dpa_u_any_bo_ro_t*: (X), \
     \
     dpa_u_bo_inline_t: (dpa_u_any_bo_inline_t*)&DPA__G(dpa_u_bo_inline_t,(X)), \
-    dpa_u_bo_unique_hashmap_t: (dpa_u_any_bo_unique_hashmap_t*)&DPA__G(dpa_u_bo_unique_hashmap_t,(X)), \
+    dpa_u_bo_unique_hashmap_t: (dpa_u_any_bo_unique_hashmap_t*)DPA__G(dpa_u_bo_unique_hashmap_t,(X)), \
     dpa_u_bo_unique_t: (dpa_u_any_bo_unique_t*)&DPA__G(dpa_u_bo_unique_t,(X)), \
     dpa_u_bo_simple_t: (dpa_u_any_bo_simple_t*)&DPA__G(dpa_u_bo_simple_t,(X)), \
     dpa_u_bo_simple_ro_t: (dpa_u_any_bo_simple_ro_t*)&DPA__G(dpa_u_bo_simple_ro_t,(X)), \
@@ -755,15 +751,19 @@ DPA_U_EXPORT inline dpa__u_really_inline struct dpa_u_refcount_freeable* dpa__u_
     const dpa_u_bo_ro_t*: (dpa_u_any_bo_ro_t*)DPA__G(const dpa_u_bo_ro_t*,(X)) \
   )
 
-DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_any_bo_ro_t*const _bo){
-  const dpa_u_bo_ro_t*const bo = (const dpa_u_bo_ro_t*)_bo;
+DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_any_bo_ro_t*const bo){
   // We allow the simple cases to be inlined, and the complicated one is handled in dpa__u_bo_do_intern instead
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
-      return (dpa_u_bo_unique_t){ .bo_inline = bo->bo_inline };
-    case DPA_U_BO_UNIQUE_HASHMAP:
-      dpa__u_bo_unique_hashmap_ref(bo->bo_unique_hashmap);
-      return bo->bo_unique;
+      return (dpa_u_bo_unique_t){ .bo_inline = *(dpa_u_bo_inline_t*)bo };
+    case DPA_U_BO_UNIQUE_HASHMAP: {
+      dpa_u_bo_unique_hashmap_t ubo = (dpa_u_bo_unique_hashmap_t)bo;
+      dpa__u_bo_unique_hashmap_ref(ubo);
+      return (dpa_u_bo_unique_t){
+        .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
+        .bo_unique_hashmap = ubo,
+      };
+    }
     default: {
       if(dpa_u_bo_get_size(bo) <= DPA_U_BO_INLINE_MAX_SIZE){
         dpa_u_bo_inline_t boi = {
@@ -776,7 +776,7 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_any_bo_ro_t*const _
       extern dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* bo);
       return (dpa_u_bo_unique_t){
         .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
-        .bo_unique_hashmap = dpa__u_bo_do_intern(_bo),
+        .bo_unique_hashmap = dpa__u_bo_do_intern(bo),
       };
     }
   }
