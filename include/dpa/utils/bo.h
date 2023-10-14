@@ -668,15 +668,6 @@ DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(con
     const dpa_u_bo_t*: (const dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_bo_get_size(DPA__G(const dpa_u_bo_t*,(X))), .data=dpa_u_bo_data(DPA__G(const dpa_u_bo_t*,(X))) } \
   )
 
-#define dpa__u_temp_bo_simple_ro_helper_g(T,P,X) \
-    T: (const dpa_u_bo_simple_ro_t){ .type = DPA_U_BO_SIMPLE, .size=dpa_u_ ## P ## _get_size(DPA__G(T,(X))), .data=dpa_u_ ## P ## _data__ ## T(DPA__G(T,(X))) }
-
-#define dpa__u_temp_bo_simple_ro_helper_2_g(T,X) \
-    dpa__u_temp_bo_simple_ro_helper_g(dpa_u_ ## T ## _t, v_ ## T, (X)), \
-    dpa__u_temp_bo_simple_ro_helper_g(dpa_u_ ## T ## _t*, p_ ## T, (X)), \
-    dpa__u_temp_bo_simple_ro_helper_g(const dpa_u_ ## T ## _t*, cp_ ## T, (X)), \
-    dpa__u_temp_bo_simple_ro_helper_g(dpa_u_p_ ## T ## _t*, any_ ## T, (X))
-
 /**
  * Note: If the source buffer was a DPA_U_BO_INLINE (which can also be the case for dpa_u_bo_t and dpa_u_bo_ro_t too),
  * then the lifetime of the data will not exceed the current blocks scope! If you pass in a pointer, it'll at least match the source BOs lifetime.
