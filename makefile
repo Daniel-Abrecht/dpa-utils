@@ -60,30 +60,35 @@ export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 
 SHELL_CMD="$$SHELL"
 
+
 all: source-checks bin lib
 
 .PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm
 
+source-checks: build/.check-all
 
-source-checks:
-	mkdir -p build
-
+build/.check-header-compile: $(HEADERS)
+	mkdir -p $(dir $@)
 	@echo "Verifying that headers compile on their own..."
-
 	find include/dpa/ -type f -iname "*.h" -print0 | xargs -0tL1 $(CC) -x c -fPIC -c -o /dev/null $(CFLAGS)
+	touch $@
 
+build/.check-inline-export: $(HEADERS)
+	mkdir -p $(dir $@)
 	@echo "Serching for inline functions which have not been exported with DPA_U_EXPORT..."
-
 	! grep -r "^inline" include/
+	touch $@
 
+build/.check-inline-extern: $(HEADERS)
+	mkdir -p $(dir $@)
 	@echo "Serching for inline functions without a following extern declaration..."
 
 	grep -r --no-filename -o ' inline [^(]*(' include/ | sed -n 's/.* \([^( ]\+\) *(.*/\1/p' | sort -u > build/inline-functions.txt
 	grep -r --no-filename -o '^extern [^(]*(' src/ | sed -n 's/.* \([^( ]\+\) *(.*/\1/p' | sort -u > build/extern-src-decs.txt
 	diff build/inline-functions.txt build/extern-src-decs.txt
 
+build/.check-g-macro: $(HEADERS)
 	@echo "Checking DPA__G macros"
-
 	@set -e; \
 	trap 'echo "$$f"' EXIT; \
 	for f in include/dpa/utils/*.h; \
@@ -111,8 +116,15 @@ source-checks:
 	  done; \
 	done; \
 	f=
+	touch $@
 
+build/.check-all: \
+  build/.check-header-compile \
+  build/.check-inline-export \
+  build/.check-inline-extern \
+  build/.check-g-macro
 	@echo "Source code checks passed"
+	touch $@
 
 
 bin: $(BINS)
