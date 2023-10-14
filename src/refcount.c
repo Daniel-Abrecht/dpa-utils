@@ -10,6 +10,7 @@ extern bool dpa_u_refcount_is_static(const struct dpa_u_refcount* rc);
 extern bool dpa_u_refcount_is_freeable(const struct dpa_u_refcount* rc);
 extern bool dpa_u_refcount_has_callback(const struct dpa_u_refcount* rc);
 extern bool dpa_u_refcount_is_bo_unique(const struct dpa_u_refcount* rc);
+extern void dpa__u_refcount_destroy(struct dpa_u_refcount_freeable*const rc);
 
 struct dpa_u_refcount dpa_u_refcount_v_static = dpa_u_refcount_i_static;
 struct dpa_u_refcount_freeable dpa_u_refcount_static_v_freeable = dpa_u_refcount_i_static;

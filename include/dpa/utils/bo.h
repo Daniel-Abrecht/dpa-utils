@@ -374,34 +374,34 @@ typedef const struct dpa_u_any_bo_t dpa_u_any_bo_t;
 #define dpa__u_cp_bo_ro_data(X)  dpa__u_bo_ro_data((X))
 #define dpa__u_any_bo_ro_data(X) dpa__u_bo_ro_data((X))
 
-DPA_U_EXPORT inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
+DPA_U_EXPORT inline dpa__u_really_inline void* dpa__u_bo_data(dpa_u_bo_t*restrict const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
   }
-  dpa_u_abort("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
-DPA_U_EXPORT inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const bo){
+DPA_U_EXPORT inline dpa__u_really_inline const void* dpa__u_cbo_data(const dpa_u_bo_t*restrict const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
   }
-  dpa_u_abort("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
-DPA_U_EXPORT inline const void* dpa__u_bo_ro_data(const dpa_u_bo_ro_t*restrict const bo){
+DPA_U_EXPORT inline dpa__u_really_inline const void* dpa__u_bo_ro_data(const dpa_u_bo_ro_t*restrict const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
     case DPA_U_BO_UNIQUE_HASHMAP: return bo->bo_unique_hashmap->data;
   }
-  dpa_u_abort("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
-DPA_U_EXPORT inline const void* dpa__u_bo_unique_data(const dpa_u_bo_unique_t*restrict const bo){
+DPA_U_EXPORT inline dpa__u_really_inline const void* dpa__u_bo_unique_data(const dpa_u_bo_unique_t*restrict const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_UNIQUE_HASHMAP: return bo->bo_unique_hashmap->data;
   }
-  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 
 ////
@@ -419,7 +419,7 @@ DPA_U_EXPORT inline const void* dpa__u_bo_unique_data(const dpa_u_bo_unique_t*re
     dpa_u_bo_t*: dpa__u_bo_set_size(DPA__G(dpa_u_bo_t*,(X)),(S)) \
   ))
 
-DPA_U_EXPORT inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size){
+DPA_U_EXPORT inline dpa__u_really_inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t size){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: {
       assert(size <= DPA_U_BO_INLINE_MAX_SIZE);
@@ -429,7 +429,7 @@ DPA_U_EXPORT inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t
       bo->bo_simple.size = size;
     } return;
   }
-  dpa_u_abort("Can't set size on bo of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("Can't set size on bo of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 
 ///
@@ -471,51 +471,51 @@ DPA_U_EXPORT inline void dpa__u_bo_set_size(dpa_u_bo_t*restrict const bo, size_t
 
 ///
 
-DPA_U_EXPORT inline size_t dpa__u_v_bo_get_size(const dpa_u_bo_t bo){
+DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_v_bo_get_size(const dpa_u_bo_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
   }
-  dpa_u_abort("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
-DPA_U_EXPORT inline size_t dpa__u_v_bo_ro_get_size(const dpa_u_bo_ro_t bo){
+DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_v_bo_ro_get_size(const dpa_u_bo_ro_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
     case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_v_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
   }
-  dpa_u_abort("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
-DPA_U_EXPORT inline size_t dpa__u_v_bo_unique_get_size(const dpa_u_bo_unique_t bo){
+DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_v_bo_unique_get_size(const dpa_u_bo_unique_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_v_bo_unique_hashmap_get_size(bo.bo_unique_hashmap);
   }
-  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 
-DPA_U_EXPORT inline void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t bo){
+DPA_U_EXPORT inline dpa__u_really_inline void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t bo){
   dpa_u_refcount_ref(&bo->refcount);
 }
 
-DPA_U_EXPORT inline bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t bo){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t bo){
   return dpa_u_refcount_put(&bo->refcount);
 }
 
-DPA_U_EXPORT inline void dpa__u_bo_unique_ref(dpa_u_bo_unique_t ubo){
+DPA_U_EXPORT inline dpa__u_really_inline void dpa__u_bo_unique_ref(dpa_u_bo_unique_t ubo){
   switch(dpa_u_bo_get_type(ubo)){
     case DPA_U_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_ref(ubo.bo_unique_hashmap); return;
     case DPA_U_BO_INLINE: return;
   }
-  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
+  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
 }
 
-DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
   switch(dpa_u_bo_get_type(ubo)){
     case DPA_U_BO_UNIQUE_HASHMAP: return dpa__u_bo_unique_hashmap_put(ubo.bo_unique_hashmap);
     case DPA_U_BO_INLINE: return false;
   }
-  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
+  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
 }
 
 /**
@@ -557,38 +557,38 @@ DPA_U_EXPORT inline bool dpa__u_bo_unique_put(dpa_u_bo_unique_t ubo){
         dpa_u_any_bo_unique_t*: dpa__u_bo_unique_put(*(dpa_u_bo_unique_t*)DPA__G(dpa_u_any_bo_unique_t*,(X))) \
   )
 
-DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_unique_get_refcount(const dpa_u_bo_unique_t ubo){
+DPA_U_EXPORT inline dpa__u_really_inline struct dpa_u_refcount_freeable* dpa__u_bo_unique_get_refcount(const dpa_u_bo_unique_t ubo){
   switch(dpa_u_bo_get_type(ubo)){
     case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&ubo.bo_unique_hashmap->refcount.freeable;
     case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
   }
-  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
+  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(ubo)));
 }
 
-DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_ro_p_get_refcount(const dpa_u_bo_ro_t* bo){
+DPA_U_EXPORT inline dpa__u_really_inline struct dpa_u_refcount_freeable* dpa__u_bo_ro_p_get_refcount(const dpa_u_bo_ro_t* bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&bo->bo_unique_hashmap->refcount.freeable;
     case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
     case DPA_U_BO_SIMPLE: return 0;
   }
-  dpa_u_abort("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 
-DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_ro_get_refcount(const dpa_u_bo_ro_t bo){
+DPA_U_EXPORT inline dpa__u_really_inline struct dpa_u_refcount_freeable* dpa__u_bo_ro_get_refcount(const dpa_u_bo_ro_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_UNIQUE_HASHMAP: return (struct dpa_u_refcount_freeable*)&bo.bo_unique_hashmap->refcount.freeable;
     case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
     case DPA_U_BO_SIMPLE: return 0;
   }
-  dpa_u_abort("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 
-DPA_U_EXPORT inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(const dpa_u_bo_t* bo){
+DPA_U_EXPORT inline dpa__u_really_inline struct dpa_u_refcount_freeable* dpa__u_bo_p_get_refcount(const dpa_u_bo_t* bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return &dpa_u_refcount_static_v_freeable;
     case DPA_U_BO_SIMPLE: return 0;
   }
-  dpa_u_abort("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 
 #define dpa__u_bo_unique_hashmap_get_refcount(X) ((struct dpa_u_refcount_freeable*)&(X)->refcount.freeable)
@@ -889,7 +889,7 @@ DPA_U_EXPORT inline int dpa__u_bo_compare_unique(const dpa_u_bo_unique_t a, cons
     case DPA_U_BO_INLINE: return dpa__u_bo_compare_inline(a.bo_inline, b.bo_inline);
     case DPA_U_BO_UNIQUE_HASHMAP: return a.bo_unique_hashmap - b.bo_unique_hashmap;
   }
-  dpa_u_abort("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(a)));
+  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(a)));
 }
 
 #endif

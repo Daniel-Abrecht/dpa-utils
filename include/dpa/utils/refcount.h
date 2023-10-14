@@ -90,7 +90,7 @@ extern struct dpa_u_refcount_callback dpa_u_refcount_static_v_callback;
 /**
  * \see dpa_u_refcount_type
  */
-DPA_U_EXPORT inline enum dpa_u_refcount_type dpa_u_refcount_get_type(const struct dpa_u_refcount*const rc){
+DPA_U_EXPORT inline dpa__u_really_inline enum dpa_u_refcount_type dpa_u_refcount_get_type(const struct dpa_u_refcount*const rc){
   // We only care about the sign bit, and it's not going to change
   return atomic_load_explicit(&rc->value, memory_order_relaxed) >> DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR;
 }
@@ -98,7 +98,7 @@ DPA_U_EXPORT inline enum dpa_u_refcount_type dpa_u_refcount_get_type(const struc
 /**
  * Increment the dpa_u_refcount
  */
-DPA_U_EXPORT inline void dpa_u_refcount_increment_p(const struct dpa_u_refcount*const _rc){
+DPA_U_EXPORT inline dpa__u_really_inline void dpa_u_refcount_increment_p(const struct dpa_u_refcount*const _rc){
   struct dpa_u_refcount*const rc = (struct dpa_u_refcount*)_rc;
   if(rc) atomic_fetch_add_explicit(&rc->value, 1, memory_order_relaxed);
 }
@@ -125,20 +125,13 @@ DPA_U_EXPORT inline void dpa_u_refcount_increment_p(const struct dpa_u_refcount*
  * Decrement the dpa_u_refcount
  * \returns false if the reference count has hit 0, true otherwise
  */
-DPA_U_EXPORT inline bool dpa_u_refcount_decrement(const struct dpa_u_refcount*const _rc){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_decrement(const struct dpa_u_refcount*const _rc){
   struct dpa_u_refcount* rc = (struct dpa_u_refcount*)_rc;
   return atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1;
 }
 
-/**
- * Decrement the dpa_u_refcount and free the referenced resource when it hits 0.
- * \returns false if the reference count has hit 0, true otherwise
- */
-DPA_U_EXPORT inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeable*const _rc){
+DPA_U_EXPORT inline void dpa__u_refcount_destroy(struct dpa_u_refcount_freeable*const rc){
   void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable*);
-  struct dpa_u_refcount_freeable*const rc = (struct dpa_u_refcount_freeable*)_rc;
-  if(dpa_u_likely(((atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1) & DPA__U_REFCOUNT_MASK)))
-    return true;
   const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
 #ifdef __GNUC__
 // GCC will get confused about which branchs are reachable and warn. All we can do about it is disable the warning.
@@ -147,15 +140,27 @@ DPA_U_EXPORT inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeab
 #endif
   switch(type){
     case DPA_U_REFCOUNT_NONE: break;
-    case DPA_U_REFCOUNT_STATIC: return false;
-    case DPA_U_REFCOUNT_FREEABLE: free(rc); return false;
-    case DPA_U_REFCOUNT_CALLBACK: ((struct dpa_u_refcount_callback*)rc)->free((struct dpa_u_refcount_callback*)rc); return false;
-    case DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_destroy(rc); return false;
+    case DPA_U_REFCOUNT_STATIC: return;
+    case DPA_U_REFCOUNT_FREEABLE: free(rc); return;
+    case DPA_U_REFCOUNT_CALLBACK: ((struct dpa_u_refcount_callback*)rc)->free((struct dpa_u_refcount_callback*)rc); return;
+    case DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_destroy(rc); return;
   }
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-  dpa_u_abort("dpa_u_refcount_freeable can't be of type %s", dpa_u_enum_get_name(dpa_u_refcount_type, type));
+  dpa_u_unreachable("dpa_u_refcount_freeable can't be of type %s", dpa_u_enum_get_name(dpa_u_refcount_type, type));
+}
+
+/**
+ * Decrement the dpa_u_refcount and free the referenced resource when it hits 0.
+ * \returns false if the reference count has hit 0, true otherwise
+ */
+DPA_U_EXPORT inline dpa__u_really_inline dpa__u_really_inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeable*const _rc){
+  struct dpa_u_refcount_freeable*const rc = (struct dpa_u_refcount_freeable*)_rc;
+  if(dpa_u_likely(((atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1) & DPA__U_REFCOUNT_MASK)))
+    return true;
+  dpa__u_refcount_destroy(rc);
+  return false;
 }
 
 #define dpa_u_refcount_put_s(X) _Generic((X), \
@@ -177,7 +182,7 @@ DPA_U_EXPORT inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeab
  * Checks if the dpa_u_refcount is 1. This usually means we have the only existing reference.
  * \returns true if the dpa_u_refcount is 1, 0 otherwise.
  */
-DPA_U_EXPORT inline bool dpa_u_refcount_is_last(const struct dpa_u_refcount*const rc){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_last(const struct dpa_u_refcount*const rc){
   return (atomic_load_explicit(&rc->value, memory_order_acquire) & DPA__U_REFCOUNT_MASK) == 1;
 }
 
@@ -186,35 +191,35 @@ DPA_U_EXPORT inline bool dpa_u_refcount_is_last(const struct dpa_u_refcount*cons
  * This may be useful when conditionally allocating datastructures, although such cases usually still need some additional locking.
  * \returns true if the dpa_u_refcount is 1, 0 otherwise.
  */
-DPA_U_EXPORT inline bool dpa_u_refcount_is_zero(const struct dpa_u_refcount*const rc){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_zero(const struct dpa_u_refcount*const rc){
   return (atomic_load_explicit(&rc->value, memory_order_acquire) & DPA__U_REFCOUNT_MASK) == 0;
 }
 
 /**
  * If something takes a refcounted object, but it's actually statically allocated
  */
-DPA_U_EXPORT inline bool dpa_u_refcount_is_static(const struct dpa_u_refcount* rc){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_static(const struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_STATIC;
 }
 
 /**
  * This object will be freed with free() when the refcount hits 0.
  */
-DPA_U_EXPORT inline bool dpa_u_refcount_is_freeable(const struct dpa_u_refcount* rc){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_freeable(const struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_FREEABLE;
 }
 
 /**
  * This object can be freed with a callback when the refcount hits 0.
  */
-DPA_U_EXPORT inline bool dpa_u_refcount_has_callback(const struct dpa_u_refcount* rc){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_has_callback(const struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_CALLBACK;
 }
 
 /**
  * This object is a dpa_u_bo_unique.
  */
-DPA_U_EXPORT inline bool dpa_u_refcount_is_bo_unique(const struct dpa_u_refcount* rc){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_bo_unique(const struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP;
 }
 
