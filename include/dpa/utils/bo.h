@@ -89,10 +89,10 @@ enum dpa_u_any_bo_s_unique_type {
 
 #define case_DPA_U_BO_UNIQUE case DPA_U_BO_INLINE: case DPA_U_BO_UNIQUE_HASHMAP
 
-#define DPA__U_BO_META(...) \
+#define DPA__U_BO_META(X) \
   struct __attribute__((packed)) { \
     unsigned type : CHAR_BIT - 4; \
-    unsigned __VA_ARGS__ : 4; \
+    unsigned X : 4; \
   }
 
 typedef struct dpa__u_bo_a { char all[DPA__U_BO_COMMON_SIZE]; } dpa__u_bo_a_t;
@@ -116,7 +116,7 @@ typedef dpa_u_any_bo_inline_t dpa_u_any_bo_inline_ro_t;
 #define DPA__U_BO_SIMPLE_MEMBERS(...) \
   union { \
     struct { \
-      DPA__U_BO_META(); \
+      DPA__U_BO_META(extra); \
       struct __attribute__((packed)) { \
         size_t size : (sizeof(size_t)-1) * CHAR_BIT; \
       }; \
@@ -169,9 +169,9 @@ typedef const struct dpa_u_any_bo_unique_hashmap_t dpa_u_any_bo_unique_hashmap_t
 
 typedef struct dpa_u_bo_unique {
   union {
-    struct { DPA__U_BO_META(); char _[DPA__U_BO_COMMON_SIZE-1]; };
+    struct { DPA__U_BO_META(extra); char _[DPA__U_BO_COMMON_SIZE-1]; };
     dpa_u_bo_inline_ro_t bo_inline;
-    struct { DPA__U_BO_META() bo_unique_hashmap_meta; dpa_u_bo_unique_hashmap_t bo_unique_hashmap; };
+    struct { DPA__U_BO_META(extra) bo_unique_hashmap_meta; dpa_u_bo_unique_hashmap_t bo_unique_hashmap; };
     DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
 } dpa_u_bo_unique_t;
@@ -179,10 +179,10 @@ typedef const struct dpa_u_any_bo_unique_t dpa_u_any_bo_unique_t;
 
 typedef struct dpa_u_bo_ro {
   union {
-    struct { DPA__U_BO_META(); char _[DPA__U_BO_COMMON_SIZE-1]; };
+    struct { DPA__U_BO_META(extra); char _[DPA__U_BO_COMMON_SIZE-1]; };
     dpa_u_bo_inline_ro_t bo_inline;
     dpa_u_bo_simple_ro_t bo_simple;
-    struct { DPA__U_BO_META() bo_unique_hashmap_meta; dpa_u_bo_unique_hashmap_t bo_unique_hashmap; };
+    struct { DPA__U_BO_META(extra) bo_unique_hashmap_meta; dpa_u_bo_unique_hashmap_t bo_unique_hashmap; };
     dpa_u_bo_unique_t bo_unique;
     DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
@@ -194,7 +194,7 @@ typedef const struct dpa_u_any_bo_ro_t dpa_u_any_bo_ro_t;
 
 typedef struct dpa_u_bo {
   union {
-    struct { DPA__U_BO_META(); char _[DPA__U_BO_COMMON_SIZE-1]; };
+    struct { DPA__U_BO_META(extra); char _[DPA__U_BO_COMMON_SIZE-1]; };
     dpa_u_bo_ro_t ro;
     dpa_u_bo_inline_t bo_inline;
     dpa_u_bo_simple_t bo_simple;

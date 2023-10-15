@@ -16,8 +16,8 @@ unexport LD_PRELOAD
 
 ifdef debug
 TYPE := debug
-CFLAGS  += -O0 -g -DDPA_U_DEBUG
-LDFLAGS += -g
+CFLAGS  += -O2 -gdwarf-4 -DDPA_U_DEBUG
+LDFLAGS += -gdwarf-4
 else
 CFLAGS  += -O2
 endif
