@@ -145,13 +145,7 @@ static_assert(offsetof(dpa_u_bo_simple_t,data) == sizeof(size_t), "Expected data
 typedef const struct dpa_u_any_bo_simple dpa_u_any_bo_simple_t;
 
 struct dpa__u_bo_unique_hashmap_entry {
-  struct {
-    DPA__U_BO_META(has_ext_refcount);
-    struct __attribute__((packed)) {
-      size_t size : (sizeof(size_t)-1) * CHAR_BIT;
-    };
-  };
-  const void* data;
+  dpa_u_bo_simple_ro_t base;
   struct dpa_u_refcount_bo_unique refcount; // If the data gets referenced by another entry, the referee probably won't have to store an offset.
   struct dpa__u_bo_unique_hashmap_entry* next;
   dpa_u_hash_t hash;
@@ -332,10 +326,10 @@ typedef const struct dpa_u_any_bo_t dpa_u_any_bo_t;
 #define dpa_u_bo_data(...) dpa_u_assert_selection(dpa_u_bo_data_g(__VA_ARGS__))
 #define dpa_u_bo_data_g(X) dpa_u_generic((X),dpa__u_helper_all_g(data,(X)))
 
-#define dpa__u_v_bo_unique_hashmap_data(X)   ((X)->data)
-#define dpa__u_p_bo_unique_hashmap_data(X)   ((X)->data)
-#define dpa__u_cp_bo_unique_hashmap_data(X)  ((X)->data)
-#define dpa__u_any_bo_unique_hashmap_data(X) ((X)->data)
+#define dpa__u_v_bo_unique_hashmap_data(X)   ((X)->base.data)
+#define dpa__u_p_bo_unique_hashmap_data(X)   ((X)->base.data)
+#define dpa__u_cp_bo_unique_hashmap_data(X)  ((X)->base.data)
+#define dpa__u_any_bo_unique_hashmap_data(X) ((X)->base.data)
 
 #define dpa__u_v_bo_inline_data(X)   ((X).data)
 #define dpa__u_p_bo_inline_data(X)   ((X)->data)
@@ -388,14 +382,14 @@ DPA_U_EXPORT inline dpa__u_really_inline const void* dpa__u_bo_ro_data(const dpa
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
     case DPA_U_BO_SIMPLE: return bo->bo_simple.data;
-    case DPA_U_BO_UNIQUE_HASHMAP: return bo->bo_unique_hashmap->data;
+    case DPA_U_BO_UNIQUE_HASHMAP: return bo->bo_unique_hashmap->base.data;
   }
   dpa_u_unreachable("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 DPA_U_EXPORT inline dpa__u_really_inline const void* dpa__u_bo_unique_data(const dpa_u_bo_unique_t*restrict const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo->bo_inline.data;
-    case DPA_U_BO_UNIQUE_HASHMAP: return bo->bo_unique_hashmap->data;
+    case DPA_U_BO_UNIQUE_HASHMAP: return bo->bo_unique_hashmap->base.data;
   }
   dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
@@ -433,10 +427,10 @@ DPA_U_EXPORT inline dpa__u_really_inline void dpa__u_bo_set_size(dpa_u_bo_t*rest
 #define dpa_u_bo_get_size(...) dpa_u_assert_selection(dpa_u_bo_get_size_g(__VA_ARGS__))
 #define dpa_u_bo_get_size_g(X) dpa_u_generic((X),dpa__u_helper_all_g(get_size,(X)))
 
-#define dpa__u_v_bo_unique_hashmap_get_size(X) ((X)->size)
-#define dpa__u_p_bo_unique_hashmap_get_size(X) ((X)->size)
-#define dpa__u_cp_bo_unique_hashmap_get_size(X) ((X)->size)
-#define dpa__u_any_bo_unique_hashmap_get_size(X) ((X)->size)
+#define dpa__u_v_bo_unique_hashmap_get_size(X) ((X)->base.size)
+#define dpa__u_p_bo_unique_hashmap_get_size(X) ((X)->base.size)
+#define dpa__u_cp_bo_unique_hashmap_get_size(X) ((X)->base.size)
+#define dpa__u_any_bo_unique_hashmap_get_size(X) ((X)->base.size)
 
 #define dpa__u_v_bo_inline_get_size(X) ((X).size)
 #define dpa__u_p_bo_inline_get_size(X) ((X)->size)
@@ -478,14 +472,14 @@ DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_v_bo_ro_get_size(const dp
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
     case DPA_U_BO_SIMPLE: return bo.bo_simple.size;
-    case DPA_U_BO_UNIQUE_HASHMAP: return bo.bo_unique_hashmap->size;
+    case DPA_U_BO_UNIQUE_HASHMAP: return bo.bo_unique_hashmap->base.size;
   }
   dpa_u_unreachable("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
 DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_v_bo_unique_get_size(const dpa_u_bo_unique_t bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return bo.bo_inline.size;
-    case DPA_U_BO_UNIQUE_HASHMAP: return bo.bo_unique_hashmap->size;
+    case DPA_U_BO_UNIQUE_HASHMAP: return bo.bo_unique_hashmap->base.size;
   }
   dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(bo)));
 }
