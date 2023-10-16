@@ -161,10 +161,19 @@ struct dpa__u_bo_entry_refcounted {
 typedef const struct dpa__u_bo_unique_hashmap_entry* dpa_u_bo_unique_hashmap_t;
 typedef const struct dpa_u_any_bo_unique_hashmap_t dpa_u_any_bo_unique_hashmap_t;
 
+typedef struct dpa_u_bo_unique_hashmap_stats_s {
+  size_t empty_count;
+  size_t collision_count;
+  size_t total_buckets;
+  size_t entry_count;
+  double load_factor;
+} dpa_u_bo_unique_hashmap_stats_t;
+
+
 typedef struct dpa_u_bo_unique {
   union {
     struct { DPA__U_BO_META(extra); char _[DPA__U_BO_COMMON_SIZE-1]; };
-    dpa_u_bo_inline_ro_t bo_inline;
+    dpa_u_bo_inline_t bo_inline;
     struct { DPA__U_BO_META(extra) bo_unique_hashmap_meta; dpa_u_bo_unique_hashmap_t bo_unique_hashmap; };
     DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
@@ -885,5 +894,8 @@ DPA_U_EXPORT inline int dpa__u_bo_compare_unique(const dpa_u_bo_unique_t a, cons
   }
   dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_type, dpa_u_bo_get_type(a)));
 }
+
+DPA_U_EXPORT extern dpa_u_bo_unique_hashmap_stats_t dpa_u_bo_unique_hashmap_stats(void);
+DPA_U_EXPORT extern void dpa_u_bo_unique_verify(void);
 
 #endif

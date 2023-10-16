@@ -15,6 +15,24 @@ static inline size_t my_puts_p(dpa_u_bo_ro_t bo){
 }
 #define my_puts(bo) my_puts_p(dpa_u_v_bo_ro((bo)))
 
+static void print_hashmap_stats(){
+  const dpa_u_bo_unique_hashmap_stats_t stats = dpa_u_bo_unique_hashmap_stats();
+  printf(
+    "\n"
+    "count: %zu\n"
+    "collisions: %zu\n"
+    "empty: %zu\n"
+    "buckets: %zu\n"
+    "load_factor: %.2lf%%\n"
+    "\n",
+    stats.entry_count,
+    stats.collision_count,
+    stats.empty_count,
+    stats.total_buckets,
+    stats.load_factor * 100
+  );
+}
+
 int main(void){
   {
     // Note: The size of dpa_u_bo_inline_t isn't fixed. It matches the size of dpa_u_bo_ro_t and dpa_u_bo_simple_ro_t, which matches the combined size of a size_t + void*, and one byte is used for size & type information.
@@ -66,7 +84,9 @@ int main(void){
       .data = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     }));
     printf("dpa_u_bo_compare: %d\n", dpa_u_bo_compare(my_bo, my_bo2));
+    print_hashmap_stats();
     dpa_u_bo_put(my_bo);
     dpa_u_bo_put(my_bo2);
   }
+  print_hashmap_stats();
 }

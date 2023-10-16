@@ -22,7 +22,7 @@ struct bucket {
 
 // The first 2 bucket lists will have 2**BUCKET_BASE entries (usually 256).
 // Each bucket will have twice the size of the previous one.
-#define BUCKET_BASE CHAR_BIT
+#define BUCKET_BASE (9)
 #define BUCKET_LIST_COUNT (int)((sizeof(size_t)-1) * CHAR_BIT - BUCKET_BASE)
 #define BUCKET_COUNT (((size_t)1)<<(BUCKET_LIST_COUNT+BUCKET_BASE))
 
@@ -56,8 +56,26 @@ static inline void init(void){
   mtx_init(&resize_lock, mtx_plain);
 }
 
+static void hmdbg(const char* s){
+  printf(
+    "%s\n"
+    "  move_pending: %zu\n"
+    "  count: %zu\n"
+    "  shift_size: %d\n",
+    s,
+    atomic_load(&hash_map.move_pending),
+    atomic_load(&hash_map.count),
+    atomic_load(&hash_map.shift_size)
+  );
+}
+
+struct bucket_index {
+  int bi;
+  size_t i;
+};
+
 static inline struct bucket* get_bucket(dpa_u_hash_t hash){
-  const size_t shift_size = atomic_load(&hash_map.shift_size);
+  const int shift_size = atomic_load(&hash_map.shift_size);
   const size_t size_mask = (((size_t)1)<<shift_size)-1;
   hash = hash & size_mask;
   if(hash >= atomic_load(&hash_map.move_pending))
@@ -66,6 +84,19 @@ static inline struct bucket* get_bucket(dpa_u_hash_t hash){
   if(hash < (((size_t)1)<<BUCKET_BASE))
     return &atomic_load(&hash_map.bucket[0])[hash];
   return &atomic_load(&hash_map.bucket[i-(BUCKET_BASE-1)])[hash&((((size_t)1)<<i)-1)];
+}
+
+// Same as get_bucket, except it returns the index
+static struct bucket_index get_bucket_index(dpa_u_hash_t hash){
+  const int shift_size = atomic_load(&hash_map.shift_size);
+  const size_t size_mask = (((size_t)1)<<shift_size)-1;
+  hash = hash & size_mask;
+  if(hash >= atomic_load(&hash_map.move_pending))
+    hash &= size_mask>>1;
+  int i = dpa_u_log2(hash);
+  if(hash < (((size_t)1)<<BUCKET_BASE))
+    return (struct bucket_index){ 0, hash };
+  return (struct bucket_index){ i-(BUCKET_BASE-1), hash & ((((size_t)1)<<i)-1) };
 }
 
 static inline struct dpa_u_refcount_freeable* entry_get_ext_refcount(const dpa__u_bo_unique_hashmap_entry_t*const e){
@@ -83,6 +114,7 @@ static inline void unlock_entry(dpa_u_hash_t hash){
 }
 
 static void grow(void){
+  puts("grow");
   {
     const int result = mtx_trylock(&resize_lock);
     if(result == thrd_busy)
@@ -92,9 +124,10 @@ static void grow(void){
   const int shift_size = atomic_load(&hash_map.shift_size);
   if(shift_size >= BUCKET_LIST_COUNT)
     goto out;
+  hmdbg("grow {");
   atomic_store(&hash_map.shift_size, shift_size + 1);
   // atomic_store(&hash_map.move_pending, ((size_t)1)<<shift_size); // Should already be set to this
-  struct bucket*const new_bucket = malloc(sizeof(struct bucket[((size_t)1)<<shift_size]));
+  struct bucket*const new_bucket = calloc(((size_t)1)<<shift_size, sizeof(struct bucket));
   if(!new_bucket){
     // TODO: Log an error
     goto out;
@@ -104,24 +137,27 @@ static void grow(void){
   for(int bi = 0; bi < shift_size-(BUCKET_BASE-1); bi++){
     struct bucket*const buckets = hash_map.bucket[bi];
     const size_t count = ((size_t)1) << (bi+BUCKET_BASE);
-    for(int j=0; i < count; i++,j++){
+    for(size_t j=0; i < count; i++,j++){
       lock_entry(i);
       for(dpa__u_bo_unique_hashmap_entry_t*restrict e, **it=&buckets[j].next; (e=*it); it=&e->next){
-        if(!(e->hash & ((size_t)1)<<shift_size))
+        if(!(e->hash & ((size_t)1)<<(shift_size-1)))
           continue;
-        new_bucket->next = e;
+        printf("Moving %zX from %x,%zX to %x,%zX. ss: %d\n", e->hash, bi, j, shift_size-(BUCKET_BASE-1), i, shift_size);
+        new_bucket[i].next = e;
         *it = 0;
         break;
       }
-      atomic_store(&hash_map.move_pending, i+1);
+      atomic_store(&hash_map.move_pending, (((size_t)1)<<shift_size) + i+1);
       unlock_entry(i);
     }
   }
 out:
   mtx_unlock(&resize_lock);
+  hmdbg("} grow");
 }
 
 static void shrink(void){
+  puts("shrink");
   {
     const int result = mtx_trylock(&resize_lock);
     if(result == thrd_busy)
@@ -133,6 +169,7 @@ static void shrink(void){
     mtx_unlock(&resize_lock);
     return;
   }
+  hmdbg("shrink {");
   struct bucket*const old_bucket = hash_map.bucket[shift_size-(BUCKET_BASE-1)];
   const size_t old_size = ((size_t)1)<<shift_size;
   size_t i = old_size;
@@ -142,7 +179,7 @@ static void shrink(void){
     for(size_t j=i-start; i--,j--; ){
       lock_entry(i);
       atomic_store(&hash_map.move_pending, i + old_size);
-      dpa__u_bo_unique_hashmap_entry_t** it=&buckets[j].next;
+      dpa__u_bo_unique_hashmap_entry_t** it = &buckets[j].next;
       while(*it) it=&(*it)->next;
       *it = old_bucket[i+old_size].next;
       unlock_entry(i);
@@ -152,6 +189,7 @@ static void shrink(void){
   atomic_store(&hash_map.bucket[shift_size-(BUCKET_BASE-1)], 0);
   mtx_unlock(&resize_lock);
   free(old_bucket);
+  hmdbg("} shrink");
 }
 
 DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable* _bo){
@@ -177,8 +215,7 @@ DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_f
       shrink();
     return;
   }
-  // TODO: Print error message
-  abort();
+  dpa_u_abort("%s", "The dpa_u_bo_unique_hashmap_t to be destroyed could not be found");
 }
 
 DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _bo){
@@ -275,4 +312,59 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
   if( total_buckets < BUCKET_COUNT && (float)count / total_buckets >= LOAD_FACTOR_EXPAND )
     grow();
   return new_entry;
+}
+
+dpa_u_bo_unique_hashmap_stats_t dpa_u_bo_unique_hashmap_stats(void){
+  mtx_lock(&resize_lock);
+  size_t empty_count = 0;
+  size_t i = 0;
+  const int shift_size = atomic_load(&hash_map.shift_size);
+  const size_t total_buckets = ((size_t)1) << shift_size;
+  for(int bi = 0; bi < shift_size-(BUCKET_BASE-1); bi++){
+    const struct bucket*const buckets = hash_map.bucket[bi];
+    const size_t count = ((size_t)1) << (bi+BUCKET_BASE);
+    for(size_t j=0; i < count; i++,j++)
+      if(!buckets[j].next)
+        empty_count += 1;
+  }
+  size_t collision_count = 0;
+  const size_t count = atomic_load(&hash_map.count);
+  if(count > total_buckets - empty_count)
+    collision_count = count - (total_buckets - empty_count);
+  const double load_factor = (double)count / total_buckets;
+  mtx_unlock(&resize_lock);
+  return (dpa_u_bo_unique_hashmap_stats_t){
+    .empty_count = empty_count,
+    .collision_count = collision_count,
+    .total_buckets = total_buckets,
+    .entry_count = count,
+    .load_factor = load_factor,
+  };
+}
+
+void dpa_u_bo_unique_verify(void){
+  mtx_lock(&resize_lock);
+  size_t wrong = 0;
+  size_t i = 0;
+  const int shift_size = atomic_load(&hash_map.shift_size);
+  for(int bi = 0; bi < shift_size-(BUCKET_BASE-1); bi++){
+    const struct bucket*const buckets = hash_map.bucket[bi];
+    const size_t count = ((size_t)1) << (bi+BUCKET_BASE);
+    for(size_t j=0; i < count; i++,j++){
+      lock_entry(i);
+      for(dpa__u_bo_unique_hashmap_entry_t*restrict e, *const*it=&buckets[j].next; (e=*it); it=&e->next){
+        struct bucket_index x = get_bucket_index(e->hash);
+        if(x.bi != bi || x.i != j){
+          fprintf(stderr, "Entry %zX expected at %X,%zX but found at %X,%zX\n", e->hash, x.bi, x.i, bi, j);
+          wrong += 1;
+        }
+      }
+      unlock_entry(i);
+    }
+  }
+  mtx_unlock(&resize_lock);
+  if(wrong){
+    fprintf(stderr, "%zu entries are at the wrong place!", wrong);
+    abort();
+  }
 }

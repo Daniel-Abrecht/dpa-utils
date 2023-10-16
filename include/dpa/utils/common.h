@@ -138,7 +138,7 @@ DPA_U_EXPORT dpa_u_format_param(printf, 3, 4)
 //
 
 DPA_U_EXPORT extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_format_param(printf, 1, 2);
-#define dpa_u_abort(F, ...) dpa_u_abort_p("%s:%d: %s: " F "\n",  __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define dpa_u_abort(F, ...) { dpa_u_abort_p("%s:%d: %s: " F "\n",  __FILE__, __LINE__, __func__, __VA_ARGS__); }
 
 #ifdef DPA_U_DEBUG
 #define dpa__u_really_inline
