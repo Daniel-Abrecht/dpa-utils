@@ -2,6 +2,7 @@
 #define DPA_U_MATH_H
 
 #include <dpa/utils/common.h>
+#include <stdbool.h>
 
 DPA_U_EXPORT inline int dpa_u_log2(long long unsigned int x){
 #if defined(__has_builtin) && __has_builtin(__builtin_clzll)
@@ -21,6 +22,19 @@ DPA_U_EXPORT inline int dpa_u_ctzll(long long unsigned int x){
   for(; i<64 && !(1&x); i++)
     x >>= 1;
   return i;
+#endif
+}
+
+
+DPA_U_EXPORT inline bool dpa_u_rbit_less_than_unsigned(long long unsigned x, long long unsigned y){
+#if defined __has_builtin && __has_builtin(__builtin_bitreverse64) && defined(__aarch64__)
+  // Note: clang has __builtin_bitreverse64. gcc does not. And some archs have it, but the compiler won't use it.
+  return (long long unsigned)__builtin_bitreverse64(x) < (long long unsigned)__builtin_bitreverse64(y);
+#else
+  x ^= y;
+  if(!x) return 0;
+  int i = dpa_u_ctzll(x);
+  return y & (1llu<<i);
 #endif
 }
 
