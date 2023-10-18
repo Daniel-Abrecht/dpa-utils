@@ -761,7 +761,15 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_any_bo_ro_t*const b
       return (dpa_u_bo_unique_t){ .bo_inline = *(dpa_u_bo_inline_t*)bo };
     case DPA_U_BO_UNIQUE_HASHMAP: {
       dpa_u_bo_unique_hashmap_t ubo = (dpa_u_bo_unique_hashmap_t)bo;
+#ifdef __GNUC__
+// GCC will get confused about which branchs are reachable and warn. All we can do about it is disable the warning.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
       dpa__u_bo_unique_hashmap_ref(ubo);
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
       return (dpa_u_bo_unique_t){
         .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
         .bo_unique_hashmap = ubo,

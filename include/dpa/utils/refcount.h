@@ -100,7 +100,7 @@ DPA_U_EXPORT inline dpa__u_really_inline enum dpa_u_refcount_type dpa_u_refcount
  */
 DPA_U_EXPORT inline dpa__u_really_inline void dpa_u_refcount_increment_p(const struct dpa_u_refcount*const _rc){
   struct dpa_u_refcount*const rc = (struct dpa_u_refcount*)_rc;
-  if(rc) atomic_fetch_add_explicit(&rc->value, 1, memory_order_relaxed);
+  atomic_fetch_add_explicit(&rc->value, 1, memory_order_relaxed);
 }
 
 #define dpa_u_refcount_increment_s(X) _Generic((X), \

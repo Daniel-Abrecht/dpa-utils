@@ -16,7 +16,7 @@ unexport LD_PRELOAD
 
 ifdef debug
 TYPE := debug
-CFLAGS  += -O2 -gdwarf-4 -DDPA_U_DEBUG
+CFLAGS  += -O0 -gdwarf-4 -DDPA_U_DEBUG
 LDFLAGS += -gdwarf-4
 else
 CFLAGS  += -O2
@@ -47,6 +47,8 @@ ifndef debug
 CFLAGS  += -ffunction-sections -fdata-sections
 LDFLAGS += -Wl,--gc-sections
 endif
+
+LDLIBS += -lm
 
 OBJECTS := $(patsubst %,build/$(TYPE)/o/%.o,$(SOURCES))
 ASMOUT  := $(patsubst %,build/$(TYPE)/s/%.s,$(SOURCES))
@@ -142,7 +144,7 @@ get//lib:
 
 bin/$(TYPE)/%: build/$(TYPE)/o/src/main/%.c.o lib/$(TYPE)/lib$(SONAME).so
 	mkdir -p $(dir $@)
-	$(CC) -o $@ $(LDFLAGS) $< -Llib/$(TYPE)/ -l$(SONAME)
+	$(CC) -o $@ $(LDFLAGS) $< -Llib/$(TYPE)/ -l$(SONAME) $(LDLIBS)
 
 build/$(TYPE)/bin/%: build/$(TYPE)/o/test/%.c.o lib/$(TYPE)/lib$(SONAME).so
 	mkdir -p $(dir $@)

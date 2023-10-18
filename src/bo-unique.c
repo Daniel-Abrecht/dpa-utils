@@ -202,10 +202,11 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
   dpa__u_bo_unique_hashmap_entry_t** it = &bucket->next;
   for(dpa__u_bo_unique_hashmap_entry_t*restrict e; (e=*it); it=&e->next){
     const dpa_u_hash_t e_hash = e->hash;
-    const size_t e_size = e->base.size;
+    // The hash has to be the first thing the entries are soted by.
     if(e_hash < hash) continue;
-    if(e_size > size) continue;
     if(e_hash > hash) break;
+    const size_t e_size = e->base.size;
+    if(e_size > size) continue;
     if(e_size < size) break;
     const void*const e_data = e->base.data;
     if(e_data != data){

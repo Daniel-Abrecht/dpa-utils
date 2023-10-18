@@ -17,8 +17,9 @@ __attribute__((used,constructor(101)))
 static inline void init(void){
   dpa_u_bo_inline_t buf = {
     .type = DPA_U_BO_INLINE,
+    .size = DPA_U_BO_INLINE_MAX_SIZE
   };
-  if(getrandom(buf.data, sizeof(buf.data), 0) != sizeof(buf.data)){
+  if(getrandom(buf.data, buf.size, 0) != buf.size){
     perror("getrandom failed");
     abort();
   }
