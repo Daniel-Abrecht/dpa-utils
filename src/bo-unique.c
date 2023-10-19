@@ -63,18 +63,18 @@ struct bucket_index {
 };
 
 static inline struct bucket_index get_bucket_index(size_t hash){
-  int shift_size = atomic_load(&hash_map.shift_size);
-  hash >>= 64 - shift_size;
-  if(shift_size > BUCKET_BASE && (hash & 1) && (hash>>1) >= atomic_load(&hash_map.move_pending)-(((size_t)1)<<(shift_size-1))){
-    hash >>= 1;
-    shift_size -= 1;
-  }
-  int i = dpa_u_ctzll(hash);
-  if(i > shift_size - BUCKET_BASE)
-    i = shift_size - BUCKET_BASE;
-  int j = (shift_size - BUCKET_BASE) - i;
-  hash >>= i + !!j;
-  return (struct bucket_index){ j, hash };
+  const size_t shift_size = atomic_load(&hash_map.shift_size);
+  const size_t size_mask = (((size_t)1)<<shift_size)-1;
+  hash = hash & size_mask;
+  if(hash >= atomic_load(&hash_map.move_pending))
+    hash &= size_mask>>1;
+  int i = dpa_u_log2(hash);
+  if(hash < (((size_t)1)<<BUCKET_BASE))
+    return (struct bucket_index){0, hash};
+  return (struct bucket_index){
+    i - (BUCKET_BASE-1),
+    hash & ((((size_t)1)<<i)-1),
+  };
 }
 
 static inline struct bucket* get_bucket(dpa_u_hash_t hash){
@@ -108,34 +108,35 @@ static void grow(void){
     goto out;
   atomic_store(&hash_map.shift_size, shift_size + 1);
   // atomic_store(&hash_map.move_pending, ((size_t)1)<<shift_size); // Should already be set to this
-  const size_t size = ((size_t)1)<<shift_size;
-  struct bucket*const new_bucket = calloc(size, sizeof(struct bucket));
+  struct bucket*const new_bucket = calloc(sizeof(struct bucket), ((size_t)1)<<shift_size);
   if(!new_bucket){
     // TODO: Log an error
     goto out;
   }
   atomic_store(&hash_map.bucket[shift_size-(BUCKET_BASE-1)], new_bucket);
-  for(size_t i=0; i<size; i++){
-    const size_t key = (((i<<1)|1)<<(63-shift_size));
-    lock_entry(key);
-    struct bucket*const bucket = get_bucket(key);
-    for(dpa__u_bo_unique_hashmap_entry_t* e, **it=&bucket->next; (e=*it); it=&e->next){
-      size_t hk = e->hash >> (63-shift_size);
-      if(!(1&hk))
-        continue;
-      assert((hk>>1) == i);
-      new_bucket[i].next = e;
-      *it = 0;
-      break;
+  size_t i = 0;
+  for(int bi = 0; bi < shift_size-(BUCKET_BASE-1); bi++){
+    struct bucket*const buckets = hash_map.bucket[bi];
+    const size_t count = ((size_t)1) << (bi+BUCKET_BASE);
+    for(size_t j=0; i < count; i++,j++){
+      lock_entry(i);
+      for(dpa__u_bo_unique_hashmap_entry_t*restrict e, **it=&buckets[j].next; (e=*it); it=&e->next){
+        if(!(e->hash & ((size_t)1)<<shift_size))
+          continue;
+        new_bucket[i].next = e;
+        *it = 0;
+        break;
+      }
+      atomic_store(&hash_map.move_pending, (((size_t)1)<<shift_size) + i+1);
+      unlock_entry(i);
     }
-    atomic_store(&hash_map.move_pending, size + i+1);
-    unlock_entry(key);
   }
 out:
   mtx_unlock(&resize_lock);
 }
 
 static void shrink(void){
+  //dpa_u_bo_unique_verify();
   {
     const int result = mtx_trylock(&resize_lock);
     if(result == thrd_busy)
@@ -148,21 +149,26 @@ static void shrink(void){
     return;
   }
   struct bucket*const old_bucket = hash_map.bucket[shift_size-(BUCKET_BASE-1)];
-  const size_t size = ((size_t)1)<<shift_size;
-  for(size_t i=size; i--; ){
-    const size_t key = (((i<<1)|1)<<(63-shift_size));
-    lock_entry(key);
-    atomic_store(&hash_map.move_pending, i + size);
-    struct bucket*const bucket = get_bucket(key);
-    dpa__u_bo_unique_hashmap_entry_t** it = &bucket->next;
-    while(*it) it=&(*it)->next;
-    *it = old_bucket[i].next;
-    unlock_entry(key);
+  const size_t old_size = ((size_t)1)<<shift_size;
+  size_t i = old_size;
+  for(int bi = shift_size-(BUCKET_BASE-1); bi--; ){
+    struct bucket*const buckets = hash_map.bucket[bi];
+    const size_t start = bi ? ((size_t)1) << (bi+BUCKET_BASE-1) : 0;
+    for(size_t j=i-start; j--; ){
+      i -= 1;
+      lock_entry(i);
+      atomic_store(&hash_map.move_pending, i + old_size);
+      dpa__u_bo_unique_hashmap_entry_t** it=&buckets[j].next;
+      while(*it) it=&(*it)->next;
+      *it = old_bucket[i].next;
+      unlock_entry(i);
+    }
   }
   atomic_store(&hash_map.shift_size, shift_size);
   atomic_store(&hash_map.bucket[shift_size-(BUCKET_BASE-1)], 0);
   mtx_unlock(&resize_lock);
   free(old_bucket);
+  //dpa_u_bo_unique_verify();
 }
 
 DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable* _bo){
@@ -203,8 +209,11 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
   for(dpa__u_bo_unique_hashmap_entry_t*restrict e; (e=*it); it=&e->next){
     const dpa_u_hash_t e_hash = e->hash;
     // The hash has to be the first thing the entries are soted by.
-    if(e_hash < hash) continue;
-    if(e_hash > hash) break;
+    // It is sorted bit inversed (10 < 01)
+    if(e_hash != hash){
+      if(dpa_u_rbit_less_than_unsigned(e_hash, hash))
+        continue; else break;
+    }
     const size_t e_size = e->base.size;
     if(e_size > size) continue;
     if(e_size < size) break;
