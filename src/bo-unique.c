@@ -154,7 +154,8 @@ static void shrink(void){
   for(int bi = shift_size-(BUCKET_BASE-1); bi--; ){
     struct bucket*const buckets = hash_map.bucket[bi];
     const size_t start = bi ? ((size_t)1) << (bi+BUCKET_BASE-1) : 0;
-    for(size_t j=i-start; i--,j--; ){
+    for(size_t j=i-start; j--; ){
+      i -= 1;
       lock_entry(i);
       atomic_store(&hash_map.move_pending, i + old_size);
       dpa__u_bo_unique_hashmap_entry_t** it=&buckets[j].next;
