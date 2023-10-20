@@ -101,10 +101,14 @@ enum dpa_u_bo_s_simple_ro_type { DPA_U_BO_SIMPLE_4 = DPA_U_BO_SIMPLE };
 enum dpa_u_any_bo_s_simple_ro_type { DPA_U_BO_SIMPLE_A4 = DPA_U_BO_SIMPLE };
 enum dpa_u_bo_s_hashed_type { DPA_U_BO_HASHED_5  = DPA_U_BO_HASHED };
 enum dpa_u_any_bo_s_hashed_type { DPA_U_BO_HASHED_A5  = DPA_U_BO_HASHED };
-enum dpa_u_bo_s_refcounted_type { DPA_U_BO_REFCOUNTED_6  = DPA_U_BO_REFCOUNTED };
-enum dpa_u_any_bo_s_refcounted_type { DPA_U_BO_REFCOUNTED_A6  = DPA_U_BO_REFCOUNTED };
-enum dpa_u_bo_s_refcounted_hashed_type { DPA_U_BO_REFCOUNTED_HASHED_7  = DPA_U_BO_REFCOUNTED_HASHED };
-enum dpa_u_any_bo_s_refcounted_hashed_type { DPA_U_BO_REFCOUNTED_HASHED_A7  = DPA_U_BO_REFCOUNTED_HASHED };
+enum dpa_u_bo_s_hashed_ro_type { DPA_U_BO_HASHED_6  = DPA_U_BO_HASHED };
+enum dpa_u_any_bo_s_hashed_ro_type { DPA_U_BO_HASHED_A6  = DPA_U_BO_HASHED };
+enum dpa_u_bo_s_refcounted_type { DPA_U_BO_REFCOUNTED_7  = DPA_U_BO_REFCOUNTED };
+enum dpa_u_any_bo_s_refcounted_type { DPA_U_BO_REFCOUNTED_A7  = DPA_U_BO_REFCOUNTED };
+enum dpa_u_bo_s_refcounted_ro_type { DPA_U_BO_REFCOUNTED_8  = DPA_U_BO_REFCOUNTED };
+enum dpa_u_any_bo_s_refcounted_ro_type { DPA_U_BO_REFCOUNTED_A8  = DPA_U_BO_REFCOUNTED };
+enum dpa_u_bo_s_refcounted_hashed_ro_type { DPA_U_BO_REFCOUNTED_HASHED_9  = DPA_U_BO_REFCOUNTED_HASHED };
+enum dpa_u_any_bo_s_refcounted_hashed_ro_type { DPA_U_BO_REFCOUNTED_HASHED_A9  = DPA_U_BO_REFCOUNTED_HASHED };
 enum dpa_u_bo_s_ro_type {
   DPA_U_BO_INLINE_10 = DPA_U_BO_INLINE,
   DPA_U_BO_UNIQUE_HASHMAP_10 = DPA_U_BO_UNIQUE_HASHMAP,
@@ -124,12 +128,37 @@ enum dpa_u_any_bo_s_type {
   DPA_U_BO_SIMPLE_A11 = DPA_U_BO_SIMPLE,
 };
 enum dpa_u_bo_s_unique_type {
-  DPA_U_BO_INLINE_12  = DPA_U_BO_INLINE,
+  DPA_U_BO_INLINE_12 = DPA_U_BO_INLINE,
   DPA_U_BO_UNIQUE_HASHMAP_12 = DPA_U_BO_UNIQUE_HASHMAP,
 };
 enum dpa_u_any_bo_s_unique_type {
-  DPA_U_BO_INLINE_A12  = DPA_U_BO_INLINE,
+  DPA_U_BO_INLINE_A12 = DPA_U_BO_INLINE,
   DPA_U_BO_UNIQUE_HASHMAP_A12 = DPA_U_BO_UNIQUE_HASHMAP,
+};
+enum dpa_u_bo_s_with_hash_type {
+  DPA_U_BO_INLINE_W20 = DPA_U_BO_INLINE,
+  DPA_U_BO_HASHED_W20 = DPA_U_BO_HASHED,
+};
+enum dpa_u_bo_s_with_hash_ro_type {
+  DPA_U_BO_INLINE_W21 = DPA_U_BO_INLINE,
+  DPA_U_BO_UNIQUE_HASHMAP_W21 = DPA_U_BO_UNIQUE_HASHMAP,
+  DPA_U_BO_HASHED_W21 = DPA_U_BO_HASHED,
+  DPA_U_BO_REFCOUNTED_HASHED_W21 = DPA_U_BO_REFCOUNTED_HASHED,
+};
+enum dpa_u_bo_s_with_refcount_type {
+  DPA_U_BO_INLINE_W22 = DPA_U_BO_INLINE,
+  DPA_U_BO_REFCOUNTED_W22 = DPA_U_BO_HASHED,
+};
+enum dpa_u_bo_s_with_refcount_ro_type {
+  DPA_U_BO_INLINE_W23 = DPA_U_BO_INLINE,
+  DPA_U_BO_UNIQUE_HASHMAP_W23 = DPA_U_BO_UNIQUE_HASHMAP,
+  DPA_U_BO_HASHED_W23 = DPA_U_BO_HASHED,
+  DPA_U_BO_REFCOUNTED_HASHED_W23 = DPA_U_BO_REFCOUNTED_HASHED,
+};
+enum dpa_u_bo_s_with_refcount_and_hash_ro_type {
+  DPA_U_BO_INLINE_W24 = DPA_U_BO_INLINE,
+  DPA_U_BO_UNIQUE_HASHMAP_W24 = DPA_U_BO_UNIQUE_HASHMAP,
+  DPA_U_BO_REFCOUNTED_HASHED_W24 = DPA_U_BO_REFCOUNTED_HASHED,
 };
 // @}
 
@@ -137,6 +166,9 @@ enum dpa_u_any_bo_s_unique_type {
 #define DPA_U_BO_INLINE ((int)DPA_U_BO_INLINE)
 #define DPA_U_BO_SIMPLE ((int)DPA_U_BO_SIMPLE)
 #define DPA_U_BO_UNIQUE_HASHMAP ((int)DPA_U_BO_UNIQUE_HASHMAP)
+#define DPA_U_BO_HASHED ((int)DPA_U_BO_HASHED)
+#define DPA_U_BO_REFCOUNTED ((int)DPA_U_BO_REFCOUNTED)
+#define DPA_U_BO_REFCOUNTED_HASHED ((int)DPA_U_BO_REFCOUNTED_HASHED)
 
 #define case_DPA_U_BO_UNIQUE case DPA_U_BO_INLINE: case DPA_U_BO_UNIQUE_HASHMAP
 
@@ -147,7 +179,7 @@ enum dpa_u_any_bo_s_unique_type {
   }
 
 struct dpa__u_bo_a { char all[DPA__U_BO_COMMON_SIZE]; };
-typedef DPA__U_BO_META(size) dpa__u_bo_meta_t;
+typedef DPA__U_BO_META(extra) dpa__u_bo_meta_t;
 
 struct dpa_u_bo_inline {
   union {
@@ -397,6 +429,38 @@ struct dpa_u_bo_unique_hashmap_stats_s {
 #define dpa__u_cp_bo_ro_get_type(X)  ((enum dpa_u_bo_s_ro_type)((X)->type))
 #define dpa__u_any_bo_ro_get_type(X) ((enum dpa_u_any_bo_s_ro_type)(((const dpa__u_bo_meta_t*)(X))->type))
 
+#define dpa__u_v_bo_hashed_ro_get_type(X)   DPA_U_BO_HASHED_6
+#define dpa__u_p_bo_hashed_ro_get_type(X)   DPA_U_BO_HASHED_6
+#define dpa__u_cp_bo_hashed_ro_get_type(X)  DPA_U_BO_HASHED_6
+#define dpa__u_any_bo_hashed_ro_get_type(X) DPA_U_BO_HASHED_A6
+
+#define dpa__u_v_bo_hashed_get_type(X)   DPA_U_BO_HASHED_5
+#define dpa__u_p_bo_hashed_get_type(X)   DPA_U_BO_HASHED_5
+#define dpa__u_cp_bo_hashed_get_type(X)  DPA_U_BO_HASHED_5
+#define dpa__u_any_bo_hashed_get_type(X) DPA_U_BO_HASHED_A5
+
+#define dpa__u_v_bo_refcounted_get_type(X)   ((enum dpa_u_bo_s_refcounted_type)((X).bo_simple.type))
+#define dpa__u_p_bo_refcounted_get_type(X)   ((enum dpa_u_bo_s_refcounted_type)((X)->bo_simple.type))
+#define dpa__u_cp_bo_refcounted_get_type(X)  ((enum dpa_u_bo_s_refcounted_type)((X)->bo_simple.type))
+#define dpa__u_any_bo_refcounted_get_type(X) ((enum dpa_u_any_bo_s_refcounted_type)(((const dpa_u_bo_refcounted_t*)(X))->type))
+
+#define dpa__u_v_bo_refcounted_ro_get_type(X)   ((enum dpa_u_bo_s_refcounted_ro_type)((X).bo_simple.type))
+#define dpa__u_p_bo_refcounted_ro_get_type(X)   ((enum dpa_u_bo_s_refcounted_ro_type)((X)->bo_simple.type))
+#define dpa__u_cp_bo_refcounted_ro_get_type(X)  ((enum dpa_u_bo_s_refcounted_ro_type)((X)->bo_simple.type))
+#define dpa__u_any_bo_refcounted_ro_get_type(X) ((enum dpa_u_any_bo_s_refcounted_ro_type)(((const dpa_u_bo_refcounted_ro_t*)(X))->type))
+
+#define dpa__u_v_bo_refcounted_hashed_ro_get_type(X)   DPA_U_BO_REFCOUNTED_HASHED_9
+#define dpa__u_p_bo_refcounted_hashed_ro_get_type(X)   DPA_U_BO_REFCOUNTED_HASHED_9
+#define dpa__u_cp_bo_refcounted_hashed_ro_get_type(X)  DPA_U_BO_REFCOUNTED_HASHED_9
+#define dpa__u_any_bo_refcounted_hashed_ro_get_type(X) DPA_U_BO_REFCOUNTED_HASHED_A9
+
+#define dpa__u_bo_with_hash_ro_get_type(X) (((const dpa__u_bo_meta_t*)(X))->type)
+#define dpa__u_bo_with_hash_get_type(X) (((const dpa__u_bo_meta_t*)(X))->type)
+#define dpa__u_bo_with_refcount_ro_get_type(X) (((const dpa__u_bo_meta_t*)(X))->type)
+#define dpa__u_bo_with_refcount_get_type(X) (((const dpa__u_bo_meta_t*)(X))->type)
+#define dpa__u_bo_with_refcount_and_hash_ro_get_type(X) (((const dpa__u_bo_meta_t*)(X))->type)
+
+
 ////
 
 #define dpa_u_bo_data(...) dpa_u_assert_selection(dpa_u_bo_data_g(__VA_ARGS__))
@@ -421,6 +485,43 @@ struct dpa_u_bo_unique_hashmap_stats_s {
 #define dpa__u_p_bo_simple_ro_data(X)   ((X)->data)
 #define dpa__u_cp_bo_simple_ro_data(X)  ((X)->data)
 #define dpa__u_any_bo_simple_ro_data(X) (((const dpa_u_bo_simple_ro_t*)(X))->data)
+/*
+#define dpa__u_v_bo_hashed_ro_data(X)
+#define dpa__u_p_bo_hashed_ro_data(X)
+#define dpa__u_cp_bo_hashed_ro_data(X)
+#define dpa__u_any_bo_hashed_ro_data(X)
+
+#define dpa__u_v_bo_hashed_data(X)
+#define dpa__u_p_bo_hashed_data(X)
+#define dpa__u_cp_bo_hashed_data(X)
+#define dpa__u_any_bo_hashed_data(X)
+*/
+#define dpa__u_v_bo_refcounted_data(X)   ((X).bo_simple.data)
+#define dpa__u_p_bo_refcounted_data(X)   ((X)->bo_simple.data)
+#define dpa__u_cp_bo_refcounted_data(X)  ((X)->bo_simple.data)
+#define dpa__u_any_bo_refcounted_data(X) (((const dpa_u_bo_refcounted_t*)(X))->data)
+
+#define dpa__u_v_bo_refcounted_ro_data(X)   ((X).bo_simple.data)
+#define dpa__u_p_bo_refcounted_ro_data(X)   ((X)->bo_simple.data)
+#define dpa__u_cp_bo_refcounted_ro_data(X)  ((X)->bo_simple.data)
+#define dpa__u_any_bo_refcounted_ro_data(X) (((const dpa_u_bo_refcounted_ro_t*)(X))->data)
+/*
+#define dpa__u_v_bo_refcounted_hashed_data(X)
+#define dpa__u_p_bo_refcounted_hashed_data(X)
+#define dpa__u_cp_bo_refcounted_hashed_data(X)
+#define dpa__u_any_bo_refcounted_hashed_data(X)
+
+#define dpa__u_v_bo_refcounted_hashed_ro_data(X)
+#define dpa__u_p_bo_refcounted_hashed_ro_data(X)
+#define dpa__u_cp_bo_refcounted_hashed_ro_data(X)
+#define dpa__u_any_bo_refcounted_hashed_ro_data(X)
+
+#define dpa__u_bo_with_hash_ro_data(X)
+#define dpa__u_bo_with_hash_data(X)
+#define dpa__u_bo_with_refcount_ro_data(X)
+#define dpa__u_bo_with_refcount_data(X)
+#define dpa__u_bo_with_refcount_and_hash_ro_data(X)
+*/
 
 // bo_unique could contain bo_inline. Copying a bo_inline would mean copying it's data.
 // This is why we reference it. This also means we need an lvalue here.

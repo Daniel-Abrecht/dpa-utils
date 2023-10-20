@@ -28,5 +28,8 @@ extern size_t dpa__u_any_bo_ro_get_size(const dpa_u_any_bo_ro_t* bo);
 #undef DPA_U_BO_INLINE
 #undef DPA_U_BO_SIMPLE
 #undef DPA_U_BO_UNIQUE_HASHMAP
+#undef DPA_U_BO_HASHED
+#undef DPA_U_BO_REFCOUNTED
+#undef DPA_U_BO_REFCOUNTED_HASHED
 
 const char*const dpa_u_bo_type_s[] = { DPA_U_ENUM_STR(dpa_u_bo_type_list) };
