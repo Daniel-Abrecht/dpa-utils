@@ -99,6 +99,12 @@ enum dpa_u_bo_s_unique_hashmap_type { DPA_U_BO_UNIQUE_HASHMAP_3 = DPA_U_BO_UNIQU
 enum dpa_u_any_bo_s_unique_hashmap_type { DPA_U_BO_UNIQUE_HASHMAP_A3 = DPA_U_BO_UNIQUE_HASHMAP };
 enum dpa_u_bo_s_simple_ro_type { DPA_U_BO_SIMPLE_4 = DPA_U_BO_SIMPLE };
 enum dpa_u_any_bo_s_simple_ro_type { DPA_U_BO_SIMPLE_A4 = DPA_U_BO_SIMPLE };
+enum dpa_u_bo_s_hashed_type { DPA_U_BO_HASHED_5  = DPA_U_BO_HASHED };
+enum dpa_u_any_bo_s_hashed_type { DPA_U_BO_HASHED_A5  = DPA_U_BO_HASHED };
+enum dpa_u_bo_s_refcounted_type { DPA_U_BO_REFCOUNTED_6  = DPA_U_BO_REFCOUNTED };
+enum dpa_u_any_bo_s_refcounted_type { DPA_U_BO_REFCOUNTED_A6  = DPA_U_BO_REFCOUNTED };
+enum dpa_u_bo_s_refcounted_hashed_type { DPA_U_BO_REFCOUNTED_HASHED_7  = DPA_U_BO_REFCOUNTED_HASHED };
+enum dpa_u_any_bo_s_refcounted_hashed_type { DPA_U_BO_REFCOUNTED_HASHED_A7  = DPA_U_BO_REFCOUNTED_HASHED };
 enum dpa_u_bo_s_ro_type {
   DPA_U_BO_INLINE_10 = DPA_U_BO_INLINE,
   DPA_U_BO_UNIQUE_HASHMAP_10 = DPA_U_BO_UNIQUE_HASHMAP,
