@@ -62,6 +62,12 @@ typedef const struct dpa_u_any_bo_hashed_ro dpa_u_any_bo_hashed_ro_t;
 typedef const struct dpa_u_any_bo_hashed dpa_u_any_bo_hashed_t;
 typedef const struct dpa_u_any_bo_refcounted_hashed_ro dpa_u_any_bo_refcounted_hashed_ro_t;
 
+typedef const struct dpa_u_bo_with_hash_ro dpa_u_bo_with_hash_ro_t;
+typedef const struct dpa_u_bo_with_hash dpa_u_bo_with_hash_t;
+typedef const struct dpa_u_bo_with_refcount_ro dpa_u_bo_with_refcount_ro_t;
+typedef const struct dpa_u_bo_with_refcount dpa_u_bo_with_refcount_t;
+typedef const struct dpa_u_bo_with_refcount_and_hash_ro dpa_u_bo_with_refcount_and_hash_ro_t;
+
 typedef struct dpa_u_bo_unique_hashmap_stats_s dpa_u_bo_unique_hashmap_stats_t;
 typedef struct dpa__u_bo_a dpa__u_bo_a_t;
 
