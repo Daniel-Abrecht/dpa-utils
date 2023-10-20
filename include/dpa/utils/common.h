@@ -164,8 +164,8 @@ DPA_U_EXPORT extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_f
 //////      Constants      //////
 /////////////////////////////////
 
-#define DPA_U__B36 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" ///< Digits for base36 numbers. Also suitable for bases < 36.
-#define DPA_U__B64 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=" ///< Digits for base64 encoded content
+#define DPA_U_B36 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" ///< Digits for base36 numbers. Also suitable for bases < 36.
+#define DPA_U_B64 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=" ///< Digits for base64 encoded content
 
 /////////////////////////////////////////////
 //////      Interopability macros      //////

@@ -83,7 +83,7 @@ static inline struct bucket* get_bucket(dpa_u_hash_t hash){
 }
 
 static inline struct dpa_u_refcount_freeable* entry_get_ext_refcount(const dpa__u_bo_unique_hashmap_entry_t*const e){
-  if(e->base.extra)
+  if(e->base.bo_simple.extra)
     return ((struct dpa__u_bo_entry_refcounted*)e)->refcount;
   return 0;
 }
@@ -121,7 +121,7 @@ static void grow(void){
     for(size_t j=0; i < count; i++,j++){
       lock_entry(i);
       for(dpa__u_bo_unique_hashmap_entry_t*restrict e, **it=&buckets[j].next; (e=*it); it=&e->next){
-        if(!(e->hash & ((size_t)1)<<shift_size))
+        if(!(e->base.hash & ((size_t)1)<<shift_size))
           continue;
         new_bucket[i].next = e;
         *it = 0;
@@ -136,7 +136,6 @@ out:
 }
 
 static void shrink(void){
-  //dpa_u_bo_unique_verify();
   {
     const int result = mtx_trylock(&resize_lock);
     if(result == thrd_busy)
@@ -168,12 +167,11 @@ static void shrink(void){
   atomic_store(&hash_map.bucket[shift_size-(BUCKET_BASE-1)], 0);
   mtx_unlock(&resize_lock);
   free(old_bucket);
-  //dpa_u_bo_unique_verify();
 }
 
 DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable* _bo){
   const dpa__u_bo_unique_hashmap_entry_t* bo = dpa_u_container_of(_bo, const dpa__u_bo_unique_hashmap_entry_t, refcount.freeable);
-  const dpa_u_hash_t hash = bo->hash;
+  const dpa_u_hash_t hash = bo->base.hash;
   lock_entry(hash);
   if(!dpa_u_refcount_is_zero(&bo->refcount.refcount)){
     // Someone else picked up the entry before we got to remove it.
@@ -207,17 +205,17 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
   struct bucket* bucket = get_bucket(hash);
   dpa__u_bo_unique_hashmap_entry_t** it = &bucket->next;
   for(dpa__u_bo_unique_hashmap_entry_t*restrict e; (e=*it); it=&e->next){
-    const dpa_u_hash_t e_hash = e->hash;
+    const dpa_u_hash_t e_hash = e->base.hash;
     // The hash has to be the first thing the entries are soted by.
     // It is sorted bit inversed (10 < 01)
     if(e_hash != hash){
       if(dpa_u_rbit_less_than_unsigned(e_hash, hash))
         continue; else break;
     }
-    const size_t e_size = e->base.size;
+    const size_t e_size = e->base.bo_simple.size;
     if(e_size > size) continue;
     if(e_size < size) break;
-    const void*const e_data = e->base.data;
+    const void*const e_data = e->base.bo_simple.data;
     if(e_data != data){
       int diff = memcmp(e_data, data, size);
       if(diff < 0) continue;
@@ -233,7 +231,7 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
     if(type == DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP){
       dpa__u_bo_unique_hashmap_entry_t* old = dpa_u_container_of(refcount, dpa__u_bo_unique_hashmap_entry_t, refcount.freeable);
       struct dpa_u_refcount_freeable*const true_refcount = entry_get_ext_refcount(old);
-      if(old->base.extra)
+      if(old->base.bo_simple.extra)
         refcount = true_refcount;
     }
     dpa_u_refcount_ref(refcount);
@@ -241,16 +239,18 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
       struct dpa__u_bo_unique_hashmap_entry*const new = malloc(sizeof(*new));
       *new = (struct dpa__u_bo_unique_hashmap_entry){
         .base = {
-          .type = DPA_U_BO_SIMPLE,
-          .extra = false,
-          .size = size,
-          .data = data,
+          .bo_simple = {
+            .type = DPA_U_BO_UNIQUE_HASHMAP,
+            .extra = false,
+            .size = size,
+            .data = data,
+          },
+          .hash = hash,
         },
         // dpa_u_refcount_i_static means the entry will never be freed again.
         // This isn't necessary, but seams sensible for data that will never be freed either.
         .refcount = dpa_u_refcount_i_static,
         .next = *it,
-        .hash = hash,
       };
       new_entry = new;
     }else{
@@ -258,14 +258,16 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
       *new = (struct dpa__u_bo_entry_refcounted){
         .entry = {
           .base = {
-            .type = DPA_U_BO_SIMPLE,
-            .extra = true,
-            .size = size,
-            .data = data,
+            .bo_simple = {
+              .type = DPA_U_BO_UNIQUE_HASHMAP,
+              .extra = true,
+              .size = size,
+              .data = data,
+            },
+            .hash = hash,
           },
           .refcount = dpa_u_refcount_i_bo_unique(1),
           .next = *it,
-          .hash = hash,
         },
         .refcount = refcount,
       };
@@ -275,14 +277,16 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
     struct dpa__u_bo_unique_hashmap_entry*const new = malloc(sizeof(*new) + size);
     *new = (struct dpa__u_bo_unique_hashmap_entry){
       .base = {
-        .type = DPA_U_BO_SIMPLE,
-        .extra = false,
-        .size = size,
-        .data = new+1,
+        .bo_simple = {
+          .type = DPA_U_BO_UNIQUE_HASHMAP,
+          .extra = false,
+          .size = size,
+          .data = new+1,
+        },
+        .hash = hash,
       },
       .refcount = dpa_u_refcount_i_bo_unique(1),
       .next = *it,
-      .hash = hash,
     };
     memcpy(new+1, data, size);
     new_entry = new;
@@ -336,9 +340,9 @@ void dpa_u_bo_unique_verify(void){
     for(size_t j=0; i < count; i++,j++){
       lock_entry(i);
       for(dpa__u_bo_unique_hashmap_entry_t*restrict e, *const*it=&buckets[j].next; (e=*it); it=&e->next){
-        struct bucket_index x = get_bucket_index(e->hash);
+        struct bucket_index x = get_bucket_index(e->base.hash);
         if(x.bi != bi || x.i != j){
-          fprintf(stderr, "Entry %016zX expected at %X,%zX but found at %X,%zX\n", e->hash, x.bi, x.i, bi, j);
+          fprintf(stderr, "Entry %016zX expected at %X,%zX but found at %X,%zX\n", e->base.hash, x.bi, x.i, bi, j);
           wrong += 1;
         }
       }

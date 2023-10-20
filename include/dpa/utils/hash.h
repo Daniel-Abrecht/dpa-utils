@@ -62,7 +62,7 @@ DPA_U_EXPORT inline uint16_t dpa_u_hash_16_p(dpa_u_bo_ro_t bo){
 
 typedef size_t dpa_u_hash_t;
 
-#define DPA_U_FNV_PRIME        _Generic( \
+#define DPA_U_FNV_PRIME _Generic( \
     (char(*)[sizeof(dpa_u_hash_t)]){0}, \
     char(*)[sizeof(uint64_t)]: DPA_U_FNV_64_PRIME, \
     char(*)[sizeof(uint32_t)]: DPA_U_FNV_32_PRIME, \
