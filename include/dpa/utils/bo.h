@@ -173,7 +173,7 @@ enum dpa_u_bo_s_with_refcount_and_hash_ro_type {
 #define case_DPA_U_BO_UNIQUE case DPA_U_BO_INLINE: case DPA_U_BO_UNIQUE_HASHMAP
 
 #define DPA__U_BO_META(X) \
-  struct __attribute__((packed)) { \
+  struct DPA_U_PACKED { \
     unsigned type : CHAR_BIT - 4; \
     unsigned X : 4; \
   }
@@ -197,7 +197,7 @@ static_assert(offsetof(dpa_u_bo_inline_t,data) == 1, "Expected data to be at byt
   union { \
     struct { \
       DPA__U_BO_META(extra); \
-      struct __attribute__((packed)) { \
+      struct DPA_U_PACKED { \
         size_t size : (sizeof(size_t)-1) * CHAR_BIT; \
       }; \
       __VA_ARGS__ void* data; \
