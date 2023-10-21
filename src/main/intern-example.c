@@ -31,17 +31,23 @@ static void print_hashmap_stats(){
 
 int main(int argc, char* argv[]){
   bool echo = false;
-  if(argc > 1)
-  if(argc == 2){
-    if(!strcmp(argv[1], "--print-words")){
-      echo = true;
-    }else{
-      fprintf(stderr, "Usage: %s [--print-words]\n", argv[0]);
-      return 1;
+  const char* file = "/usr/share/dict/words";
+  if(argc > 1){
+    char** args = argv + argc;
+    int i = -argc;
+    while(++i){
+      if(!strcmp(args[i], "--print-words")){
+        echo = true;
+      }else if(!strcmp(args[i], "--file") && i <= -2){
+        file = args[++i];
+      }else{
+        fprintf(stderr, "Usage: %s [--print-words] [--file myfile]\n", *argv);
+        return 1;
+      }
     }
   }
   printf("dpa_hash_offset_basis: %zX\n", dpa_hash_offset_basis);
-  FILE* f = fopen("/usr/share/dict/words", "rb");
+  FILE* f = fopen(file, "rb");
   size_t count = 0;
   size_t list_size = 1;
   dpa_u_bo_unique_t* list = malloc(sizeof(*list));
