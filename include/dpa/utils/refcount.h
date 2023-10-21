@@ -27,6 +27,11 @@ pid_t gettid(void);
   X((DPA_U_REFCOUNT_CALLBACK))  /* When this refcount hits 0, it'll call a callback. */ \
   X((DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP)) /* Refcount of dpa_u_bo_unique. Because this is an essential internal type, we can special case it here to safe a bit of memory. */
 
+/**
+ * Any refcount can be static.
+ * A refcount either is freeable or not.
+ * If it is freeable, it may have a callback, or be of type DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP, or neither, in which case it'll be freed with free().
+ */
 DPA_U_ENUM(dpa_u_refcount_type)
 
 #define DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR 61
@@ -100,7 +105,22 @@ extern struct dpa_u_refcount_callback dpa_u_refcount_static_v_callback;
 /**
  * \see dpa_u_refcount_type
  */
-DPA_U_EXPORT inline dpa__u_really_inline enum dpa_u_refcount_type dpa_u_refcount_get_type(const struct dpa_u_refcount*const rc){
+#define dpa_u_refcount_get_type(...) dpa_u_assert_selection(dpa_u_refcount_get_type_g(__VA_ARGS__))
+#define dpa_u_refcount_get_type_g(X) dpa_u_generic((X), \
+    struct dpa_u_refcount: dpa_u_refcount_get_type_p(&DPA__G(struct dpa_u_refcount,(X))), \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_get_type_p(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
+    struct dpa_u_refcount_callback: dpa_u_refcount_get_type_p(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
+    struct dpa__u_refcount_bo_unique: dpa_u_refcount_get_type_p(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).refcount), \
+          struct dpa_u_refcount*: dpa_u_refcount_get_type_p(DPA__G(struct dpa_u_refcount*,(X))), \
+    const struct dpa_u_refcount*: dpa_u_refcount_get_type_p(DPA__G(const struct dpa_u_refcount*,(X))), \
+          struct dpa_u_refcount_freeable*: dpa_u_refcount_get_type_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
+    const struct dpa_u_refcount_freeable*: dpa_u_refcount_get_type_p(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
+          struct dpa_u_refcount_callback*: dpa_u_refcount_get_type_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount), \
+    const struct dpa_u_refcount_callback*: dpa_u_refcount_get_type_p(&DPA__G(const struct dpa_u_refcount_callback*,(X))->refcount), \
+          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_get_type_p(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->refcount), \
+    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_get_type_p(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->refcount) \
+  )
+DPA_U_EXPORT inline dpa__u_really_inline enum dpa_u_refcount_type dpa_u_refcount_get_type_p(const struct dpa_u_refcount*const rc){
   // We only care about the sign bit, and it's not going to change
 #ifndef DPA_U_NO_THREADS
   return atomic_load_explicit(&rc->value, memory_order_relaxed) >> DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR;
@@ -112,6 +132,23 @@ DPA_U_EXPORT inline dpa__u_really_inline enum dpa_u_refcount_type dpa_u_refcount
 /**
  * Increment the dpa_u_refcount
  */
+#define dpa_u_refcount_increment(...) dpa_u_assert_selection(dpa_u_refcount_increment_g(__VA_ARGS__))
+#define dpa_u_refcount_increment_s dpa_u_refcount_increment_p
+#define dpa_u_refcount_increment_g(X) dpa_u_generic((X), \
+    struct dpa_u_refcount: dpa_u_refcount_increment_s(&DPA__G(struct dpa_u_refcount,(X))), \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_increment_s(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
+    struct dpa_u_refcount_callback: dpa_u_refcount_increment_s(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
+    struct dpa__u_refcount_bo_unique: dpa_u_refcount_increment_s(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).refcount), \
+          struct dpa_u_refcount*: dpa_u_refcount_increment_s(DPA__G(struct dpa_u_refcount*,(X))), \
+    const struct dpa_u_refcount*: dpa_u_refcount_increment_s(DPA__G(const struct dpa_u_refcount*,(X))), \
+          struct dpa_u_refcount_freeable*: dpa_u_refcount_increment_s(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
+    const struct dpa_u_refcount_freeable*: dpa_u_refcount_increment_s(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
+          struct dpa_u_refcount_callback*: dpa_u_refcount_increment_s(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount), \
+    const struct dpa_u_refcount_callback*: dpa_u_refcount_increment_s(&DPA__G(const struct dpa_u_refcount_callback*,(X))->refcount), \
+          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_increment_s(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->refcount), \
+    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_increment_s(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->refcount) \
+  )
+#define dpa_u_refcount_ref(X) dpa_u_refcount_increment((X))
 DPA_U_EXPORT inline dpa__u_really_inline void dpa_u_refcount_increment_p(const struct dpa_u_refcount*const _rc){
   struct dpa_u_refcount*const rc = (struct dpa_u_refcount*)_rc;
 #ifndef DPA_U_NO_THREADS
@@ -120,24 +157,6 @@ DPA_U_EXPORT inline dpa__u_really_inline void dpa_u_refcount_increment_p(const s
   rc->value++;
 #endif
 }
-
-#define dpa_u_refcount_increment_s(X) _Generic((X), \
-    struct dpa_u_refcount: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount,(X))), \
-    struct dpa_u_refcount_freeable: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
-    struct dpa_u_refcount_callback: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
-    struct dpa__u_refcount_bo_unique: dpa_u_refcount_increment_p(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).refcount), \
-          struct dpa_u_refcount*: dpa_u_refcount_increment_p(DPA__G(struct dpa_u_refcount*,(X))), \
-    const struct dpa_u_refcount*: dpa_u_refcount_increment_p(DPA__G(const struct dpa_u_refcount*,(X))), \
-          struct dpa_u_refcount_freeable*: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
-    const struct dpa_u_refcount_freeable*: dpa_u_refcount_increment_p(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
-          struct dpa_u_refcount_callback*: dpa_u_refcount_increment_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount), \
-    const struct dpa_u_refcount_callback*: dpa_u_refcount_increment_p(&DPA__G(const struct dpa_u_refcount_callback*,(X))->refcount), \
-          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_increment_p(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->refcount), \
-    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_increment_p(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->refcount) \
-  )
-
-#define dpa_u_refcount_increment(X) dpa_u_refcount_increment_s((X))
-#define dpa_u_refcount_ref(X) dpa_u_refcount_increment((X))
 
 /**
  * Decrement the dpa_u_refcount
@@ -173,10 +192,24 @@ DPA_U_EXPORT inline void dpa__u_refcount_destroy(struct dpa_u_refcount_freeable*
   dpa_u_unreachable("dpa_u_refcount_freeable can't be of type %s", dpa_u_enum_get_name(dpa_u_refcount_type, type));
 }
 
+
 /**
  * Decrement the dpa_u_refcount and free the referenced resource when it hits 0.
  * \returns false if the reference count has hit 0, true otherwise
  */
+#define dpa_u_refcount_put(...) dpa_u_assert_selection(dpa_u_refcount_put_g(__VA_ARGS__))
+#define dpa_u_refcount_put_s dpa_u_refcount_put_p
+#define dpa_u_refcount_put_g(X) dpa_u_generic((X), \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_put_s(&DPA__G(struct dpa_u_refcount_freeable,(X))), \
+    struct dpa_u_refcount_callback: dpa_u_refcount_put_s(&DPA__G(struct dpa_u_refcount_callback,(X)).freeable), \
+    struct dpa__u_refcount_bo_unique: dpa_u_refcount_put_s(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).freeable), \
+          struct dpa_u_refcount_freeable*: dpa_u_refcount_put_s(DPA__G(struct dpa_u_refcount_freeable*,(X))), \
+    const struct dpa_u_refcount_freeable*: dpa_u_refcount_put_s(DPA__G(const struct dpa_u_refcount_freeable*,(X))), \
+          struct dpa_u_refcount_callback*: dpa_u_refcount_put_s(&DPA__G(struct dpa_u_refcount_callback*,(X))->freeable), \
+    const struct dpa_u_refcount_callback*: dpa_u_refcount_put_s(&DPA__G(const struct dpa_u_refcount_callback*,(X))->freeable), \
+          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_put_s(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->freeable), \
+    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_put_s(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->freeable) \
+  )
 DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeable*const _rc){
   struct dpa_u_refcount_freeable*const rc = (struct dpa_u_refcount_freeable*)_rc;
 #ifndef DPA_U_NO_THREADS
@@ -190,26 +223,27 @@ DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_put_p(const struct 
   return false;
 }
 
-#define dpa_u_refcount_put_s(X) _Generic((X), \
-    struct dpa_u_refcount_freeable: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_freeable,(X))), \
-    struct dpa_u_refcount_callback: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback,(X)).freeable), \
-    struct dpa__u_refcount_bo_unique: dpa_u_refcount_put_p(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).freeable), \
-          struct dpa_u_refcount_freeable*: dpa_u_refcount_put_p(DPA__G(struct dpa_u_refcount_freeable*,(X))), \
-    const struct dpa_u_refcount_freeable*: dpa_u_refcount_put_p(DPA__G(const struct dpa_u_refcount_freeable*,(X))), \
-          struct dpa_u_refcount_callback*: dpa_u_refcount_put_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->freeable), \
-    const struct dpa_u_refcount_callback*: dpa_u_refcount_put_p(&DPA__G(const struct dpa_u_refcount_callback*,(X))->freeable), \
-          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_put_p(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->freeable), \
-    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_put_p(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->freeable) \
-  )
-
-#define dpa_u_refcount_put(X) dpa_u_refcount_put_s((X))
-
 
 /**
  * Checks if the dpa_u_refcount is 1. This usually means we have the only existing reference.
  * \returns true if the dpa_u_refcount is 1, 0 otherwise.
  */
-DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_last(const struct dpa_u_refcount*const rc){
+#define dpa_u_refcount_is_last(...) dpa_u_assert_selection(dpa_u_refcount_is_last_g(__VA_ARGS__))
+#define dpa_u_refcount_is_last_g(X) dpa_u_generic((X), \
+    struct dpa_u_refcount: dpa_u_refcount_is_last_p(&DPA__G(struct dpa_u_refcount,(X))), \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_is_last_p(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
+    struct dpa_u_refcount_callback: dpa_u_refcount_is_last_p(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
+    struct dpa__u_refcount_bo_unique: dpa_u_refcount_is_last_p(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).refcount), \
+          struct dpa_u_refcount*: dpa_u_refcount_is_last_p(DPA__G(struct dpa_u_refcount*,(X))), \
+    const struct dpa_u_refcount*: dpa_u_refcount_is_last_p(DPA__G(const struct dpa_u_refcount*,(X))), \
+          struct dpa_u_refcount_freeable*: dpa_u_refcount_is_last_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
+    const struct dpa_u_refcount_freeable*: dpa_u_refcount_is_last_p(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
+          struct dpa_u_refcount_callback*: dpa_u_refcount_is_last_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount), \
+    const struct dpa_u_refcount_callback*: dpa_u_refcount_is_last_p(&DPA__G(const struct dpa_u_refcount_callback*,(X))->refcount), \
+          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_last_p(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->refcount), \
+    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_last_p(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->refcount) \
+  )
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_last_p(const struct dpa_u_refcount*const rc){
 #ifndef DPA_U_NO_THREADS
   return (atomic_load_explicit(&rc->value, memory_order_acquire) & DPA__U_REFCOUNT_MASK) == 1;
 #else
@@ -222,7 +256,22 @@ DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_last(const struc
  * This may be useful when conditionally allocating datastructures, although such cases usually still need some additional locking.
  * \returns true if the dpa_u_refcount is 1, 0 otherwise.
  */
-DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_zero(const struct dpa_u_refcount*const rc){
+#define dpa_u_refcount_is_zero(...) dpa_u_assert_selection(dpa_u_refcount_is_zero_g(__VA_ARGS__))
+#define dpa_u_refcount_is_zero_g(X) dpa_u_generic((X), \
+    struct dpa_u_refcount: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa_u_refcount,(X))), \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
+    struct dpa_u_refcount_callback: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
+    struct dpa__u_refcount_bo_unique: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).refcount), \
+          struct dpa_u_refcount*: dpa_u_refcount_is_zero_p(DPA__G(struct dpa_u_refcount*,(X))), \
+    const struct dpa_u_refcount*: dpa_u_refcount_is_zero_p(DPA__G(const struct dpa_u_refcount*,(X))), \
+          struct dpa_u_refcount_freeable*: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
+    const struct dpa_u_refcount_freeable*: dpa_u_refcount_is_zero_p(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
+          struct dpa_u_refcount_callback*: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount), \
+    const struct dpa_u_refcount_callback*: dpa_u_refcount_is_zero_p(&DPA__G(const struct dpa_u_refcount_callback*,(X))->refcount), \
+          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->refcount), \
+    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_zero_p(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->refcount) \
+  )
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_zero_p(const struct dpa_u_refcount*const rc){
 #ifndef DPA_U_NO_THREADS
   return (atomic_load_explicit(&rc->value, memory_order_acquire) & DPA__U_REFCOUNT_MASK) == 0;
 #else
@@ -230,41 +279,99 @@ DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_zero(const struc
 #endif
 }
 
+#define dpa_u_refcount_is_static(...) dpa_u_assert_selection(dpa_u_refcount_is_static_g(__VA_ARGS__))
+#define dpa_u_refcount_is_static_g(X) dpa_u_generic((X), \
+    struct dpa_u_refcount: dpa_u_refcount_is_static_p(&DPA__G(struct dpa_u_refcount,(X))), \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_is_static_p(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
+    struct dpa_u_refcount_callback: dpa_u_refcount_is_static_p(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
+    struct dpa__u_refcount_bo_unique: dpa_u_refcount_is_static_p(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).refcount), \
+          struct dpa_u_refcount*: dpa_u_refcount_is_static_p(DPA__G(struct dpa_u_refcount*,(X))), \
+    const struct dpa_u_refcount*: dpa_u_refcount_is_static_p(DPA__G(const struct dpa_u_refcount*,(X))), \
+          struct dpa_u_refcount_freeable*: dpa_u_refcount_is_static_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
+    const struct dpa_u_refcount_freeable*: dpa_u_refcount_is_static_p(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
+          struct dpa_u_refcount_callback*: dpa_u_refcount_is_static_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount), \
+    const struct dpa_u_refcount_callback*: dpa_u_refcount_is_static_p(&DPA__G(const struct dpa_u_refcount_callback*,(X))->refcount), \
+          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_static_p(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->refcount), \
+    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_static_p(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->refcount) \
+  )
 /**
  * If something takes a refcounted object, but it's actually statically allocated
  */
-DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_static(const struct dpa_u_refcount* rc){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_static_p(const struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_STATIC;
 }
+
 
 /**
  * This object will be freed with free() when the refcount hits 0.
  */
-DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_freeable(const struct dpa_u_refcount* rc){
-  return dpa_u_refcount_get_type(rc);
-}
+#define dpa_u_refcount_is_freeable(...) dpa_u_assert_selection(dpa_u_refcount_is_freeable_g(__VA_ARGS__))
+#define dpa_u_refcount_is_freeable_g(X) dpa_u_generic((X), \
+    struct dpa_u_refcount: false, \
+    struct dpa_u_refcount_freeable: true, \
+    struct dpa_u_refcount_callback: true, \
+    struct dpa__u_refcount_bo_unique: true, \
+          struct dpa_u_refcount*: false, \
+    const struct dpa_u_refcount*: false, \
+          struct dpa_u_refcount_freeable*: true, \
+    const struct dpa_u_refcount_freeable*: true, \
+          struct dpa_u_refcount_callback*: true, \
+    const struct dpa_u_refcount_callback*: true, \
+          struct dpa__u_refcount_bo_unique*: true, \
+    const struct dpa__u_refcount_bo_unique*: true \
+  )
 
 /**
  * This object can be freed with a callback when the refcount hits 0.
  */
-DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_has_callback(const struct dpa_u_refcount* rc){
+#define dpa_u_refcount_has_callback(...) dpa_u_assert_selection(dpa_u_refcount_has_callback_g(__VA_ARGS__))
+#define dpa_u_refcount_has_callback_g(X) dpa_u_generic((X), \
+    struct dpa_u_refcount: false, \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_has_callback_p(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
+    struct dpa_u_refcount_callback: true, \
+    struct dpa__u_refcount_bo_unique: false, \
+          struct dpa_u_refcount*: false, \
+    const struct dpa_u_refcount*: false, \
+          struct dpa_u_refcount_freeable*: dpa_u_refcount_has_callback_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
+    const struct dpa_u_refcount_freeable*: dpa_u_refcount_has_callback_p(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
+          struct dpa_u_refcount_callback*: true, \
+    const struct dpa_u_refcount_callback*: true, \
+          struct dpa__u_refcount_bo_unique*: false, \
+    const struct dpa__u_refcount_bo_unique*: false \
+  )
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_has_callback_p(const struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_CALLBACK;
 }
 
 /**
  * This object is a dpa_u_bo_unique.
  */
-DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_bo_unique(const struct dpa_u_refcount* rc){
+#define dpa_u_refcount_is_bo_unique(...) dpa_u_assert_selection(dpa_u_refcount_is_bo_unique_g(__VA_ARGS__))
+#define dpa_u_refcount_is_bo_unique_g(X) dpa_u_generic((X), \
+    struct dpa_u_refcount: false, \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_is_bo_unique_p(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
+    struct dpa_u_refcount_callback: false, \
+    struct dpa__u_refcount_bo_unique: true, \
+          struct dpa_u_refcount*: false, \
+    const struct dpa_u_refcount*: false, \
+          struct dpa_u_refcount_freeable*: dpa_u_refcount_is_bo_unique_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
+    const struct dpa_u_refcount_freeable*: dpa_u_refcount_is_bo_unique_p(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
+          struct dpa_u_refcount_callback*: false, \
+    const struct dpa_u_refcount_callback*: false, \
+          struct dpa__u_refcount_bo_unique*: true, \
+    const struct dpa__u_refcount_bo_unique*: true \
+  )
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_bo_unique_p(const struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP;
 }
 
 #ifdef DPA_U_REFCOUNT_DEBUG
-#undef dpa_u_refcount_increment
-#define dpa_u_refcount_increment(R) \
+#undef dpa_u_refcount_increment_s
+#define dpa_u_refcount_increment_s(R) \
   do { \
     struct dpa_u_refcount* _dpa_u_refcount = (R); \
     fprintf(stderr, "%ld> %s:%d: %s: dpa_u_refcount_increment(%p: %s)\n", (long)gettid(), __FILE__, __LINE__, __func__, (void*)_dpa_u_refcount, #R); \
-    dpa_u_refcount_increment_s(_dpa_u_refcount); \
+    dpa_u_refcount_increment(_dpa_u_refcount); \
   } while(0)
 
 #define dpa_u_refcount_decrement(R) \
@@ -275,11 +382,11 @@ DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_bo_unique(const 
      : (fprintf(stderr, "false\n"), false) \
   )
 
-#undef dpa_u_refcount_put
-#define dpa_u_refcount_put(R) \
+#undef dpa_u_refcount_put_s
+#define dpa_u_refcount_put_s(R) \
   ( \
     fprintf(stderr, "%ld> %s:%d: %s: dpa_u_refcount_put(%p: %s) = " , (long)gettid(), __FILE__, __LINE__, __func__, (void*)(R), #R), \
-    dpa_u_refcount_put_s((R)) \
+    dpa_u_refcount_put((R)) \
      ? (fprintf(stderr, "true\n" ), true ) \
      : (fprintf(stderr, "false\n"), false) \
   )
