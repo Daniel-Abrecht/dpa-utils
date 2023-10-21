@@ -9,17 +9,16 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#ifndef DPA_U_NO_THREADS
+#include <stdatomic.h>
+
 #ifdef DPA_UTILS_REFCOUNT_DEBUG
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
 pid_t gettid(void);
 #endif
-
-// Note: it's absolutely idiotic that there is an __STDC_NO_ATOMICS__ macro instead of a __STDC_ATOMICS__ macro.
-// Non conforming compilers per default fail to specify it. Please fire whoever thought a negative feature test macro was a good idea.
-#if __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
-#include <stdatomic.h>
+#endif
 
 #define dpa_u_refcount_type_list(X) \
   X((DPA_U_REFCOUNT_NONE))      /* It's not specified what happens when the refcount hits 0, it probably shouldn't be messed with directly. */ \
@@ -32,21 +31,27 @@ DPA_U_ENUM(dpa_u_refcount_type)
 
 #define DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR 61
 #define DPA__U_REFCOUNT_GUARD_BIT (((uint64_t)1)<<(DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR-1))
-#define DPA__U_REFCOUNT_MASK      (DPA__U_REFCOUNT_GUARD_BIT-1)
+#define DPA__U_REFCOUNT_MASK (DPA__U_REFCOUNT_GUARD_BIT-1)
 
 typedef struct dpa_u_refcount dpa_u_refcount_t;
 typedef struct dpa_u_refcount_freeable dpa_u_refcount_freeable_t;
 typedef struct dpa_u_refcount_callback dpa_u_refcount_callback_t;
 typedef struct dpa__u_refcount_bo_unique dpa__u_refcount_bo_unique_t;
 
+#ifndef DPA_U_NO_THREADS
+typedef atomic_uint_fast64_t dpa__u_refcount_value_t;
+#else
+typedef uint_fast64_t dpa__u_refcount_value_t;
+#endif
+
 struct dpa_u_refcount {
-  atomic_uint_fast64_t value;
+  dpa__u_refcount_value_t value;
 };
 static_assert(offsetof(struct dpa_u_refcount, value) == 0, "Unexpected offset of member .value");
 
 struct dpa_u_refcount_freeable {
   union {
-    atomic_uint_fast64_t value;
+    dpa__u_refcount_value_t value;
     struct dpa_u_refcount refcount;
   };
 };
@@ -56,7 +61,7 @@ static_assert(sizeof(struct dpa_u_refcount_freeable) == sizeof(struct dpa_u_refc
 
 struct dpa_u_refcount_callback {
   union {
-    atomic_uint_fast64_t value;
+    dpa__u_refcount_value_t value;
     struct dpa_u_refcount refcount;
     struct dpa_u_refcount_freeable freeable;
   };
@@ -68,7 +73,7 @@ static_assert(offsetof(struct dpa_u_refcount_callback, freeable) == 0, "Unexpect
 
 struct dpa__u_refcount_bo_unique {
   union {
-    atomic_uint_fast64_t value;
+    dpa__u_refcount_value_t value;
     struct dpa_u_refcount refcount;
     struct dpa_u_refcount_freeable freeable;
   };
@@ -97,7 +102,11 @@ extern struct dpa_u_refcount_callback dpa_u_refcount_static_v_callback;
  */
 DPA_U_EXPORT inline dpa__u_really_inline enum dpa_u_refcount_type dpa_u_refcount_get_type(const struct dpa_u_refcount*const rc){
   // We only care about the sign bit, and it's not going to change
+#ifndef DPA_U_NO_THREADS
   return atomic_load_explicit(&rc->value, memory_order_relaxed) >> DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR;
+#else
+  return rc->value >> DPA__U_REFCOUNT_TYPE_SHIFT_FACTOR;
+#endif
 }
 
 /**
@@ -105,7 +114,11 @@ DPA_U_EXPORT inline dpa__u_really_inline enum dpa_u_refcount_type dpa_u_refcount
  */
 DPA_U_EXPORT inline dpa__u_really_inline void dpa_u_refcount_increment_p(const struct dpa_u_refcount*const _rc){
   struct dpa_u_refcount*const rc = (struct dpa_u_refcount*)_rc;
+#ifndef DPA_U_NO_THREADS
   atomic_fetch_add_explicit(&rc->value, 1, memory_order_relaxed);
+#else
+  rc->value++;
+#endif
 }
 
 #define dpa_u_refcount_increment_s(X) _Generic((X), \
@@ -132,7 +145,11 @@ DPA_U_EXPORT inline dpa__u_really_inline void dpa_u_refcount_increment_p(const s
  */
 DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_decrement(const struct dpa_u_refcount*const _rc){
   struct dpa_u_refcount* rc = (struct dpa_u_refcount*)_rc;
+#ifndef DPA_U_NO_THREADS
   return atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1;
+#else
+  return --rc->value;
+#endif
 }
 
 DPA_U_EXPORT inline void dpa__u_refcount_destroy(struct dpa_u_refcount_freeable*const rc){
@@ -160,10 +177,15 @@ DPA_U_EXPORT inline void dpa__u_refcount_destroy(struct dpa_u_refcount_freeable*
  * Decrement the dpa_u_refcount and free the referenced resource when it hits 0.
  * \returns false if the reference count has hit 0, true otherwise
  */
-DPA_U_EXPORT inline dpa__u_really_inline dpa__u_really_inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeable*const _rc){
+DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeable*const _rc){
   struct dpa_u_refcount_freeable*const rc = (struct dpa_u_refcount_freeable*)_rc;
+#ifndef DPA_U_NO_THREADS
   if(dpa_u_likely(((atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1) & DPA__U_REFCOUNT_MASK)))
     return true;
+#else
+  if(dpa_u_likely(--rc->value & DPA__U_REFCOUNT_MASK))
+    return true;
+#endif
   dpa__u_refcount_destroy(rc);
   return false;
 }
@@ -188,7 +210,11 @@ DPA_U_EXPORT inline dpa__u_really_inline dpa__u_really_inline bool dpa_u_refcoun
  * \returns true if the dpa_u_refcount is 1, 0 otherwise.
  */
 DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_last(const struct dpa_u_refcount*const rc){
+#ifndef DPA_U_NO_THREADS
   return (atomic_load_explicit(&rc->value, memory_order_acquire) & DPA__U_REFCOUNT_MASK) == 1;
+#else
+  return (rc->value & DPA__U_REFCOUNT_MASK) == 1;
+#endif
 }
 
 /**
@@ -197,7 +223,11 @@ DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_last(const struc
  * \returns true if the dpa_u_refcount is 1, 0 otherwise.
  */
 DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_zero(const struct dpa_u_refcount*const rc){
+#ifndef DPA_U_NO_THREADS
   return (atomic_load_explicit(&rc->value, memory_order_acquire) & DPA__U_REFCOUNT_MASK) == 0;
+#else
+  return (rc->value & DPA__U_REFCOUNT_MASK) == 0;
+#endif
 }
 
 /**
@@ -227,10 +257,6 @@ DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_has_callback(const 
 DPA_U_EXPORT inline dpa__u_really_inline bool dpa_u_refcount_is_bo_unique(const struct dpa_u_refcount* rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP;
 }
-
-#else
-#error "This file currently absolutely needs C11 atomic support. But feel free to add a fallback here."
-#endif
 
 #ifdef DPA_U_REFCOUNT_DEBUG
 #undef dpa_u_refcount_increment
