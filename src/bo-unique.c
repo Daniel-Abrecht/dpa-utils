@@ -228,9 +228,11 @@ DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_f
   const dpa_u_hash_t hash = bo->base.hash;
 #ifndef DPA_U_NO_THREADS
   lock_entry(hash);
-  if(!dpa_u_refcount_is_zero(&bo->refcount.refcount)){
+  if(!dpa_u_refcount_is_zero(&bo->refcount)){
     // Someone else picked up the entry before we got to remove it.
     unlock_entry(hash);
+    // dpa__u_bo_do_intern also incremented the refcount for dpa__u_bo_unique_hashmap_destroy, it knows we wanted to free it.
+    dpa_u_refcount_put(&bo->refcount);
     return;
   }
 #endif
@@ -285,6 +287,10 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
       if(diff < 0) continue;
       if(diff > 0) break;
     }
+#ifndef DPA_U_NO_THREADS
+    if(dpa_u_refcount_is_zero(&e->refcount)) // We grabbed it before dpa__u_bo_unique_hashmap_destroy managed to remove it.
+      dpa_u_refcount_ref(&e->refcount);      // This reference is on behalf of dpa__u_bo_unique_hashmap_destroy, which will drop it again.
+#endif
     dpa_u_refcount_ref(&e->refcount);
 #ifndef DPA_U_NO_THREADS
     unlock_entry(hash);
@@ -297,7 +303,7 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
     if(type == DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP){
       dpa__u_bo_unique_hashmap_entry_t* old = dpa_u_container_of(refcount, dpa__u_bo_unique_hashmap_entry_t, refcount.freeable);
       struct dpa_u_refcount_freeable*const true_refcount = entry_get_ext_refcount(old);
-      if(old->base.bo_simple.extra)
+      if(true_refcount)
         refcount = true_refcount;
     }
     dpa_u_refcount_ref(refcount);
