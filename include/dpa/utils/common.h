@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#ifdef DPA_U_CONFIG
+#include DPA_U_CONFIG
+#endif
+
 ///////////////////////////////////////
 //////      Internal macros      //////
 ///////////////////////////////////////

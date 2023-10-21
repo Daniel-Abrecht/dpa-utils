@@ -18,7 +18,7 @@ extern bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t);
 
 #ifndef DPA_U_NO_THREADS
 #define m_aload(X) atomic_load(&(X))
-#define m_astore(X) atomic_store(&(X))
+#define m_astore(X,V) atomic_store(&(X), (V))
 #define m_atomic _Atomic
 #else
 #define m_aload(X) (X)
@@ -26,29 +26,39 @@ extern bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t);
 #define m_atomic
 #endif
 
-#define LOAD_FACTOR_EXPAND 2
-#define LOAD_FACTOR_SHRINK 0.5
+// Note: After the expansion, the load factore gets smaller, and vice versa. The amount
+// of buckets gets doubled/halved. Be careful never to set DPA_U_LOAD_FACTOR_EXPAND and
+// DPA_U_LOAD_FACTOR_SHRINK such that after expension / shrinking, it's above / below
+// the other factor, or it'll grow and shrink every time!
+#ifndef DPA_U_LOAD_FACTOR_EXPAND
+#define DPA_U_LOAD_FACTOR_EXPAND 2
+#endif
+#ifndef DPA_U_LOAD_FACTOR_SHRINK
+#define DPA_U_LOAD_FACTOR_SHRINK 0.5
+#endif
 
 struct bucket {
   dpa__u_bo_unique_hashmap_entry_t* next;
 };
 
-// The first 2 bucket lists will have 2**BUCKET_BASE entries (usually 256).
+// The first 2 bucket lists will have 2**DPA_U_BUCKET_BASE entries (usually 256).
 // Each bucket will have twice the size of the previous one.
-#define BUCKET_BASE (9)
-#define BUCKET_LIST_COUNT (int)((sizeof(dpa_u_hash_t)-1) * CHAR_BIT - BUCKET_BASE)
-#define BUCKET_COUNT (((dpa_u_hash_t)1)<<(BUCKET_LIST_COUNT+BUCKET_BASE))
+#ifndef DPA_U_BUCKET_BASE
+#define DPA_U_BUCKET_BASE 9
+#endif
+#define BUCKET_LIST_COUNT (int)((sizeof(dpa_u_hash_t)-1) * CHAR_BIT - DPA_U_BUCKET_BASE)
+#define BUCKET_COUNT (((dpa_u_hash_t)1)<<(BUCKET_LIST_COUNT+DPA_U_BUCKET_BASE))
 
 #ifndef DPA_U_NO_THREADS
 // Locks are really big. Like, 40 bytes big on my PC!
-enum { LOCK_BIT_COUNT = 7 };
-enum { LOCK_COUNT = 1llu<<LOCK_BIT_COUNT };
+#define DPA_U_LOCK_BIT_COUNT 7
 #endif
+#define LOCK_COUNT (1llu<<DPA_U_LOCK_BIT_COUNT)
 
 static_assert(BUCKET_LIST_COUNT > 0, "dpa_u_hash_t was smaller than expected");
 
 #ifndef DPA_U_NO_THREADS
-static_assert(LOCK_COUNT <= (((size_t)1)<<BUCKET_BASE), "There can't be more locks than buckets in the first bucket list");
+static_assert(LOCK_COUNT <= (((size_t)1)<<DPA_U_BUCKET_BASE), "There can't be more locks than buckets in the first bucket list");
 static_assert(!(LOCK_COUNT & (LOCK_COUNT-1)), "LOCK_COUNT must be a power of 2");
 static mtx_t lock_table[LOCK_COUNT];
 static mtx_t resize_lock;
@@ -64,17 +74,17 @@ struct hash_map {
 };
 static struct hash_map hash_map = {
   .count = 0,
-  .shift_size = BUCKET_BASE,
-  .bucket[0] = (struct bucket[((size_t)1)<<BUCKET_BASE]){0}, // the first bucket list is pre-allocated & static
+  .shift_size = DPA_U_BUCKET_BASE,
+  .bucket[0] = (struct bucket[((size_t)1)<<DPA_U_BUCKET_BASE]){0}, // the first bucket list is pre-allocated & static
 #ifndef DPA_U_NO_THREADS
-  .move_pending = ((size_t)1)<<BUCKET_BASE,
+  .move_pending = ((size_t)1)<<DPA_U_BUCKET_BASE,
 #endif
 };
 
 #ifndef DPA_U_NO_THREADS
 __attribute__((used,constructor(101)))
 static inline void init(void){
-  for(int i=0; i<LOCK_COUNT; i++)
+  for(size_t i=0; i<LOCK_COUNT; i++)
     mtx_init(&lock_table[i], mtx_plain);
   mtx_init(&resize_lock, mtx_plain);
 }
@@ -94,10 +104,10 @@ static inline struct bucket_index get_bucket_index(size_t hash){
     hash &= size_mask>>1;
 #endif
   int i = dpa_u_log2(hash);
-  if(hash < (((size_t)1)<<BUCKET_BASE))
+  if(hash < (((size_t)1)<<DPA_U_BUCKET_BASE))
     return (struct bucket_index){0, hash};
   return (struct bucket_index){
-    i - (BUCKET_BASE-1),
+    i - (DPA_U_BUCKET_BASE-1),
     hash & ((((size_t)1)<<i)-1),
   };
 }
@@ -115,10 +125,10 @@ static inline struct dpa_u_refcount_freeable* entry_get_ext_refcount(const dpa__
 
 #ifndef DPA_U_NO_THREADS
 static inline dpa__u_really_inline void lock_entry(dpa_u_hash_t hash){
-  mtx_lock(&lock_table[hash>>(64-LOCK_BIT_COUNT)]);
+  mtx_lock(&lock_table[hash>>(64-DPA_U_LOCK_BIT_COUNT)]);
 }
 static inline dpa__u_really_inline void unlock_entry(dpa_u_hash_t hash){
-  mtx_unlock(&lock_table[hash>>(64-LOCK_BIT_COUNT)]);
+  mtx_unlock(&lock_table[hash>>(64-DPA_U_LOCK_BIT_COUNT)]);
 }
 #endif
 
@@ -141,11 +151,11 @@ static void grow(void){
     // TODO: Log an error
     goto out;
   }
-  m_astore(hash_map.bucket[shift_size-(BUCKET_BASE-1)], new_bucket);
+  m_astore(hash_map.bucket[shift_size-(DPA_U_BUCKET_BASE-1)], new_bucket);
   size_t i = 0;
-  for(int bi = 0; bi < shift_size-(BUCKET_BASE-1); bi++){
+  for(int bi = 0; bi < shift_size-(DPA_U_BUCKET_BASE-1); bi++){
     struct bucket*const buckets = hash_map.bucket[bi];
-    const size_t count = ((size_t)1) << (bi+BUCKET_BASE);
+    const size_t count = ((size_t)1) << (bi+DPA_U_BUCKET_BASE);
     for(size_t j=0; i < count; i++,j++){
 #ifndef DPA_U_NO_THREADS
       lock_entry(i);
@@ -179,18 +189,18 @@ static void shrink(void){
   }
 #endif
   const int shift_size = m_aload(hash_map.shift_size) - 1;
-  if(shift_size < BUCKET_BASE){
+  if(shift_size < DPA_U_BUCKET_BASE){
 #ifndef DPA_U_NO_THREADS
     mtx_unlock(&resize_lock);
 #endif
     return;
   }
-  struct bucket*const old_bucket = hash_map.bucket[shift_size-(BUCKET_BASE-1)];
+  struct bucket*const old_bucket = hash_map.bucket[shift_size-(DPA_U_BUCKET_BASE-1)];
   const size_t old_size = ((size_t)1)<<shift_size;
   size_t i = old_size;
-  for(int bi = shift_size-(BUCKET_BASE-1); bi--; ){
+  for(int bi = shift_size-(DPA_U_BUCKET_BASE-1); bi--; ){
     struct bucket*const buckets = hash_map.bucket[bi];
-    const size_t start = bi ? ((size_t)1) << (bi+BUCKET_BASE-1) : 0;
+    const size_t start = bi ? ((size_t)1) << (bi+DPA_U_BUCKET_BASE-1) : 0;
     for(size_t j=i-start; j--; ){
       i -= 1;
 #ifndef DPA_U_NO_THREADS
@@ -206,7 +216,7 @@ static void shrink(void){
     }
   }
   m_astore(hash_map.shift_size, shift_size);
-  m_astore(hash_map.bucket[shift_size-(BUCKET_BASE-1)], 0);
+  m_astore(hash_map.bucket[shift_size-(DPA_U_BUCKET_BASE-1)], 0);
 #ifndef DPA_U_NO_THREADS
   mtx_unlock(&resize_lock);
 #endif
@@ -240,7 +250,7 @@ DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_f
     const size_t count = --hash_map.count;
 #endif
     const size_t total_buckets = ((size_t)1) << m_aload(hash_map.shift_size);
-    if( total_buckets > (((size_t)1) << BUCKET_BASE) && (float)count / total_buckets <= LOAD_FACTOR_SHRINK )
+    if( total_buckets > (((size_t)1) << DPA_U_BUCKET_BASE) && (float)count / total_buckets <= DPA_U_LOAD_FACTOR_SHRINK )
       shrink();
     return;
   }
@@ -356,7 +366,7 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* _b
   const size_t count = ++hash_map.count;
 #endif
   const size_t total_buckets = ((size_t)1) << m_aload(hash_map.shift_size);
-  if( total_buckets < BUCKET_COUNT && (float)count / total_buckets >= LOAD_FACTOR_EXPAND )
+  if( total_buckets < BUCKET_COUNT && (float)count / total_buckets >= DPA_U_LOAD_FACTOR_EXPAND )
     grow();
   return new_entry;
 }
@@ -369,9 +379,9 @@ dpa_u_bo_unique_hashmap_stats_t dpa_u_bo_unique_hashmap_stats(void){
   size_t i = 0;
   const int shift_size = m_aload(hash_map.shift_size);
   const size_t total_buckets = ((size_t)1) << shift_size;
-  for(int bi = 0; bi < shift_size-(BUCKET_BASE-1); bi++){
+  for(int bi = 0; bi < shift_size-(DPA_U_BUCKET_BASE-1); bi++){
     const struct bucket*const buckets = hash_map.bucket[bi];
-    const size_t count = ((size_t)1) << (bi+BUCKET_BASE);
+    const size_t count = ((size_t)1) << (bi+DPA_U_BUCKET_BASE);
     for(size_t j=0; i < count; i++,j++)
       if(!buckets[j].next)
         empty_count += 1;
@@ -400,9 +410,9 @@ void dpa_u_bo_unique_verify(void){
   size_t wrong = 0;
   size_t i = 0;
   const int shift_size = m_aload(hash_map.shift_size);
-  for(int bi = 0; bi < shift_size-(BUCKET_BASE-1); bi++){
+  for(int bi = 0; bi < shift_size-(DPA_U_BUCKET_BASE-1); bi++){
     const struct bucket*const buckets = hash_map.bucket[bi];
-    const size_t count = ((size_t)1) << (bi+BUCKET_BASE);
+    const size_t count = ((size_t)1) << (bi+DPA_U_BUCKET_BASE);
     for(size_t j=0; i < count; i++,j++){
 #ifndef DPA_U_NO_THREADS
       lock_entry(i);
