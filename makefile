@@ -85,8 +85,8 @@ build/.check-inline-extern: $(HEADERS)
 	mkdir -p $(dir $@)
 	@echo "Serching for inline functions without a following extern declaration..."
 
-	grep -r --no-filename -o ' inline [^(]*(' include/ | sed -n 's/.* \([^( ]\+\) *(.*/\1/p' | sort -u > build/inline-functions.txt
-	grep -r --no-filename -o '^extern [^(]*(' src/ | sed -n 's/.* \([^( ]\+\) *(.*/\1/p' | sort -u > build/extern-src-decs.txt
+	grep -r --no-filename -o ' inline [^(]*(' include/ | sed -n 's/.* \([^( ]\+\)(.*/\1/p' | sort -u > build/inline-functions.txt
+	grep -r --no-filename -o '^extern [^(]*(' src/ | sed -n 's/.* \([^( ]\+\)(.*/\1/p' | sort -u > build/extern-src-decs.txt
 	diff build/inline-functions.txt build/extern-src-decs.txt
 
 build/.check-g-macro: $(HEADERS)
