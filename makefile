@@ -103,7 +103,7 @@ build/.check-g-macro: $(HEADERS)
 	    printf '%s\n' "$$line" | while IFS=':' read -r T V; \
 	    do \
 	      l="$$( ( \
-	          printf '%s\n' "$$T"; \
+	          printf '%s\n' "$$T" | sed 's/^  *\|  *$$//g'; \
 	          printf '%s\n' "$$V" | grep -o 'DPA__G([^,]*' | sed 's/DPA__G(//'; \
 	        ) | sed 's/^\s*\|\s*$$//' | sed 's/\([a-zA-Z0-9_]\)  *\([a-zA-Z_]\)/\1 \2/' \
 	          | sed 's/ \([^a-zA-Z_]\)/\1/' | sed 's/\([^a-zA-Z_]\) /\1/' \
