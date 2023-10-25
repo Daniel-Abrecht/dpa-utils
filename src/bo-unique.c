@@ -13,9 +13,6 @@
 #include <threads.h>
 #endif
 
-extern void dpa__u_bo_unique_hashmap_ref(dpa_u_bo_unique_hashmap_t);
-extern bool dpa__u_bo_unique_hashmap_put(dpa_u_bo_unique_hashmap_t);
-
 #ifndef DPA_U_NO_THREADS
 #define m_aload(X) atomic_load(&(X))
 #define m_astore(X,V) atomic_store(&(X), (V))

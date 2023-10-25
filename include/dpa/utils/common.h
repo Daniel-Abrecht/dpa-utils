@@ -134,6 +134,9 @@ DPA_U_EXPORT dpa_u_format_param(printf, 3, 4)
   enum { ENUM ## _count = DPA_U_ENUM_COUNT(ENUM ## _list) }; \
   DPA_U_EXPORT extern const char*const ENUM ## _s[];
 
+#define DPA_U_ENUM_DEF(ENUM) \
+  const char*const ENUM ## _s[] = { DPA_U_ENUM_STR(ENUM ## _list) };
+
 #define dpa_u_enum_get_name(ENUM,X) \
   ( (X) < (int)ENUM ## _count && ENUM ## _s[(X)] \
      ? ENUM ## _s[(X)] \
