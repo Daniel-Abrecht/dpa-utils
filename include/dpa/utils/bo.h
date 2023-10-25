@@ -456,10 +456,29 @@ struct dpa_u_bo_unique_hashmap_stats_s {
     dpa_u_bo_t*: 0x61, \
     const dpa_u_bo_t*: 0x62, \
     dpa_u_any_bo_t*: 0x64, \
-    dpa_u_bo_ro_t: 0x70, \
-    dpa_u_bo_ro_t*: 0x71, \
-    const dpa_u_bo_ro_t*: 0x72, \
-    dpa_u_any_bo_ro_t*: 0x74, \
+    dpa_u_bo_hashed_t: 0x70, \
+    dpa_u_bo_hashed_t*: 0x71, \
+    const dpa_u_bo_hashed_t*: 0x72, \
+    dpa_u_any_bo_hashed_t*: 0x74, \
+    dpa_u_bo_refcounted_t: 0x80, \
+    dpa_u_bo_refcounted_t*: 0x81, \
+    const dpa_u_bo_refcounted_t*: 0x82, \
+    dpa_u_any_bo_refcounted_t*: 0x84, \
+    dpa_u_bo_refcounted_ro_t: 0x90, \
+    dpa_u_bo_refcounted_ro_t*: 0x91, \
+    const dpa_u_bo_refcounted_ro_t*: 0x92, \
+    dpa_u_any_bo_refcounted_ro_t*: 0x94, \
+    dpa_u_bo_refcounted_hashed_ro_t: 0xA0, \
+    dpa_u_bo_refcounted_hashed_ro_t*: 0xA1, \
+    const dpa_u_bo_refcounted_hashed_ro_t*: 0xA2, \
+    dpa_u_any_bo_refcounted_hashed_ro_t*: 0xA4, \
+    dpa_u_bo_with_refcount_t*: 0xB4, \
+    dpa_u_bo_with_refcount_ro_t*: 0xB5, \
+    dpa_u_bo_with_refcount_and_hash_ro_t*: 0xB6, \
+    dpa_u_bo_ro_t: 0xF0, \
+    dpa_u_bo_ro_t*: 0xF1, \
+    const dpa_u_bo_ro_t*: 0xF2, \
+    dpa_u_any_bo_ro_t*: 0xF4, \
     default: 0xFFF \
   )
 
