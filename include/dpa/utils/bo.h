@@ -711,21 +711,42 @@ DPA_U_EXPORT inline dpa__u_really_inline const void* dpa__u_any_bo_ro__data(cons
 
 #define dpa_u_bo_set_size(...) dpa_u_assert_selection(dpa_u_bo_set_size_g(__VA_ARGS__))
 #define dpa_u_bo_set_size_g(X,S) ((void)dpa_u_generic((X), \
-    dpa_u_bo_inline_t: dpa__u_p_bo_inline__set_size(&DPA__G(dpa_u_bo_inline_t,(X)), (S)), \
-    dpa_u_bo_simple_t: dpa__u_p_bo_simple__set_size(&DPA__G(dpa_u_bo_simple_t,(X)), (S)), \
-    dpa_u_bo_simple_ro_t: dpa__u_p_bo_simple_ro__set_size(&DPA__G(dpa_u_bo_simple_ro_t,(X)), (S)), \
-    dpa_u_bo_t: dpa__u_p_bo__set_size(&DPA__G(dpa_u_bo_t,(X)),(S)), \
+    dpa_u_bo_inline_t: dpa__u_v_bo_inline__set_size(DPA__G(dpa_u_bo_inline_t,(X)), (S)), \
+    dpa_u_bo_simple_t: dpa__u_v_bo_simple__set_size(DPA__G(dpa_u_bo_simple_t,(X)), (S)), \
+    dpa_u_bo_simple_ro_t: dpa__u_v_bo_simple_ro__set_size(DPA__G(dpa_u_bo_simple_ro_t,(X)), (S)), \
+    dpa_u_bo_t: dpa__u_v_bo__set_size(DPA__G(dpa_u_bo_t,(X)),(S)), \
+    dpa_u_bo_refcounted_t: dpa__u_v_bo_refcounted__set_size(DPA__G(dpa_u_bo_refcounted_t,(X)),(S)), \
+    dpa_u_bo_refcounted_ro_t: dpa__u_v_bo_refcounted_ro__set_size(DPA__G(dpa_u_bo_refcounted_ro_t,(X)),(S)), \
+    dpa_u_bo_refcounted_hashed_ro_t: dpa__u_v_bo_refcounted_hashed_ro__set_size(DPA__G(dpa_u_bo_refcounted_hashed_ro_t,(X)),(S)) \
     \
     dpa_u_bo_inline_t*: dpa__u_p_bo_inline__set_size(DPA__G(dpa_u_bo_inline_t*,(X)), (S)), \
     dpa_u_bo_simple_t*: dpa__u_p_bo_simple__set_size(&DPA__G(dpa_u_bo_simple_t*,(X)), (S)), \
     dpa_u_bo_simple_ro_t*: dpa__u_p_bo_simple_ro__set_size(&DPA__G(dpa_u_bo_simple_ro_t*,(X)), (S)), \
-    dpa_u_bo_t*: dpa__u_p_bo__set_size(DPA__G(dpa_u_bo_t*,(X)),(S)) \
+    dpa_u_bo_t*: dpa__u_p_bo__set_size(DPA__G(dpa_u_bo_t*,(X)),(S)), \
+    dpa_u_bo_refcounted_t*: dpa__u_p_bo_refcounted__set_size(DPA__G(dpa_u_bo_refcounted_t*,(X)),(S)), \
+    dpa_u_bo_refcounted_ro_t*: dpa__u_p_bo_refcounted_ro__set_size(DPA__G(dpa_u_bo_refcounted_ro_t*,(X)),(S)), \
+    dpa_u_bo_refcounted_hashed_ro_t*: dpa__u_p_bo_refcounted_hashed_ro__set_size(DPA__G(dpa_u_bo_refcounted_hashed_ro_t*,(X)),(S)) \
   ))
 
-#define dpa__u_p_bo_inline__set_size(X,S)    (assert((S) <= DPA_U_BO_INLINE_MAX_SIZE),((X)->size=(S)&0xF))
-#define dpa__u_p_bo_simple__set_size(X,S)    (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
+#define dpa__u_v_bo_inline__set_size(X,S) dpa__u_p_bo_inline__set_size(&(X),(S))
+#define dpa__u_p_bo_inline__set_size(X,S) (assert((S) <= DPA_U_BO_INLINE_MAX_SIZE),((X)->size=(S)&0xF))
+
+#define dpa__u_v_bo_simple__set_size(X,S) dpa__u_p_bo_simple__set_size(&(X),(S))
+#define dpa__u_p_bo_simple__set_size(X,S) (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
+
+#define dpa__u_v_bo_simple_ro__set_size(X,S) dpa__u_p_bo_simple_ro__set_size(&(X),(S))
 #define dpa__u_p_bo_simple_ro__set_size(X,S) (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
 
+#define dpa__u_v_bo_refcounted__set_size(X,S) dpa__u_p_bo_refcounted__set_size(&(X),(S))
+#define dpa__u_p_bo_refcounted__set_size(X,S) (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
+
+#define dpa__u_v_bo_refcounted_ro__set_size(X,S) dpa__u_p_bo_refcounted_ro__set_size(&(X),(S))
+#define dpa__u_p_bo_refcounted_ro__set_size(X,S) (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
+
+#define dpa__u_v_bo_refcounted_hashed_ro__set_size(X,S) dpa__u_p_bo_refcounted_hashed_ro__set_size(&(X),(S))
+#define dpa__u_p_bo_refcounted_hashed_ro__set_size(X,S) (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
+
+#define dpa__u_v_bo__set_size(X,S) dpa__u_p_bo__set_size(&(X),(S))
 DPA_U_EXPORT inline dpa__u_really_inline void dpa__u_p_bo__set_size(dpa_u_bo_t*restrict const bo, size_t size){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: {
