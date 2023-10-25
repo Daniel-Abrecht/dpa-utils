@@ -1453,11 +1453,7 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_any_bo_ro_t*const b
 }
 
 #define dpa_u_any_bo_ro(...) dpa_u_assert_selection(dpa_u_any_bo_ro_g(__VA_ARGS__))
-#define dpa_u_any_bo_ro_g(X) _Generic((X), \
-    dpa_u_bo_unique_hashmap_t: (dpa_u_any_bo_ro_t*)&(dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = DPA__G(dpa_u_bo_unique_hashmap_t, (X)) }, \
-    dpa_u_any_bo_unique_hashmap_t*: (dpa_u_any_bo_ro_t*)&(dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*, (X)) }, \
-    default: dpa_u_generic_if_selection(dpa_u_bo_ptr_g(X), (dpa_u_any_bo_ro_t*)dpa_u_bo_ptr((X))) \
-  )
+#define dpa_u_any_bo_ro_g(X) dpa_u_generic_if_selection(dpa_u_bo_ptr_g(X), (dpa_u_any_bo_ro_t*)dpa_u_bo_ptr((X)))
 
 /**
  * Interns a buffer. The refcount of the buffer will be increased.
