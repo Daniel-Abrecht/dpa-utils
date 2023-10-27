@@ -293,6 +293,8 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* bo
     return e;
   }
   dpa__u_bo_unique_hashmap_entry_t* new_entry;
+  if(dpa_u_bo_get_type(bo) == DPA_U_BO_UNIQUE_HASHMAP)
+    return (dpa_u_bo_unique_hashmap_t)bo; // See the DPA_U_DEFINE_UNIQUE_CSTRING, it can only come from there.
   struct dpa_u_refcount_freeable* refcount = dpa_u_bo_get_refcount(bo);
   if(refcount){
     enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&refcount->refcount);

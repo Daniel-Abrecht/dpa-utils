@@ -80,8 +80,17 @@ typedef struct { int x; } dpa_u_invalid_selection_t;
 #define dpa_u_unlikely(x)
 #endif
 
+
 #if defined(__GNUC__) || defined(__llvm__)
-#define dpa_u_format_param(...) __attribute__ ((format (__VA_ARGS__)))
+#define dpa_u_unsequenced __attribute__((const))
+#elif __STDC_VERSION__ >= 202311
+#define dpa_u_unsequenced [[unsequenced, gnu::const]]
+#else
+#define dpa_u_unsequenced
+#endif
+
+#if defined(__GNUC__) || defined(__llvm__)
+#define dpa_u_format_param(...) __attribute__((format (__VA_ARGS__)))
 #else
 #define dpa_u_format_param(...)
 #endif
@@ -148,7 +157,7 @@ DPA_U_EXPORT dpa_u_format_param(printf, 3, 4)
 DPA_U_EXPORT extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_format_param(printf, 1, 2);
 #define dpa_u_abort(F, ...) { dpa_u_abort_p("%s:%d: %s: " F "\n",  __FILE__, __LINE__, __func__, __VA_ARGS__); }
 
-#if !defined(DPA_U_DEBUG) && !defined(__GNUC__)
+#if !defined(DPA_U_DEBUG) && defined(__GNUC__)
 #define dpa__u_really_inline __attribute__((always_inline))
 #else
 #define dpa__u_really_inline
@@ -191,9 +200,9 @@ typedef intmax_t dpa_int128_t;
 typedef uintmax_t dpa_uint128_t;
 #elif BITINT_MAXWIDTH >= 128
 #define DPA_HAS_INT128
-typedef __BitInt(128) dpa_int128_t;
+typedef _BitInt(128) dpa_int128_t;
 #define DPA_HAS_UINT128
-typedef unsigned __BitInt(128) dpa_uint128_t;
+typedef unsigned _BitInt(128) dpa_uint128_t;
 #elif defined(__SIZEOF_INT128__)
 #define DPA_HAS_INT128
 typedef __int128_t dpa_int128_t;
