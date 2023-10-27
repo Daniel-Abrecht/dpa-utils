@@ -1005,7 +1005,7 @@ DPA_U_EXPORT inline dpa__u_really_inline void dpa__u_bo_gc_ro__ref(dpa_u_bo_gc_r
     case DPA_U_BO_REFCOUNTED:
     case DPA_U_BO_REFCOUNTED_HASHED: dpa_u_refcount_ref(((const dpa_u_bo_refcounted_ro_t*)bo)->refcount); return;
   }
-  dpa_u_unreachable("dpa_u_any_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(ubo)));
+  dpa_u_unreachable("dpa_u_bo_gc_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 #define dpa__u_bo_with_refcount_ro__ref(X) dpa_u_refcount_increment_p(&((const dpa_u_bo_refcounted_ro_t*)(X))->refcount->refcount)
 #define dpa__u_bo_with_refcount__ref(X) dpa_u_refcount_increment_p(&((const dpa_u_bo_refcounted_ro_t*)(X))->refcount->refcount)
@@ -1098,7 +1098,7 @@ DPA_U_EXPORT inline dpa__u_really_inline void dpa__u_bo_gc_ro__put(dpa_u_bo_gc_r
     case DPA_U_BO_REFCOUNTED:
     case DPA_U_BO_REFCOUNTED_HASHED: dpa_u_refcount_put(((const dpa_u_bo_refcounted_ro_t*)bo)->refcount); return;
   }
-  dpa_u_unreachable("dpa_u_any_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(ubo)));
+  dpa_u_unreachable("dpa_u_bo_gc_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 #define dpa__u_bo_with_refcount_ro__put(X) dpa_u_refcount_put_p(((const dpa_u_bo_refcounted_ro_t*)(X))->refcount)
 #define dpa__u_bo_with_refcount__put(X) dpa_u_refcount_put_p(((const dpa_u_bo_refcounted_ro_t*)(X))->refcount)
@@ -1150,7 +1150,7 @@ DPA_U_EXPORT inline dpa__u_really_inline dpa_u_refcount_freeable_t* dpa__u_bo_gc
     case DPA_U_BO_REFCOUNTED:
     case DPA_U_BO_REFCOUNTED_HASHED: return (dpa_u_refcount_freeable_t*)&((dpa_u_bo_refcounted_ro_t*)bo)->refcount;
   }
-  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(ubo)));
+  dpa_u_unreachable("dpa_u_bo_gc_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 DPA_U_EXPORT inline dpa__u_really_inline dpa_u_refcount_freeable_t* dpa__u_bo_with_refcount_ro__get_refcount(const dpa_u_bo_with_refcount_ro_t* bo){
   switch(dpa_u_bo_get_type(bo)){
@@ -1158,14 +1158,14 @@ DPA_U_EXPORT inline dpa__u_really_inline dpa_u_refcount_freeable_t* dpa__u_bo_wi
     case DPA_U_BO_REFCOUNTED:
     case DPA_U_BO_REFCOUNTED_HASHED: return (dpa_u_refcount_freeable_t*)&((dpa_u_bo_refcounted_ro_t*)bo)->refcount;
   }
-  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(ubo)));
+  dpa_u_unreachable("dpa_u_bo_with_refcount_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 DPA_U_EXPORT inline dpa__u_really_inline dpa_u_refcount_freeable_t* dpa__u_bo_with_refcount_and_hash_ro__get_refcount(const dpa_u_bo_with_refcount_and_hash_ro_t* bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_UNIQUE_HASHMAP: return (dpa_u_refcount_freeable_t*)&((dpa_u_bo_unique_hashmap_t)bo)->refcount.freeable;
     case DPA_U_BO_REFCOUNTED_HASHED: return (dpa_u_refcount_freeable_t*)&((dpa_u_bo_refcounted_ro_t*)bo)->refcount;
   }
-  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(ubo)));
+  dpa_u_unreachable("dpa_u_bo_with_refcount_and_hash_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 DPA_U_EXPORT inline dpa__u_really_inline dpa_u_refcount_freeable_t* dpa__u_v_bo_unique__get_refcount(const dpa_u_bo_unique_t ubo){
   switch(dpa_u_bo_get_type(ubo)){
