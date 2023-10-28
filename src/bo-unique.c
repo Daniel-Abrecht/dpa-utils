@@ -256,7 +256,7 @@ DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_f
   dpa_u_abort("%s", "The dpa_u_bo_unique_hashmap_t to be destroyed could not be found");
 }
 
-DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t* bo){
+DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t*const bo){
   const dpa_u_hash_t hash = dpa_u_bo_hash(bo);
   const size_t size = dpa_u_bo_get_size(bo);
   const void*const data = dpa_u_bo_data(bo);

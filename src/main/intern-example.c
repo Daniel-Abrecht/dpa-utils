@@ -31,6 +31,7 @@ static void print_hashmap_stats(){
 
 int main(int argc, char* argv[]){
   bool echo = false;
+  bool nocleanup = false;
   const char* file = "/usr/share/dict/words";
   if(argc > 1){
     char** args = argv + argc;
@@ -38,6 +39,8 @@ int main(int argc, char* argv[]){
     while(++i){
       if(!strcmp(args[i], "--print-words")){
         echo = true;
+      }else if(!strcmp(args[i], "--nocleanup")){
+        nocleanup = true;
       }else if(!strcmp(args[i], "--file") && i <= -2){
         file = args[++i];
       }else{
@@ -77,12 +80,14 @@ int main(int argc, char* argv[]){
     puts("");
   }
   printf("word count: %zu\n", count);
-  print_hashmap_stats();
-  dpa_u_bo_unique_verify();
-  for(size_t i=0; i<count; i++)
-    dpa_u_bo_put(list[i]);
-  free(list);
-  print_hashmap_stats();
-  dpa_u_bo_unique_verify();
-  fclose(f);
+  if(!nocleanup){
+    print_hashmap_stats();
+    dpa_u_bo_unique_verify();
+    for(size_t i=0; i<count; i++)
+      dpa_u_bo_put(list[i]);
+    free(list);
+    print_hashmap_stats();
+    dpa_u_bo_unique_verify();
+    fclose(f);
+  }
 }

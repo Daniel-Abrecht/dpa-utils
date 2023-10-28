@@ -90,6 +90,14 @@ typedef struct { int x; } dpa_u_invalid_selection_t;
 #endif
 
 #if defined(__GNUC__) || defined(__llvm__)
+#define dpa_u_reproducible __attribute__((pure))
+#elif __STDC_VERSION__ >= 202311
+#define dpa_u_reproducible [[reproducible, gnu::pure]]
+#else
+#define dpa_u_reproducible
+#endif
+
+#if defined(__GNUC__) || defined(__llvm__)
 #define dpa_u_format_param(...) __attribute__((format (__VA_ARGS__)))
 #else
 #define dpa_u_format_param(...)
