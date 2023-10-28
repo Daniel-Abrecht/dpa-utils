@@ -13,6 +13,9 @@
 #include <threads.h>
 #endif
 
+#undef dpa_u_refcount_is_zero_s
+#define dpa_u_refcount_is_zero_s dpa_u_refcount_is_zero_p
+
 #ifndef DPA_U_NO_THREADS
 #define m_aload(X) atomic_load(&(X))
 #define m_astore(X,V) atomic_store(&(X), (V))

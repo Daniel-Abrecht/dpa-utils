@@ -12,11 +12,13 @@
 #ifndef DPA_U_NO_THREADS
 #include <stdatomic.h>
 
-#ifdef DPA_UTILS_REFCOUNT_DEBUG
+#ifdef DPA_U_REFCOUNT_DEBUG
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
 pid_t gettid(void);
+void flockfile(FILE *filehandle);
+void funlockfile(FILE *filehandle);
 #endif
 #endif
 
@@ -162,7 +164,9 @@ dpa__u_really_inline DPA_U_EXPORT inline void dpa_u_refcount_increment_p(const s
  * Decrement the dpa_u_refcount
  * \returns false if the reference count has hit 0, true otherwise
  */
-dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_decrement(const struct dpa_u_refcount*const _rc){
+#define dpa_u_refcount_decrement dpa_u_refcount_decrement_s
+#define dpa_u_refcount_decrement_s dpa_u_refcount_decrement_p
+dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_decrement_p(const struct dpa_u_refcount*const _rc){
   struct dpa_u_refcount* rc = (struct dpa_u_refcount*)_rc;
 #ifndef DPA_U_NO_THREADS
   return atomic_fetch_sub_explicit(&rc->value, 1, memory_order_acq_rel) - 1;
@@ -229,19 +233,20 @@ dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_put_p(const struct 
  * \returns true if the dpa_u_refcount is 1, 0 otherwise.
  */
 #define dpa_u_refcount_is_last(...) dpa_u_assert_selection(dpa_u_refcount_is_last_g(__VA_ARGS__))
+#define dpa_u_refcount_is_last_s dpa_u_refcount_is_last_p
 #define dpa_u_refcount_is_last_g(X) dpa_u_generic((X), \
-    struct dpa_u_refcount: dpa_u_refcount_is_last_p(&DPA__G(struct dpa_u_refcount,(X))), \
-    struct dpa_u_refcount_freeable: dpa_u_refcount_is_last_p(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
-    struct dpa_u_refcount_callback: dpa_u_refcount_is_last_p(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
-    struct dpa__u_refcount_bo_unique: dpa_u_refcount_is_last_p(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).refcount), \
-          struct dpa_u_refcount*: dpa_u_refcount_is_last_p(DPA__G(struct dpa_u_refcount*,(X))), \
-    const struct dpa_u_refcount*: dpa_u_refcount_is_last_p(DPA__G(const struct dpa_u_refcount*,(X))), \
-          struct dpa_u_refcount_freeable*: dpa_u_refcount_is_last_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
-    const struct dpa_u_refcount_freeable*: dpa_u_refcount_is_last_p(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
-          struct dpa_u_refcount_callback*: dpa_u_refcount_is_last_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount), \
-    const struct dpa_u_refcount_callback*: dpa_u_refcount_is_last_p(&DPA__G(const struct dpa_u_refcount_callback*,(X))->refcount), \
-          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_last_p(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->refcount), \
-    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_last_p(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->refcount) \
+    struct dpa_u_refcount: dpa_u_refcount_is_last_s(&DPA__G(struct dpa_u_refcount,(X))), \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_is_last_s(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
+    struct dpa_u_refcount_callback: dpa_u_refcount_is_last_s(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
+    struct dpa__u_refcount_bo_unique: dpa_u_refcount_is_last_s(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).refcount), \
+          struct dpa_u_refcount*: dpa_u_refcount_is_last_s(DPA__G(struct dpa_u_refcount*,(X))), \
+    const struct dpa_u_refcount*: dpa_u_refcount_is_last_s(DPA__G(const struct dpa_u_refcount*,(X))), \
+          struct dpa_u_refcount_freeable*: dpa_u_refcount_is_last_s(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
+    const struct dpa_u_refcount_freeable*: dpa_u_refcount_is_last_s(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
+          struct dpa_u_refcount_callback*: dpa_u_refcount_is_last_s(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount), \
+    const struct dpa_u_refcount_callback*: dpa_u_refcount_is_last_s(&DPA__G(const struct dpa_u_refcount_callback*,(X))->refcount), \
+          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_last_s(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->refcount), \
+    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_last_s(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->refcount) \
   )
 dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_is_last_p(const struct dpa_u_refcount*const rc){
 #ifndef DPA_U_NO_THREADS
@@ -257,19 +262,20 @@ dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_
  * \returns true if the dpa_u_refcount is 1, 0 otherwise.
  */
 #define dpa_u_refcount_is_zero(...) dpa_u_assert_selection(dpa_u_refcount_is_zero_g(__VA_ARGS__))
+#define dpa_u_refcount_is_zero_s dpa_u_refcount_is_zero_p
 #define dpa_u_refcount_is_zero_g(X) dpa_u_generic((X), \
-    struct dpa_u_refcount: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa_u_refcount,(X))), \
-    struct dpa_u_refcount_freeable: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
-    struct dpa_u_refcount_callback: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
-    struct dpa__u_refcount_bo_unique: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).refcount), \
-          struct dpa_u_refcount*: dpa_u_refcount_is_zero_p(DPA__G(struct dpa_u_refcount*,(X))), \
-    const struct dpa_u_refcount*: dpa_u_refcount_is_zero_p(DPA__G(const struct dpa_u_refcount*,(X))), \
-          struct dpa_u_refcount_freeable*: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
-    const struct dpa_u_refcount_freeable*: dpa_u_refcount_is_zero_p(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
-          struct dpa_u_refcount_callback*: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount), \
-    const struct dpa_u_refcount_callback*: dpa_u_refcount_is_zero_p(&DPA__G(const struct dpa_u_refcount_callback*,(X))->refcount), \
-          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_zero_p(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->refcount), \
-    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_zero_p(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->refcount) \
+    struct dpa_u_refcount: dpa_u_refcount_is_zero_s(&DPA__G(struct dpa_u_refcount,(X))), \
+    struct dpa_u_refcount_freeable: dpa_u_refcount_is_zero_s(&DPA__G(struct dpa_u_refcount_freeable,(X)).refcount), \
+    struct dpa_u_refcount_callback: dpa_u_refcount_is_zero_s(&DPA__G(struct dpa_u_refcount_callback,(X)).refcount), \
+    struct dpa__u_refcount_bo_unique: dpa_u_refcount_is_zero_s(&DPA__G(struct dpa__u_refcount_bo_unique,(X)).refcount), \
+          struct dpa_u_refcount*: dpa_u_refcount_is_zero_s(DPA__G(struct dpa_u_refcount*,(X))), \
+    const struct dpa_u_refcount*: dpa_u_refcount_is_zero_s(DPA__G(const struct dpa_u_refcount*,(X))), \
+          struct dpa_u_refcount_freeable*: dpa_u_refcount_is_zero_s(&DPA__G(struct dpa_u_refcount_freeable*,(X))->refcount), \
+    const struct dpa_u_refcount_freeable*: dpa_u_refcount_is_zero_s(&DPA__G(const struct dpa_u_refcount_freeable*,(X))->refcount), \
+          struct dpa_u_refcount_callback*: dpa_u_refcount_is_zero_s(&DPA__G(struct dpa_u_refcount_callback*,(X))->refcount), \
+    const struct dpa_u_refcount_callback*: dpa_u_refcount_is_zero_s(&DPA__G(const struct dpa_u_refcount_callback*,(X))->refcount), \
+          struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_zero_s(&DPA__G(struct dpa__u_refcount_bo_unique*,(X))->refcount), \
+    const struct dpa__u_refcount_bo_unique*: dpa_u_refcount_is_zero_s(&DPA__G(const struct dpa__u_refcount_bo_unique*,(X))->refcount) \
   )
 dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_is_zero_p(const struct dpa_u_refcount*const rc){
 #ifndef DPA_U_NO_THREADS
@@ -368,43 +374,51 @@ dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_
 #ifdef DPA_U_REFCOUNT_DEBUG
 #undef dpa_u_refcount_increment_s
 #define dpa_u_refcount_increment_s(R) \
-  do { \
-    struct dpa_u_refcount* _dpa_u_refcount = (R); \
-    fprintf(stderr, "%ld> %s:%d: %s: dpa_u_refcount_increment(%p: %s)\n", (long)gettid(), __FILE__, __LINE__, __func__, (void*)_dpa_u_refcount, #R); \
-    dpa_u_refcount_increment(_dpa_u_refcount); \
-  } while(0)
-
-#define dpa_u_refcount_decrement(R) \
   ( \
+    flockfile(stderr), \
+    fprintf(stderr, "%ld> %s:%d: %s: dpa_u_refcount_increment(%p: %s)\n", (long)gettid(), __FILE__, __LINE__, __func__, (void*)(R), #R), \
+    funlockfile(stderr), \
+    dpa_u_refcount_increment_p((R)) \
+  )
+
+#undef dpa_u_refcount_decrement_s
+#define dpa_u_refcount_decrement_s(R) \
+  ( \
+    flockfile(stderr), \
     fprintf(stderr, "%ld> %s:%d: %s: dpa_u_refcount_decrement(%p: %s) = ", (long)gettid(), __FILE__, __LINE__, __func__, (void*)(R), #R), \
-    dpa_u_refcount_decrement((R)) \
-     ? (fprintf(stderr, "true\n" ), true ) \
-     : (fprintf(stderr, "false\n"), false) \
+    dpa_u_refcount_decrement_p((R)) \
+     ? (fprintf(stderr, "true\n" ), funlockfile(stderr), true ) \
+     : (fprintf(stderr, "false\n"), funlockfile(stderr), false) \
   )
 
 #undef dpa_u_refcount_put_s
 #define dpa_u_refcount_put_s(R) \
   ( \
+    flockfile(stderr), \
     fprintf(stderr, "%ld> %s:%d: %s: dpa_u_refcount_put(%p: %s) = " , (long)gettid(), __FILE__, __LINE__, __func__, (void*)(R), #R), \
-    dpa_u_refcount_put((R)) \
-     ? (fprintf(stderr, "true\n" ), true ) \
-     : (fprintf(stderr, "false\n"), false) \
+    dpa_u_refcount_put_p((R)) \
+     ? (fprintf(stderr, "true\n" ), funlockfile(stderr), true ) \
+     : (fprintf(stderr, "false\n"), funlockfile(stderr), false) \
   )
 
-#define dpa_u_refcount_is_last(R) \
+#undef dpa_u_refcount_is_last_s
+#define dpa_u_refcount_is_last_s(R) \
   ( \
+    flockfile(stderr), \
     fprintf(stderr, "%ld> %s:%d: %s: dpa_u_refcount_is_last(%p: %s) = " , (long)gettid(), __FILE__, __LINE__, __func__, (void*)(R), #R), \
-    dpa_u_refcount_is_last((R)) \
-     ? (fprintf(stderr, "true\n" ), true ) \
-     : (fprintf(stderr, "false\n"), false) \
+    dpa_u_refcount_is_last_p((R)) \
+     ? (fprintf(stderr, "true\n" ), funlockfile(stderr), true ) \
+     : (fprintf(stderr, "false\n"), funlockfile(stderr), false) \
   )
 
-#define dpa_u_refcount_is_zero(R) \
+#undef dpa_u_refcount_is_zero_s
+#define dpa_u_refcount_is_zero_s(R) \
   ( \
+    flockfile(stderr), \
     fprintf(stderr, "%ld> %s:%d: %s: dpa_u_refcount_is_zero(%p: %s) = " , (long)gettid(), __FILE__, __LINE__, __func__, (void*)(R), #R), \
-    dpa_u_refcount_is_zero((R)) \
-     ? (fprintf(stderr, "true\n" ), true ) \
-     : (fprintf(stderr, "false\n"), false) \
+    dpa_u_refcount_is_zero_p((R)) \
+     ? (fprintf(stderr, "true\n" ), funlockfile(stderr), true ) \
+     : (fprintf(stderr, "false\n"), funlockfile(stderr), false) \
   )
 
 #endif
