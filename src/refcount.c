@@ -6,9 +6,9 @@ extern bool dpa_u_refcount_decrement(const struct dpa_u_refcount*const rc);
 extern bool dpa_u_refcount_put_p(const struct dpa_u_refcount_freeable*const rc);
 extern bool dpa_u_refcount_is_last_p(const struct dpa_u_refcount*const rc);
 extern bool dpa_u_refcount_is_zero_p(const struct dpa_u_refcount*const rc);
-extern bool dpa_u_refcount_is_static_p(const struct dpa_u_refcount* rc);
-extern bool dpa_u_refcount_has_callback_p(const struct dpa_u_refcount* rc);
-extern bool dpa_u_refcount_is_bo_unique_p(const struct dpa_u_refcount* rc);
+extern bool dpa_u_refcount_is_static_p(const struct dpa_u_refcount*const rc);
+extern bool dpa_u_refcount_has_callback_p(const struct dpa_u_refcount*const rc);
+extern bool dpa_u_refcount_is_bo_unique_p(const struct dpa_u_refcount*const rc);
 extern void dpa__u_refcount_destroy(struct dpa_u_refcount_freeable*const rc);
 
 struct dpa_u_refcount dpa_u_refcount_v_static = dpa_u_refcount_i_static;

@@ -297,7 +297,7 @@ dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_
 /**
  * If something takes a refcounted object, but it's actually statically allocated
  */
-dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_is_static_p(const struct dpa_u_refcount* rc){
+dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_is_static_p(const struct dpa_u_refcount*const rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_STATIC;
 }
 
@@ -339,7 +339,7 @@ dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_
           struct dpa__u_refcount_bo_unique*: false, \
     const struct dpa__u_refcount_bo_unique*: false \
   )
-dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_has_callback_p(const struct dpa_u_refcount* rc){
+dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_has_callback_p(const struct dpa_u_refcount*const rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_CALLBACK;
 }
 
@@ -361,7 +361,7 @@ dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_
           struct dpa__u_refcount_bo_unique*: true, \
     const struct dpa__u_refcount_bo_unique*: true \
   )
-dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_is_bo_unique_p(const struct dpa_u_refcount* rc){
+dpa_u_reproducible dpa__u_really_inline DPA_U_EXPORT inline bool dpa_u_refcount_is_bo_unique_p(const struct dpa_u_refcount*const rc){
   return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP;
 }
 

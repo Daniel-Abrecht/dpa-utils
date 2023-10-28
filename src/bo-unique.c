@@ -27,6 +27,7 @@
 // of buckets gets doubled/halved. Be careful never to set DPA_U_LOAD_FACTOR_EXPAND and
 // DPA_U_LOAD_FACTOR_SHRINK such that after expension / shrinking, it's above / below
 // the other factor, or it'll grow and shrink every time!
+// 1 and 0.25 give is a bit faster, but wastes a bit more space than 2 0.5.
 #ifndef DPA_U_LOAD_FACTOR_EXPAND
 #define DPA_U_LOAD_FACTOR_EXPAND 2
 #endif
