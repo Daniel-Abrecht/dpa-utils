@@ -92,79 +92,175 @@ DPA_U_ENUM(dpa_u_bo_any_type)
  * the possible type constants. The values are the same as in the enum dpa_u_bo_any_type.
  * @{
  */
-enum dpa_u_bo_inline_type { DPA_U_BO_INLINE_1 = DPA_U_BO_INLINE };
-enum dpa_u_any_bo_inline_type { DPA_U_BO_INLINE_A1 = DPA_U_BO_INLINE };
-enum dpa_u_bo_simple_type { DPA_U_BO_SIMPLE_2 = DPA_U_BO_SIMPLE };
+enum dpa_u_bo_inline_type {
+  DPA_U_BO_INLINE_1 = DPA_U_BO_INLINE,
+};
+enum dpa_u_any_bo_inline_type {
+  DPA_U_BO_INLINE_A1 = DPA_U_BO_INLINE,
+};
+enum dpa_u_bo_simple_type {
+  DPA_U_BO_SIMPLE_2 = DPA_U_BO_SIMPLE,
+};
+#define case_DPA_U_ANY_BO_SIMPLE \
+  case DPA_U_BO_SIMPLE: \
+  case DPA_U_BO_HASHED: \
+  case DPA_U_BO_REFCOUNTED:
 enum dpa_u_any_bo_simple_type {
-  DPA_U_BO_SIMPLE_A2 = DPA_U_BO_SIMPLE
+  DPA_U_BO_SIMPLE_A2 = DPA_U_BO_SIMPLE,
+  DPA_U_BO_HASHED_A2 = DPA_U_BO_HASHED,
+  DPA_U_BO_REFCOUNTED_A2 = DPA_U_BO_REFCOUNTED,
 };
-enum dpa_u_bo_unique_hashmap_type { DPA_U_BO_UNIQUE_HASHMAP_3 = DPA_U_BO_UNIQUE_HASHMAP };
-enum dpa_u_any_bo_unique_hashmap_type { DPA_U_BO_UNIQUE_HASHMAP_A3 = DPA_U_BO_UNIQUE_HASHMAP };
-enum dpa_u_bo_simple_ro_type { DPA_U_BO_SIMPLE_4 = DPA_U_BO_SIMPLE };
+enum dpa_u_bo_unique_hashmap_type {
+  DPA_U_BO_UNIQUE_HASHMAP_3 = DPA_U_BO_UNIQUE_HASHMAP,
+};
+enum dpa_u_any_bo_unique_hashmap_type {
+  DPA_U_BO_UNIQUE_HASHMAP_A3 = DPA_U_BO_UNIQUE_HASHMAP,
+};
+enum dpa_u_bo_simple_ro_type {
+  DPA_U_BO_SIMPLE_4 = DPA_U_BO_SIMPLE,
+};
 enum dpa_u_any_bo_simple_ro_type {
-  DPA_U_BO_SIMPLE_A4 = DPA_U_BO_SIMPLE
+  DPA_U_BO_SIMPLE_A4 = DPA_U_BO_SIMPLE,
+  DPA_U_BO_UNIQUE_HASHMAP_A4 = DPA_U_BO_UNIQUE_HASHMAP,
+  DPA_U_BO_HASHED_A4 = DPA_U_BO_HASHED,
+  DPA_U_BO_REFCOUNTED_A4 = DPA_U_BO_REFCOUNTED,
+  DPA_U_BO_REFCOUNTED_HASHED_A4 = DPA_U_BO_REFCOUNTED_HASHED,
 };
-enum dpa_u_bo_hashed_type { DPA_U_BO_HASHED_5 = DPA_U_BO_HASHED };
-enum dpa_u_any_bo_hashed_type { DPA_U_BO_HASHED_A5 = DPA_U_BO_HASHED };
-enum dpa_u_bo_hashed_ro_type { DPA_U_BO_HASHED_6 = DPA_U_BO_HASHED };
-enum dpa_u_any_bo_hashed_ro_type { DPA_U_BO_HASHED_A6 = DPA_U_BO_HASHED };
-enum dpa_u_bo_refcounted_type { DPA_U_BO_REFCOUNTED_7 = DPA_U_BO_REFCOUNTED };
-enum dpa_u_any_bo_refcounted_type { DPA_U_BO_REFCOUNTED_A7 = DPA_U_BO_REFCOUNTED };
-enum dpa_u_bo_refcounted_ro_type { DPA_U_BO_REFCOUNTED_8 = DPA_U_BO_REFCOUNTED };
+enum dpa_u_bo_hashed_type {
+  DPA_U_BO_HASHED_5 = DPA_U_BO_HASHED,
+};
+enum dpa_u_any_bo_hashed_type {
+  DPA_U_BO_HASHED_A5 = DPA_U_BO_HASHED,
+};
+enum dpa_u_bo_hashed_ro_type {
+  DPA_U_BO_HASHED_6 = DPA_U_BO_HASHED,
+};
+#define case_DPA_U_ANY_BO_HASHED_RO \
+  case DPA_U_BO_UNIQUE_HASHMAP: \
+  case DPA_U_BO_HASHED:
+enum dpa_u_any_bo_hashed_ro_type {
+  DPA_U_BO_UNIQUE_HASHMAP_A6 = DPA_U_BO_UNIQUE_HASHMAP,
+  DPA_U_BO_HASHED_A6 = DPA_U_BO_HASHED,
+};
+enum dpa_u_bo_refcounted_type {
+  DPA_U_BO_REFCOUNTED_7 = DPA_U_BO_REFCOUNTED,
+};
+enum dpa_u_any_bo_refcounted_type {
+  DPA_U_BO_REFCOUNTED_A7 = DPA_U_BO_REFCOUNTED,
+};
+enum dpa_u_bo_refcounted_ro_type {
+  DPA_U_BO_REFCOUNTED_8 = DPA_U_BO_REFCOUNTED,
+};
 enum dpa_u_any_bo_refcounted_ro_type {
   DPA_U_BO_REFCOUNTED_A8 = DPA_U_BO_REFCOUNTED,
   DPA_U_BO_REFCOUNTED_HASHED_A8 = DPA_U_BO_REFCOUNTED_HASHED,
 };
-enum dpa_u_bo_refcounted_hashed_ro_type { DPA_U_BO_REFCOUNTED_HASHED_9 = DPA_U_BO_REFCOUNTED_HASHED };
-enum dpa_u_any_bo_refcounted_hashed_ro_type { DPA_U_BO_REFCOUNTED_HASHED_A9 = DPA_U_BO_REFCOUNTED_HASHED };
+enum dpa_u_bo_refcounted_hashed_ro_type {
+  DPA_U_BO_REFCOUNTED_HASHED_9 = DPA_U_BO_REFCOUNTED_HASHED,
+};
+enum dpa_u_any_bo_refcounted_hashed_ro_type {
+  DPA_U_BO_REFCOUNTED_HASHED_A9 = DPA_U_BO_REFCOUNTED_HASHED,
+};
+#define case_DPA_U_BO_RO \
+  case DPA_U_BO_INLINE: \
+  case DPA_U_BO_UNIQUE_HASHMAP: \
+  case DPA_U_BO_SIMPLE:
 enum dpa_u_bo_ro_type {
   DPA_U_BO_INLINE_10 = DPA_U_BO_INLINE,
   DPA_U_BO_UNIQUE_HASHMAP_10 = DPA_U_BO_UNIQUE_HASHMAP,
   DPA_U_BO_SIMPLE_10 = DPA_U_BO_SIMPLE,
 };
+#define case_DPA_U_ANY_BO_RO \
+  case DPA_U_BO_INLINE: \
+  case DPA_U_BO_UNIQUE_HASHMAP: \
+  case DPA_U_BO_SIMPLE: \
+  case DPA_U_BO_HASHED: \
+  case DPA_U_BO_REFCOUNTED: \
+  case DPA_U_BO_REFCOUNTED_HASHED
 enum dpa_u_any_bo_ro_type {
   DPA_U_BO_INLINE_A10 = DPA_U_BO_INLINE,
   DPA_U_BO_UNIQUE_HASHMAP_A10 = DPA_U_BO_UNIQUE_HASHMAP,
   DPA_U_BO_SIMPLE_A10 = DPA_U_BO_SIMPLE,
+  DPA_U_BO_HASHED_A10 = DPA_U_BO_HASHED,
+  DPA_U_BO_REFCOUNTED_A10 = DPA_U_BO_REFCOUNTED,
+  DPA_U_BO_REFCOUNTED_HASHED_A10 = DPA_U_BO_REFCOUNTED_HASHED,
 };
+#define case_DPA_U_BO \
+  case DPA_U_BO_INLINE: \
+  case DPA_U_BO_SIMPLE
 enum dpa_u_bo_type {
   DPA_U_BO_INLINE_11 = DPA_U_BO_INLINE,
   DPA_U_BO_SIMPLE_11 = DPA_U_BO_SIMPLE,
 };
+#define case_DPA_U_ANY_BO \
+  case DPA_U_BO_INLINE: \
+  case DPA_U_BO_SIMPLE: \
+  case DPA_U_BO_HASHED: \
+  case DPA_U_BO_REFCOUNTED
 enum dpa_u_any_bo_type {
   DPA_U_BO_INLINE_A11 = DPA_U_BO_INLINE,
   DPA_U_BO_SIMPLE_A11 = DPA_U_BO_SIMPLE,
+  DPA_U_BO_HASHED_A11 = DPA_U_BO_HASHED,
+  DPA_U_BO_REFCOUNTED_A11 = DPA_U_BO_REFCOUNTED,
 };
+#define case_DPA_U_BO_UNIQUE \
+  case DPA_U_BO_INLINE: \
+  case DPA_U_BO_UNIQUE_HASHMAP
 enum dpa_u_bo_unique_type {
   DPA_U_BO_INLINE_12 = DPA_U_BO_INLINE,
   DPA_U_BO_UNIQUE_HASHMAP_12 = DPA_U_BO_UNIQUE_HASHMAP,
 };
+#define case_DPA_U_ANY_BO_UNIQUE \
+  case DPA_U_BO_INLINE: \
+  case DPA_U_BO_UNIQUE_HASHMAP
 enum dpa_u_any_bo_unique_type {
   DPA_U_BO_INLINE_A12 = DPA_U_BO_INLINE,
   DPA_U_BO_UNIQUE_HASHMAP_A12 = DPA_U_BO_UNIQUE_HASHMAP,
 };
+#define case_DPA_U_BO_WITH_HASH \
+  case DPA_U_BO_HASHED: \
+  case DPA_U_BO_INLINE:
 enum dpa_u_bo_with_hash_type {
   DPA_U_BO_INLINE_W20 = DPA_U_BO_INLINE,
   DPA_U_BO_HASHED_W20 = DPA_U_BO_HASHED,
 };
+#define case_DPA_U_BO_WITH_HASH_RO \
+  case DPA_U_BO_INLINE: \
+  case DPA_U_BO_UNIQUE_HASHMAP: \
+  case DPA_U_BO_HASHED: \
+  case DPA_U_BO_REFCOUNTED_HASHED:
 enum dpa_u_bo_with_hash_ro_type {
   DPA_U_BO_INLINE_W21 = DPA_U_BO_INLINE,
   DPA_U_BO_UNIQUE_HASHMAP_W21 = DPA_U_BO_UNIQUE_HASHMAP,
   DPA_U_BO_HASHED_W21 = DPA_U_BO_HASHED,
   DPA_U_BO_REFCOUNTED_HASHED_W21 = DPA_U_BO_REFCOUNTED_HASHED,
 };
+#define case_DPA_U_BO_WITH_REFCOUNT \
+  case DPA_U_BO_REFCOUNTED:
 enum dpa_u_bo_with_refcount_type {
-  DPA_U_BO_REFCOUNTED_W22 = DPA_U_BO_HASHED,
+  DPA_U_BO_REFCOUNTED_W22 = DPA_U_BO_REFCOUNTED,
 };
+#define case_DPA_U_BO_WITH_REFCOUNT_RO \
+  case DPA_U_BO_REFCOUNTED: \
+  case DPA_U_BO_UNIQUE_HASHMAP: \
+  case DPA_U_BO_REFCOUNTED_HASHED:
 enum dpa_u_bo_with_refcount_ro_type {
   DPA_U_BO_UNIQUE_HASHMAP_W23 = DPA_U_BO_UNIQUE_HASHMAP,
   DPA_U_BO_REFCOUNTED_W23 = DPA_U_BO_REFCOUNTED,
   DPA_U_BO_REFCOUNTED_HASHED_W23 = DPA_U_BO_REFCOUNTED_HASHED,
 };
+#define case_DPA_U_BO_WITH_REFCOUNT_AND_HASH_RO \
+  case DPA_U_BO_UNIQUE_HASHMAP: \
+  case DPA_U_BO_REFCOUNTED_HASHED:
 enum dpa_u_bo_with_refcount_and_hash_ro_type {
   DPA_U_BO_UNIQUE_HASHMAP_W24 = DPA_U_BO_UNIQUE_HASHMAP,
   DPA_U_BO_REFCOUNTED_HASHED_W24 = DPA_U_BO_REFCOUNTED_HASHED,
 };
+#define case_DPA_U_BO_GC_RO \
+  case DPA_U_BO_INLINE: \
+  case DPA_U_BO_UNIQUE_HASHMAP: \
+  case DPA_U_BO_REFCOUNTED: \
+  case DPA_U_BO_REFCOUNTED_HASHED:
 enum dpa_u_bo_gc_ro_type {
   DPA_U_BO_INLINE_25 = DPA_U_BO_INLINE,
   DPA_U_BO_UNIQUE_HASHMAP_W25 = DPA_U_BO_UNIQUE_HASHMAP,
@@ -180,69 +276,6 @@ enum dpa_u_bo_gc_ro_type {
 #define DPA_U_BO_HASHED ((int)DPA_U_BO_HASHED)
 #define DPA_U_BO_REFCOUNTED ((int)DPA_U_BO_REFCOUNTED)
 #define DPA_U_BO_REFCOUNTED_HASHED ((int)DPA_U_BO_REFCOUNTED_HASHED)
-
-#define case_DPA_U_BO_UNIQUE \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP
-#define case_DPA_U_ANY_BO_UNIQUE case_DPA_U_BO_UNIQUE
-#define case_DPA_U_BO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_SIMPLE
-#define case_DPA_U_ANY_BO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_SIMPLE: \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_REFCOUNTED
-#define case_DPA_U_BO_RO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_SIMPLE:
-#define case_DPA_U_ANY_BO_RO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_SIMPLE: \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_REFCOUNTED: \
-  case DPA_U_BO_REFCOUNTED_HASHED
-#define case_DPA_U_ANY_BO_SIMPLE \
-  case DPA_U_BO_SIMPLE: \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_REFCOUNTED:
-#define case_DPA_U_ANY_BO_SIMPLE_RO \
-  case DPA_U_BO_SIMPLE: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_REFCOUNTED: \
-  case DPA_U_BO_REFCOUNTED_HASHED:
-#define case_DPA_U_ANY_BO_HASHED_RO \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_REFCOUNTED_HASHED:
-#define case_DPA_U_BO_WITH_HASH \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_INLINE:
-#define case_DPA_U_BO_WITH_HASH_RO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_REFCOUNTED_HASHED:
-#define case_DPA_U_BO_WITH_REFCOUNT \
-  case DPA_U_BO_REFCOUNTED: \
-  case DPA_U_BO_INLINE:
-#define case_DPA_U_BO_WITH_REFCOUNT_RO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_REFCOUNTED: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_REFCOUNTED_HASHED:
-#define case_DPA_U_BO_WITH_REFCOUNT_AND_HASH_RO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_REFCOUNTED_HASHED:
-#define case_DPA_U_BO_GC_RO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_REFCOUNTED: \
-  case DPA_U_BO_REFCOUNTED_HASHED:
 
 #define DPA__U_BO_META(X) \
   struct DPA_U_PACKED { \
@@ -384,11 +417,13 @@ struct dpa__u_bo_unique_hashmap_entry {
   struct dpa__u_refcount_bo_unique refcount;
   struct dpa__u_bo_unique_hashmap_entry* next;
 };
+static_assert(offsetof(struct dpa__u_bo_unique_hashmap_entry, base) == 0, "Expected first member to be of dpa_u_bo_hashed_ro_t type");
 
 struct dpa__u_bo_entry_refcounted {
   dpa__u_bo_unique_hashmap_entry_t entry;
   dpa_u_refcount_freeable_t* refcount;
 };
+static_assert(offsetof(struct dpa__u_bo_unique_hashmap_entry, base) == 0, "Expected first member to be of dpa__u_bo_unique_hashmap_entry_t type");
 
 struct dpa_u_bo_unique_hashmap_stats_s {
   size_t empty_count;
@@ -552,12 +587,12 @@ struct dpa_u_bo_unique_hashmap_stats_s {
 #define dpa__u_v_bo_hashed_ro__get_type(X)   DPA_U_BO_HASHED_6
 #define dpa__u_p_bo_hashed_ro__get_type(X)   DPA_U_BO_HASHED_6
 #define dpa__u_cp_bo_hashed_ro__get_type(X)  DPA_U_BO_HASHED_6
-#define dpa__u_any_bo_hashed_ro__get_type(X) DPA_U_BO_HASHED_A6
+#define dpa__u_any_bo_hashed_ro__get_type(X) ((enum dpa_u_any_bo_hashed_ro_type)(((const dpa__u_bo_meta_t*)(X))->type))
 
 #define dpa__u_v_bo_hashed__get_type(X)   DPA_U_BO_HASHED_5
 #define dpa__u_p_bo_hashed__get_type(X)   DPA_U_BO_HASHED_5
 #define dpa__u_cp_bo_hashed__get_type(X)  DPA_U_BO_HASHED_5
-#define dpa__u_any_bo_hashed__get_type(X) DPA_U_BO_HASHED_A5
+#define dpa__u_any_bo_hashed__get_type(X) ((enum dpa_u_any_bo_hashed_type)(((const dpa__u_bo_meta_t*)(X))->type))
 
 #define dpa__u_v_bo_refcounted__get_type(X)   DPA_U_BO_REFCOUNTED_7
 #define dpa__u_p_bo_refcounted__get_type(X)   DPA_U_BO_REFCOUNTED_7
@@ -700,6 +735,8 @@ DPA_U_EXPORT inline dpa__u_really_inline const void* dpa__u_cp_bo__data(const dp
 DPA_U_EXPORT inline dpa__u_really_inline const void* dpa__u_any_bo__data(const dpa_u_any_bo_t* const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return ((const dpa_u_bo_inline_t*)bo)->data;
+    case DPA_U_BO_HASHED:
+    case DPA_U_BO_REFCOUNTED:
     case DPA_U_BO_SIMPLE: return ((const dpa_u_bo_simple_t*)bo)->data;
   }
   dpa_u_unreachable("dpa_u_any_bo_t* can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
@@ -720,8 +757,11 @@ DPA_U_EXPORT inline dpa__u_really_inline const void* dpa__u_cp_bo_ro__data(const
 DPA_U_EXPORT inline dpa__u_really_inline const void* dpa__u_any_bo_ro__data(const dpa_u_any_bo_ro_t* const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return ((const dpa_u_bo_inline_t*)bo)->data;
+    case DPA_U_BO_HASHED:
+    case DPA_U_BO_REFCOUNTED:
+    case DPA_U_BO_REFCOUNTED_HASHED:
+    case DPA_U_BO_UNIQUE_HASHMAP:
     case DPA_U_BO_SIMPLE: return ((const dpa_u_bo_simple_t*)bo)->data;
-    case DPA_U_BO_UNIQUE_HASHMAP: return ((dpa_u_bo_unique_hashmap_t)bo)->base.bo_simple.data;
   }
   dpa_u_unreachable("dpa_u_any_bo_ro_t* can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
@@ -888,6 +928,8 @@ DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_v_bo__get_size(const dpa_
 DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_any_bo__get_size(const dpa_u_any_bo_t* bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return ((const dpa_u_bo_inline_t*)bo)->size;
+    case DPA_U_BO_HASHED:
+    case DPA_U_BO_REFCOUNTED:
     case DPA_U_BO_SIMPLE: return ((const dpa_u_bo_simple_t*)bo)->size;
   }
   dpa_u_unreachable("dpa_u_any_bo_t* can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
@@ -906,8 +948,11 @@ DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_v_bo_ro__get_size(const d
 DPA_U_EXPORT inline dpa__u_really_inline size_t dpa__u_any_bo_ro__get_size(const dpa_u_any_bo_ro_t* bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return ((const dpa_u_bo_inline_t*)bo)->size;
+    case DPA_U_BO_HASHED:
+    case DPA_U_BO_REFCOUNTED:
+    case DPA_U_BO_REFCOUNTED_HASHED:
+    case DPA_U_BO_UNIQUE_HASHMAP:
     case DPA_U_BO_SIMPLE: return ((const dpa_u_bo_simple_t*)bo)->size;
-    case DPA_U_BO_UNIQUE_HASHMAP: return ((dpa_u_bo_unique_hashmap_t)bo)->base.bo_simple.size;
   }
   dpa_u_unreachable("dpa_u_any_bo_ro_t* can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
@@ -1198,8 +1243,13 @@ DPA_U_EXPORT inline dpa__u_really_inline dpa_u_refcount_freeable_t* dpa__u_cp_bo
 DPA_U_EXPORT inline dpa__u_really_inline dpa_u_refcount_freeable_t* dpa__u_any_bo_ro__get_refcount(dpa_u_any_bo_ro_t* bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
+    case DPA_U_BO_HASHED:
     case DPA_U_BO_SIMPLE: return 0;
-    case DPA_U_BO_UNIQUE_HASHMAP: return (dpa_u_refcount_freeable_t*)&((dpa_u_bo_unique_hashmap_t)bo)->refcount.freeable;
+    case DPA_U_BO_REFCOUNTED:
+    case DPA_U_BO_REFCOUNTED_HASHED:
+      return ((dpa_u_bo_refcounted_ro_t*)bo)->refcount;
+    case DPA_U_BO_UNIQUE_HASHMAP:
+      return (dpa_u_refcount_freeable_t*)&((dpa_u_bo_unique_hashmap_t)bo)->refcount.freeable;
   }
   dpa_u_unreachable("dpa_u_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
