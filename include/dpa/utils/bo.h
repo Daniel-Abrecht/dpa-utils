@@ -121,55 +121,76 @@ DPA_U_ENUM(dpa_u_bo_any_type)
   T(dpa_u_bo_with_refcount) \
   T(dpa_u_bo_with_refcount_and_hash_ro)
 
+#define DPA__U_BO_TYPE_CASES(S,C) case C:
 
+#define case_dpa_u_bo_inline_t dpa_u_bo_inline_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_inline_m_type(F) \
   F(  1,DPA_U_BO_INLINE)
+#define case_dpa_u_any_bo_inline_t dpa_u_any_bo_inline_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_inline_m_type(F) \
   F( A1,DPA_U_BO_INLINE)
+#define case_dpa_u_bo_simple_t dpa_u_bo_simple_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_simple_m_type(F) \
   F(  2,DPA_U_BO_SIMPLE)
+#define case_dpa_u_any_bo_simple_t dpa_u_any_bo_simple_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_simple_m_type(F) \
   F( A2,DPA_U_BO_SIMPLE) \
   F( A2,DPA_U_BO_HASHED) \
   F( A2,DPA_U_BO_REFCOUNTED)
+#define case_dpa_u_bo_unique_hashmap_t dpa_u_bo_unique_hashmap_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_unique_hashmap_m_type(F) \
   F(  3,DPA_U_BO_UNIQUE_HASHMAP)
+#define case_dpa_u_any_bo_unique_hashmap_t dpa_u_any_bo_unique_hashmap_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_unique_hashmap_m_type(F) \
   F( A3,DPA_U_BO_UNIQUE_HASHMAP)
+#define case_dpa_u_bo_simple_ro_t dpa_u_bo_simple_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_simple_ro_m_type(F) \
   F(  4,DPA_U_BO_SIMPLE)
+#define case_dpa_u_any_bo_simple_ro_t dpa_u_any_bo_simple_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_simple_ro_m_type(F) \
   F( A4,DPA_U_BO_SIMPLE) \
   F( A4,DPA_U_BO_UNIQUE_HASHMAP) \
   F( A4,DPA_U_BO_HASHED) \
   F( A4,DPA_U_BO_REFCOUNTED) \
   F( A4,DPA_U_BO_REFCOUNTED_HASHED)
+#define case_dpa_u_bo_hashed_t dpa_u_bo_hashed_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_hashed_m_type(F) \
   F(  5,DPA_U_BO_HASHED)
+#define case_dpa_u_any_bo_hashed_t dpa_u_any_bo_hashed_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_hashed_m_type(F) \
   F( A5,DPA_U_BO_HASHED)
+#define case_dpa_u_bo_hashed_ro_t dpa_u_bo_hashed_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_hashed_ro_m_type(F) \
   F(  6,DPA_U_BO_HASHED)
+#define case_dpa_u_any_bo_hashed_ro_t dpa_u_any_bo_hashed_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_hashed_ro_m_type(F) \
   F( A6,DPA_U_BO_UNIQUE_HASHMAP) \
   F( A6,DPA_U_BO_HASHED)
+#define case_dpa_u_bo_refcounted_t dpa_u_bo_refcounted_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_refcounted_m_type(F) \
   F(  7,DPA_U_BO_REFCOUNTED)
+#define case_dpa_u_any_bo_refcounted_t dpa_u_any_bo_refcounted_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_refcounted_m_type(F) \
   F( A7,DPA_U_BO_REFCOUNTED)
+#define case_dpa_u_bo_refcounted_ro_t dpa_u_bo_refcounted_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_refcounted_ro_m_type(F) \
   F(  8,DPA_U_BO_REFCOUNTED)
+#define case_dpa_u_any_bo_refcounted_ro_t dpa_u_any_bo_refcounted_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_refcounted_ro_m_type(F) \
   F( A8,DPA_U_BO_REFCOUNTED) \
   F( A8,DPA_U_BO_REFCOUNTED_HASHED)
+#define case_dpa_u_bo_refcounted_hashed_ro_t dpa_u_bo_refcounted_hashed_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_refcounted_hashed_ro_m_type(F) \
   F(  9,DPA_U_BO_REFCOUNTED_HASHED)
+#define case_dpa_u_any_bo_refcounted_hashed_ro_t dpa_u_any_bo_refcounted_hashed_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_refcounted_hashed_ro_m_type(F) \
   F( A9,DPA_U_BO_REFCOUNTED_HASHED)
+#define case_dpa_u_bo_ro_t dpa_u_bo_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_ro_m_type(F) \
   F( 10,DPA_U_BO_INLINE) \
   F( 10,DPA_U_BO_UNIQUE_HASHMAP) \
   F( 10,DPA_U_BO_SIMPLE)
+#define case_dpa_u_any_bo_ro_t dpa_u_any_bo_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_ro_m_type(F) \
   F(A10,DPA_U_BO_INLINE) \
   F(A10,DPA_U_BO_UNIQUE_HASHMAP) \
@@ -177,37 +198,47 @@ DPA_U_ENUM(dpa_u_bo_any_type)
   F(A10,DPA_U_BO_HASHED) \
   F(A10,DPA_U_BO_REFCOUNTED) \
   F(A10,DPA_U_BO_REFCOUNTED_HASHED)
+#define case_dpa_u_bo_t dpa_u_bo_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_m_type(F) \
   F( 11,DPA_U_BO_INLINE) \
   F( 11,DPA_U_BO_SIMPLE)
+#define case_dpa_u_any_bo_t dpa_u_any_bo_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_m_type(F) \
   F(A11,DPA_U_BO_INLINE) \
   F(A11,DPA_U_BO_SIMPLE) \
   F(A11,DPA_U_BO_HASHED) \
   F(A11,DPA_U_BO_REFCOUNTED)
+#define case_dpa_u_bo_unique_t dpa_u_bo_unique_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_unique_m_type(F) \
   F( 12,DPA_U_BO_INLINE) \
   F( 12,DPA_U_BO_UNIQUE_HASHMAP)
+#define case_dpa_u_any_bo_unique_t dpa_u_any_bo_unique_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_any_bo_unique_m_type(F) \
   F(A12,DPA_U_BO_INLINE) \
   F(A12,DPA_U_BO_UNIQUE_HASHMAP)
+#define case_dpa_u_bo_with_hash_t dpa_u_bo_with_hash_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_with_hash_m_type(F) \
   F(W20,DPA_U_BO_INLINE) \
   F(W20,DPA_U_BO_HASHED)
+#define case_dpa_u_bo_with_hash_ro_t dpa_u_bo_with_hash_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_with_hash_ro_m_type(F) \
   F(W21,DPA_U_BO_INLINE) \
   F(W21,DPA_U_BO_UNIQUE_HASHMAP) \
   F(W21,DPA_U_BO_HASHED) \
   F(W21,DPA_U_BO_REFCOUNTED_HASHED)
+#define case_dpa_u_bo_with_refcount_t dpa_u_bo_with_refcount_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_with_refcount_m_type(F) \
   F(W22,DPA_U_BO_REFCOUNTED)
+#define case_dpa_u_bo_with_refcount_ro_t dpa_u_bo_with_refcount_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_with_refcount_ro_m_type(F) \
   F(W23,DPA_U_BO_UNIQUE_HASHMAP) \
   F(W23,DPA_U_BO_REFCOUNTED) \
   F(W23,DPA_U_BO_REFCOUNTED_HASHED)
+#define case_dpa_u_bo_with_refcount_and_hash_ro_t dpa_u_bo_with_refcount_and_hash_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_with_refcount_and_hash_ro_m_type(F) \
   F(W24,DPA_U_BO_UNIQUE_HASHMAP) \
   F(W24,DPA_U_BO_REFCOUNTED_HASHED)
+#define case_dpa_u_bo_gc_ro_t dpa_u_bo_gc_ro_m_type(DPA__U_BO_TYPE_CASES)
 #define dpa_u_bo_gc_ro_m_type(F) \
   F(W25,DPA_U_BO_INLINE) \
   F(W25,DPA_U_BO_UNIQUE_HASHMAP) \
