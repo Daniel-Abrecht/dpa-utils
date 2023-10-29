@@ -86,188 +86,160 @@ typedef struct dpa__u_bo_a dpa__u_bo_a_t;
 
 DPA_U_ENUM(dpa_u_bo_any_type)
 
+#define DPA_U_BO_TYPES(T) \
+  T(dpa_u_bo_inline) \
+  T(dpa_u_bo_simple_ro) \
+  T(dpa_u_bo_simple) \
+  T(dpa_u_bo_unique_hashmap) \
+  T(dpa_u_bo_unique) \
+  T(dpa_u_bo_ro) \
+  T(dpa_u_bo) \
+  T(dpa_u_bo_refcounted_ro) \
+  T(dpa_u_bo_refcounted) \
+  T(dpa_u_bo_hashed_ro) \
+  T(dpa_u_bo_hashed) \
+  T(dpa_u_bo_refcounted_hashed_ro) \
+  \
+  T(dpa_u_any_bo_inline) \
+  T(dpa_u_any_bo_simple_ro) \
+  T(dpa_u_any_bo_simple) \
+  T(dpa_u_any_bo_unique_hashmap) \
+  T(dpa_u_any_bo_unique) \
+  T(dpa_u_any_bo_ro) \
+  T(dpa_u_any_bo) \
+  \
+  T(dpa_u_any_bo_refcounted_ro) \
+  T(dpa_u_any_bo_refcounted) \
+  T(dpa_u_any_bo_hashed_ro) \
+  T(dpa_u_any_bo_hashed) \
+  T(dpa_u_any_bo_refcounted_hashed_ro) \
+  \
+  T(dpa_u_bo_gc_ro) \
+  T(dpa_u_bo_with_hash_ro) \
+  T(dpa_u_bo_with_hash) \
+  T(dpa_u_bo_with_refcount_ro) \
+  T(dpa_u_bo_with_refcount) \
+  T(dpa_u_bo_with_refcount_and_hash_ro)
+
+
+#define dpa_u_bo_inline_m_type(F) \
+  F(  1,DPA_U_BO_INLINE)
+#define dpa_u_any_bo_inline_m_type(F) \
+  F( A1,DPA_U_BO_INLINE)
+#define dpa_u_bo_simple_m_type(F) \
+  F(  2,DPA_U_BO_SIMPLE)
+#define dpa_u_any_bo_simple_m_type(F) \
+  F( A2,DPA_U_BO_SIMPLE) \
+  F( A2,DPA_U_BO_HASHED) \
+  F( A2,DPA_U_BO_REFCOUNTED)
+#define dpa_u_bo_unique_hashmap_m_type(F) \
+  F(  3,DPA_U_BO_UNIQUE_HASHMAP)
+#define dpa_u_any_bo_unique_hashmap_m_type(F) \
+  F( A3,DPA_U_BO_UNIQUE_HASHMAP)
+#define dpa_u_bo_simple_ro_m_type(F) \
+  F(  4,DPA_U_BO_SIMPLE)
+#define dpa_u_any_bo_simple_ro_m_type(F) \
+  F( A4,DPA_U_BO_SIMPLE) \
+  F( A4,DPA_U_BO_UNIQUE_HASHMAP) \
+  F( A4,DPA_U_BO_HASHED) \
+  F( A4,DPA_U_BO_REFCOUNTED) \
+  F( A4,DPA_U_BO_REFCOUNTED_HASHED)
+#define dpa_u_bo_hashed_m_type(F) \
+  F(  5,DPA_U_BO_HASHED)
+#define dpa_u_any_bo_hashed_m_type(F) \
+  F( A5,DPA_U_BO_HASHED)
+#define dpa_u_bo_hashed_ro_m_type(F) \
+  F(  6,DPA_U_BO_HASHED)
+#define dpa_u_any_bo_hashed_ro_m_type(F) \
+  F( A6,DPA_U_BO_UNIQUE_HASHMAP) \
+  F( A6,DPA_U_BO_HASHED)
+#define dpa_u_bo_refcounted_m_type(F) \
+  F(  7,DPA_U_BO_REFCOUNTED)
+#define dpa_u_any_bo_refcounted_m_type(F) \
+  F( A7,DPA_U_BO_REFCOUNTED)
+#define dpa_u_bo_refcounted_ro_m_type(F) \
+  F(  8,DPA_U_BO_REFCOUNTED)
+#define dpa_u_any_bo_refcounted_ro_m_type(F) \
+  F( A8,DPA_U_BO_REFCOUNTED) \
+  F( A8,DPA_U_BO_REFCOUNTED_HASHED)
+#define dpa_u_bo_refcounted_hashed_ro_m_type(F) \
+  F(  9,DPA_U_BO_REFCOUNTED_HASHED)
+#define dpa_u_any_bo_refcounted_hashed_ro_m_type(F) \
+  F( A9,DPA_U_BO_REFCOUNTED_HASHED)
+#define dpa_u_bo_ro_m_type(F) \
+  F( 10,DPA_U_BO_INLINE) \
+  F( 10,DPA_U_BO_UNIQUE_HASHMAP) \
+  F( 10,DPA_U_BO_SIMPLE)
+#define dpa_u_any_bo_ro_m_type(F) \
+  F(A10,DPA_U_BO_INLINE) \
+  F(A10,DPA_U_BO_UNIQUE_HASHMAP) \
+  F(A10,DPA_U_BO_SIMPLE) \
+  F(A10,DPA_U_BO_HASHED) \
+  F(A10,DPA_U_BO_REFCOUNTED) \
+  F(A10,DPA_U_BO_REFCOUNTED_HASHED)
+#define dpa_u_bo_m_type(F) \
+  F( 11,DPA_U_BO_INLINE) \
+  F( 11,DPA_U_BO_SIMPLE)
+#define dpa_u_any_bo_m_type(F) \
+  F(A11,DPA_U_BO_INLINE) \
+  F(A11,DPA_U_BO_SIMPLE) \
+  F(A11,DPA_U_BO_HASHED) \
+  F(A11,DPA_U_BO_REFCOUNTED)
+#define dpa_u_bo_unique_m_type(F) \
+  F( 12,DPA_U_BO_INLINE) \
+  F( 12,DPA_U_BO_UNIQUE_HASHMAP)
+#define dpa_u_any_bo_unique_m_type(F) \
+  F(A12,DPA_U_BO_INLINE) \
+  F(A12,DPA_U_BO_UNIQUE_HASHMAP)
+#define dpa_u_bo_with_hash_m_type(F) \
+  F(W20,DPA_U_BO_INLINE) \
+  F(W20,DPA_U_BO_HASHED)
+#define dpa_u_bo_with_hash_ro_m_type(F) \
+  F(W21,DPA_U_BO_INLINE) \
+  F(W21,DPA_U_BO_UNIQUE_HASHMAP) \
+  F(W21,DPA_U_BO_HASHED) \
+  F(W21,DPA_U_BO_REFCOUNTED_HASHED)
+#define dpa_u_bo_with_refcount_m_type(F) \
+  F(W22,DPA_U_BO_REFCOUNTED)
+#define dpa_u_bo_with_refcount_ro_m_type(F) \
+  F(W23,DPA_U_BO_UNIQUE_HASHMAP) \
+  F(W23,DPA_U_BO_REFCOUNTED) \
+  F(W23,DPA_U_BO_REFCOUNTED_HASHED)
+#define dpa_u_bo_with_refcount_and_hash_ro_m_type(F) \
+  F(W24,DPA_U_BO_UNIQUE_HASHMAP) \
+  F(W24,DPA_U_BO_REFCOUNTED_HASHED)
+#define dpa_u_bo_gc_ro_m_type(F) \
+  F(W25,DPA_U_BO_INLINE) \
+  F(W25,DPA_U_BO_UNIQUE_HASHMAP) \
+  F(W25,DPA_U_BO_REFCOUNTED) \
+  F(W25,DPA_U_BO_REFCOUNTED_HASHED)
+
+#define DPA__U_TYPE_ENUMS_SUB(S, C) C ## _ ## S = C,
+#define DPA__U_TYPE_ENUMS(T) enum T ## _type { T ## _m_type(DPA__U_TYPE_ENUMS_SUB) };
+
 /**
  * Many compilers have this really nice feature that they can warn you about enums without a case in a switch.
  * Not all types are compatible, so not all of them will need a case. These enums correspond to types with just
  * the possible type constants. The values are the same as in the enum dpa_u_bo_any_type.
  * @{
  */
-enum dpa_u_bo_inline_type {
-  DPA_U_BO_INLINE_1 = DPA_U_BO_INLINE,
-};
-enum dpa_u_any_bo_inline_type {
-  DPA_U_BO_INLINE_A1 = DPA_U_BO_INLINE,
-};
-enum dpa_u_bo_simple_type {
-  DPA_U_BO_SIMPLE_2 = DPA_U_BO_SIMPLE,
-};
-#define case_DPA_U_ANY_BO_SIMPLE \
-  case DPA_U_BO_SIMPLE: \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_REFCOUNTED:
-enum dpa_u_any_bo_simple_type {
-  DPA_U_BO_SIMPLE_A2 = DPA_U_BO_SIMPLE,
-  DPA_U_BO_HASHED_A2 = DPA_U_BO_HASHED,
-  DPA_U_BO_REFCOUNTED_A2 = DPA_U_BO_REFCOUNTED,
-};
-enum dpa_u_bo_unique_hashmap_type {
-  DPA_U_BO_UNIQUE_HASHMAP_3 = DPA_U_BO_UNIQUE_HASHMAP,
-};
-enum dpa_u_any_bo_unique_hashmap_type {
-  DPA_U_BO_UNIQUE_HASHMAP_A3 = DPA_U_BO_UNIQUE_HASHMAP,
-};
-enum dpa_u_bo_simple_ro_type {
-  DPA_U_BO_SIMPLE_4 = DPA_U_BO_SIMPLE,
-};
-enum dpa_u_any_bo_simple_ro_type {
-  DPA_U_BO_SIMPLE_A4 = DPA_U_BO_SIMPLE,
-  DPA_U_BO_UNIQUE_HASHMAP_A4 = DPA_U_BO_UNIQUE_HASHMAP,
-  DPA_U_BO_HASHED_A4 = DPA_U_BO_HASHED,
-  DPA_U_BO_REFCOUNTED_A4 = DPA_U_BO_REFCOUNTED,
-  DPA_U_BO_REFCOUNTED_HASHED_A4 = DPA_U_BO_REFCOUNTED_HASHED,
-};
-enum dpa_u_bo_hashed_type {
-  DPA_U_BO_HASHED_5 = DPA_U_BO_HASHED,
-};
-enum dpa_u_any_bo_hashed_type {
-  DPA_U_BO_HASHED_A5 = DPA_U_BO_HASHED,
-};
-enum dpa_u_bo_hashed_ro_type {
-  DPA_U_BO_HASHED_6 = DPA_U_BO_HASHED,
-};
-#define case_DPA_U_ANY_BO_HASHED_RO \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_HASHED:
-enum dpa_u_any_bo_hashed_ro_type {
-  DPA_U_BO_UNIQUE_HASHMAP_A6 = DPA_U_BO_UNIQUE_HASHMAP,
-  DPA_U_BO_HASHED_A6 = DPA_U_BO_HASHED,
-};
-enum dpa_u_bo_refcounted_type {
-  DPA_U_BO_REFCOUNTED_7 = DPA_U_BO_REFCOUNTED,
-};
-enum dpa_u_any_bo_refcounted_type {
-  DPA_U_BO_REFCOUNTED_A7 = DPA_U_BO_REFCOUNTED,
-};
-enum dpa_u_bo_refcounted_ro_type {
-  DPA_U_BO_REFCOUNTED_8 = DPA_U_BO_REFCOUNTED,
-};
-enum dpa_u_any_bo_refcounted_ro_type {
-  DPA_U_BO_REFCOUNTED_A8 = DPA_U_BO_REFCOUNTED,
-  DPA_U_BO_REFCOUNTED_HASHED_A8 = DPA_U_BO_REFCOUNTED_HASHED,
-};
-enum dpa_u_bo_refcounted_hashed_ro_type {
-  DPA_U_BO_REFCOUNTED_HASHED_9 = DPA_U_BO_REFCOUNTED_HASHED,
-};
-enum dpa_u_any_bo_refcounted_hashed_ro_type {
-  DPA_U_BO_REFCOUNTED_HASHED_A9 = DPA_U_BO_REFCOUNTED_HASHED,
-};
-#define case_DPA_U_BO_RO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_SIMPLE:
-enum dpa_u_bo_ro_type {
-  DPA_U_BO_INLINE_10 = DPA_U_BO_INLINE,
-  DPA_U_BO_UNIQUE_HASHMAP_10 = DPA_U_BO_UNIQUE_HASHMAP,
-  DPA_U_BO_SIMPLE_10 = DPA_U_BO_SIMPLE,
-};
-#define case_DPA_U_ANY_BO_RO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_SIMPLE: \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_REFCOUNTED: \
-  case DPA_U_BO_REFCOUNTED_HASHED
-enum dpa_u_any_bo_ro_type {
-  DPA_U_BO_INLINE_A10 = DPA_U_BO_INLINE,
-  DPA_U_BO_UNIQUE_HASHMAP_A10 = DPA_U_BO_UNIQUE_HASHMAP,
-  DPA_U_BO_SIMPLE_A10 = DPA_U_BO_SIMPLE,
-  DPA_U_BO_HASHED_A10 = DPA_U_BO_HASHED,
-  DPA_U_BO_REFCOUNTED_A10 = DPA_U_BO_REFCOUNTED,
-  DPA_U_BO_REFCOUNTED_HASHED_A10 = DPA_U_BO_REFCOUNTED_HASHED,
-};
-#define case_DPA_U_BO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_SIMPLE
-enum dpa_u_bo_type {
-  DPA_U_BO_INLINE_11 = DPA_U_BO_INLINE,
-  DPA_U_BO_SIMPLE_11 = DPA_U_BO_SIMPLE,
-};
-#define case_DPA_U_ANY_BO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_SIMPLE: \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_REFCOUNTED
-enum dpa_u_any_bo_type {
-  DPA_U_BO_INLINE_A11 = DPA_U_BO_INLINE,
-  DPA_U_BO_SIMPLE_A11 = DPA_U_BO_SIMPLE,
-  DPA_U_BO_HASHED_A11 = DPA_U_BO_HASHED,
-  DPA_U_BO_REFCOUNTED_A11 = DPA_U_BO_REFCOUNTED,
-};
-#define case_DPA_U_BO_UNIQUE \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP
-enum dpa_u_bo_unique_type {
-  DPA_U_BO_INLINE_12 = DPA_U_BO_INLINE,
-  DPA_U_BO_UNIQUE_HASHMAP_12 = DPA_U_BO_UNIQUE_HASHMAP,
-};
-#define case_DPA_U_ANY_BO_UNIQUE \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP
-enum dpa_u_any_bo_unique_type {
-  DPA_U_BO_INLINE_A12 = DPA_U_BO_INLINE,
-  DPA_U_BO_UNIQUE_HASHMAP_A12 = DPA_U_BO_UNIQUE_HASHMAP,
-};
-#define case_DPA_U_BO_WITH_HASH \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_INLINE:
-enum dpa_u_bo_with_hash_type {
-  DPA_U_BO_INLINE_W20 = DPA_U_BO_INLINE,
-  DPA_U_BO_HASHED_W20 = DPA_U_BO_HASHED,
-};
-#define case_DPA_U_BO_WITH_HASH_RO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_HASHED: \
-  case DPA_U_BO_REFCOUNTED_HASHED:
-enum dpa_u_bo_with_hash_ro_type {
-  DPA_U_BO_INLINE_W21 = DPA_U_BO_INLINE,
-  DPA_U_BO_UNIQUE_HASHMAP_W21 = DPA_U_BO_UNIQUE_HASHMAP,
-  DPA_U_BO_HASHED_W21 = DPA_U_BO_HASHED,
-  DPA_U_BO_REFCOUNTED_HASHED_W21 = DPA_U_BO_REFCOUNTED_HASHED,
-};
-#define case_DPA_U_BO_WITH_REFCOUNT \
-  case DPA_U_BO_REFCOUNTED:
-enum dpa_u_bo_with_refcount_type {
-  DPA_U_BO_REFCOUNTED_W22 = DPA_U_BO_REFCOUNTED,
-};
-#define case_DPA_U_BO_WITH_REFCOUNT_RO \
-  case DPA_U_BO_REFCOUNTED: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_REFCOUNTED_HASHED:
-enum dpa_u_bo_with_refcount_ro_type {
-  DPA_U_BO_UNIQUE_HASHMAP_W23 = DPA_U_BO_UNIQUE_HASHMAP,
-  DPA_U_BO_REFCOUNTED_W23 = DPA_U_BO_REFCOUNTED,
-  DPA_U_BO_REFCOUNTED_HASHED_W23 = DPA_U_BO_REFCOUNTED_HASHED,
-};
-#define case_DPA_U_BO_WITH_REFCOUNT_AND_HASH_RO \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_REFCOUNTED_HASHED:
-enum dpa_u_bo_with_refcount_and_hash_ro_type {
-  DPA_U_BO_UNIQUE_HASHMAP_W24 = DPA_U_BO_UNIQUE_HASHMAP,
-  DPA_U_BO_REFCOUNTED_HASHED_W24 = DPA_U_BO_REFCOUNTED_HASHED,
-};
-#define case_DPA_U_BO_GC_RO \
-  case DPA_U_BO_INLINE: \
-  case DPA_U_BO_UNIQUE_HASHMAP: \
-  case DPA_U_BO_REFCOUNTED: \
-  case DPA_U_BO_REFCOUNTED_HASHED:
-enum dpa_u_bo_gc_ro_type {
-  DPA_U_BO_INLINE_25 = DPA_U_BO_INLINE,
-  DPA_U_BO_UNIQUE_HASHMAP_W25 = DPA_U_BO_UNIQUE_HASHMAP,
-  DPA_U_BO_REFCOUNTED_W25 = DPA_U_BO_REFCOUNTED,
-  DPA_U_BO_REFCOUNTED_HASHED_W25 = DPA_U_BO_REFCOUNTED_HASHED,
-};
+DPA_U_BO_TYPES(DPA__U_TYPE_ENUMS)
 // @}
+#undef DPA__U_TYPE_ENUMS_SUB
+#undef DPA__U_TYPE_ENUMS
+
+#define DPA__U_TYPE_MASKS_SUB(S, C) |(1u<<(C))
+#define DPA__U_TYPE_MASKS(T) enum { dpa_u_mask_ ## T = (0 T ## _m_type(DPA__U_TYPE_MASKS_SUB)) };
+/**
+ * Since some types could contain various variants of other types, or point to derived types, here are some masks
+ * of the dynamic types each of these static types can contain.
+ * @{
+ */
+DPA_U_BO_TYPES(DPA__U_TYPE_MASKS)
+// @}
+#undef DPA__U_TYPE_MASKS_SUB
+#undef DPA__U_TYPE_MASKS
+
 
 // We erase the type information from these enums, because we do not want it to warn if they are assigned to one of the specialized enums above.
 #define DPA_U_BO_INLINE ((int)DPA_U_BO_INLINE)
