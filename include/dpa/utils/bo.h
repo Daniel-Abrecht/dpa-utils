@@ -260,13 +260,13 @@ DPA_U_BO_TYPES(DPA__U_TYPE_ENUMS)
 #undef DPA__U_TYPE_ENUMS
 
 #define DPA__U_TYPE_MASKS_SUB(S, C) |(1u<<(C))
-#define DPA__U_TYPE_MASKS(T) enum { dpa_u_mask_ ## T = (0 T ## _m_type(DPA__U_TYPE_MASKS_SUB)) };
+#define DPA__U_TYPE_MASKS(T) dpa_u_mask_ ## T = (0 T ## _m_type(DPA__U_TYPE_MASKS_SUB)),
 /**
  * Since some types could contain various variants of other types, or point to derived types, here are some masks
  * of the dynamic types each of these static types can contain.
  * @{
  */
-DPA_U_BO_TYPES(DPA__U_TYPE_MASKS)
+enum { DPA_U_BO_TYPES(DPA__U_TYPE_MASKS) };
 // @}
 #undef DPA__U_TYPE_MASKS_SUB
 #undef DPA__U_TYPE_MASKS
