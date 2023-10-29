@@ -1574,14 +1574,14 @@ DPA_U_EXPORT inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_any_bo_ro_t*const b
     dpa_u_bo_unique_hashmap_t: dpa__u_bo_compare_unique_hashmap_g(DPA__G(dpa_u_bo_unique_hashmap_t,(X)),(Y),(S)), \
     dpa_u_any_bo_unique_hashmap_t*: dpa__u_bo_compare_unique_hashmap_g((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X)),(Y),(S)), \
     DPA__U_BOCVHV(bo_unique, dpa__u_bo_compare_unique_g, (X), (Y), (S)), \
-    default: dpa_u_generic_if_selection(dpa_u_temp_bo_simple_ro(X), \
-      dpa_u_generic_if_selection(dpa_u_temp_bo_simple_ro(Y), \
-        dpa__u_bo_compare_default(dpa_u_temp_bo_simple_ro(X), dpa_u_temp_bo_simple_ro(Y)) \
+    default: dpa_u_generic_if_selection(dpa_u_any_bo_ro(X), \
+      dpa_u_generic_if_selection(dpa_u_any_bo_ro(Y), \
+        dpa__u_bo_compare_default(dpa_u_any_bo_ro(X), dpa_u_any_bo_ro(Y)) \
       ) \
     ) \
   )
 
-DPA_U_EXPORT inline int dpa__u_bo_compare_default(const dpa_u_bo_simple_ro_t a, const dpa_u_bo_simple_ro_t b){
+dpa_u_unsequenced DPA_U_EXPORT inline int dpa__u_bo_compare_default_sub(const dpa_u_bo_simple_ro_t a, const dpa_u_bo_simple_ro_t b){
   const size_t a_size = dpa_u_bo_get_size(a);
   const size_t b_size = dpa_u_bo_get_size(b);
   if(a_size < b_size) return -1;
@@ -1595,7 +1595,7 @@ DPA_U_EXPORT inline int dpa__u_bo_compare_default(const dpa_u_bo_simple_ro_t a, 
 
 // Note: S is always 1
 #define dpa__u_bo_compare_inline_g(X,Y,S) dpa_u_generic((Y), DPA__U_BOCVHV2(bo_inline, (-S) * dpa__u_bo_compare_inline, (Y), (X)))
-DPA_U_EXPORT inline int dpa__u_bo_compare_inline(const dpa_u_bo_inline_t a, const dpa_u_bo_inline_t b){
+dpa_u_unsequenced DPA_U_EXPORT inline int dpa__u_bo_compare_inline(const dpa_u_bo_inline_t a, const dpa_u_bo_inline_t b){
   if(a.size != b.size)
     return (int)a.size - b.size;
   return memcmp(a.data, b.data, a.size);
@@ -1628,6 +1628,21 @@ dpa_u_unsequenced DPA_U_EXPORT inline int dpa__u_bo_compare_unique(const dpa_u_b
     case DPA_U_BO_UNIQUE_HASHMAP: return a.bo_unique_hashmap - b.bo_unique_hashmap;
   }
   dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
+}
+
+dpa_u_reproducible DPA_U_EXPORT inline int dpa__u_bo_compare_default(dpa_u_any_bo_ro_t* a, dpa_u_any_bo_ro_t* b){
+  const enum dpa_u_any_bo_ro_type a_type = dpa_u_bo_get_type(a);
+  const enum dpa_u_any_bo_ro_type b_type = dpa_u_bo_get_type(b);
+  if(a_type == b_type)
+  switch(a_type){
+    case DPA_U_BO_INLINE: return dpa__u_bo_compare_inline(*(const dpa_u_bo_inline_t*)a, *(const dpa_u_bo_inline_t*)b);
+    case DPA_U_BO_UNIQUE_HASHMAP: return (char*)a - (char*)b;
+    default: break;
+  }
+  return dpa__u_bo_compare_default_sub(
+    dpa_u_temp_bo_simple_ro(a),
+    dpa_u_temp_bo_simple_ro(b)
+  );
 }
 
 DPA_U_EXPORT extern dpa_u_bo_unique_hashmap_stats_t dpa_u_bo_unique_hashmap_stats(void);

@@ -43,8 +43,8 @@ extern dpa_u_refcount_freeable_t* dpa__u_bo_gc_ro__get_refcount(const dpa_u_bo_g
 
 extern int dpa__u_bo_compare_inline(const dpa_u_bo_inline_t, const dpa_u_bo_inline_t);
 extern int dpa__u_bo_compare_unique(const dpa_u_bo_unique_t, const dpa_u_bo_unique_t);
-extern int dpa__u_bo_compare_default(const dpa_u_bo_simple_ro_t, const dpa_u_bo_simple_ro_t);
-
+extern int dpa__u_bo_compare_default(dpa_u_any_bo_ro_t* a, dpa_u_any_bo_ro_t* b);
+extern int dpa__u_bo_compare_default_sub(const dpa_u_bo_simple_ro_t a, const dpa_u_bo_simple_ro_t b);
 
 #undef DPA_U_BO_INLINE
 #undef DPA_U_BO_SIMPLE
