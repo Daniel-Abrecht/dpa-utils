@@ -72,14 +72,25 @@ typedef struct { int x; } dpa_u_invalid_selection_t;
   ((type*)( (ptr) ? (char*)(ptr) - offsetof(type, member) : 0 ))
 #endif
 
-#if defined(__has_builtin) && __has_builtin(__builtin_expect)
-#define dpa_u_likely(x)   __builtin_expect(!!(x), 1)
-#define dpa_u_unlikely(x) __builtin_expect(!!(x), 0)
+#ifdef __has_builtin
+#define DPA__U__has_builtin(X) __has_builtin(X)
 #else
-#define dpa_u_likely(x)
-#define dpa_u_unlikely(x)
+#define DPA__U__has_builtin(X) 0
 #endif
 
+#ifdef __has_include
+#define DPA__U__has_include(...) __has_include(__VA_ARGS__)
+#else
+#define DPA__U__has_include(...) 1 /* Let's be optimistic! */
+#endif
+
+#if DPA__U__has_builtin(__builtin_expect)
+#define dpa_u_likely(X)   __builtin_expect(!!(X), 1)
+#define dpa_u_unlikely(X) __builtin_expect(!!(X), 0)
+#else
+#define dpa_u_likely(X)   (X)
+#define dpa_u_unlikely(X) (X)
+#endif
 
 #if defined(__GNUC__) || defined(__llvm__)
 #define dpa_u_unsequenced __attribute__((const))
@@ -173,9 +184,9 @@ DPA_U_EXPORT extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_f
 
 #if defined(DPA_U_DEBUG)
 #define dpa_u_unreachable(...) dpa_u_abort(__VA_ARGS__)
-#elif defined(__has_builtin) && __has_builtin(__builtin_unreachable)
+#elif DPA__U__has_builtin(__builtin_unreachable)
 #define dpa_u_unreachable(...) __builtin_unreachable()
-#elif defined(__has_builtin) && __has_builtin(__builtin_trap)
+#elif DPA__U__has_builtin(__builtin_trap)
 #define dpa_u_unreachable(...) __builtin_trap()
 #else
 #define dpa_u_unreachable(...) abort()

@@ -1,7 +1,12 @@
 .SECONDARY:
 
+ifndef notest
 HEADERS := $(shell find include -type f -name "*.h" -not -name ".*")
 SOURCES := $(shell find src test -type f -iname "*.c")
+else
+HEADERS := $(shell find include -type f -name "*.h" -not -name ".*" -not -iname "*test*")
+SOURCES := $(shell find src -type f -iname "*.c" -not -iname "*test*")
+endif
 
 SONAME = dpa-utils
 MAJOR  = 0
@@ -34,7 +39,7 @@ CFLAGS  += --coverage
 LDFLAGS += --coverage
 endif
 
-CFLAGS  += --std=c17
+CFLAGS  += --std=c11
 CFLAGS  += -Iinclude
 CFLAGS  += -Wall -Wextra -pedantic -Werror
 #CFLAGS  += -fstack-protector-all

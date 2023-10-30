@@ -47,8 +47,17 @@ struct bucket {
 #ifndef DPA_U_BUCKET_BASE
 #define DPA_U_BUCKET_BASE 9
 #endif
-#define BUCKET_LIST_COUNT (int)((sizeof(dpa_u_hash_t)-1) * CHAR_BIT - DPA_U_BUCKET_BASE)
+static_assert(DPA_U_BUCKET_BASE <= sizeof(dpa_u_hash_t) * CHAR_BIT, "Bucket base can't be larger than the number of bits in dpa_u_hash_t");
+
+#ifndef DPA_U_SINGLE_BUCKET
+// Note: It would take many years to insert enough entries to warant more than 2^48 buckets.
+// Also, we need to have one bucket list too few, or BUCKET_COUNT will be too large to store in a dpa_u_hash_t / size_t
+#define BUCKET_LIST_COUNT (int)((sizeof(dpa_u_hash_t) > 6 ? 6 : sizeof(dpa_u_hash_t)) * CHAR_BIT - DPA_U_BUCKET_BASE - 1)
 #define BUCKET_COUNT (((dpa_u_hash_t)1)<<(BUCKET_LIST_COUNT+DPA_U_BUCKET_BASE))
+#else
+#define BUCKET_LIST_COUNT 1
+#define BUCKET_COUNT (1<<DPA_U_BUCKET_BASE)
+#endif
 
 #ifndef DPA_U_NO_THREADS
 // Locks are really big. Like, 40 bytes big on my PC!
@@ -133,6 +142,7 @@ static inline dpa__u_really_inline void unlock_entry(dpa_u_hash_t hash){
 }
 #endif
 
+#ifndef DPA_U_SINGLE_BUCKET
 static void grow(void){
 #ifndef DPA_U_NO_THREADS
   {
@@ -223,6 +233,7 @@ static void shrink(void){
 #endif
   free(old_bucket);
 }
+#endif
 
 DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable* ref){
   const dpa__u_bo_unique_hashmap_entry_t* bo = dpa_u_container_of(ref, const dpa__u_bo_unique_hashmap_entry_t, refcount.freeable);
@@ -252,9 +263,13 @@ DPA_U_EXPORT void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_f
 #else
     const size_t count = --hash_map.count;
 #endif
+#ifndef DPA_U_SINGLE_BUCKET
     const size_t total_buckets = ((size_t)1) << m_aload(hash_map.shift_size);
     if( total_buckets > (((size_t)1) << DPA_U_BUCKET_BASE) && (float)count / total_buckets <= DPA_U_LOAD_FACTOR_SHRINK )
       shrink();
+#else
+    (void)count;
+#endif
     return;
   }
   dpa_u_abort("%s", "The dpa_u_bo_unique_hashmap_t to be destroyed could not be found");
@@ -373,9 +388,13 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t*con
 #else
   const size_t count = ++hash_map.count;
 #endif
+#ifndef DPA_U_SINGLE_BUCKET
   const size_t total_buckets = ((size_t)1) << m_aload(hash_map.shift_size);
   if( total_buckets < BUCKET_COUNT && (float)count / total_buckets >= DPA_U_LOAD_FACTOR_EXPAND )
     grow();
+#else
+    (void)count;
+#endif
   return new_entry;
 }
 

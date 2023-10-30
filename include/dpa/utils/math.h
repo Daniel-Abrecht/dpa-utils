@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 DPA_U_EXPORT inline int dpa_u_log2(long long unsigned int x){
-#if defined(__has_builtin) && __has_builtin(__builtin_clzll)
+#if DPA__U__has_builtin(__builtin_clzll)
   return 63 - __builtin_clzll(x);
 #else
   int i = 0;
@@ -15,7 +15,7 @@ DPA_U_EXPORT inline int dpa_u_log2(long long unsigned int x){
 }
 
 DPA_U_EXPORT inline int dpa_u_ctzll(long long unsigned int x){
-#if defined(__has_builtin) && __has_builtin(__builtin_ctzll)
+#if DPA__U__has_builtin(__builtin_ctzll)
   return __builtin_ctzll(x);
 #else
   int i = 0;
@@ -27,7 +27,7 @@ DPA_U_EXPORT inline int dpa_u_ctzll(long long unsigned int x){
 
 
 DPA_U_EXPORT inline bool dpa_u_rbit_less_than_unsigned(long long unsigned x, long long unsigned y){
-#if defined __has_builtin && __has_builtin(__builtin_bitreverse64) && defined(__aarch64__)
+#if DPA__U__has_builtin(__builtin_bitreverse64) && defined(__aarch64__)
   // Note: clang has __builtin_bitreverse64. gcc does not. And some archs have it, but the compiler won't use it.
   return (long long unsigned)__builtin_bitreverse64(x) < (long long unsigned)__builtin_bitreverse64(y);
 #else
