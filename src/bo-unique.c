@@ -76,18 +76,26 @@ static mtx_t resize_lock;
 
 struct hash_map {
   m_atomic size_t count;
-  m_atomic int shift_size;
+#ifndef DPA_U_SINGLE_BUCKET
   struct bucket*m_atomic bucket[BUCKET_LIST_COUNT];
+#else
+  struct bucket* bucket[BUCKET_LIST_COUNT];
+#endif
+#ifndef DPA_U_SINGLE_BUCKET
+  m_atomic int shift_size;
 #ifndef DPA_U_NO_THREADS
   m_atomic size_t move_pending;
+#endif
 #endif
 };
 static struct hash_map hash_map = {
   .count = 0,
-  .shift_size = DPA_U_BUCKET_BASE,
   .bucket[0] = (struct bucket[((size_t)1)<<DPA_U_BUCKET_BASE]){0}, // the first bucket list is pre-allocated & static
+#ifndef DPA_U_SINGLE_BUCKET
+  .shift_size = DPA_U_BUCKET_BASE,
 #ifndef DPA_U_NO_THREADS
   .move_pending = ((size_t)1)<<DPA_U_BUCKET_BASE,
+#endif
 #endif
 };
 
@@ -96,7 +104,9 @@ __attribute__((used,constructor(101)))
 static inline void init(void){
   for(size_t i=0; i<LOCK_COUNT; i++)
     mtx_init(&lock_table[i], mtx_plain);
+#ifndef DPA_U_SINGLE_BUCKET
   mtx_init(&resize_lock, mtx_plain);
+#endif
 }
 #endif
 
@@ -106,6 +116,7 @@ struct bucket_index {
 };
 
 static inline struct bucket_index get_bucket_index(size_t hash){
+#ifndef DPA_U_SINGLE_BUCKET
   const size_t shift_size = m_aload(hash_map.shift_size);
   const size_t size_mask = (((size_t)1)<<shift_size)-1;
   hash = hash & size_mask;
@@ -120,11 +131,20 @@ static inline struct bucket_index get_bucket_index(size_t hash){
     i - (DPA_U_BUCKET_BASE-1),
     hash & ((((size_t)1)<<i)-1),
   };
+#else
+  return (struct bucket_index){
+    .i = hash & (BUCKET_COUNT-1)
+  };
+#endif
 }
 
 static inline struct bucket* get_bucket(dpa_u_hash_t hash){
+#ifndef DPA_U_SINGLE_BUCKET
   struct bucket_index x = get_bucket_index(hash);
   return &m_aload(hash_map.bucket[x.bi])[x.i];
+#else
+  return &hash_map.bucket[0][hash & (BUCKET_COUNT-1)];
+#endif
 }
 
 static inline struct dpa_u_refcount_freeable* entry_get_ext_refcount(const dpa__u_bo_unique_hashmap_entry_t*const e){
@@ -398,13 +418,22 @@ DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t*con
   return new_entry;
 }
 
+DPA_U_EXPORT dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern_early(dpa_u_any_bo_ro_t*const bo){
+  dpa_u_init_dpa_hash_offset_basis();
+  return dpa__u_bo_do_intern(bo);
+}
+
 dpa_u_bo_unique_hashmap_stats_t dpa_u_bo_unique_hashmap_stats(void){
 #ifndef DPA_U_NO_THREADS
   mtx_lock(&resize_lock);
 #endif
   size_t empty_count = 0;
   size_t i = 0;
+#ifndef DPA_U_SINGLE_BUCKET
   const int shift_size = m_aload(hash_map.shift_size);
+#else
+  const int shift_size = DPA_U_BUCKET_BASE;
+#endif
   const size_t total_buckets = ((size_t)1) << shift_size;
   for(int bi = 0; bi < shift_size-(DPA_U_BUCKET_BASE-1); bi++){
     const struct bucket*const buckets = hash_map.bucket[bi];
@@ -436,7 +465,11 @@ void dpa_u_bo_unique_verify(void){
 #endif
   size_t wrong = 0;
   size_t i = 0;
+#ifndef DPA_U_SINGLE_BUCKET
   const int shift_size = m_aload(hash_map.shift_size);
+#else
+  const int shift_size = DPA_U_BUCKET_BASE;
+#endif
   for(int bi = 0; bi < shift_size-(DPA_U_BUCKET_BASE-1); bi++){
     const struct bucket*const buckets = hash_map.bucket[bi];
     const size_t count = ((size_t)1) << (bi+DPA_U_BUCKET_BASE);

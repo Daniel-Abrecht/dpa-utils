@@ -51,6 +51,7 @@ int main(int argc, char* argv[]){
   }
   printf("dpa_hash_offset_basis: %zX\n", dpa_hash_offset_basis);
   FILE* f = fopen(file, "rb");
+  if(!f) dpa_u_abort("fopen failed (%d): %s", errno, strerror(errno));
   size_t count = 0;
   size_t list_size = 1;
   dpa_u_bo_unique_t* list = malloc(sizeof(*list));

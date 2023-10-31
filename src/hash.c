@@ -1,10 +1,19 @@
 #include <dpa/utils/hash.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdbool.h>
+
 #if DPA__U__has_include(<sys/random.h>)
 #include <sys/random.h>
-bool dpa_u_getrandom(void* buf, unsigned buflen){
-  return getrandom(buf, buflen, 0) == buflen;
+void dpa_u_getrandom(void* _buf, size_t buflen){
+  char* buf = _buf;
+  while(buflen){
+    ssize_t i = getrandom(buf, buflen, 0);
+    if(((size_t)i)>buflen)
+      dpa_u_abort("getrandom failed (%d): %s", errno, strerror(errno));
+    buf += i;
+    buflen -= i;
+  }
 }
 #endif
 
@@ -18,15 +27,15 @@ extern dpa_u_hash_t dpa_u_bo_hash_p(const struct dpa__u_default_hash_args args);
 
 dpa_u_hash_t dpa_hash_offset_basis;
 
-__attribute__((used,constructor))
-static inline void init(void){
+__attribute__((constructor))
+void dpa_u_init_dpa_hash_offset_basis(void){
+  static bool init_done = false;
+  if(init_done) return;
+  init_done = true;
   dpa_u_bo_inline_t buf = {
     .type = DPA_U_BO_INLINE,
     .size = DPA_U_BO_INLINE_MAX_SIZE
   };
-  if(!dpa_u_getrandom(buf.data, buf.size)){
-    perror("getrandom failed");
-    abort();
-  }
+  dpa_u_getrandom(buf.data, buf.size);
   dpa_hash_offset_basis = dpa_u_hash_FNV_1a(buf);
 }

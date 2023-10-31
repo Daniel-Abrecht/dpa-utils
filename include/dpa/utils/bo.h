@@ -1417,7 +1417,7 @@ dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_t dpa__u_any_bo__v_bo_ro
         }
       };
   }
-  dpa_u_unreachable("dpa_u_any_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
+  dpa_u_unreachable("dpa_u_any_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 
 #define dpa__u_v_bo_ro__v_bo_ro(X) (X)
@@ -1446,7 +1446,7 @@ dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_any_bo_ro__v
         }
       };
   }
-  dpa_u_unreachable("dpa_u_any_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
+  dpa_u_unreachable("dpa_u_any_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 
 #define dpa__u_v_bo_inline__v_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_inline = (X) }
@@ -1481,7 +1481,7 @@ dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_any_bo_simpl
         }
       };
   }
-  dpa_u_unreachable("dpa_u_any_bo_simple_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
+  dpa_u_unreachable("dpa_u_any_bo_simple_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 
 #define dpa__u_v_bo_unique_hashmap__v_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (X) }
@@ -1540,7 +1540,7 @@ dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_bo_gc_ro__v_
         }
       };
   }
-  dpa_u_unreachable("dpa_u_any_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
+  dpa_u_unreachable("dpa_u_bo_gc_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_bo_with_hash_ro__v_bo_ro(dpa_u_bo_with_hash_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
@@ -1563,7 +1563,7 @@ dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_bo_with_hash
         }
       };
   }
-  dpa_u_unreachable("dpa_u_any_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
+  dpa_u_unreachable("dpa_u_bo_with_hash_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_bo_with_hash__v_bo_ro(dpa_u_bo_with_hash_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
@@ -1580,7 +1580,7 @@ dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_bo_with_hash
         }
       };
   }
-  dpa_u_unreachable("dpa_u_any_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
+  dpa_u_unreachable("dpa_u_bo_with_hash_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_bo_with_refcount_ro__v_bo_ro(dpa_u_bo_with_refcount_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
@@ -1599,7 +1599,7 @@ dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_bo_with_refc
         }
       };
   }
-  dpa_u_unreachable("dpa_u_any_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
+  dpa_u_unreachable("dpa_u_bo_with_refcount_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 #define dpa__u_bo_with_refcount__v_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_simple = { .type=DPA_U_BO_SIMPLE, .size=dpa__u_any_bo_refcounted_hashed_ro__get_size((X)), .data=dpa__u_any_bo_refcounted_hashed_ro__data((X)) } }
 dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_bo_with_refcount_and_hash_ro__v_bo_ro(dpa_u_bo_with_refcount_and_hash_ro_t*const bo){
@@ -1618,7 +1618,7 @@ dpa_u_reproducible dpa__u_really_inline inline dpa_u_bo_ro_t dpa__u_bo_with_refc
         }
       };
   }
-  dpa_u_unreachable("dpa_u_any_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
+  dpa_u_unreachable("dpa_u_bo_with_refcount_and_hash_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 
 ////
@@ -1886,8 +1886,8 @@ DPA_U_EXPORT extern void dpa_u_bo_unique_verify(void);
         }, \
         .refcount = dpa_u_refcount_i_static, \
       }; \
-      extern dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t*const bo); \
-      dpa__u_sucstrp__ ## name = dpa__u_bo_do_intern((dpa_u_any_bo_ro_t*)&uhe); \
+      extern dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern_early(dpa_u_any_bo_ro_t*const bo); \
+      dpa__u_sucstrp__ ## name = dpa__u_bo_do_intern_early((dpa_u_any_bo_ro_t*)&uhe); \
     } \
   }
 

@@ -111,6 +111,7 @@ DPA_U_EXPORT inline dpa_u_hash_t dpa_u_bo_hash_p(const struct dpa__u_default_has
  */
 #define dpa_u_bo_hash(...) dpa__u_bo_hash(__VA_ARGS__,)
 
-bool dpa_u_getrandom(void* buf, unsigned buflen);
+void dpa_u_getrandom(void* buf, size_t buflen);
+void dpa_u_init_dpa_hash_offset_basis(void);
 
 #endif
