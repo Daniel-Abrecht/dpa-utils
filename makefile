@@ -39,7 +39,7 @@ CFLAGS  += --coverage
 LDFLAGS += --coverage
 endif
 
-CFLAGS  += --std=c11
+CFLAGS  += --std=c17
 CFLAGS  += -Iinclude
 CFLAGS  += -Wall -Wextra -pedantic -Werror
 #CFLAGS  += -fstack-protector-all
@@ -67,6 +67,12 @@ export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 
 SHELL_CMD="$$SHELL"
 
+ifeq (0,$(shell echo 'int main(){}' | avr-gcc -o /dev/null --shared -fPIC -x c - 2>/dev/null; echo $$?))
+has_shared := 1
+LIB := lib/$(TYPE)/lib$(SONAME).so
+else
+LIB := lib/$(TYPE)/lib$(SONAME).a
+endif
 
 all: source-checks bin lib
 
@@ -138,8 +144,7 @@ bin: $(BINS)
 
 asm: $(ASMOUT)
 
-lib: lib/$(TYPE)/lib$(SONAME).a \
-     lib/$(TYPE)/lib$(SONAME).so
+lib: $(LIB)
 
 get//bin:
 	@echo bin/$(TYPE)/
@@ -147,11 +152,11 @@ get//bin:
 get//lib:
 	@echo lib/$(TYPE)/
 
-bin/$(TYPE)/%: build/$(TYPE)/o/src/main/%.c.o lib/$(TYPE)/lib$(SONAME).so
+bin/$(TYPE)/%: build/$(TYPE)/o/src/main/%.c.o $(LIB)
 	mkdir -p $(dir $@)
 	$(CC) -o $@ $(LDFLAGS) $< -Llib/$(TYPE)/ -l$(SONAME) $(LDLIBS)
 
-build/$(TYPE)/bin/%: build/$(TYPE)/o/test/%.c.o lib/$(TYPE)/lib$(SONAME).so
+build/$(TYPE)/bin/%: build/$(TYPE)/o/test/%.c.o $(LIB)
 	mkdir -p $(dir $@)
 	$(CC) -o $@ $(LDFLAGS) $< -Llib/$(TYPE)/ -l$(SONAME)
 
@@ -176,10 +181,12 @@ clean:
 	rm -rf build/$(TYPE)/ bin/$(TYPE)/ lib/$(TYPE)/
 
 install:
+ifdef has_shared
 	cp "lib/$(TYPE)/lib$(SONAME).so" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so.$(MAJOR).$(MINOR).$(PATCH)"
 	ln -sf "lib$(SONAME).so.$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so.$(MAJOR).$(MINOR)"
 	ln -sf "lib$(SONAME).so.$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so.$(MAJOR)"
 	ln -sf "lib$(SONAME).so.$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so"
+endif
 	cp "lib/$(TYPE)/lib$(SONAME).a" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).a"
 	cp -a include/dpa/utils/./ "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	cp include/dpa/utils.h "$(DESTDIR)$(prefix)/include/dpa/"

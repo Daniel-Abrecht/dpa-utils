@@ -9,6 +9,8 @@ void dpa_u_getrandom(void* _buf, size_t buflen){
   char* buf = _buf;
   while(buflen){
     ssize_t i = getrandom(buf, buflen, 0);
+    if(i == -1 && errno == EINTR)
+      continue;
     if(((size_t)i)>buflen)
       dpa_u_abort("getrandom failed (%d): %s", errno, strerror(errno));
     buf += i;
