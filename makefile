@@ -41,7 +41,7 @@ endif
 
 CFLAGS  += --std=c11
 CFLAGS  += -Iinclude
-CFLAGS  += -Wall -Wextra -pedantic # -Werror
+CFLAGS  += -Wall -Wextra -pedantic -Werror
 #CFLAGS  += -fstack-protector-all
 CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces
 #CFLAGS  += -fmax-errors=2
