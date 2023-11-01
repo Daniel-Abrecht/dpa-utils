@@ -1829,7 +1829,7 @@ dpa_u_unsequenced DPA_U_EXPORT inline int dpa__u_bo_compare_unique(const dpa_u_b
     return a_type - b_type;
   switch(a_type){
     case DPA_U_BO_INLINE: return dpa__u_bo_compare_inline(a.bo_inline, b.bo_inline);
-    case DPA_U_BO_UNIQUE_HASHMAP: return a.bo_unique_hashmap - b.bo_unique_hashmap;
+    case DPA_U_BO_UNIQUE_HASHMAP: return (dpa_u_bo_unique_hashmap_t)a.bo_unique_hashmap < (dpa_u_bo_unique_hashmap_t)b.bo_unique_hashmap ? -1 : (dpa_u_bo_unique_hashmap_t)b.bo_unique_hashmap < (dpa_u_bo_unique_hashmap_t)a.bo_unique_hashmap ? 1 : 0;
   }
   dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
 }
@@ -1840,7 +1840,7 @@ dpa_u_reproducible DPA_U_EXPORT inline int dpa__u_bo_compare_default(dpa_u_any_b
   if(a_type == b_type)
   switch(a_type){
     case DPA_U_BO_INLINE: return dpa__u_bo_compare_inline(*(const dpa_u_bo_inline_t*)a, *(const dpa_u_bo_inline_t*)b);
-    case DPA_U_BO_UNIQUE_HASHMAP: return (char*)a - (char*)b;
+    case DPA_U_BO_UNIQUE_HASHMAP: return (dpa_u_bo_unique_hashmap_t)a < (dpa_u_bo_unique_hashmap_t)b ? -1 : (dpa_u_bo_unique_hashmap_t)b < (dpa_u_bo_unique_hashmap_t)a ? 1 : 0;
     default: break;
   }
   return dpa__u_bo_compare_default_sub(
