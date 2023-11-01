@@ -1891,4 +1891,12 @@ DPA_U_EXPORT extern void dpa_u_bo_unique_verify(void);
     } \
   }
 
+#ifdef DPA_U_GEN_DEF
+#define DPA_U_UNIQUE_CSTRING(...) \
+  DPA_U_DECLARE_UNIQUE_CSTRING(__VA_ARGS__) \
+  DPA_U_DEFINE_UNIQUE_CSTRING(__VA_ARGS__)
+#else
+#define DPA_U_UNIQUE_CSTRING(...) DPA_U_DECLARE_UNIQUE_CSTRING(__VA_ARGS__)
+#endif
+
 #endif
