@@ -44,7 +44,7 @@ int main(int argc, char* argv[]){
       }else if(!strcmp(args[i], "--file") && i <= -2){
         file = args[++i];
       }else{
-        fprintf(stderr, "Usage: %s [--print-words] [--file myfile]\n", *argv);
+        fprintf(stderr, "Usage: %s [--print-words] [--file myfile] [--nocleanup]\n", *argv);
         return 1;
       }
     }

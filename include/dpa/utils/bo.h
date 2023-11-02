@@ -1811,15 +1811,15 @@ dpa_u_unsequenced DPA_U_EXPORT inline int dpa__u_bo_compare_inline(const dpa_u_b
     dpa_u_bo_inline_t: -S, \
     dpa_u_any_bo_inline_t*: -S, \
     dpa_u_bo_unique_hashmap_t: S * ((X) - DPA__G(dpa_u_bo_unique_hashmap_t,(Y))), \
-    dpa_u_any_bo_unique_hashmap_t*: S * ((X) - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(Y))) \
+    dpa_u_any_bo_unique_hashmap_t*: S * dpa_u_ptr_compare((X), DPA__G(dpa_u_any_bo_unique_hashmap_t*,(Y))) \
   )
 
 #define dpa__u_bo_compare_unique_g(X,Y,S) \
   dpa_u_generic((Y), \
     dpa_u_bo_inline_t: -S, \
     dpa_u_any_bo_inline_t*: -S, \
-    dpa_u_bo_unique_hashmap_t: (X).type == DPA_U_BO_UNIQUE_HASHMAP ? (S * ((X).bo_unique_hashmap - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_bo_unique_hashmap_t,(Y)))) : -S, \
-    dpa_u_any_bo_unique_hashmap_t*: (X).type == DPA_U_BO_UNIQUE_HASHMAP ? (S * ((X).bo_unique_hashmap - (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(Y)))) : -S, \
+    dpa_u_bo_unique_hashmap_t: (X).type == DPA_U_BO_UNIQUE_HASHMAP ? (S * dpa_u_ptr_compare((X).bo_unique_hashmap, DPA__G(dpa_u_bo_unique_hashmap_t,(Y)))) : -S, \
+    dpa_u_any_bo_unique_hashmap_t*: (X).type == DPA_U_BO_UNIQUE_HASHMAP ? (S * dpa_u_ptr_compare((X).bo_unique_hashmap, DPA__G(dpa_u_any_bo_unique_hashmap_t*,(Y)))) : -S, \
     DPA__U_BOCVHV2(bo_unique, (-S) * dpa__u_bo_compare_unique, (Y), (X)) \
   )
 dpa_u_unsequenced DPA_U_EXPORT inline int dpa__u_bo_compare_unique(const dpa_u_bo_unique_t a, const dpa_u_bo_unique_t b){
@@ -1829,7 +1829,7 @@ dpa_u_unsequenced DPA_U_EXPORT inline int dpa__u_bo_compare_unique(const dpa_u_b
     return a_type - b_type;
   switch(a_type){
     case DPA_U_BO_INLINE: return dpa__u_bo_compare_inline(a.bo_inline, b.bo_inline);
-    case DPA_U_BO_UNIQUE_HASHMAP: return (dpa_u_bo_unique_hashmap_t)a.bo_unique_hashmap < (dpa_u_bo_unique_hashmap_t)b.bo_unique_hashmap ? -1 : (dpa_u_bo_unique_hashmap_t)b.bo_unique_hashmap < (dpa_u_bo_unique_hashmap_t)a.bo_unique_hashmap ? 1 : 0;
+    case DPA_U_BO_UNIQUE_HASHMAP: return dpa_u_ptr_compare(a.bo_unique_hashmap, b.bo_unique_hashmap);
   }
   dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(a)));
 }
@@ -1840,7 +1840,7 @@ dpa_u_reproducible DPA_U_EXPORT inline int dpa__u_bo_compare_default(dpa_u_any_b
   if(a_type == b_type)
   switch(a_type){
     case DPA_U_BO_INLINE: return dpa__u_bo_compare_inline(*(const dpa_u_bo_inline_t*)a, *(const dpa_u_bo_inline_t*)b);
-    case DPA_U_BO_UNIQUE_HASHMAP: return (dpa_u_bo_unique_hashmap_t)a < (dpa_u_bo_unique_hashmap_t)b ? -1 : (dpa_u_bo_unique_hashmap_t)b < (dpa_u_bo_unique_hashmap_t)a ? 1 : 0;
+    case DPA_U_BO_UNIQUE_HASHMAP: return dpa_u_ptr_compare(a, b);
     default: break;
   }
   return dpa__u_bo_compare_default_sub(
@@ -1874,8 +1874,7 @@ DPA_U_EXPORT extern void dpa_u_bo_unique_verify(void);
 #define DPA_U_DEFINE_UNIQUE_CSTRING(name, ...) \
   extern dpa_u_bo_unique_t name (void); \
   dpa_u_bo_unique_hashmap_t dpa__u_sucstrp__ ## name; \
-  __attribute__((constructor,used)) \
-  static void dpa__u_sucstri__ ## name(void){ \
+  dpa_u_init static void dpa__u_sucstri__ ## name(void){ \
     if((sizeof((const char[]){__VA_ARGS__})-1) > DPA_U_BO_INLINE_MAX_SIZE){ \
       static const char cstr[] = {__VA_ARGS__}; \
       static dpa__u_bo_unique_hashmap_entry_t uhe = { \

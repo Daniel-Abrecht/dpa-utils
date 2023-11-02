@@ -30,7 +30,7 @@
 // of buckets gets doubled/halved. Be careful never to set DPA_U_LOAD_FACTOR_EXPAND and
 // DPA_U_LOAD_FACTOR_SHRINK such that after expension / shrinking, it's above / below
 // the other factor, or it'll grow and shrink every time!
-// 1 and 0.25 give is a bit faster, but wastes a bit more space than 2 0.5.
+// 1 and 0.25 is a bit faster, but wastes a bit more space than 2 0.5.
 #ifndef DPA_U_LOAD_FACTOR_EXPAND
 #define DPA_U_LOAD_FACTOR_EXPAND 2
 #endif
@@ -100,8 +100,7 @@ static struct hash_map hash_map = {
 };
 
 #ifndef DPA_U_NO_THREADS
-__attribute__((used,constructor(101)))
-static inline void init(void){
+dpa_u_init static inline void init(void){
   for(size_t i=0; i<LOCK_COUNT; i++)
     mtx_init(&lock_table[i], mtx_plain);
 #ifndef DPA_U_SINGLE_BUCKET
@@ -154,11 +153,11 @@ static inline struct dpa_u_refcount_freeable* entry_get_ext_refcount(const dpa__
 }
 
 #ifndef DPA_U_NO_THREADS
-static inline dpa__u_really_inline void lock_entry(dpa_u_hash_t hash){
-  mtx_lock(&lock_table[hash>>(64-DPA_U_LOCK_BIT_COUNT)]);
+dpa__u_really_inline static inline void lock_entry(dpa_u_hash_t hash){
+  mtx_lock(&lock_table[hash&(LOCK_COUNT-1)]);
 }
-static inline dpa__u_really_inline void unlock_entry(dpa_u_hash_t hash){
-  mtx_unlock(&lock_table[hash>>(64-DPA_U_LOCK_BIT_COUNT)]);
+dpa__u_really_inline static inline void unlock_entry(dpa_u_hash_t hash){
+  mtx_unlock(&lock_table[hash&(LOCK_COUNT-1)]);
 }
 #endif
 

@@ -29,8 +29,7 @@ extern dpa_u_hash_t dpa_u_bo_hash_p(const struct dpa__u_default_hash_args args);
 
 dpa_u_hash_t dpa_hash_offset_basis;
 
-__attribute__((constructor))
-void dpa_u_init_dpa_hash_offset_basis(void){
+dpa_u_init void dpa_u_init_dpa_hash_offset_basis(void){
   static bool init_done = false;
   if(init_done) return;
   init_done = true;

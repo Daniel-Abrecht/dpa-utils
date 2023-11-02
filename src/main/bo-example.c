@@ -9,11 +9,11 @@
  *
  * The dpa_u_puts macro doesn't do this to allow more optimisations, althoug it'll probably not matter in practice.
  */
-static inline size_t my_puts_p(dpa_u_bo_ro_t bo){
+static inline size_t my_puts_p(dpa_u_bo_simple_ro_t bo){
   fwrite(dpa_u_bo_data(bo), dpa_u_bo_get_size(bo), 1, stdout);
   return puts("");
 }
-#define my_puts(bo) my_puts_p(dpa_u_v_bo_ro((bo)))
+#define my_puts(bo) my_puts_p(dpa_u_temp_bo_simple_ro((bo)))
 
 static void print_hashmap_stats(){
   const dpa_u_bo_unique_hashmap_stats_t stats = dpa_u_bo_unique_hashmap_stats();

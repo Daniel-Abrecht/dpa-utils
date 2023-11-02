@@ -35,8 +35,15 @@
 #define DPA_U_FIRST_1(X, ...) X
 #define DPA_U_FIRST(...) DPA_U_FIRST_1(__VA_ARGS__,1)
 
+#if __STDC_VERSION__ < 202311
 #define DPA_U_EXPORT __attribute__((visibility("default")))
 #define DPA_U_PACKED __attribute__((packed))
+#define dpa_u_init __attribute__((constructor))
+#else
+#define DPA_U_EXPORT [[gnu::visibility("default")]]
+#define DPA_U_PACKED [[gnu::packed]]
+#define dpa_u_init [[gnu::constructor]]
+#endif
 
 #ifdef __llvm__
 #define DPA__U_STATIC_ASSERT_IN_STRUCT_BUGGY
@@ -92,24 +99,26 @@ typedef struct { int x; } dpa_u_invalid_selection_t;
 #define dpa_u_unlikely(X) (X)
 #endif
 
-#if defined(__GNUC__) || defined(__llvm__)
-#define dpa_u_unsequenced __attribute__((const))
-#elif __STDC_VERSION__ >= 202311
+#if __STDC_VERSION__ >= 202311
 #define dpa_u_unsequenced [[unsequenced, gnu::const]]
+#elif defined(__GNUC__) || defined(__llvm__)
+#define dpa_u_unsequenced __attribute__((const))
 #else
 #define dpa_u_unsequenced
 #endif
 
-#if defined(__GNUC__) || defined(__llvm__)
-#define dpa_u_reproducible  __attribute__((pure))
-#elif __STDC_VERSION__ >= 202311
+#if __STDC_VERSION__ >= 202311
 #define dpa_u_reproducible [[reproducible, gnu::pure]]
+#elif defined(__GNUC__) || defined(__llvm__)
+#define dpa_u_reproducible  __attribute__((pure))
 #else
 #define dpa_u_reproducible
 #endif
 
-#if defined(__GNUC__) || defined(__llvm__)
-#define dpa_u_format_param(...) __attribute__((format (__VA_ARGS__)))
+#if __STDC_VERSION__ >= 202311
+#define dpa_u_format_param(...) [[gnu::format(__VA_ARGS__)]]
+#elif defined(__GNUC__) || defined(__llvm__)
+#define dpa_u_format_param(...) __attribute__((format(__VA_ARGS__)))
 #else
 #define dpa_u_format_param(...)
 #endif
@@ -176,7 +185,9 @@ DPA_U_EXPORT dpa_u_format_param(printf, 3, 4)
 DPA_U_EXPORT extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_format_param(printf, 1, 2);
 #define dpa_u_abort(F, ...) { dpa_u_abort_p("%s:%d: %s: " F "\n",  __FILE__, __LINE__, __func__, __VA_ARGS__); }
 
-#if !defined(DPA_U_DEBUG) && defined(__GNUC__)
+#if __STDC_VERSION__ >= 202311
+#define dpa__u_really_inline [[gnu::always_inline]]
+#elif !defined(DPA_U_DEBUG) && defined(__GNUC__)
 #define dpa__u_really_inline __attribute__((always_inline))
 #else
 #define dpa__u_really_inline
@@ -191,6 +202,11 @@ DPA_U_EXPORT extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_f
 #else
 #define dpa_u_unreachable(...) abort()
 #endif
+
+dpa_u_unsequenced dpa__u_really_inline DPA_U_EXPORT inline int dpa_u_ptr_compare(const void*const a, const void*const b){
+  return (const char*)a < (const char*)b ? -1 : (const char*)b < (const char*)a ? 1 : 0;
+}
+
 
 // TODO: This is currently not a very safe macro
 #define DPA_U_MIN(X,Y) ((X)<(Y)?(X):(Y))
