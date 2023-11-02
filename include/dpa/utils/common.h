@@ -36,12 +36,12 @@
 #define DPA_U_FIRST(...) DPA_U_FIRST_1(__VA_ARGS__,1)
 
 #if __STDC_VERSION__ < 202311
-#define DPA_U_EXPORT __attribute__((visibility("default")))
-#define DPA_U_PACKED __attribute__((packed))
+#define dpa_u_export __attribute__((visibility("default")))
+#define dpa_u_packed __attribute__((packed))
 #define dpa_u_init __attribute__((constructor))
 #else
-#define DPA_U_EXPORT [[gnu::visibility("default")]]
-#define DPA_U_PACKED [[gnu::packed]]
+#define dpa_u_export [[gnu::visibility("default")]]
+#define dpa_u_packed [[gnu::packed]]
 #define dpa_u_init [[gnu::constructor]]
 #endif
 
@@ -135,7 +135,7 @@ enum {
   DPA_U_LONG_LONG_MAX_B10_DIGITS = CHAR_BIT * sizeof(long long) / 3 + 3,
 };
 
-DPA_U_EXPORT dpa_u_format_param(printf, 3, 4)
+dpa_u_export dpa_u_format_param(printf, 3, 4)
   inline char* dpa__u_compound_printf(size_t s, char c[s], const char* format, ...){
     va_list args;
     va_start(args, format);
@@ -169,7 +169,7 @@ DPA_U_EXPORT dpa_u_format_param(printf, 3, 4)
 #define DPA_U_ENUM(ENUM) \
   enum ENUM { DPA_U_ENUM_CONST(ENUM ## _list) }; \
   enum { ENUM ## _count = DPA_U_ENUM_COUNT(ENUM ## _list) }; \
-  DPA_U_EXPORT extern const char*const ENUM ## _s[];
+  dpa_u_export extern const char*const ENUM ## _s[];
 
 #define DPA_U_ENUM_DEF(ENUM) \
   const char*const ENUM ## _s[] = { DPA_U_ENUM_STR(ENUM ## _list) };
@@ -182,7 +182,7 @@ DPA_U_EXPORT dpa_u_format_param(printf, 3, 4)
 
 //
 
-DPA_U_EXPORT extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_format_param(printf, 1, 2);
+dpa_u_export extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_format_param(printf, 1, 2);
 #define dpa_u_abort(F, ...) { dpa_u_abort_p("%s:%d: %s: " F "\n",  __FILE__, __LINE__, __func__, __VA_ARGS__); }
 
 #if __STDC_VERSION__ >= 202311
@@ -203,7 +203,7 @@ DPA_U_EXPORT extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_f
 #define dpa_u_unreachable(...) abort()
 #endif
 
-dpa_u_unsequenced dpa__u_really_inline DPA_U_EXPORT inline int dpa_u_ptr_compare(const void*const a, const void*const b){
+dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline int dpa_u_ptr_compare(const void*const a, const void*const b){
   return (const char*)a < (const char*)b ? -1 : (const char*)b < (const char*)a ? 1 : 0;
 }
 

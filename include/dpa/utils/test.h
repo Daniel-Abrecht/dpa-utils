@@ -24,7 +24,7 @@
  *   used by the `testsuite` program itself, but any value can be used.
  * \returns true on success, false if sending the result failed
  */
-DPA_U_EXPORT bool dpa_u_testcase_result(int fd, const char* name, const char* result);
+dpa_u_export bool dpa_u_testcase_result(int fd, const char* name, const char* result);
 
 #define DPA_U_TESTCASE(NAME)  \
   static int DPA_U_CONCAT_E(dpa_u_test_f_, __LINE__)(void); \
@@ -39,7 +39,7 @@ DPA_U_EXPORT bool dpa_u_testcase_result(int fd, const char* name, const char* re
   } \
   static int DPA_U_CONCAT_E(dpa_u_test_f_, __LINE__)(void)
 
-DPA_U_EXPORT int dpa_u_test_main(int argc, const char* argv[]);
+dpa_u_export int dpa_u_test_main(int argc, const char* argv[]);
 
 #define DPA_U_TEST_MAIN \
   int main(int argc, const char* argv[]){ \
