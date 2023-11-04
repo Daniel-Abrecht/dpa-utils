@@ -135,14 +135,13 @@ enum {
   DPA_U_LONG_LONG_MAX_B10_DIGITS = CHAR_BIT * sizeof(long long) / 3 + 3,
 };
 
-dpa_u_export dpa_u_format_param(printf, 3, 4)
-  inline char* dpa__u_compound_printf(size_t s, char c[s], const char* format, ...){
-    va_list args;
-    va_start(args, format);
-    vsnprintf(c,s, format, args);
-    va_end(args);
-    return c;
-  }
+dpa_u_export dpa_u_format_param(printf, 3, 4) inline char* dpa__u_compound_printf(size_t s, char c[s], const char* format, ...){
+  va_list args;
+  va_start(args, format);
+  vsnprintf(c,s, format, args);
+  va_end(args);
+  return c;
+}
 
 #define dpa_u_compound_printf(S,...) dpa__u_compound_printf( (S), (char[(S)]){0}, __VA_ARGS__ )
 

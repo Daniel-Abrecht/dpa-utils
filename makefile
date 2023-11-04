@@ -88,8 +88,8 @@ build/.check-header-compile: $(HEADERS)
 
 build/.check-inline-export: $(HEADERS)
 	mkdir -p $(dir $@)
-	@echo "Serching for inline functions which have not been exported with DPA_U_EXPORT..."
-	! grep -r "^inline" include/
+	@echo "Serching for inline functions which have not been exported with dpa_u_export..."
+	! grep -r "\(^\| \)inline .*(" include/ | grep -v "\(:\| \)dpa_u_export "
 	touch $@
 
 build/.check-inline-extern: $(HEADERS)
