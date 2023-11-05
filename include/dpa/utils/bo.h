@@ -88,35 +88,35 @@ DPA_U_ENUM(dpa_u_bo_any_type)
 
 #define DPA_U_BO_TYPES(T) \
   T(dpa_u_bo_inline) \
+  T(dpa_u_bo_unique_hashmap) \
   T(dpa_u_bo_simple_ro) \
   T(dpa_u_bo_simple) \
-  T(dpa_u_bo_unique_hashmap) \
   T(dpa_u_bo_unique) \
   T(dpa_u_bo_ro) \
   T(dpa_u_bo) \
-  T(dpa_u_bo_refcounted_ro) \
-  T(dpa_u_bo_refcounted) \
   T(dpa_u_bo_hashed_ro) \
   T(dpa_u_bo_hashed) \
+  T(dpa_u_bo_refcounted_ro) \
+  T(dpa_u_bo_refcounted) \
   T(dpa_u_bo_refcounted_hashed_ro) \
   \
   T(dpa_u_any_bo_inline) \
+  T(dpa_u_any_bo_unique_hashmap) \
   T(dpa_u_any_bo_simple_ro) \
   T(dpa_u_any_bo_simple) \
-  T(dpa_u_any_bo_unique_hashmap) \
   T(dpa_u_any_bo_unique) \
   T(dpa_u_any_bo_ro) \
   T(dpa_u_any_bo) \
   \
-  T(dpa_u_any_bo_refcounted_ro) \
-  T(dpa_u_any_bo_refcounted) \
   T(dpa_u_any_bo_hashed_ro) \
   T(dpa_u_any_bo_hashed) \
+  T(dpa_u_any_bo_refcounted_ro) \
+  T(dpa_u_any_bo_refcounted) \
   T(dpa_u_any_bo_refcounted_hashed_ro) \
   \
-  T(dpa_u_bo_gc_ro) \
   T(dpa_u_bo_with_hash_ro) \
   T(dpa_u_bo_with_hash) \
+  T(dpa_u_bo_gc_ro) \
   T(dpa_u_bo_with_refcount_ro) \
   T(dpa_u_bo_with_refcount) \
   T(dpa_u_bo_with_refcount_and_hash_ro)
