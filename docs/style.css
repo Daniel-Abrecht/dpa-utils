@@ -1,0 +1,75 @@
+:link { color: #0000EE; }
+:visited { color: #551A8B; }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    background-color: #000;
+    color: #FFF;
+  }
+  :link { color: #00FFFF; }
+  :visited { color: #da42ff; }
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 1em;
+}
+
+.text-up, table.matrix > thead > tr > th {
+  writing-mode: sideways-lr;
+  padding: 0.5em 0.25em;
+}
+
+@supports (writing-mode: vertical-rl) and (not (writing-mode: sideways-lr)) {
+  .text-up, table.matrix > thead > tr > th {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    vertical-align: bottom;
+    text-align: left;
+  }
+}
+
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  margin: 1em;
+}
+
+table.pad > * > tr > td,
+table.pad > * > tr > th {
+  padding: 0.25em 0.5em;
+}
+
+table.matrix > * > tr > * {
+  border: 1px solid #888;
+}
+
+table.matrix > thead > tr > td {
+  border: 0 none;
+}
+
+table.matrix > thead:first-child > tr:first-child > th {
+  border-top: 0 none;
+}
+
+table.matrix > * > tr > :first-child {
+  border-left: 0 none;
+  text-align: right;
+  padding: 0.25em 0.5em;
+}
+
+table.matrix > tbody > tr:nth-child(even) {
+  background-color: color-mix(in srgb, var(--color) 20%, #FFF0);
+}
+
+table.matrix > tbody > tr:nth-child(odd) {
+  background-color: color-mix(in srgb, var(--color) 33%, #FFF0);
+}
+
+table.matrix > tbody > tr:empty {
+  display: none;
+}

@@ -1,79 +1,83 @@
-<h1>Buffer Object (BO) Types</h1>
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="." />
+  <link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+<body>
 
-<style>
-table {
-  border-spacing: 0;
-  border-collapse: collapse;
-}
-</style>
+<h2>Buffer Object (BO) Types</h2>
 
-<table>
-  <tr><td style="color: green;">Base types</td><td>they all have the same small size</td></tr>
-  <tr><td style="color: yellow;">Base type variants</td><td>can store various base types & have the same size</td></tr>
-  <tr><td style="color: blue;">Derived types</td><td>Contain additional useful properties</td></tr>
-  <tr>
-    <td style="color: red;">Any types</td>
+<table class="pad">
+  <tr style="background-color: color-mix(in srgb, green 33%, #FFF0);"><th><nobr>Base types</th><td>They all have the same small size</td></tr>
+  <tr style="background-color: color-mix(in srgb, yellow 33%, #FFF0);"><th><nobr>Base type variants</th><td>Can store various base types &amp; have the same size</td></tr>
+  <tr style="background-color: color-mix(in srgb, blue 33%, #FFF0);"><th><nobr>Derived types</th><td>Contain additional useful properties</td></tr>
+  <tr style="background-color: color-mix(in srgb, red 33%, #FFF0);">
+    <th><nobr>Any types</th>
     <td>Opaque type, must be used as a pointer.
       They may point to the corresponding base type itself,
       but can also be though of pointing to the variants which can store it.
       It could also point to the types derived from the base type.
-    </td>
+    </th>
   </tr>
-  <tr><td style="color: orange;">Trait types</td><td>Opaque type, must be used as a pointer. Points to types with specific properties</td></tr>
+  <tr style="background-color: color-mix(in srgb, orange 33%, #FFF0);"><th><nobr>Trait types</th><td>Opaque type, must be used as a pointer. Points to types with specific properties</td></tr>
 </table>
 
-Note: The dpa_u_bo_inline_ro_t is just the const version of the dpa_u_bo_inline_t type, rather than a distinct type.
+The dpa_u_bo_inline_ro_t is just the const version of the dpa_u_bo_inline_t type, rather than a distinct type.
 
-<table>
+<table class="matrix">
   <thead>
     <tr valign="bottom">
       <td></td>
-      <th style="writing-mode: sideways-lr;"> DPA_U_BO_INLINE </th>
-      <th style="writing-mode: sideways-lr;"> DPA_U_BO_UNIQUE_HASHMAP </th>
-      <th style="writing-mode: sideways-lr;"> DPA_U_BO_SIMPLE </th>
-      <th style="writing-mode: sideways-lr;"> DPA_U_BO_HASHED </th>
-      <th style="writing-mode: sideways-lr;"> DPA_U_BO_REFCOUNTED </th>
-      <th style="writing-mode: sideways-lr;"> DPA_U_BO_REFCOUNTED_HASHED </th>
+      <th> DPA_U_BO_INLINE </th>
+      <th> DPA_U_BO_UNIQUE_HASHMAP </th>
+      <th> DPA_U_BO_SIMPLE </th>
+      <th> DPA_U_BO_HASHED </th>
+      <th> DPA_U_BO_REFCOUNTED </th>
+      <th> DPA_U_BO_REFCOUNTED_HASHED </th>
     </tr>
   </thead>
-  <tbody style="border: 0.2em solid green;">
-    <tr><td> dpa_u_bo_inline_t                    </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_unique_hashmap_t            </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_simple_ro_t                 </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_simple_t                    </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+  <tbody style="--color:green;">
+    <tr><th> dpa_u_bo_inline_t                    </th><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_unique_hashmap_t            </th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_simple_ro_t                 </th><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_simple_t                    </th><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
   </tbody>
-  <tbody style="border: 0.2em solid yellow;">
-    <tr><td> dpa_u_bo_unique_t                    </td><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_ro_t                        </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_t                           </td><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+  <tbody style="--color: yellow;">
+    <tr><th> dpa_u_bo_unique_t                    </th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_ro_t                        </th><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_t                           </th><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
   </tbody>
-  <tbody style="border: 0.2em solid blue;">
-    <tr><td> dpa_u_bo_hashed_ro_t                 </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_hashed_t                    </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_refcounted_ro_t             </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_refcounted_t                </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_refcounted_hashed_ro_t      </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
+  <tbody style="--color: blue;">
+    <tr></tr>
+    <tr><th> dpa_u_bo_hashed_ro_t                 </th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_hashed_t                    </th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_refcounted_ro_t             </th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_refcounted_t                </th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_refcounted_hashed_ro_t      </th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
   </tbody>
-  <tbody style="border: 0.2em solid red;">
-    <tr><td> dpa_u_any_bo_inline_t                </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_any_bo_unique_hashmap_t        </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_any_bo_simple_ro_t             </td><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td></tr>
-    <tr><td> dpa_u_any_bo_simple_t                </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_any_bo_unique_t                </td><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_any_bo_ro_t                    </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td></tr>
-    <tr><td> dpa_u_any_bo_t                       </td><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_any_bo_hashed_ro_t             </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_any_bo_hashed_t                </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_any_bo_refcounted_ro_t         </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
-    <tr><td> dpa_u_any_bo_refcounted_t            </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_any_bo_refcounted_hashed_ro_t  </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
+  <tbody style="--color: red;">
+    <tr><th> dpa_u_any_bo_inline_t                </th><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_any_bo_unique_hashmap_t        </th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_any_bo_simple_ro_t             </th><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td></tr>
+    <tr><th> dpa_u_any_bo_simple_t                </th><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_any_bo_unique_t                </th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_any_bo_ro_t                    </th><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td></tr>
+    <tr><th> dpa_u_any_bo_t                       </th><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_any_bo_hashed_ro_t             </th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_any_bo_hashed_t                </th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_any_bo_refcounted_ro_t         </th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
+    <tr><th> dpa_u_any_bo_refcounted_t            </th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_any_bo_refcounted_hashed_ro_t  </th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
   </tbody>
-  <tbody style="border: 0.2em solid orange;">
-    <tr><td> dpa_u_bo_with_hash_ro_t              </td><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td></tr>
-    <tr><td> dpa_u_bo_with_hash_t                 </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_gc_ro_t                     </td><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
-    <tr><td> dpa_u_bo_with_refcount_ro_t          </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
-    <tr><td> dpa_u_bo_with_refcount_t             </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
-    <tr><td> dpa_u_bo_with_refcount_and_hash_ro_t </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
+  <tbody style="--color: orange;">
+    <tr><th> dpa_u_bo_with_hash_ro_t              </th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td></tr>
+    <tr><th> dpa_u_bo_with_hash_t                 </th><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_gc_ro_t                     </th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
+    <tr><th> dpa_u_bo_with_refcount_ro_t          </th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
+    <tr><th> dpa_u_bo_with_refcount_t             </th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
+    <tr><th> dpa_u_bo_with_refcount_and_hash_ro_t </th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
   </tbody>
 </table>
+
+</body></html>
