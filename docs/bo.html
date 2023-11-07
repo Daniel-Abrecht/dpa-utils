@@ -5,8 +5,35 @@
   <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 <body>
+<h1 id="bo">Buffer Object (BO)</h1>
 
-<h2>Buffer Object (BO) Types</h2>
+A buffer object is a convenient container to store arbitrary data. It's also possible to use them to store text if desired, in which case using UTF-8 it recommended.<br/>
+
+<h2 id="types">Types</h2>
+
+<p>For different use-cases, there exist different types of buffer objects.</p>
+<p>The <code>dpa_u_bo_simple_ro_t</code> is useful in cases where only a simple buffer is needed, and there are no additional needs.
+It can also be used force a buffers data to be copied in functions which need to store a reference to the bo.</p>
+<p>The <code>dpa_u_bo_unique_t</code> is useful where comparing 2 BOs and/or getting their hash should be fast / in O(1), it is also very memory efficient.
+But there is an initial overhead for creating such a bo, which can only be done using the <code>dpa_u_bo_intern</code> function.</p>
+
+<h3 id="ro-bo">Readonly (ro) and non-readonly types</h3>
+<p>
+Technically, all of them have a readonly (ro) version. When that type is used, the data the bo contains is const qualified and will only be accessed
+for reading through that bo, but if there is a pointer to the data, that pointer is not const qualified. The <code>dpa_u_bo_simple_ro_t</code> is
+special. It's just the const version of the <code>dpa_u_bo_inline_t</code> type, rather than a distinct type, because the bo object itself
+contains it's data directly. Also, even ro types that may contain a <code>dpa_u_bo_inline_t</code> won't use <code>dpa_u_bo_inline_ro_t</code>, because then, they
+would not be assignable anymore, but the const version of the ro buffer will contain the const version of <code>dpa_u_bo_inline_t</code>, which is a <code>dpa_u_bo_inline_ro_t</code>.
+Also, <code>dpa_u_bo_unique_hashmap_t</code> does not end in _ro_t, but it is a readonly type.
+</p>
+<p>
+Some types do not have a non-readonly variant. These types are not only readonly, but immutable. This includes the <code>dpa_u_bo_unique_hashmap_t</code>
+and the <code>dpa_u_bo_refcounted_hashed_ro_t</code> type. The <code>dpa_u_bo_inline_ro_t</code> does have a non-ro variant, but it can still be consideret immutable.
+The <code>dpa_u_bo_refcounted_hashed_ro_t</code> has no non-readonly type because changing the data of a hashed bo wil lead to it having an invalid hash,
+and a refcount only makes sense with multiple instances of the bo, in other words, if such a bo would exist, it would only end up with a wrong hash eventually.
+</p>
+
+<h3 id="static-and-runtime-types">Static &amp; runtime types</h3>
 
 <table class="pad">
   <tr style="background-color: color-mix(in srgb, green 33%, #FFF0);"><th><nobr>Base types</th><td>They all have the same small size</td></tr>
@@ -22,8 +49,6 @@
   </tr>
   <tr style="background-color: color-mix(in srgb, orange 33%, #FFF0);"><th><nobr>Trait types</th><td>Opaque type, must be used as a pointer. Points to types with specific properties</td></tr>
 </table>
-
-The dpa_u_bo_inline_ro_t is just the const version of the dpa_u_bo_inline_t type, rather than a distinct type.
 
 <table class="matrix">
   <thead>
