@@ -1,3 +1,9 @@
+@import "var.css";
+
+:root {
+  --var-active-color: #FF8000;
+  --var-related-color: #FF0080;
+}
 :link { color: #0000EE; }
 :visited { color: #551A8B; }
 
@@ -17,6 +23,11 @@ html, body {
 
 body {
   margin: 1em;
+}
+
+var {
+  font-style: unset;
+  font-weight: bold;
 }
 
 .text-up, table.matrix > thead > tr > th {
@@ -44,8 +55,16 @@ table.pad > * > tr > th {
   padding: 0.25em 0.5em;
 }
 
-table.matrix > * > tr > * {
-  border: 1px solid #888;
+table.matrix.border > * > tr > *,
+table.matrix.vborder > * > tr > * {
+  border-left: 1px solid #888;
+  border-right: 1px solid #888;
+}
+
+table.matrix.border > * > tr > *,
+table.matrix.hborder > * > tr > * {
+  border-top: 1px solid #888;
+  border-bottom: 1px solid #888;
 }
 
 table.matrix > thead > tr > td {
@@ -62,14 +81,24 @@ table.matrix > * > tr > :first-child {
   padding: 0.25em 0.5em;
 }
 
-table.matrix > tbody > tr:nth-child(even) {
-  background-color: color-mix(in srgb, var(--color) 20%, #FFF0);
+tbody[style*="--color:"],
+tr[style*="--color:"] {
+  border-left: 0.25em solid var(--color);
+  border-right: 0.25em solid var(--color);
 }
 
-table.matrix > tbody > tr:nth-child(odd) {
-  background-color: color-mix(in srgb, var(--color) 33%, #FFF0);
+tr[style*="--color:"] {
+  background-color: color-mix(in srgb, var(--color) 40%, #FFF0);
 }
 
-table.matrix > tbody > tr:empty {
+tbody[style*="--color:"] > tr:nth-child(even) {
+  background-color: color-mix(in srgb, var(--color) 25%, #FFF0);
+}
+
+tbody[style*="--color:"] > tr:nth-child(odd) {
+  background-color: color-mix(in srgb, var(--color) 40%, #FFF0);
+}
+
+tr:empty {
   display: none;
 }
