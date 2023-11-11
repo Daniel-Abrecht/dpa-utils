@@ -69,7 +69,7 @@ rrelated=()
 for kv in "${related[@]}"
 do
   read -r k v <<<"$kv"
-  rrelated["$v"]="$k"
+  rrelated+=("$v $k")
 done
 
 find-matches(){
@@ -80,7 +80,56 @@ find-matches(){
   done
 }
 
+find-matches-graph(){
+  g="$1"; shift
+  for kv in "$@"
+  do
+    read -r k v <<<"$kv"
+    case "$k" in $g) echo "$v";; esac
+  done | sort -u
+}
+
 (
+
+for selector in "${vars[@]}"
+do
+  r=( $(find-matches-graph "$selector" "${related[@]}") )
+  if [ "${#r[@]}" -gt 0 ]
+  then
+    printf ":root:has(var[name=\"%s\"]:hover) :is(" "$selector"
+    printf "var[name=\"%s\"]" "$r"
+    if [ "${#r[@]}" -gt 1 ]
+      then printf ",var[name=\"%s\"]" "${r[@]:1}"
+    fi
+    echo "),"
+  fi
+done
+cat <<EOF
+x:root {
+  color: var(--var-related-color);
+}
+
+EOF
+
+for selector in "${vars[@]}"
+do
+  r=( $(find-matches-graph "$selector" "${rrelated[@]}") )
+  if [ "${#r[@]}" -gt 0 ]
+  then
+    printf ":root:has(var[name=\"%s\"]:hover) :is(" "$selector"
+    printf "var[name=\"%s\"]" "$r"
+    if [ "${#r[@]}" -gt 1 ]
+      then printf ",var[name=\"%s\"]" "${r[@]:1}"
+    fi
+    echo "),"
+  fi
+done
+cat <<EOF
+x:root {
+  color: var(--var-rrelated-color);
+}
+
+EOF
 
 for selector in "${vars[@]}"
 do
@@ -88,7 +137,7 @@ do
   printf ":root:has(var[name=\"%s\"]:hover) :is(" "$selector"
   printf "var[name=\"%s\"]" "$matches"
   if [ "${#matches[@]}" -gt 1 ]
-    then printf ",var[name=\"%s\"]" "${matches[@]:2}"
+    then printf ",var[name=\"%s\"]" "${matches[@]:1}"
   fi
   echo "),"
 done
@@ -96,26 +145,7 @@ cat <<EOF
 x:root {
   color: var(--var-active-color);
 }
-EOF
 
-# for selector in "${vars[@]}"
-# do
-#   rk=( $(find-matches "$selector" "${!related[@]}") )
-#   rrk=( $(find-matches "$selector" "${!rrelated[@]}") )
-#   r=()
-#   rr=()
-#   for k in "${rk[@]}"
-#   do
-#     r+=("${related[$k]}")
-#   done
-#   for k in "${rrk[@]}"
-#   do
-#     rr+=("${rrelated[$k]}")
-#   done
-#   printf ":root:has(var[name=\"%s\"]:hover) :is(" "$selector"
-#   echo
-#   printf " < %s\n" "${r[@]}"
-#   printf " > %s\n" "${rr[@]}"
-# done
+EOF
 
 ) | tee docs/css/var.css

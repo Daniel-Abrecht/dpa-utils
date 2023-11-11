@@ -1,10 +1,56 @@
+:root:has(var[name="dpa_u_any_bo_*_t"]:hover) :is(var[name="DPA_U_BO_HASHED"],var[name="DPA_U_BO_INLINE"],var[name="DPA_U_BO_REFCOUNTED"],var[name="DPA_U_BO_REFCOUNTED_HASHED"],var[name="DPA_U_BO_SIMPLE"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_any_bo_hashed_ro_t"]:hover) :is(var[name="DPA_U_BO_HASHED"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_any_bo_hashed_t"]:hover) :is(var[name="DPA_U_BO_HASHED"]),
+:root:has(var[name="dpa_u_any_bo_inline_t"]:hover) :is(var[name="DPA_U_BO_INLINE"]),
+:root:has(var[name="dpa_u_any_bo_refcounted_hashed_ro_t"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED_HASHED"]),
+:root:has(var[name="dpa_u_any_bo_refcounted_ro_t"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED"],var[name="DPA_U_BO_REFCOUNTED_HASHED"]),
+:root:has(var[name="dpa_u_any_bo_refcounted_t"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED"]),
+:root:has(var[name="dpa_u_any_bo_ro_t"]:hover) :is(var[name="DPA_U_BO_HASHED"],var[name="DPA_U_BO_INLINE"],var[name="DPA_U_BO_REFCOUNTED"],var[name="DPA_U_BO_REFCOUNTED_HASHED"],var[name="DPA_U_BO_SIMPLE"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_any_bo_simple_ro_t"]:hover) :is(var[name="DPA_U_BO_HASHED"],var[name="DPA_U_BO_REFCOUNTED"],var[name="DPA_U_BO_REFCOUNTED_HASHED"],var[name="DPA_U_BO_SIMPLE"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_any_bo_simple_t"]:hover) :is(var[name="DPA_U_BO_HASHED"],var[name="DPA_U_BO_REFCOUNTED"],var[name="DPA_U_BO_SIMPLE"]),
+:root:has(var[name="dpa_u_any_bo_t"]:hover) :is(var[name="DPA_U_BO_HASHED"],var[name="DPA_U_BO_INLINE"],var[name="DPA_U_BO_REFCOUNTED"],var[name="DPA_U_BO_SIMPLE"]),
+:root:has(var[name="dpa_u_any_bo_unique_hashmap_t"]:hover) :is(var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_any_bo_unique_t"]:hover) :is(var[name="DPA_U_BO_INLINE"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_bo_*_t"]:hover) :is(var[name="DPA_U_BO_HASHED"],var[name="DPA_U_BO_INLINE"],var[name="DPA_U_BO_REFCOUNTED"],var[name="DPA_U_BO_REFCOUNTED_HASHED"],var[name="DPA_U_BO_SIMPLE"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_bo_gc_ro_t"]:hover) :is(var[name="DPA_U_BO_INLINE"],var[name="DPA_U_BO_REFCOUNTED"],var[name="DPA_U_BO_REFCOUNTED_HASHED"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_bo_hashed_ro_t"]:hover) :is(var[name="DPA_U_BO_HASHED"]),
+:root:has(var[name="dpa_u_bo_hashed_t"]:hover) :is(var[name="DPA_U_BO_HASHED"]),
+:root:has(var[name="dpa_u_bo_inline_t"]:hover) :is(var[name="DPA_U_BO_INLINE"]),
+:root:has(var[name="dpa_u_bo_refcounted_hashed_ro_t"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED_HASHED"]),
+:root:has(var[name="dpa_u_bo_refcounted_ro_t"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED"]),
+:root:has(var[name="dpa_u_bo_refcounted_t"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED"]),
+:root:has(var[name="dpa_u_bo_ro_t"]:hover) :is(var[name="DPA_U_BO_INLINE"],var[name="DPA_U_BO_SIMPLE"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_bo_simple_ro_t"]:hover) :is(var[name="DPA_U_BO_SIMPLE"]),
+:root:has(var[name="dpa_u_bo_simple_t"]:hover) :is(var[name="DPA_U_BO_SIMPLE"]),
+:root:has(var[name="dpa_u_bo_t"]:hover) :is(var[name="DPA_U_BO_INLINE"],var[name="DPA_U_BO_SIMPLE"]),
+:root:has(var[name="dpa_u_bo_unique_hashmap_t"]:hover) :is(var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_bo_unique_t"]:hover) :is(var[name="DPA_U_BO_INLINE"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_bo_with_hash_ro_t"]:hover) :is(var[name="DPA_U_BO_HASHED"],var[name="DPA_U_BO_INLINE"],var[name="DPA_U_BO_REFCOUNTED_HASHED"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_bo_with_hash_t"]:hover) :is(var[name="DPA_U_BO_HASHED"],var[name="DPA_U_BO_INLINE"]),
+:root:has(var[name="dpa_u_bo_with_refcount_and_hash_ro_t"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED_HASHED"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_bo_with_refcount_ro_t"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED"],var[name="DPA_U_BO_REFCOUNTED_HASHED"],var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
+:root:has(var[name="dpa_u_bo_with_refcount_t"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED"]),
+x:root {
+  color: var(--var-related-color);
+}
+
+:root:has(var[name="DPA_U_BO_HASHED"]:hover) :is(var[name="dpa_u_any_bo_hashed_ro_t"],var[name="dpa_u_any_bo_hashed_t"],var[name="dpa_u_any_bo_ro_t"],var[name="dpa_u_any_bo_simple_ro_t"],var[name="dpa_u_any_bo_simple_t"],var[name="dpa_u_any_bo_t"],var[name="dpa_u_bo_hashed_ro_t"],var[name="dpa_u_bo_hashed_t"],var[name="dpa_u_bo_with_hash_ro_t"],var[name="dpa_u_bo_with_hash_t"]),
+:root:has(var[name="DPA_U_BO_INLINE"]:hover) :is(var[name="dpa_u_any_bo_inline_t"],var[name="dpa_u_any_bo_ro_t"],var[name="dpa_u_any_bo_t"],var[name="dpa_u_any_bo_unique_t"],var[name="dpa_u_bo_gc_ro_t"],var[name="dpa_u_bo_inline_t"],var[name="dpa_u_bo_ro_t"],var[name="dpa_u_bo_t"],var[name="dpa_u_bo_unique_t"],var[name="dpa_u_bo_with_hash_ro_t"],var[name="dpa_u_bo_with_hash_t"]),
+:root:has(var[name="DPA_U_BO_REFCOUNTED"]:hover) :is(var[name="dpa_u_any_bo_refcounted_ro_t"],var[name="dpa_u_any_bo_refcounted_t"],var[name="dpa_u_any_bo_ro_t"],var[name="dpa_u_any_bo_simple_ro_t"],var[name="dpa_u_any_bo_simple_t"],var[name="dpa_u_any_bo_t"],var[name="dpa_u_bo_gc_ro_t"],var[name="dpa_u_bo_refcounted_ro_t"],var[name="dpa_u_bo_refcounted_t"],var[name="dpa_u_bo_with_refcount_ro_t"],var[name="dpa_u_bo_with_refcount_t"]),
+:root:has(var[name="DPA_U_BO_REFCOUNTED_HASHED"]:hover) :is(var[name="dpa_u_any_bo_refcounted_hashed_ro_t"],var[name="dpa_u_any_bo_refcounted_ro_t"],var[name="dpa_u_any_bo_ro_t"],var[name="dpa_u_any_bo_simple_ro_t"],var[name="dpa_u_bo_gc_ro_t"],var[name="dpa_u_bo_refcounted_hashed_ro_t"],var[name="dpa_u_bo_with_hash_ro_t"],var[name="dpa_u_bo_with_refcount_and_hash_ro_t"],var[name="dpa_u_bo_with_refcount_ro_t"]),
+:root:has(var[name="DPA_U_BO_SIMPLE"]:hover) :is(var[name="dpa_u_any_bo_ro_t"],var[name="dpa_u_any_bo_simple_ro_t"],var[name="dpa_u_any_bo_simple_t"],var[name="dpa_u_any_bo_t"],var[name="dpa_u_bo_ro_t"],var[name="dpa_u_bo_simple_ro_t"],var[name="dpa_u_bo_simple_t"],var[name="dpa_u_bo_t"]),
+:root:has(var[name="DPA_U_BO_UNIQUE_HASHMAP"]:hover) :is(var[name="dpa_u_any_bo_hashed_ro_t"],var[name="dpa_u_any_bo_ro_t"],var[name="dpa_u_any_bo_simple_ro_t"],var[name="dpa_u_any_bo_unique_hashmap_t"],var[name="dpa_u_any_bo_unique_t"],var[name="dpa_u_bo_gc_ro_t"],var[name="dpa_u_bo_ro_t"],var[name="dpa_u_bo_unique_hashmap_t"],var[name="dpa_u_bo_unique_t"],var[name="dpa_u_bo_with_hash_ro_t"],var[name="dpa_u_bo_with_refcount_and_hash_ro_t"],var[name="dpa_u_bo_with_refcount_ro_t"]),
+x:root {
+  color: var(--var-rrelated-color);
+}
+
 :root:has(var[name="DPA_U_BO_HASHED"]:hover) :is(var[name="DPA_U_BO_HASHED"]),
 :root:has(var[name="DPA_U_BO_INLINE"]:hover) :is(var[name="DPA_U_BO_INLINE"]),
 :root:has(var[name="DPA_U_BO_REFCOUNTED"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED"]),
 :root:has(var[name="DPA_U_BO_REFCOUNTED_HASHED"]:hover) :is(var[name="DPA_U_BO_REFCOUNTED_HASHED"]),
 :root:has(var[name="DPA_U_BO_SIMPLE"]:hover) :is(var[name="DPA_U_BO_SIMPLE"]),
 :root:has(var[name="DPA_U_BO_UNIQUE_HASHMAP"]:hover) :is(var[name="DPA_U_BO_UNIQUE_HASHMAP"]),
-:root:has(var[name="dpa_u_any_bo_*_t"]:hover) :is(var[name="dpa_u_any_bo_*_t"],var[name="dpa_u_any_bo_hashed_t"],var[name="dpa_u_any_bo_inline_t"],var[name="dpa_u_any_bo_refcounted_hashed_ro_t"],var[name="dpa_u_any_bo_refcounted_ro_t"],var[name="dpa_u_any_bo_refcounted_t"],var[name="dpa_u_any_bo_ro_t"],var[name="dpa_u_any_bo_simple_ro_t"],var[name="dpa_u_any_bo_simple_t"],var[name="dpa_u_any_bo_unique_hashmap_t"],var[name="dpa_u_any_bo_unique_t"]),
+:root:has(var[name="dpa_u_any_bo_*_t"]:hover) :is(var[name="dpa_u_any_bo_*_t"],var[name="dpa_u_any_bo_hashed_ro_t"],var[name="dpa_u_any_bo_hashed_t"],var[name="dpa_u_any_bo_inline_t"],var[name="dpa_u_any_bo_refcounted_hashed_ro_t"],var[name="dpa_u_any_bo_refcounted_ro_t"],var[name="dpa_u_any_bo_refcounted_t"],var[name="dpa_u_any_bo_ro_t"],var[name="dpa_u_any_bo_simple_ro_t"],var[name="dpa_u_any_bo_simple_t"],var[name="dpa_u_any_bo_unique_hashmap_t"],var[name="dpa_u_any_bo_unique_t"]),
 :root:has(var[name="dpa_u_any_bo_hashed_ro_t"]:hover) :is(var[name="dpa_u_any_bo_hashed_ro_t"]),
 :root:has(var[name="dpa_u_any_bo_hashed_t"]:hover) :is(var[name="dpa_u_any_bo_hashed_t"]),
 :root:has(var[name="dpa_u_any_bo_inline_t"]:hover) :is(var[name="dpa_u_any_bo_inline_t"]),
@@ -17,6 +63,7 @@
 :root:has(var[name="dpa_u_any_bo_t"]:hover) :is(var[name="dpa_u_any_bo_t"]),
 :root:has(var[name="dpa_u_any_bo_unique_hashmap_t"]:hover) :is(var[name="dpa_u_any_bo_unique_hashmap_t"]),
 :root:has(var[name="dpa_u_any_bo_unique_t"]:hover) :is(var[name="dpa_u_any_bo_unique_t"]),
+:root:has(var[name="dpa_u_bo_*_t"]:hover) :is(var[name="dpa_u_bo_*_t"],var[name="dpa_u_bo_gc_ro_t"],var[name="dpa_u_bo_hashed_ro_t"],var[name="dpa_u_bo_hashed_t"],var[name="dpa_u_bo_inline_ro_t"],var[name="dpa_u_bo_inline_t"],var[name="dpa_u_bo_refcounted_hashed_ro_t"],var[name="dpa_u_bo_refcounted_ro_t"],var[name="dpa_u_bo_refcounted_t"],var[name="dpa_u_bo_ro_t"],var[name="dpa_u_bo_simple_ro_t"],var[name="dpa_u_bo_simple_t"],var[name="dpa_u_bo_unique_hashmap_t"],var[name="dpa_u_bo_unique_t"],var[name="dpa_u_bo_with_hash_ro_t"],var[name="dpa_u_bo_with_hash_t"],var[name="dpa_u_bo_with_refcount_and_hash_ro_t"],var[name="dpa_u_bo_with_refcount_ro_t"],var[name="dpa_u_bo_with_refcount_t"]),
 :root:has(var[name="dpa_u_bo_gc_ro_t"]:hover) :is(var[name="dpa_u_bo_gc_ro_t"]),
 :root:has(var[name="dpa_u_bo_hashed_ro_t"]:hover) :is(var[name="dpa_u_bo_hashed_ro_t"]),
 :root:has(var[name="dpa_u_bo_hashed_t"]:hover) :is(var[name="dpa_u_bo_hashed_t"]),
@@ -44,3 +91,4 @@
 x:root {
   color: var(--var-active-color);
 }
+

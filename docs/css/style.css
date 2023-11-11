@@ -1,8 +1,11 @@
 @import "var.css";
 
 :root {
-  --var-active-color: #FF8000;
-  --var-related-color: #FF0080;
+  --var-active-color: red;
+  --var-related-color: darkviolet;
+  --var-rrelated-color: green;
+  --line-height: 1.2;
+  line-height: var(line-height);
 }
 :link { color: #0000EE; }
 :visited { color: #551A8B; }
@@ -11,6 +14,9 @@
   :root {
     background-color: #000;
     color: #FFF;
+    --var-active-color: #FF8000;
+    --var-related-color: #FF0080;
+    --var-rrelated-color: #00FF80;
   }
   :link { color: #00FFFF; }
   :visited { color: #da42ff; }
@@ -30,9 +36,35 @@ var {
   font-weight: bold;
 }
 
+table {
+  break-inside: avoid-column;
+  column-span: all;
+}
+
+section:not(.nocolumn) {
+  text-align: justify;
+  column-width: 20em;
+  orphans: 10;
+  widows: 3;
+  hyphens: auto;
+}
+
+p {
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  margin: 0;
+  margin-bottom: calc(var(--line-height) * 1em);
+}
+
+table.matrix {
+  text-align: center;
+}
+
 .text-up, table.matrix > thead > tr > th {
   writing-mode: sideways-lr;
   padding: 0.5em 0.25em;
+  min-width: calc(var(--line-height) * 1em);
+  text-align: center;
 }
 
 @supports (writing-mode: vertical-rl) and (not (writing-mode: sideways-lr)) {

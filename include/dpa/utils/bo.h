@@ -535,20 +535,6 @@ struct dpa_u_bo_unique_hashmap_stats_s {
 //////      Member access functions      //////
 ///////////////////////////////////////////////
 
-
-/**
- * The dpa_u_any_* types are const opaque types. They are to be passed to functions expecting a variant or derived type of the corresponding dpa_u_* type.
- * Some of the dpa_u_any_ typs may not have a correspondng true type, and may just be there to indicate a refcountable bo, or a bo with a (trivially / quickly obtainable) hash.
- * If a pointer to an dpa_u_ is passed to a function, that usually means the function is to return a bo of that type.
- * If a pointer to an dpa_u_any_ is passed to a function, that usually means the function will just use, but not change, the bo in question.
- * This is to make sure pointers to dpa_u_ won't point to derived types. That way, a = *b will be a safe operation for dpa_u_ pointers.
- * Some of these types may not be very useful and are just provided for consistency / completeness.
- * 
- * This macro will not check the type fields for types where only 1 type is possible, it'll just return that type constant.
- * The type returned is always an enum, but which enum depends on the bo in question. This is so that when it's used in a switch,
- * te compiler only warns about the possible type values if they haveno case. It's always safe to cast to (enum dpa_u_bo_any_type),
- * and it's recommended to always use the constants in that struct.
- */
 #define dpa_u_bo_get_type(...) dpa_u_assert_selection(dpa_u_bo_get_type_g(__VA_ARGS__))
 #define dpa_u_bo_get_type_g(X) dpa_u_generic((X),dpa__u_helper_all_g(get_type,(X)))
 
@@ -772,7 +758,7 @@ dpa_u_reproducible dpa__u_really_inline dpa_u_export inline const void* dpa__u_a
 ////
 
 #define dpa_u_bo_set_size(...) dpa_u_assert_selection(dpa_u_bo_set_size_g(__VA_ARGS__))
-#define dpa_u_bo_set_size_g(X,S) ((void)dpa_u_generic((X), \
+#define dpa_u_bo_set_size_g(X,S) dpa_u_generic((X), \
     dpa_u_bo_inline_t: dpa__u_v_bo_inline__set_size(DPA__G(dpa_u_bo_inline_t,(X)), (S)), \
     dpa_u_bo_simple_t: dpa__u_v_bo_simple__set_size(DPA__G(dpa_u_bo_simple_t,(X)), (S)), \
     dpa_u_bo_simple_ro_t: dpa__u_v_bo_simple_ro__set_size(DPA__G(dpa_u_bo_simple_ro_t,(X)), (S)), \
@@ -788,25 +774,25 @@ dpa_u_reproducible dpa__u_really_inline dpa_u_export inline const void* dpa__u_a
     dpa_u_bo_refcounted_t*: dpa__u_p_bo_refcounted__set_size(DPA__G(dpa_u_bo_refcounted_t*,(X)),(S)), \
     dpa_u_bo_refcounted_ro_t*: dpa__u_p_bo_refcounted_ro__set_size(DPA__G(dpa_u_bo_refcounted_ro_t*,(X)),(S)), \
     dpa_u_bo_refcounted_hashed_ro_t*: dpa__u_p_bo_refcounted_hashed_ro__set_size(DPA__G(dpa_u_bo_refcounted_hashed_ro_t*,(X)),(S)) \
-  ))
+  )
 
 #define dpa__u_v_bo_inline__set_size(X,S) dpa__u_p_bo_inline__set_size(&(X),(S))
-#define dpa__u_p_bo_inline__set_size(X,S) (assert((S) <= DPA_U_BO_INLINE_MAX_SIZE),((X)->size=(S)&0xF))
+#define dpa__u_p_bo_inline__set_size(X,S) (void)(assert((S) <= DPA_U_BO_INLINE_MAX_SIZE),((X)->size=(S)&0xF))
 
 #define dpa__u_v_bo_simple__set_size(X,S) dpa__u_p_bo_simple__set_size(&(X),(S))
-#define dpa__u_p_bo_simple__set_size(X,S) (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
+#define dpa__u_p_bo_simple__set_size(X,S) (void)(assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
 
 #define dpa__u_v_bo_simple_ro__set_size(X,S) dpa__u_p_bo_simple_ro__set_size(&(X),(S))
-#define dpa__u_p_bo_simple_ro__set_size(X,S) (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
+#define dpa__u_p_bo_simple_ro__set_size(X,S) (void)(assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
 
 #define dpa__u_v_bo_refcounted__set_size(X,S) dpa__u_p_bo_refcounted__set_size(&(X),(S))
-#define dpa__u_p_bo_refcounted__set_size(X,S) (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
+#define dpa__u_p_bo_refcounted__set_size(X,S) (void)(assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
 
 #define dpa__u_v_bo_refcounted_ro__set_size(X,S) dpa__u_p_bo_refcounted_ro__set_size(&(X),(S))
-#define dpa__u_p_bo_refcounted_ro__set_size(X,S) (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
+#define dpa__u_p_bo_refcounted_ro__set_size(X,S) (void)(assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
 
 #define dpa__u_v_bo_refcounted_hashed_ro__set_size(X,S) dpa__u_p_bo_refcounted_hashed_ro__set_size(&(X),(S))
-#define dpa__u_p_bo_refcounted_hashed_ro__set_size(X,S) (assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
+#define dpa__u_p_bo_refcounted_hashed_ro__set_size(X,S) (void)(assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
 
 #define dpa__u_v_bo__set_size(X,S) dpa__u_p_bo__set_size(&(X),(S))
 dpa__u_really_inline dpa_u_export inline void dpa__u_p_bo__set_size(dpa_u_bo_t*const bo, size_t size){
