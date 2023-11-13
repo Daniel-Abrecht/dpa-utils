@@ -5,6 +5,7 @@
   --var-related-color: darkviolet;
   --var-rrelated-color: green;
   --line-height: 1.2;
+  --section-level: 0;
   line-height: var(line-height);
 }
 :link { color: #0000EE; }
@@ -31,14 +32,19 @@ body {
   margin: 1em;
 }
 
-var {
+var, .var {
   font-style: unset;
   font-weight: bold;
 }
 
-table {
+table, section, section > :is(h1,h2,h3,h4,h5,h6), .nocolumn {
   break-inside: avoid-column;
   column-span: all;
+}
+
+:is(h1,h2,h3,h4,h5,h6) > a[href] {
+  color: unset;
+  text-decoration: none;
 }
 
 section:not(.nocolumn) {
@@ -47,6 +53,73 @@ section:not(.nocolumn) {
   orphans: 10;
   widows: 3;
   hyphens: auto;
+}
+
+section {
+  --section-level: 1;
+  --section-counter: sc1;
+  --section-number: ;
+}
+section section {
+  --section-level: 2;
+  --section-counter: sc2;
+  --section-number: counter(sc2);
+}
+section section section {
+  --section-level: 3;
+  --section-counter: sc3;
+  --section-number: counter(sc2) '.' counter(sc3);
+}
+section section section section {
+  --section-level: 4;
+  --section-counter: sc4;
+  --section-number: counter(sc2) '.' counter(sc3) '.' counter(sc4);
+}
+section section section section section {
+  --section-level: 5;
+  --section-counter: sc5;
+  --section-number: counter(sc2) '.' counter(sc3) '.' counter(sc4) '.' counter(sc5);
+}
+section section section section section section {
+  --section-level: 6;
+  --section-counter: sc6;
+  --section-number: counter(sc2) '.' counter(sc3) '.' counter(sc4) '.' counter(sc5) '.' counter(sc6);
+}
+section section section section section section section {
+  --section-level: 7;
+  --section-counter: sc7;
+  --section-number: counter(sc2) '.' counter(sc3) '.' counter(sc4) '.' counter(sc5) '.' counter(sc6) '.' counter(sc7);
+}
+section section section section section section section section {
+  --section-level: 8;
+  --section-counter: sc8;
+  --section-number: counter(sc2) '.' counter(sc3) '.' counter(sc4) '.' counter(sc5) '.' counter(sc6) '.' counter(sc7) '.' counter(sc8);
+}
+section section section section section section section section section {
+  --section-level: 9;
+  --section-counter: sc9;
+  --section-number: counter(sc2) '.' counter(sc3) '.' counter(sc4) '.' counter(sc5) '.' counter(sc6) '.' counter(sc7) '.' counter(sc8) '.' counter(sc9);
+}
+section section section section section section section section section section {
+  --section-level: 10;
+  --section-counter: sc10;
+  --section-number: counter(sc2) '.' counter(sc3) '.' counter(sc4) '.' counter(sc5) '.' counter(sc6) '.' counter(sc7) '.' counter(sc8) '.' counter(sc9) '.' counter(sc10);
+}
+
+section {
+  counter-increment: var(--section-counter);
+  --title-size: calc(1em / var(--section-level) + 1em);
+  margin-top: var(--title-size);
+}
+
+section > :is(h2,h3,h4,h5,h6)::before {
+  content: var(--section-number) '. ';
+}
+
+section > :is(h1,h2,h3,h4,h5,h6) {
+  font-size: var(--title-size);
+  margin: 0;
+  margin-bottom: 1em;
 }
 
 p {
@@ -64,6 +137,7 @@ table.matrix {
   writing-mode: sideways-lr;
   padding: 0.5em 0.25em;
   min-width: calc(var(--line-height) * 1em);
+  box-sizing: border-box;
   text-align: center;
 }
 
@@ -76,10 +150,31 @@ table.matrix {
   }
 }
 
+a.var {
+  color: unset;
+  text-decoration: none;
+}
+
+table.first-right > * > tr > :first-child {
+  text-align: right;
+}
+
+table.border > * > tr > :is(td,th) {
+  border: 1px solid #808080;
+}
+
+table.striped > * > tr:nth-child(odd) > :is(td,th) {
+  background-color: #7777;
+}
+
+table.striped > * > tr:nth-child(even) > :is(td,th) {
+  background-color: #7774;
+}
+
 table {
   border-spacing: 0;
   border-collapse: collapse;
-  margin: 1em;
+  margin: 1em 0;
 }
 
 table.pad > * > tr > td,

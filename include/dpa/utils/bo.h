@@ -293,7 +293,7 @@ struct dpa_u_bo_inline {
   union {
     struct {
       DPA__U_BO_META(size);
-      char data[DPA__U_BO_COMMON_SIZE-1];
+      char data[DPA_U_BO_INLINE_MAX_SIZE];
     };
     DPA__U_BO_ALIGN dpa__u_bo_a_t all;
   };
@@ -1717,10 +1717,6 @@ dpa_u_export inline dpa_u_bo_unique_t dpa__u_bo_intern(dpa_u_any_bo_ro_t*const b
 #define dpa_u_any_bo_ro(...) dpa_u_assert_selection(dpa_u_any_bo_ro_g(__VA_ARGS__))
 #define dpa_u_any_bo_ro_g(X) dpa_u_generic_if_selection(dpa_u_bo_ptr_g(X), (dpa_u_any_bo_ro_t*)dpa_u_bo_ptr((X)))
 
-/**
- * Interns a buffer. The refcount of the buffer will be increased.
- * \returns dpa_u_bo_unique_t
- */
 #define dpa_u_bo_intern(...) dpa_u_assert_selection(dpa_u_bo_intern_g(__VA_ARGS__))
 #define dpa_u_bo_intern_g(X) _Generic((X), \
     dpa_u_bo_inline_t: (const dpa_u_bo_unique_t){ .bo_inline = DPA__G(dpa_u_bo_inline_t, (X)) }, \
