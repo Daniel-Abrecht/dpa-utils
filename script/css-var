@@ -100,7 +100,7 @@ do
   r=( $(find-matches-graph "$selector" "${related[@]}") )
   if [ "${#r[@]}" -gt 0 ]
   then
-    printf ":root:has(:is(var[name=\"%s\"],.var[href$=\"#%s\"]):hover) :is(" "$selector" "$selector"
+    printf ":root:has(var[name=\"%s\"]:hover,.var[href$=\"#%s\"]:hover) :is(" "$selector" "$selector"
     printf "var[name=\"%s\"],.var[href$=\"#%s\"]" "$r" "$r"
     if [ "${#r[@]}" -gt 1 ]
     then
@@ -112,7 +112,29 @@ do
 done
 cat <<EOF
 x:root {
-  color: var(--var-related-color);
+  color: var(--var-related-color-hover);
+}
+
+EOF
+
+for selector in "${vars[@]}"
+do
+  r=( $(find-matches-graph "$selector" "${related[@]}") )
+  if [ "${#r[@]}" -gt 0 ]
+  then
+    printf ":root:has(var[name=\"%s\"]:focus,.var[href$=\"#%s\"]:focus) :is(" "$selector" "$selector"
+    printf "var[name=\"%s\"],.var[href$=\"#%s\"]" "$r" "$r"
+    if [ "${#r[@]}" -gt 1 ]
+    then
+      printf ",var[name=\"%s\"]" "${r[@]:1}"
+      printf ",.var[href$=\"#%s\"]" "${r[@]:1}"
+    fi
+    echo "),"
+  fi
+done
+cat <<EOF
+x:root {
+  color: var(--var-related-color-focus);
 }
 
 EOF
@@ -122,7 +144,7 @@ do
   r=( $(find-matches-graph "$selector" "${rrelated[@]}") )
   if [ "${#r[@]}" -gt 0 ]
   then
-    printf ":root:has(:is(var[name=\"%s\"],.var[href$=\"#%s\"]):hover) :is(" "$selector" "$selector"
+    printf ":root:has(var[name=\"%s\"]:hover,.var[href$=\"#%s\"]:hover) :is(" "$selector" "$selector"
     printf "var[name=\"%s\"],.var[href$=\"#%s\"]" "$r" "$r"
     if [ "${#r[@]}" -gt 1 ]
     then
@@ -134,7 +156,29 @@ do
 done
 cat <<EOF
 x:root {
-  color: var(--var-rrelated-color);
+  color: var(--var-rrelated-color-hover);
+}
+
+EOF
+
+for selector in "${vars[@]}"
+do
+  r=( $(find-matches-graph "$selector" "${rrelated[@]}") )
+  if [ "${#r[@]}" -gt 0 ]
+  then
+    printf ":root:has(var[name=\"%s\"]:focus,.var[href$=\"#%s\"]:focus) :is(" "$selector" "$selector"
+    printf "var[name=\"%s\"],.var[href$=\"#%s\"]" "$r" "$r"
+    if [ "${#r[@]}" -gt 1 ]
+    then
+      printf ",var[name=\"%s\"]" "${r[@]:1}"
+      printf ",.var[href$=\"#%s\"]" "${r[@]:1}"
+    fi
+    echo "),"
+  fi
+done
+cat <<EOF
+x:root {
+  color: var(--var-rrelated-color-focus);
 }
 
 EOF
@@ -142,7 +186,7 @@ EOF
 for selector in "${vars[@]}"
 do
   matches=( $(find-matches "$selector" "${vars[@]}") )
-  printf ":root:has(:is(var[name=\"%s\"],.var[href$=\"#%s\"]):hover) :is(" "$selector" "$selector"
+  printf ":root:has(var[name=\"%s\"]:hover,.var[href$=\"#%s\"]:hover) :is(" "$selector" "$selector"
   printf "var[name=\"%s\"],.var[href$=\"#%s\"]" "$matches" "$matches"
   if [ "${#matches[@]}" -gt 1 ]
   then
@@ -153,7 +197,26 @@ do
 done
 cat <<EOF
 x:root {
-  color: var(--var-active-color);
+  color: var(--var-active-color-hover);
+}
+
+EOF
+
+for selector in "${vars[@]}"
+do
+  matches=( $(find-matches "$selector" "${vars[@]}") )
+  printf ":root:has(var[name=\"%s\"]:focus,.var[href$=\"#%s\"]:focus) :is(" "$selector" "$selector"
+  printf "var[name=\"%s\"],.var[href$=\"#%s\"]" "$matches" "$matches"
+  if [ "${#matches[@]}" -gt 1 ]
+  then
+    printf ",var[name=\"%s\"]" "${matches[@]:1}"
+    printf ",.var[href$=\"#%s\"]" "${matches[@]:1}"
+  fi
+  echo "),"
+done
+cat <<EOF
+x:root {
+  color: var(--var-active-color-focus);
 }
 
 EOF

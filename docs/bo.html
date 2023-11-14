@@ -20,14 +20,14 @@
   </p>
 
   <section class="nocolumn">
-    <h3><a id="bo-ptr-vs-any-bo" href="#bo-ptr-vs-any-bo">Pointers to <var name="dpa_u_bo_*_t">dpa_u_&shy;bo_*_t*</var> types vs. <var name="dpa_u_any_bo_*_t">dpa_u_any_&shy;bo_*_t*</var> types</a></h3>
+    <h3><a id="bo-ptr-vs-any-bo" href="#bo-ptr-vs-any-bo">Pointers to <var tabindex="0" name="dpa_u_bo_*_t">dpa_u_&shy;bo_*_t*</var> types vs. <var tabindex="0" name="dpa_u_any_bo_*_t">dpa_u_any_&shy;bo_*_t*</var> types</a></h3>
     <p>
-      The <var name="dpa_u_any_bo_*_t">dpa_u_any_&shy;bo_*_t*</var> types are const opaque types. They are to be passed
-      to functions expecting a variant or derived type of the corresponding <var name="dpa_u_bo_*_t">dpa_u_&shy;bo_*_t</var>
-      type. Pointers to <var name="dpa_u_bo_*_t">dpa_u_&shy;bo_*_t</var> types must never point to a derived type, nor,
-      in case of a variant type, to a type that variant can not contain. That way, a = *b will be a safe operation for
-      <var name="dpa_u_bo_*_t">dpa_u_&shy;bo_*_t</var> pointers. The BO objects contain a type field, and this ensures
-      the type field of a base type will not be set to the type constant for a derived type.
+      The <var tabindex="0" name="dpa_u_any_bo_*_t">dpa_u_any_&shy;bo_*_t*</var> types are const opaque types. They are
+      to be passed to functions expecting a variant or derived type of the corresponding <var tabindex="0" name="dpa_u_bo_*_t">dpa_u_&shy;bo_*_t</var>
+      type. Pointers to <var tabindex="0" name="dpa_u_bo_*_t">dpa_u_&shy;bo_*_t</var> types must never point to a
+      derived type, nor, in case of a variant type, to a type that variant can not contain. That way, a = *b will be a
+      safe operation for <var tabindex="0" name="dpa_u_bo_*_t">dpa_u_&shy;bo_*_t</var> pointers. The BO objects contain
+      a type field, and this ensures the type field of a base type will not be set to the type constant for a derived type.
     </p>
   </section>
 
@@ -35,84 +35,84 @@
     <h3><a id="use-cases" href="#use-cases">Use cases</a></h3>
     <p>For different use-cases, there exist different types of buffer objects.</p>
     <p>
-      The <var name="dpa_u_bo_simple_ro_t">dpa_u_&shy;bo_&shy;simple_&shy;ro_t</var> is useful in cases where only a
-      simple buffer is needed, and there are no additional needs. It can also be used force a buffers data to be copied
-      in functions which need to store a reference to the BO.
+      The <var tabindex="0" name="dpa_u_bo_simple_ro_t">dpa_u_&shy;bo_&shy;simple_&shy;ro_t</var> is useful in cases
+      where only a simple buffer is needed, and there are no additional needs. It can also be used to force a buffers
+      data to be copied in functions which need to store a reference to the BO.
     </p><p>
-      The <var name="dpa_u_bo_unique_t">dpa_u_&shy;bo_&shy;unique_t</var> is useful where comparing 2 BOs and/or getting
-      their hash should be fast / in O(1), it is also very memory efficient. But there is an initial overhead for
-      creating such a BO, which can only be done using the <var name="dpa_u_bo_intern">dpa_u_&shy;bo_&shy;intern</var>
-      function. This type may either store a <var name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var> or a
-      <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>, but those two types are not
-      intended to be used directly, and while <var name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var> can only
-      store data up to a certain size, <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
-      will only store amounts of data bigger than that. <var name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var>
-      takes advantage of automatic storage duration &amp; data copying, while <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
-      is immutable and reference counted. For simplicity, all these types can be passed to <var name="dpa_u_bo_ref">dpa_u_&shy;bo_&shy;ref</var>
-      and <var name="dpa_u_bo_put">dpa_u_&shy;bo_&shy;put</var>, although for <var name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var>,
+      The <var tabindex="0" name="dpa_u_bo_unique_t">dpa_u_&shy;bo_&shy;unique_t</var> is useful where comparing 2 BOs
+      and/or getting their hash should be fast / in O(1), it is also very memory efficient. But there is an initial
+      overhead for creating such a BO, which can only be done using the <a class="var" href="#dpa_u_bo_intern">dpa_u_&shy;bo_&shy;intern</a>
+      function. This type may either store a <var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var>
+      or a <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>, but those
+      two types are not intended to be used directly, and while <var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var>
+      can only store data up to a certain size, <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
+      will only store amounts of data bigger than that. <var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var>
+      takes advantage of automatic storage duration &amp; data copying, while <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
+      is immutable and reference counted. For simplicity, all these types can be passed to <a class="var" href="#dpa_u_bo_ref">dpa_u_&shy;bo_&shy;ref</a>
+      and <a class="var" href="#dpa_u_bo_put">dpa_u_&shy;bo_&shy;put</a>, although for <var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var>,
       this is simply a no-op.
     </p><p>
       The hashed and reference counted BO can, as their name implies, hold a reference count or hash respectively. A
       hashed type contains the hash in the BO object.<br/>
       A reference count, on the other hand, will match the lifetime of the data a BO points to, and it is recommended to
       allocate the reference count together with the data whenever possible. More specifically, a
-      <var name="dpa_u_refcount_freeable_t">dpa_u_&shy;ref&shy;count_&shy;free&shy;able_t</var> or a type derived from
-      it is used, which allows automatically freeing the BO when it's no longer referenced. It's also possible to execute
-      a destructor callback at the same time if needed. The reference count types serve an additional purpose. When they
-      contain a static reference count, that is a hint that the BOs data will never bee freed, which is useful to allow
-      functions to know that they do not need to copy string literals and such things.
+      <var tabindex="0" name="dpa_u_refcount_freeable_t">dpa_u_&shy;ref&shy;count_&shy;free&shy;able_t</var> or a type
+      derived from it is used, which allows automatically freeing the BO when it's no longer referenced. It's also
+      possible to execute a destructor callback at the same time if needed. The reference count types serve an additional
+      purpose. When they contain a static reference count, that is a hint that the BOs data will never bee freed, which
+      is useful to allow functions to know that they do not need to copy string literals and such things.
     </p><p>
-      The <var name="dpa_u_any_bo_*_t">dpa_u_any_&shy;bo_*_t*</var> types may point to a derived type of their
-      corresponding type. The <var name="dpa_u_any_bo_ro_t">dpa_u_any_&shy;bo_&shy;ro_t*</var> type is notable, because
-      it may point to any type of BO. The only special case is <var name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var>,
-      because <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var> is internally a
-      pointer to an entry in a hash map, and the any types will always point to that entry directly, rather than to an
-      enclosing variant type, it can't refer to the original variant BO even if the any BO pointer was derived from one,
-      which may affect it's lifetime. However, this is usually not necessary anyway, and it avoids an unnecessary
+      The <var tabindex="0" name="dpa_u_any_bo_*_t">dpa_u_any_&shy;bo_*_t*</var> types may point to a derived type of
+      their corresponding type. The <var tabindex="0" name="dpa_u_any_bo_ro_t">dpa_u_any_&shy;bo_&shy;ro_t*</var> type
+      is notable, because it may point to any type of BO. The only special case is <var tabindex="0" name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var>,
+      because <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var> is
+      internally a pointer to an entry in a hash map, and the any types will always point to that entry directly, rather
+      than to an enclosing variant type, it can't refer to the original variant BO even if the any BO pointer was derived
+      from one, which may affect it's lifetime. However, this is usually not necessary anyway, and it avoids an unnecessary
       dereference step. It is also still possible to create a new, temporary, variant BO, from an any pointer containing
-      a <var name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var>.
+      a <var tabindex="0" name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var>.
     </p><p>
-      If a pointer to an <var name="dpa_u_bo_*_t">dpa_u_&shy;bo_*_t</var> is passed to a function, that usually means
-      the function is to return a BO of that type.
+      If a pointer to an <var tabindex="0" name="dpa_u_bo_*_t">dpa_u_&shy;bo_*_t</var> is passed to a function, that
+      usually means the function is used to return a BO of that type, or to modify an existing BO.
     </p><p>
       Because there are limitations in what can be done using inheritance and association, which limits what the
-      <var name="dpa_u_any_bo_*_t">dpa_u_any_&shy;bo_*_t*</var> types can be used for, the trait types exist. These are
-      opaque types that can point to a BO with certain traits. For example, <var name="dpa_u_bo_with_hash_ro_t">dpa_u_&shy;bo_&shy;with_&shy;hash_&shy;ro_t*</var>
-      can refer to any BO type which may contain a hash, which <var name="dpa_u_any_bo_hashed_ro_t">dpa_u_any_&shy;bo_&shy;hashed_&shy;ro_t*</var>
-      can't do, because <var name="dpa_u_any_bo_refcounted_hashed_ro_t">dpa_u_any_&shy;bo_&shy;ref&shy;count&shy;ed_&shy;hashed_&shy;ro_t*</var>
-      can't inherit from <var name="dpa_u_any_bo_refcounted_ro_t">dpa_u_any_&shy;bo_&shy;ref&shy;count&shy;ed_&shy;ro_t*</var>
-      and <var name="dpa_u_any_bo_hashed_ro_t">dpa_u_any_&shy;bo_&shy;hashed_&shy;ro_t*</var> at the same time.</br>
-      The <var name="dpa_u_bo_gc_ro_t">dpa_u_&shy;bo_&shy;gc_ro_t</var> type was specifically added for both, reference
-      counted and inline BOs. This is useful because a unique BO could contain an inline BO.
+      <var tabindex="0" name="dpa_u_any_bo_*_t">dpa_u_any_&shy;bo_*_t*</var> types can be used for, the trait types exist.
+      These are opaque types that can point to a BO with certain traits. For example, <var tabindex="0" name="dpa_u_bo_with_hash_ro_t">dpa_u_&shy;bo_&shy;with_&shy;hash_&shy;ro_t*</var>
+      can refer to any BO type which may contain a hash, which <var tabindex="0" name="dpa_u_any_bo_hashed_ro_t">dpa_u_any_&shy;bo_&shy;hashed_&shy;ro_t*</var>
+      can't do, because <var tabindex="0" name="dpa_u_any_bo_refcounted_hashed_ro_t">dpa_u_any_&shy;bo_&shy;ref&shy;count&shy;ed_&shy;hashed_&shy;ro_t*</var>
+      can't inherit from <var tabindex="0" name="dpa_u_any_bo_refcounted_ro_t">dpa_u_any_&shy;bo_&shy;ref&shy;count&shy;ed_&shy;ro_t*</var>
+      and <var tabindex="0" name="dpa_u_any_bo_hashed_ro_t">dpa_u_any_&shy;bo_&shy;hashed_&shy;ro_t*</var> at the same time.</br>
+      The <var tabindex="0" name="dpa_u_bo_gc_ro_t">dpa_u_&shy;bo_&shy;gc_ro_t</var> type was specifically added for
+      both, reference counted and inline BOs. This is useful because a unique BO could contain an inline BO.
     </p>
   </section>
 
   <section>
     <h3><a id="ro-bo" href="#ro-bo">Readonly (ro), immutability, and non-readonly types</a></h3>
     <p>
-      Technically, all of them have a readonly (ro) version. When that type is used, the data the BO contains is const
+      Technically, all BO types have a readonly (ro) version. When that type is used, the data the BO contains is const
       qualified and will only be accessed for reading through that BO, but if there is a pointer to the data, that
-      pointer is not const qualified. The <var name="dpa_u_bo_inline_ro_t">dpa_u_&shy;bo_&shy;inline_&shy;ro_t</var> is
-      special. It's just the const version of the <var name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var> type,
+      pointer is not const qualified. The <var tabindex="0" name="dpa_u_bo_inline_ro_t">dpa_u_&shy;bo_&shy;inline_&shy;ro_t</var> is
+      special. It's just the const version of the <var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var> type,
       rather than a distinct type, because the BO object itself contains it's data directly. Also, even ro types that
-      may contain a <var name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var> won't use
-      <var name="dpa_u_bo_inline_ro_t">dpa_u_&shy;bo_&shy;inline_&shy;ro_t</var>, because then, they would not be
-      assignable anymore, but the const version of the ro buffer will contain the const version of <var name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var>,
-      which is a <var name="dpa_u_bo_inline_ro_t">dpa_u_&shy;bo_&shy;inline_&shy;ro_t</var>. Also,
-      <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var> does not end in _ro_t, but it
-      is a readonly type.
+      may contain a <var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var> won't use
+      <var tabindex="0" name="dpa_u_bo_inline_ro_t">dpa_u_&shy;bo_&shy;inline_&shy;ro_t</var>, because then, they would
+      not be assignable anymore, but the const version of the ro buffer will contain the const version of
+      <var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var>, which is a <var tabindex="0" name="dpa_u_bo_inline_ro_t">dpa_u_&shy;bo_&shy;inline_&shy;ro_t</var>.
+      Also, <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var> does not
+      end in _ro_t, but it is a readonly type.
     </p><p>
       Some types do not have a non-readonly variant. These types are not only readonly, but immutable. This includes the
-      <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var> and the
-      <var name="dpa_u_bo_refcounted_hashed_ro_t">dpa_u_&shy;bo_&shy;ref&shy;count&shy;ed_&shy;hashed_ro_t</var> type.
-      The <var name="dpa_u_bo_inline_ro_t">dpa_u_&shy;bo_&shy;inline_&shy;ro_t</var> does have a non-ro variant, but it
-      can still be considered immutable. The <var name="dpa_u_bo_refcounted_hashed_ro_t">dpa_u_&shy;bo_&shy;ref&shy;count&shy;ed_&shy;hashed_ro_t</var>
+      <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var> and the
+      <var tabindex="0" name="dpa_u_bo_refcounted_hashed_ro_t">dpa_u_&shy;bo_&shy;ref&shy;count&shy;ed_&shy;hashed_ro_t</var>
+      type. The <var tabindex="0" name="dpa_u_bo_inline_ro_t">dpa_u_&shy;bo_&shy;inline_&shy;ro_t</var> does have a
+      non-ro variant, but it can still be considered immutable. The <var tabindex="0" name="dpa_u_bo_refcounted_hashed_ro_t">dpa_u_&shy;bo_&shy;ref&shy;count&shy;ed_&shy;hashed_ro_t</var>
       has no non-readonly type because changing the data of a hashed BO will lead to it having an invalid hash, and a
       reference count only makes sense with multiple instances of the BO, in other words, if such a BO would exist, it
-      would only end up with a wrong hash eventually. For simplicities sake, functions of this library assume <var name="dpa_u_bo_refcounted_ro_t">dpa_u_&shy;bo_&shy;refcounted_&shy;ro_t</var>
+      would only end up with a wrong hash eventually. For simplicities sake, functions of this library assume <var tabindex="0" name="dpa_u_bo_refcounted_ro_t">dpa_u_&shy;bo_&shy;refcounted_&shy;ro_t</var>
       to be immutable as well, although this doesn't necessarily have to be true. Be careful when converting a
-      <var name="dpa_u_bo_refcounted_t">dpa_u_&shy;bo_&shy;ref&shy;count&shy;ed_t</var> to an <var name="dpa_u_bo_refcounted_ro_t">dpa_u_&shy;bo_&shy;ref&shy;count&shy;ed_&shy;ro_t</var>,
-      if the BO may change in the future, it's recommended to convert it to a <var name="dpa_u_bo_simple_ro_t">dpa_u_&shy;bo_&shy;simple_&shy;ro_t</var>
+      <var tabindex="0" name="dpa_u_bo_refcounted_t">dpa_u_&shy;bo_&shy;ref&shy;count&shy;ed_t</var> to an <var tabindex="0" name="dpa_u_bo_refcounted_ro_t">dpa_u_&shy;bo_&shy;ref&shy;count&shy;ed_&shy;ro_t</var>,
+      if the BO may change in the future, it's recommended to convert it to a <var tabindex="0" name="dpa_u_bo_simple_ro_t">dpa_u_&shy;bo_&shy;simple_&shy;ro_t</var>
       or to copy it directly first instead before passing it to functions which may want to keep a reference to an
       immutable BO. For this, there is also the conversion macro <a class="var" href="#dpa_u_bo_maybe_not_immutable">dpa_u_&shy;bo_&shy;maybe_&shy;not_&shy;immutable</a>,
       which can handle this for any BO type.
@@ -141,54 +141,54 @@
       <thead>
         <tr valign="bottom">
           <td></td>
-          <th><var name="DPA_U_BO_INLINE">DPA_U_BO_INLINE</var></th>
-          <th><var name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_BO_UNIQUE_HASHMAP</var></th>
-          <th><var name="DPA_U_BO_SIMPLE">DPA_U_BO_SIMPLE</var></th>
-          <th><var name="DPA_U_BO_HASHED">DPA_U_BO_HASHED</var></th>
-          <th><var name="DPA_U_BO_REFCOUNTED">DPA_U_BO_REFCOUNTED</var></th>
-          <th><var name="DPA_U_BO_REFCOUNTED_HASHED">DPA_U_BO_REFCOUNTED_HASHED</var></th>
+          <th><var tabindex="0" name="DPA_U_BO_INLINE">DPA_U_BO_INLINE</var></th>
+          <th><var tabindex="0" name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_BO_UNIQUE_HASHMAP</var></th>
+          <th><var tabindex="0" name="DPA_U_BO_SIMPLE">DPA_U_BO_SIMPLE</var></th>
+          <th><var tabindex="0" name="DPA_U_BO_HASHED">DPA_U_BO_HASHED</var></th>
+          <th><var tabindex="0" name="DPA_U_BO_REFCOUNTED">DPA_U_BO_REFCOUNTED</var></th>
+          <th><var tabindex="0" name="DPA_U_BO_REFCOUNTED_HASHED">DPA_U_BO_REFCOUNTED_HASHED</var></th>
         </tr>
       </thead>
       <tbody style="--color:green;">
-        <tr><th><var name="dpa_u_bo_inline_t">dpa_u_bo_inline_t</var></th><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_unique_hashmap_t">dpa_u_bo_unique_hashmap_t</var></th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_simple_ro_t">dpa_u_bo_simple_ro_t</var></th><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_simple_t">dpa_u_bo_simple_t</var></th><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_bo_inline_t</var></th><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_bo_unique_hashmap_t</var></th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_simple_ro_t">dpa_u_bo_simple_ro_t</var></th><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_simple_t">dpa_u_bo_simple_t</var></th><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
       </tbody>
       <tbody style="--color: yellow;">
-        <tr><th><var name="dpa_u_bo_unique_t">dpa_u_bo_unique_t</var></th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_ro_t">dpa_u_bo_ro_t</var></th><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_t">dpa_u_bo_t</var></th><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_unique_t">dpa_u_bo_unique_t</var></th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_ro_t">dpa_u_bo_ro_t</var></th><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_t">dpa_u_bo_t</var></th><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
       </tbody>
       <tbody style="--color: blue;">
         <tr></tr>
-        <tr><th><var name="dpa_u_bo_hashed_ro_t">dpa_u_bo_hashed_ro_t</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_hashed_t">dpa_u_bo_hashed_t</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_refcounted_ro_t">dpa_u_bo_refcounted_ro_t</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_refcounted_t">dpa_u_bo_refcounted_t</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_refcounted_hashed_ro_t">dpa_u_bo_refcounted_hashed_ro_t</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_hashed_ro_t">dpa_u_bo_hashed_ro_t</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_hashed_t">dpa_u_bo_hashed_t</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_refcounted_ro_t">dpa_u_bo_refcounted_ro_t</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_refcounted_t">dpa_u_bo_refcounted_t</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_refcounted_hashed_ro_t">dpa_u_bo_refcounted_hashed_ro_t</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
       </tbody>
       <tbody style="--color: red;">
-        <tr><th><var name="dpa_u_any_bo_inline_t">dpa_u_any_bo_inline_t*</var></th><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_unique_hashmap_t">dpa_u_any_bo_unique_hashmap_t*</var></th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_simple_ro_t">dpa_u_any_bo_simple_ro_t*</var></th><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_simple_t">dpa_u_any_bo_simple_t*</var></th><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_unique_t">dpa_u_any_bo_unique_t*</var></th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_ro_t">dpa_u_any_bo_ro_t*</var></th><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_t">dpa_u_any_bo_t*</var></th><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_hashed_ro_t">dpa_u_any_bo_hashed_ro_t*</var></th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_hashed_t">dpa_u_any_bo_hashed_t*</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_refcounted_ro_t">dpa_u_any_bo_refcounted_ro_t*</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_refcounted_t">dpa_u_any_bo_refcounted_t*</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_any_bo_refcounted_hashed_ro_t">dpa_u_any_bo_refcounted_hashed_ro_t*</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_inline_t">dpa_u_any_bo_inline_t*</var></th><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_unique_hashmap_t">dpa_u_any_bo_unique_hashmap_t*</var></th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_simple_ro_t">dpa_u_any_bo_simple_ro_t*</var></th><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_simple_t">dpa_u_any_bo_simple_t*</var></th><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_unique_t">dpa_u_any_bo_unique_t*</var></th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_ro_t">dpa_u_any_bo_ro_t*</var></th><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_t">dpa_u_any_bo_t*</var></th><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td><td> ✅ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_hashed_ro_t">dpa_u_any_bo_hashed_ro_t*</var></th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_hashed_t">dpa_u_any_bo_hashed_t*</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_refcounted_ro_t">dpa_u_any_bo_refcounted_ro_t*</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_refcounted_t">dpa_u_any_bo_refcounted_t*</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_any_bo_refcounted_hashed_ro_t">dpa_u_any_bo_refcounted_hashed_ro_t*</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
       </tbody>
       <tbody style="--color: orange;">
-        <tr><th><var name="dpa_u_bo_with_hash_ro_t">dpa_u_bo_with_hash_ro_t*</var></th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td></tr>
-        <tr><th><var name="dpa_u_bo_with_hash_t">dpa_u_bo_with_hash_t*</var></th><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_gc_ro_t">dpa_u_bo_gc_ro_t*</var></th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
-        <tr><th><var name="dpa_u_bo_with_refcount_ro_t">dpa_u_bo_with_refcount_ro_t*</var></th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
-        <tr><th><var name="dpa_u_bo_with_refcount_t">dpa_u_bo_with_refcount_t*</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
-        <tr><th><var name="dpa_u_bo_with_refcount_and_hash_ro_t">dpa_u_bo_with_refcount_and_hash_ro_t*</var></th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_with_hash_ro_t">dpa_u_bo_with_hash_ro_t*</var></th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ✅ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_with_hash_t">dpa_u_bo_with_hash_t*</var></th><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_gc_ro_t">dpa_u_bo_gc_ro_t*</var></th><td> ✅ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_with_refcount_ro_t">dpa_u_bo_with_refcount_ro_t*</var></th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ✅ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_with_refcount_t">dpa_u_bo_with_refcount_t*</var></th><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td><td> ❌ </td></tr>
+        <tr><th><var tabindex="0" name="dpa_u_bo_with_refcount_and_hash_ro_t">dpa_u_bo_with_refcount_and_hash_ro_t*</var></th><td> ❌ </td><td> ✅ </td><td> ❌ </td><td> ❌ </td><td> ❌ </td><td> ✅ </td></tr>
       </tbody>
     </table>
   </section>
@@ -196,26 +196,30 @@
   <section class="nocolumn">
     <h3><a id="type-layout" href="#type-layout">Layout of Types</a></h3>
     <p>The ro and non-ro types have the same layout.</p> 
-    <p>For accessing properties of an existing object, using the macros for this is always recommended.</p>
+    <p>For accessing properties of an existing object, using the macros is always recommended.</p>
     <p>
       The layout of variant types is unspecified and subject to change. Use the type conversion macros to create them.
-      The same applies to the opaque types and the <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
+      The same applies to the opaque types and the <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
       type.
     </p>
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_bo_inline_t" href="#dpa_u_bo_inline_t">dpa_u_bo_inline_t</a></h4>
       <table class="pad first-right striped">
         <tr><th>Type</th><th>Name</th><th>Description</th></tr>
-        <tr><td><nobr>unsigned : 4</td><td>type</td><td><var name="DPA_U_BO_INLINE">DPA_U_BO_INLINE</var></td></tr>
-        <tr><td><nobr>size : 4</td><td>size</td><td>The size of the BO. Currently, <var name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var> is assumed to never be bigger than 16 bytes, but it may be smaller than that.</td></tr>
-        <tr><td><nobr>char[DPA_U_BO_INLINE_MAX_SIZE]</td><td>data</td><td>An array which contains the data. One byte less than the size of <var name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var></td></tr>
+        <tr><td><nobr>unsigned : 4</td><td>type</td><td><var tabindex="0" name="DPA_U_BO_INLINE">DPA_U_BO_INLINE</var></td></tr>
+        <tr><td><nobr>size : 4</td><td>size</td><td>The size of the BO. Currently, <var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var> is assumed to never be bigger than 16 bytes, but it may be smaller than that.</td></tr>
+        <tr>
+          <td><nobr>char[<var tabindex="0" name="DPA_U_BO_INLINE_MAX_SIZE">DPA_U_BO_INLINE_MAX_SIZE</var>]</td>
+          <td>data</td>
+          <td>An array which contains the data. One byte less than the size of <var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var></td>
+        </tr>
       </table>
     </section>
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_bo_simple_t" href="#dpa_u_bo_simple_t">dpa_u_bo_simple_t</a> / <a class="var" id="dpa_u_bo_simple_ro_t" href="#dpa_u_bo_simple_ro_t">dpa_u_bo_simple_ro_t</a></h4>
       <table class="pad first-right striped">
         <tr><th>Type</th><th>Name</th><th>Description</th></tr>
-        <tr><td><nobr>unsigned : 4</td><td>type</td><td><var name="DPA_U_BO_SIMPLE">DPA_U_&shy;BO_&shy;SIMPLE</var></td></tr>
+        <tr><td><nobr>unsigned : 4</td><td>type</td><td><var tabindex="0" name="DPA_U_BO_SIMPLE">DPA_U_&shy;BO_&shy;SIMPLE</var></td></tr>
         <tr><td><nobr>size_t : sizeof(size_t)-1</td><td>size</td><td>The size of the BO.</td></tr>
         <tr><td><nobr>void* / const void*</td><td>data</td><td>A pointer to the data</td></tr>
       </table>
@@ -225,7 +229,7 @@
       <table class="pad first-right striped">
         <tr><th>Type</th><th>Name</th><th>Description</th></tr>
         <tr><td><a class="var" href="#dpa_u_bo_simple_t">dpa_u_bo_simple_t</a> / <a class="var" href="#dpa_u_bo_simple_ro_t">dpa_u_bo_simple_ro_t</a></td><td>bo_simple</td><td>See <a class="var" href="#dpa_u_bo_simple_t">dpa_u_&shy;bo_&shy;simple_t</a></td></tr>
-        <tr><td><nobr><var name="dpa_u_refcount_freeable_t">dpa_u_refcount_freeable_t*</var></td><td>refcount</td><td>A pointer to the reference counter</td></tr>
+        <tr><td><nobr><var tabindex="0" name="dpa_u_refcount_freeable_t">dpa_u_refcount_freeable_t*</var></td><td>refcount</td><td>A pointer to the reference counter</td></tr>
       </table>
     </section>
     <section class="nocolumn">
@@ -233,7 +237,7 @@
       <table class="pad first-right striped">
         <tr><th>Type</th><th>Name</th><th>Description</th></tr>
         <tr><td><a class="var" href="#dpa_u_bo_simple_t">dpa_u_bo_simple_t</a> / <a class="var" href="#dpa_u_bo_simple_ro_t">dpa_u_bo_simple_ro_t</a></td><td>bo_simple</td><td>See <a class="var" href="#dpa_u_bo_simple_t">dpa_u_&shy;bo_&shy;simple_t</a></td></tr>
-        <tr><td><nobr><var name="dpa_u_hash_t">dpa_u_hash_t</var></td><td>hash</td><td>From this field and the data, the hash can be derived in O(1)</td></tr>
+        <tr><td><nobr><var tabindex="0" name="dpa_u_hash_t">dpa_u_hash_t</var></td><td>hash</td><td>From this field and the data, the hash can be derived in O(1)</td></tr>
       </table>
     </section>
     <section class="nocolumn">
@@ -241,7 +245,7 @@
       <table class="pad first-right striped">
         <tr><th>Type</th><th>Name</th><th>Description</th></tr>
         <tr><td><a class="var" href="#dpa_u_bo_refcounted_ro_t">dpa_u_bo_refcounted_ro_t</a></td><td>bo_refcounted</td><td>See <a class="var" href="#dpa_u_bo_refcounted_ro_t">dpa_u_&shy;bo_&shy;refcounted_&shy;ro_t</a></td></tr>
-        <tr><td><nobr><var name="dpa_u_hash_t">dpa_u_hash_t</var></td><td>hash</td><td>From this field and the data, the hash can be derived in O(1)</td></tr>
+        <tr><td><nobr><var tabindex="0" name="dpa_u_hash_t">dpa_u_hash_t</var></td><td>hash</td><td>From this field and the data, the hash can be derived in O(1)</td></tr>
       </table>
     </section>
   </section>
@@ -263,8 +267,8 @@
         This macro will not check the type fields for types where only 1 type is possible, it'll just return that type
         constant. The type returned is always an enum, but which enum depends on the BO in question. This is so that
         when it's used in a switch, the compiler only warns about the <i>possible</i> type values if they have no case.
-        It's always safe to cast to <var name="dpa_u_bo_any_type">enum dpa_u_bo_any_type</var>, and it's recommended to
-        always use the constants in that enum.
+        It's always safe to cast to <a class="var" href="#dpa_u_bo_any_type">enum dpa_u_&shy;bo_&shy;any_&shy;type</a>, and it's
+        recommended to always use the constants in that enum.
       </p>
     </section>
     <section class="nocolumn">
@@ -275,9 +279,9 @@
       </p>
     </section>
     <section class="nocolumn">
-      <h4><a class="var" id="dpa_u_bo_set_size" href="#dpa_u_bo_set_size">dpa_u_bo_set_size</a></h4>
+      <h4><a class="var" id="dpa_u_bo_set_size" href="#dpa_u_bo_set_size">dpa_u_bo_set_size(bo, size)</a></h4>
       <p>
-        Set the size of a BO. For some BO types, such as the immutable <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
+        Set the size of a BO. For some BO types, such as the immutable <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
         the size can not be set. Static types which could refer to such a type can't have the size set directly either,
         even if their dynamic type is one where the size can be set. In that case, the type first needs to be converted
         to a compatible mutable type.
@@ -290,8 +294,20 @@
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_bo_get_refcount" href="#dpa_u_bo_get_refcount">dpa_u_bo_get_refcount</a></h4>
       <p>
-        Returns a pointer to the reference count object, it has the type <var name="dpa_u_refcount_freeable_t">dpa_u_&shy;ref&shy;count_&shy;free&shy;able_t</var>.
+        Returns a pointer to the reference count, it has the type <var tabindex="0" name="dpa_u_refcount_freeable_t">dpa_u_&shy;ref&shy;count_&shy;free&shy;able_t</var>.
         Takes only BOs which may have a reference count. If they don't after all, returns 0.
+      </p>
+      <p>
+        For incrementing / decrementing the reference count, it's recommended to just use <a class="var" href="#dpa_u_bo_ref">dpa_u_bo_ref</a>
+        and <a class="var" href="#dpa_u_bo_unref">dpa_u_bo_unref</a> directly, instead of first getting the referemce
+        count and then using <a class="var" href="refcount.html#dpa_u_refcount_ref">dpa_u_&shy;refcount_&shy;ref</a> and <a class="var" href="refcount.html#dpa_u_refcount_put">dpa_u_&shy;refcount_&shy;put</a>
+        on it.
+      </p>
+    </section>
+    <section class="nocolumn">
+      <h4><a class="var" id="dpa_u_bo_set_refcount" href="#dpa_u_bo_set_refcount">dpa_u_bo_set_refcount</a></h4>
+      <p>
+        Sets the pointer to the reference count.
       </p>
     </section>
   </section>
@@ -301,18 +317,18 @@
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_bo_maybe_not_immutable" href="#dpa_u_bo_maybe_not_immutable">dpa_u_bo_maybe_not_immutable</a> / <a class="var" id="dpa_u_­bo_­mni" href="#dpa_u_­bo_­mni">dpa_u_­bo_­mni</a></h4>
       <p>
-        If a BO has a dynamic type of <var name="DPA_U_BO_REFCOUNTED">DPA_U_&shy;BO_&shy;REFCOUNTED</var>, it'll be
-        changed to <var name="DPA_U_BO_SIMPLE">DPA_U_&shy;BO_&shy;SIMPLE</var>. The static type may also change if the
-        old type can not hold that dynamic type. This is useful to ensure that a function which needs to store a
-        reference to a buffer for longer than than it's own runtime has to make a copy.
+        If a BO has a dynamic type of <var tabindex="0" name="DPA_U_BO_REFCOUNTED">DPA_U_&shy;BO_&shy;REFCOUNTED</var>,
+        it'll be changed to <var tabindex="0" name="DPA_U_BO_SIMPLE">DPA_U_&shy;BO_&shy;SIMPLE</var>. The static type
+        may also change if the old type can not hold that dynamic type. This is useful to ensure that a function which
+        needs to store a reference to a buffer for longer than than it's own runtime has to make a copy.
       </p>
     </section>
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_bo_intern" href="#dpa_u_bo_intern">dpa_u_bo_intern</a></h4>
       <p>
-        Interns a BO. Returns a <var name="dpa_u_bo_unique_t">dpa_u_&shy;bo_&shy;unique_t</var>. This function needs to
-        compare strings internally, and may resize &amp; reorganize internal data structures. Reference counted BOs will
-        not be copied, instead, their reference count is incremented.
+        Interns a BO. Returns a <var tabindex="0" name="dpa_u_bo_unique_t">dpa_u_&shy;bo_&shy;unique_t</var>. This
+        function needs to compare strings internally, and may resize &amp; reorganize internal data structures.
+        Reference counted BOs will not be copied, instead, their reference count is incremented.
       </p>
     </section>
     <section class="nocolumn">
@@ -326,8 +342,8 @@
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_temp_bo_simple" href="#dpa_u_temp_bo_simple">dpa_u_temp_bo_simple</a> / <a class="var" id="dpa_u_temp_bo_simple_ro" href="#dpa_u_temp_bo_simple_ro">dpa_u_temp_bo_simple_ro</a></h4>
       <p>
-        Mostly the same as <var name="dpa_u_v_bo_simple">dpa_u_v_&shy;bo_&shy;simple</var> / <var name="dpa_u_v_bo_simple_ro">dpa_u_v_&shy;bo_&shy;simple_&shy;ro</var>,
-        but it does also take types that may contain inline BOs. For that reason, the lifetime of it's data may only be
+        Mostly the same as <var tabindex="0" name="dpa_u_v_bo_simple">dpa_u_v_&shy;bo_&shy;simple</var> / <var tabindex="0" name="dpa_u_v_bo_simple_ro">dpa_u_v_&shy;bo_&shy;simple_&shy;ro</var>,
+        but it does also take types that may contain inline BOs. For that reason, the lifetime of it's data may be
         limited to the current block scope.
       </p>
     </section>
@@ -336,25 +352,25 @@
       <p>
         Cast the BO to a pointer to the specified static BO type if it is compatible. It does not take BO types were
         this is not possible. The pointer will point to the original BO object, except if the source BO is a variant
-        type that is being converted to a <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
+        type that is being converted to a <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
         or an opaque pointer type, because that type is already a pointer.
       </p>
     </section>
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_up_bo_*" href="#dpa_u_up_bo_*">dpa_u_up_bo_*</a> / <a class="var" id="dpa_up_any_bo_*" href="#dpa_up_any_bo_*">dpa_up_any_bo_*</a></h4>
       <p>
-        Cast the BO to a pointer to the specified static BO type. For types where if this is possible  this depends on
-        the dynamic type, if it turns out not to be possible at runtime, it returns 0. The pointer will point to the
-        original BO object, except if the source BO is a variant type that is being converted to a <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
+        Cast the BO to a pointer to the specified static BO type. For types where if this is possible depends on the
+        dynamic type, if it turns out not to be possible at runtime, it returns 0. The pointer will point to the
+        original BO object, except if the source BO is a variant type that is being converted to a <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
         or an opaque pointer type, because that type is already a pointer.
       </p>
     </section>
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_bo_ptr" href="#dpa_u_bo_ptr">dpa_u_bo_ptr</a></h4>
       <p>
-        Turns a BO into it's <var name="dpa_u_any_bo_*">dpa_u_any_bo_*</var> version. The pointer will point to the
-        original BO object, except if the source BO is a variant type containing a <var name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var>,
-        because that type contains a <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>,
+        Turns a BO into it's <var tabindex="0" name="dpa_u_any_bo_*">dpa_u_any_bo_*</var> version. The pointer will
+        point to the original BO object, except if the source BO is a variant type containing a <var tabindex="0" name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var>,
+        because that type contains a <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>,
         which is already a pointer.
       </p>
     </section>
@@ -362,35 +378,126 @@
 
   <section>
     <h3><a id="other-functions" href="#other-functions">Other functions</a></h3>
-
+    <section class="nocolumn">
+      <h4><a class="var" id="dpa_u_bo_ref" href="#dpa_u_bo_ref">dpa_u_bo_ref</a></h4>
+      <p>
+        Take a reference / Increments the BOs reference count.
+      </p><p>
+        For inline BOs, this is a no-op.
+      </p>
+    </section>
+    <section class="nocolumn">
+      <h4><a class="var" id="dpa_u_bo_put" href="#dpa_u_bo_put">dpa_u_bo_put</a></h4>
+      <p>
+        Release a reference / decrement the BOs datas reference count.
+      </p><p>
+        When no references are left, the BOs data is freed. Some BOs may als have their own destructor function, which
+        will then be executed.
+      </p><p>
+        Some BOs may have a static reference count, such a reference count will never hit 0, and the reference count will never
+        be freed.
+      </p><p>
+        For inline BOs, this is a no-op.
+      </p>
+    </section>
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_bo_compare" href="#dpa_u_bo_compare">dpa_u_bo_compare</a></h4>
       <p>Compares 2 BOs.</p>
       <p>
-        Comparing exclusively between BOs of any of the types <var name="dpa_u_bo_unique_t">dpa_u_&shy;bo_&shy;unique_t</var>,
-        <var name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var> and <var name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var>,
-        bzw. <var name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var> and <var name="DPA_U_BO_INLINE">DPA_U_&shy;BO_&shy;INLINE</var>,
+        Comparing exclusively between BOs of any of the types <var tabindex="0" name="dpa_u_bo_unique_t">dpa_u_&shy;bo_&shy;unique_t</var>,
+        <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var> and <var tabindex="0" name="dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var>,
+        bzw. <var tabindex="0" name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var> and <var tabindex="0" name="DPA_U_BO_INLINE">DPA_U_&shy;BO_&shy;INLINE</var>,
         is an O(1) operation. For any other type, it's O(N), and depends on the length of the data.
       </p><p>
         Returns 0 if equal, -1 or 1 otherwise. For most BOs, first, the size is compared, then the content using memcmp.
-        But 2 <var name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var> will only compare the
-        address of the BO objects, instead of the data, because they are unique. In that case, the order may differ for
-        the same data referred to by a different BO type, in non-transitive ways. If you use this for sorting, ensure
-        you never have both, a <var name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var> BOs and
-        another BO of a different type, that refers to the same data, or the sorting will not work as expected.
+        But 2 <var tabindex="0" name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var> will only
+        compare the address of the BO objects, instead of the data, because they are unique. In that case, the order may
+        differ for the same data referred to by a different BO type, in non-transitive ways. If you use this for sorting,
+        ensure you never have both, a <var tabindex="0" name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_&shy;BO_&shy;UNIQUE_&shy;HASHMAP</var>
+        BOs and another BO of a different type, that refers to the same data, or the sorting will not work as expected.
       </p>
     </section>
-
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_bo_compare_lexicographic" href="#dpa_u_bo_compare_lexicographic">dpa_u_bo_compare_lexicographic</a></h4>
       <p>Compares the content of 2 BOs.</p>
       <p>
-        This uses memcmp to copy 2 BOs, and thn the size. It does not have the limitations <var>dpa_u_bo_compare</var>
+        This uses memcmp to copy 2 BOs, and then the size. It does not have the limitations <a class="var" href="#dpa_u_bo_compare">dpa_u_bo_compare</a>
         has, but is often slower.
       </p>
     </section>
   </section>
+</section>
 
+<section>
+  <h2><a id="constants" href="#contants">Constants</a></h2>
+  <section class="nocolumn">
+    <h3><a class="var" id="dpa_u_bo_any_type" href="#dpa_u_bo_any_type">enum dpa_u_&shy;bo_&shy;any_&shy;type</a></h3>
+    <table class="pad striped">
+      <tr><th>Name</th><th>Value</th></tr>
+      <tr><td><var tabindex="0" name="DPA_U_BO_INLINE">DPA_U_BO_INLINE</var></td><td>1</td></tr>
+      <tr><td><var tabindex="0" name="DPA_U_BO_UNIQUE_HASHMAP">DPA_U_BO_UNIQUE_HASHMAP</var></td><td>2</td></tr>
+      <tr><td><var tabindex="0" name="DPA_U_BO_SIMPLE">DPA_U_BO_SIMPLE</var></td><td>3</td></tr>
+      <tr><td><var tabindex="0" name="DPA_U_BO_HASHED">DPA_U_BO_HASHED</var></td><td>4</td></tr>
+      <tr><td><var tabindex="0" name="DPA_U_BO_REFCOUNTED">DPA_U_BO_REFCOUNTED</var></td><td>5</td></tr>
+      <tr><td><var tabindex="0" name="DPA_U_BO_REFCOUNTED_HASHED">DPA_U_BO_REFCOUNTED_HASHED</var></td><td>6</td></tr>
+    </table>
+  </section>
+  <section class="nocolumn">
+    <h3><a id="other-constants" href="#other-constants">Other constants</a></h3>
+    <table class="pad striped">
+      <tr><th>Name</th><th>Value</th></tr>
+      <tr>
+        <td><var tabindex="0" id="DPA_U_BO_INLINE_MAX_SIZE" name="DPA_U_BO_INLINE_MAX_SIZE">DPA_U_BO_INLINE_MAX_SIZE</var></td>
+        <td>Currently assumed to be &lt;= 15. Platform dependent. One byte less than the size of <a class="var" href="#dpa_u_bo_inline_t">dpa_u_&shy;bo_&shy;inline_t</var></td>
+      </tr>
+      <tr>
+        <td><var tabindex="0" name="dpa_u_mask_*">dpa_u_mask_*</var></td>
+        <td>There is such a constant for every static BO type. It is a bitmask of all dynamic types it can contain. See the <a href="#static-and-runtime-types">table</a> above.</td>
+      </tr>
+    </table>
+  </section>
+</section>
+
+<section>
+  <h2><a id="macros" href="#macros">Macros</a></h2>
+  <section class="nocolumn">
+    <h3><a class="var" id="dpa_u_case_*" href="#dpa_u_case_*">dpa_u_case_*</a></h3>
+    <p>
+      There is such a macro for every static type. It expands to a bunch of cases for type constants the static type can
+      contain. For example:
+  <code lang="c"
+  >dpa_u_case_bo_unique: puts("dpa_u_bo_unique_t");
+  </code>
+      expands to:
+  <code lang="c"
+  >case DPA_U_BO_INLINE:
+  case DPA_U_BO_UNIQUE_HASHMAP: puts("dpa_u_bo_unique_t");
+  </code>
+      This may seam very useful at first, but there is an overlap between dynamic types with many static types, so in
+      practice, the dynamic types often need to be specified explicitly anyway.
+    </p>
+  </section>
+  <section class="nocolumn">
+    <h3><a class="var" id="DPA_U_BO_UNIQUE_CSTRING" href="#DPA_U_BO_UNIQUE_CSTRING">DPA_U_BO_UNIQUE_CSTRING</a> / <a class="var" id="DPA_U_BO_DECLARE_UNIQUE_CSTRING" href="#DPA_U_BO_DECLARE_UNIQUE_CSTRING">DPA_U_BO_DECLARE_UNIQUE_CSTRING</a> / <a class="var" id="DPA_U_BO_DEFINE_UNIQUE_CSTRING" href="#DPA_U_BO_DEFINE_UNIQUE_CSTRING">DPA_U_BO_DEFINE_UNIQUE_CSTRING</a></h3>
+    <p>
+      This is for when you need a string constant as a <var tabindex="0" name="dpa_u_bo_unique_t">dpa_u_&shy;bo_&shy;unique_t</var>.
+      It can only be used in file scope.
+    </p><p>
+      All these macros take first the name of a getter function, and then a C string constant.
+      The getter will return the desired <var tabindex="0" name="dpa_u_bo_unique_t">dpa_u_&shy;bo_&shy;unique_t</var>.
+      <a class="var" href="#DPA_U_BO_DECLARE_UNIQUE_CSTRING">DPA_U_BO_DECLARE_UNIQUE_CSTRING</a> declares the getter,
+      whereas <a class="var" href="#DPA_U_BO_DEFINE_UNIQUE_CSTRING">DPA_U_BO_DEFINE_UNIQUE_CSTRING</a> defines it. The
+      getter is an inline function. If the string fits into an inline BO, this is equivalent to constructing one &amp;
+      returing it. If it doesn't, it interns the string on program startup, and the getter simply copies the unique bo.
+    </p><p>
+      The macro <a class="var" href="#DPA_U_BO_UNIQUE_CSTRING">DPA_U_BO_UNIQUE_CSTRING</a> is either defined as
+      <a class="var" href="#DPA_U_BO_DECLARE_UNIQUE_CSTRING">DPA_U_BO_DECLARE_UNIQUE_CSTRING</a> or as
+      <a class="var" href="#DPA_U_BO_DEFINE_UNIQUE_CSTRING">DPA_U_BO_DEFINE_UNIQUE_CSTRING</a> if <var tabindex="0" name="DPA_U_GEN_DEF">DPA_U_GEN_DEF</var>
+      was set before includeing bo.h. This way, you can put the C strings you need as unique BOs into a single file,
+      include it where you need the declaration, and compile it with <var tabindex="0" name="DPA_U_GEN_DEF">DPA_U_GEN_DEF</var>
+      set to get the needed declarations. That way, you don't need to keep 2 files in sync.
+    </p>
+  </section>
 </section>
 
 </section></body></html>

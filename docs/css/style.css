@@ -1,9 +1,12 @@
 @import "var.css";
 
 :root {
-  --var-active-color: red;
-  --var-related-color: darkviolet;
-  --var-rrelated-color: green;
+  --var-active-color-hover: #FF8000;
+  --var-active-color-focus: red;
+  --var-related-color-hover: #FF0080;
+  --var-related-color-focus: darkviolet;
+  --var-rrelated-color-hover: #00FF80;
+  --var-rrelated-color-focus: green;
   --line-height: 1.2;
   --section-level: 0;
   line-height: var(line-height);
@@ -15,9 +18,12 @@
   :root {
     background-color: #000;
     color: #FFF;
-    --var-active-color: #FF8000;
-    --var-related-color: #FF0080;
-    --var-rrelated-color: #00FF80;
+    --var-active-color-hover: #FFC080;
+    --var-active-color-focus: #FF8000;
+    --var-related-color-hover: #FF80C0;
+    --var-related-color-focus: #FF0080;
+    --var-rrelated-color-hover: #80FFC0;
+    --var-rrelated-color-focus: #00FF80;
   }
   :link { color: #00FFFF; }
   :visited { color: #da42ff; }
@@ -37,7 +43,7 @@ var, .var {
   font-weight: bold;
 }
 
-table, section, section > :is(h1,h2,h3,h4,h5,h6), .nocolumn {
+table, section, section > :is(h1,h2,h3,h4,h5,h6), .nocolumn, code {
   break-inside: avoid-column;
   column-span: all;
 }
@@ -228,4 +234,12 @@ tbody[style*="--color:"] > tr:nth-child(odd) {
 
 tr:empty {
   display: none;
+}
+
+code {
+  display: block;
+  border: 1px dotted;
+  white-space: pre-line;
+  padding: 0.5em 1em;
+  margin: 0.5em 0;
 }
