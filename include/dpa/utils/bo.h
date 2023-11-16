@@ -1610,46 +1610,137 @@ dpa_u_reproducible dpa__u_really_inline dpa_u_export inline dpa_u_bo_ro_t dpa__u
 
 ////
 
-// TODO
-
 #define dpa_u_v_bo_inline(...) dpa_u_assert_selection(dpa_u_v_bo_inline_g(__VA_ARGS__))
 #define dpa_u_v_bo_inline_g(X) dpa_u_generic((X), \
+    dpa_u_bo_inline_t: dpa__u_v_bo_inline__v_bo_inline(X), \
+    dpa_u_bo_inline_t*: dpa__u_p_bo_inline__v_bo_inline(DPA__G(dpa_u_bo_inline_t*, (X))), \
+    const dpa_u_bo_inline_t*: dpa__u_cp_bo_inline__v_bo_inline(DPA__G(const dpa_u_bo_inline_t*, (X))), \
+    dpa_u_any_bo_inline_t*: dpa__u_any_bo_inline__v_bo_inline(DPA__G(dpa_u_any_bo_inline_t*, (X))) \
   )
+
+#define dpa__u_v_bo_inline__v_bo_inline(X) (X)
+#define dpa__u_p_bo_inline__v_bo_inline(X) *(X)
+#define dpa__u_cp_bo_inline__v_bo_inline(X) *(X)
+#define dpa__u_any_bo_inline__v_bo_inline(X) *(const dpa_u_bo_inline_t*)(X)
+
+////
 
 #define dpa_u_v_bo_unique_hashmap(...) dpa_u_assert_selection(dpa_u_v_bo_unique_hashmap_g(__VA_ARGS__))
 #define dpa_u_v_bo_unique_hashmap_g(X) dpa_u_generic((X), \
+    dpa_u_bo_unique_hashmap_t: dpa__u_v_bo_unique_hashmap__v_bo_unique_hashmap((X)), \
+    dpa_u_any_bo_unique_hashmap_t*: dpa__u_v_any_bo_unique_hashmap__v_bo_unique_hashmap(DPA__G(dpa_u_any_bo_unique_hashmap_t*, (X))) \
   )
+
+#define dpa__u_v_bo_unique_hashmap__v_bo_unique_hashmap(X)     (X)
+#define dpa__u_p_bo_unique_hashmap__v_bo_unique_hashmap(X)     (X)
+#define dpa__u_cp_bo_unique_hashmap__v_bo_unique_hashmap(X)    (X)
+#define dpa__u_v_any_bo_unique_hashmap__v_bo_unique_hashmap(X) (dpa_u_bo_unique_hashmap_t)(X)
+
+////
+
+// TODO
 
 #define dpa_u_v_bo_simple_ro(...) dpa_u_assert_selection(dpa_u_v_bo_simple_ro_g(__VA_ARGS__))
 #define dpa_u_v_bo_simple_ro_g(X) dpa_u_generic((X), \
+    dpa_u_bo_simple_ro_t: dpa__u_v_bo_simple_ro__v_bo_simple_ro((X)), \
+    dpa_u_bo_simple_ro_t*: dpa__u_p_bo_simple_ro__v_bo_simple_ro(DPA__G(dpa_u_bo_simple_ro_t*, (X))), \
+    const dpa_u_bo_simple_ro_t*: dpa__u_cp_bo_simple_ro__v_bo_simple_ro(DPA__G(const dpa_u_bo_simple_ro_t*, (X))), \
+    \
+    dpa_u_bo_simple_t: dpa__u_v_bo_simple__v_bo_simple_ro(DPA__G(dpa_u_bo_simple_t, (X))), \
+    dpa_u_bo_simple_t*: dpa__u_p_bo_simple__v_bo_simple_ro(DPA__G(dpa_u_bo_simple_t*, (X))), \
+    const dpa_u_bo_simple_t*: dpa__u_cp_bo_simple__v_bo_simple_ro(DPA__G(const dpa_u_bo_simple_t*, (X))) \
   )
+
+#define dpa__u_v_bo_simple_ro__v_bo_simple_ro(X)   (X)
+#define dpa__u_p_bo_simple_ro__v_bo_simple_ro(X)  *(X)
+#define dpa__u_cp_bo_simple_ro__v_bo_simple_ro(X) *(X)
+
+#define dpa__u_v_bo_simple__v_bo_simple_ro(X)  (X).ro
+#define dpa__u_p_bo_simple__v_bo_simple_ro(X)  (X)->ro
+#define dpa__u_cp_bo_simple__v_bo_simple_ro(X) (X)->ro
+
+////
+
+// TODO
 
 #define dpa_u_v_bo_simple(...) dpa_u_assert_selection(dpa_u_v_bo_simple_g(__VA_ARGS__))
 #define dpa_u_v_bo_simple_g(X) dpa_u_generic((X), \
+    dpa_u_bo_simple_t: dpa__u_v_bo_simple__v_bo_simple((X)), \
+    dpa_u_bo_simple_t*: dpa__u_p_bo_simple__v_bo_simple(DPA__G(dpa_u_bo_simple_t*, (X))), \
+    const dpa_u_bo_simple_t*: dpa__u_cp_bo_simple__v_bo_simple(DPA__G(const dpa_u_bo_simple_t*, (X))) \
   )
+
+#define dpa__u_v_bo_simple__v_bo_simple(X)   (X)
+#define dpa__u_p_bo_simple__v_bo_simple(X)  *(X)
+#define dpa__u_cp_bo_simple__v_bo_simple(X) *(X)
+
+////
+
+// TODO
 
 #define dpa_u_v_bo(...) dpa_u_assert_selection(dpa_u_v_bo_g(__VA_ARGS__))
 #define dpa_u_v_bo_g(X) dpa_u_generic((X), \
+    dpa_u_bo_t: dpa__u_v_bo__v_bo(X), \
+    dpa_u_bo_t*: dpa__u_p_bo__v_bo(DPA__G(dpa_u_bo_t*, (X))), \
+    const dpa_u_bo_t*: dpa__u_cp_bo__v_bo(DPA__G(const dpa_u_bo_t*, (X))) \
   )
+
+#define dpa__u_v_bo__v_bo(X)   (X)
+#define dpa__u_p_bo__v_bo(X)  *(X)
+#define dpa__u_cp_bo__v_bo(X) *(X)
 
 #define dpa_u_v_bo_hashed_ro(...) dpa_u_assert_selection(dpa_u_v_bo_hashed_ro_g(__VA_ARGS__))
 #define dpa_u_v_bo_hashed_ro_g(X) dpa_u_generic((X), \
+    dpa_u_bo_hashed_ro_t: dpa__u_v_bo_hashed_ro__v_bo_hashed_ro((X)), \
+    dpa_u_bo_hashed_ro_t*: dpa__u_p_bo_hashed_ro__v_bo_hashed_ro(DPA__G(dpa_u_bo_hashed_ro_t*, (X))), \
+    const dpa_u_bo_hashed_ro_t*: dpa__u_cp_bo_hashed_ro__v_bo_hashed_ro(DPA__G(const dpa_u_bo_hashed_ro_t*, (X))), \
+    \
+    dpa_u_bo_hashed_t: dpa__u_v_bo_hashed__v_bo_hashed_ro(DPA__G(dpa_u_bo_hashed_t, (X))), \
+    dpa_u_bo_hashed_t*: dpa__u_p_bo_hashed__v_bo_hashed_ro(DPA__G(dpa_u_bo_hashed_t*, (X))), \
+    const dpa_u_bo_hashed_t*: dpa__u_cp_bo_hashed__v_bo_hashed_ro(DPA__G(const dpa_u_bo_hashed_t*, (X))) \
   )
+
+#define dpa__u_v_bo_hashed_ro__v_bo_hashed_ro(X)   (X)
+#define dpa__u_p_bo_hashed_ro__v_bo_hashed_ro(X)  *(X)
+#define dpa__u_cp_bo_hashed_ro__v_bo_hashed_ro(X) *(X)
+
+#define dpa__u_v_bo_hashed__v_bo_hashed_ro(X)  (X).ro
+#define dpa__u_p_bo_hashed__v_bo_hashed_ro(X)  (X)->ro
+#define dpa__u_cp_bo_hashed__v_bo_hashed_ro(X) (X)->ro
 
 #define dpa_u_v_bo_hashed(...) dpa_u_assert_selection(dpa_u_v_bo_hashed_g(__VA_ARGS__))
 #define dpa_u_v_bo_hashed_g(X) dpa_u_generic((X), \
+    dpa_u_bo_hashed_t: dpa__u_v_bo_hashed__v_bo_hashed((X)), \
+    dpa_u_bo_hashed_t*: dpa__u_p_bo_hashed__v_bo_hashed(DPA__G(dpa_u_bo_hashed_t*, (X))), \
+    const dpa_u_bo_hashed_t*: dpa__u_cp_bo_hashed__v_bo_hashed(DPA__G(const dpa_u_bo_hashed_t*, (X))), \
+    dpa_u_any_bo_hashed_t*: dpa__u_any_bo_hashed__v_bo_hashed(DPA__G(dpa_u_any_bo_hashed_t*, (X))) \
   )
+
+#define dpa__u_v_bo_hashed__v_bo_hashed(X)   (X)
+#define dpa__u_p_bo_hashed__v_bo_hashed(X)  *(X)
+#define dpa__u_cp_bo_hashed__v_bo_hashed(X) *(X)
+#define dpa__u_any_bo_hashed__v_bo_hashed(X) *(const dpa_u_bo_hashed_t*)(X)
 
 #define dpa_u_v_bo_refcounted_ro(...) dpa_u_assert_selection(dpa_u_v_bo_refcounted_ro_g(__VA_ARGS__))
 #define dpa_u_v_bo_refcounted_ro_g(X) dpa_u_generic((X), \
+    dpa_u_bo_refcounted_ro_t: (X), \
+    dpa_u_bo_refcounted_ro_t*: *DPA__G(dpa_u_bo_refcounted_ro_t*, (X)), \
+    const dpa_u_bo_refcounted_ro_t*: *DPA__G(const dpa_u_bo_refcounted_ro_t*, (X)) \
   )
 
 #define dpa_u_v_bo_refcounted(...) dpa_u_assert_selection(dpa_u_v_bo_refcounted_g(__VA_ARGS__))
 #define dpa_u_v_bo_refcounted_g(X) dpa_u_generic((X), \
+    dpa_u_bo_refcounted_t: (X), \
+    dpa_u_bo_refcounted_t*: *DPA__G(dpa_u_bo_refcounted_t*, (X)), \
+    const dpa_u_bo_refcounted_t*: *DPA__G(const dpa_u_bo_refcounted_t*, (X)) \
   )
 
 #define dpa_u_v_bo_refcounted_hashed_ro(...) dpa_u_assert_selection(dpa_u_v_bo_refcounted_hashed_ro_g(__VA_ARGS__))
 #define dpa_u_v_bo_refcounted_hashed_ro_g(X) dpa_u_generic((X), \
+    dpa_u_bo_refcounted_hashed_ro_t: (X), \
+    dpa_u_bo_refcounted_hashed_ro_t*: *DPA__G(dpa_u_bo_refcounted_hashed_ro_t*, (X)), \
+    const dpa_u_bo_refcounted_hashed_ro_t*: *DPA__G(const dpa_u_bo_refcounted_hashed_ro_t*, (X)), \
+    dpa_u_any_bo_refcounted_hashed_ro_t*: *(const dpa_u_bo_refcounted_hashed_ro_t*)DPA__G(dpa_u_any_bo_refcounted_hashed_ro_t*, (X)) \
   )
 
 ////
@@ -1658,10 +1749,16 @@ dpa_u_reproducible dpa__u_really_inline dpa_u_export inline dpa_u_bo_ro_t dpa__u
 
 #define dpa_u_p_bo_inline(...) dpa_u_assert_selection(dpa_u_p_bo_inline_g(__VA_ARGS__))
 #define dpa_u_p_bo_inline_g(X) dpa_u_generic((X), \
+    dpa_u_bo_inline_t: &DPA__G(dpa_u_bo_inline_t, (X)), \
+    dpa_u_bo_inline_t*: (X), \
+    const dpa_u_bo_inline_t*: (X), \
+    dpa_u_any_bo_inline_t*: *(const dpa_u_bo_inline_t*)DPA__G(dpa_u_any_bo_inline_t*, (X)) \
   )
 
 #define dpa_u_p_bo_unique_hashmap(...) dpa_u_assert_selection(dpa_u_p_bo_unique_hashmap_g(__VA_ARGS__))
 #define dpa_u_p_bo_unique_hashmap_g(X) dpa_u_generic((X), \
+    dpa_u_bo_unique_hashmap_t: (X), \
+    dpa_u_any_bo_unique_hashmap_t*: (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*, (X)) \
   )
 
 #define dpa_u_p_bo_simple_ro(...) dpa_u_assert_selection(dpa_u_p_bo_simple_ro_g(__VA_ARGS__))
