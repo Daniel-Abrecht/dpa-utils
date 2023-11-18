@@ -248,6 +248,18 @@
         <tr><td><nobr><var tabindex="0" name="dpa_u_hash_t">dpa_u_hash_t</var></td><td>hash</td><td>From this field and the data, the hash can be derived in O(1)</td></tr>
       </table>
     </section>
+    <section class="nocolumn">
+      <h4><a class="var" id="dpa_u_bo_unique_hashmap_stats_t" href="#dpa_u_bo_unique_hashmap_stats_t">dpa_u_bo_unique_hashmap_stats_t</a></h4>
+      See also <a class="var" href="#dpa_u_bo_unique_hashmap_stats">dpa_u_bo_unique_hashmap_stats</a>.
+      <table class="pad first-right striped">
+        <tr><th>Type</th><th>Name</th><th>Description</th></tr>
+        <tr><td>size_t</td><td>empty_count</td><td>How many buckets of the hash map are unused</td></tr>
+        <tr><td>size_t</td><td>collision_count</td><td>If an entry is added to a bucket that is already occupied, that is a collision. This field indicates how often that happened.</td></tr>
+        <tr><td>size_t</td><td>total_buckets</td><td>The total amount of buckets that currently exist</td></tr>
+        <tr><td>size_t</td><td>entry_count</td><td>The total amount of entries</td></tr>
+        <tr><td>double</td><td>load_factor</td><td>entry_count divided by total_buckets</td></tr>
+      </table>
+    </section>
   </section>
 </section>
 
@@ -401,7 +413,7 @@
       </p>
     </section>
     <section class="nocolumn">
-      <h4><a class="var" id="dpa_u_bo_compare" href="#dpa_u_bo_compare">dpa_u_bo_compare</a></h4>
+      <h4><a class="var" id="dpa_u_bo_compare" href="#dpa_u_bo_compare">int dpa_u_bo_compare(a,b)</a></h4>
       <p>Compares 2 BOs.</p>
       <p>
         Comparing exclusively between BOs of any of the types <var tabindex="0" name="dpa_u_bo_unique_t">dpa_u_&shy;bo_&shy;unique_t</var>,
@@ -418,11 +430,27 @@
       </p>
     </section>
     <section class="nocolumn">
-      <h4><a class="var" id="dpa_u_bo_compare_lexicographic" href="#dpa_u_bo_compare_lexicographic">dpa_u_bo_compare_lexicographic</a></h4>
+      <h4><a class="var" id="dpa_u_bo_compare_lexicographic" href="#dpa_u_bo_compare_lexicographic">int dpa_u_bo_compare_lexicographic(a,b)</a></h4>
       <p>Compares the content of 2 BOs.</p>
       <p>
         This uses memcmp to copy 2 BOs, and then the size. It does not have the limitations <a class="var" href="#dpa_u_bo_compare">dpa_u_bo_compare</a>
         has, but is often slower.
+      </p>
+    </section>
+    <section class="nocolumn">
+      <h4><a class="var" href="#dpa_u_bo_unique_hashmap_stats_t">dpa_u_bo_unique_hashmap_stats_t</a><a class="var" id="dpa_u_bo_unique_hashmap_stats" href="#dpa_u_bo_unique_hashmap_stats"> dpa_u_bo_unique_hashmap_stats()</a></h4>
+      <p>
+        This function is manly for debugging purposes. It returns statistics about the hash map storing <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
+        entries, such as how many entries there are, how many collisions, and so on. See <a class="var" href="#dpa_u_bo_unique_hashmap_stats_t">dpa_u_bo_unique_hashmap_stats_t</a>
+        for details.
+      </p>
+    </section>
+    <section class="nocolumn">
+      <h4><a class="var" id="dpa_u_bo_unique_verify" href="#dpa_u_bo_unique_verify">void dpa_u_bo_unique_verify()</a></h4>
+      <p>
+        This function is for debugging purposes only. Verifies that the internal hash map storing the unique BOs is
+        in a valid state. On success, does nothing. On error, aborts. There is pretty much never a need to use this
+        function.
       </p>
     </section>
   </section>
