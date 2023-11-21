@@ -13,7 +13,7 @@ static inline size_t my_puts_p(dpa_u_bo_simple_ro_t bo){
   fwrite(dpa_u_bo_data(bo), dpa_u_bo_get_size(bo), 1, stdout);
   return puts("");
 }
-#define my_puts(bo) my_puts_p(dpa_u_temp_bo_simple_ro((bo)))
+#define my_puts(bo) my_puts_p(dpa_u_t_bo_simple_ro((bo)))
 
 static void print_hashmap_stats(){
   const dpa_u_bo_unique_hashmap_stats_t stats = dpa_u_bo_unique_hashmap_stats();
@@ -34,20 +34,6 @@ static void print_hashmap_stats(){
 }
 
 int main(void){
-  {
-    // Note: The size of dpa_u_bo_inline_t isn't fixed. It matches the size of dpa_u_bo_ro_t and dpa_u_bo_simple_ro_t, which matches the combined size of a size_t + void*, and one byte is used for size & type information.
-    // This means that the following will work on most 64bit machines, but not on on 32bit platforms, you shouldn't do this in practice.
-    // The main use of dpa_u_bo_inline_t is as a variant of dpa_u_bo_unique_t, for small strings, where putting them in a hash map nor allocating space would make any sense.
-    // There are also the dpa_u_cstrbo_* macros for creating appropriate BOs from string constants. 
-    dpa_u_bo_inline_t my_bo = {
-      .type = DPA_U_BO_INLINE,
-      .size = sizeof("Hello World!")-1,
-      .data = "Hello World!",
-    };
-    printf("Type: %s\n", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(my_bo)));
-    dpa_u_puts(my_bo);
-    my_puts(my_bo);
-  }
   {
     dpa_u_bo_simple_ro_t my_bo = {
       .type = DPA_U_BO_SIMPLE,

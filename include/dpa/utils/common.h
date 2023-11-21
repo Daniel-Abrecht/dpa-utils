@@ -192,14 +192,16 @@ dpa_u_export extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_f
 #define dpa__u_really_inline
 #endif
 
+// The if(0) below isn't a mistake. Forming the error messages isn't cheap, so we don't do it, but we still want to
+// check that it'd be valid so the debug builds won't unexpectedly break.
 #if defined(DPA_U_DEBUG)
 #define dpa_u_unreachable(...) dpa_u_abort(__VA_ARGS__)
 #elif DPA__U__has_builtin(__builtin_unreachable)
-#define dpa_u_unreachable(...) __builtin_unreachable()
+#define dpa_u_unreachable(...) { __builtin_unreachable(); if(0){ dpa_u_abort(__VA_ARGS__); } }
 #elif DPA__U__has_builtin(__builtin_trap)
-#define dpa_u_unreachable(...) __builtin_trap()
+#define dpa_u_unreachable(...) { __builtin_trap(); if(0){ dpa_u_abort(__VA_ARGS__); } }
 #else
-#define dpa_u_unreachable(...) abort()
+#define dpa_u_unreachable(...) { abort(); if(0){ dpa_u_abort(__VA_ARGS__); } }
 #endif
 
 dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline int dpa_u_ptr_compare(const void*const a, const void*const b){

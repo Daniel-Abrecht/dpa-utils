@@ -33,6 +33,8 @@ extern void dpa__u_v_bo_unique__put(dpa_u_bo_unique_t ubo);
 extern void dpa__u_any_bo_unique__put(dpa_u_any_bo_unique_t*const ubo);
 extern void dpa__u_bo_gc_ro__put(dpa_u_bo_gc_ro_t*const bo);
 
+extern dpa_u_bo_unique_t dpa__u_any_bo_unique__bo_unique(dpa_u_any_bo_unique_t*const bo);
+
 extern dpa_u_bo_ro_t dpa__u_any_bo_simple_ro__v_bo_ro(dpa_u_any_bo_simple_ro_t*const bo);
 extern dpa_u_bo_ro_t dpa__u_any_bo__v_bo_ro(dpa_u_any_bo_t*const bo);
 extern dpa_u_bo_ro_t dpa__u_any_bo_ro__v_bo_ro(dpa_u_any_bo_ro_t*const bo);
