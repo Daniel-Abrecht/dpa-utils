@@ -205,7 +205,7 @@ dpa_u_export extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_f
 #endif
 
 dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline int dpa_u_ptr_compare(const void*const a, const void*const b){
-  return (const char*)a < (const char*)b ? -1 : (const char*)b < (const char*)a ? 1 : 0;
+  return (uintptr_t)a < (uintptr_t)b ? -1 : (uintptr_t)b < (uintptr_t)a ? 1 : 0;
 }
 
 
