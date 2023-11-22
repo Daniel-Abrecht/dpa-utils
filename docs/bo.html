@@ -352,11 +352,14 @@
       </p>
     </section>
     <section class="nocolumn">
-      <h4><a class="var" id="dpa_u_temp_bo_simple" href="#dpa_u_temp_bo_simple">dpa_u_temp_bo_simple</a> / <a class="var" id="dpa_u_temp_bo_simple_ro" href="#dpa_u_temp_bo_simple_ro">dpa_u_temp_bo_simple_ro</a></h4>
+      <h4><a class="var" id="dpa_u_t_bo_*" href="#dpa_u_t_bo_*">dpa_u_t_bo_*</a></h4>
       <p>
-        Mostly the same as <var tabindex="0" name="dpa_u_v_bo_simple">dpa_u_v_&shy;bo_&shy;simple</var> / <var tabindex="0" name="dpa_u_v_bo_simple_ro">dpa_u_v_&shy;bo_&shy;simple_&shy;ro</var>,
-        but it does also take types that may contain inline BOs. For that reason, the lifetime of it's data may be
-        limited to the current block scope.
+        Mostly the same as <var tabindex="0" name="dpa_u_v_bo_*">dpa_u_v_&shy;bo_&shy;*</var>,
+        but it does also take types that may contain inline BOs even if that changes the lifetime of the BOs data.
+        The lifetime of non-pointer inline BOs will always be changed to the lifetime of the current block scope
+        using a compound literal. This is done because otherwise, the lifetime of an inline bo rvalue would have
+        temporary storage duration, which is shorter than the lifetime of a compound literal or a variable with
+        automatic storage duration, and that often wouldn't be very helpful.
       </p>
     </section>
     <section class="nocolumn">
