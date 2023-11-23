@@ -23,7 +23,7 @@ extern size_t dpa__u_bo_gc_ro__get_size(const dpa_u_bo_gc_ro_t*const bo);
 
 extern void dpa__u_p_bo__set_size(dpa_u_bo_t*const bo, size_t size);
 
-extern dpa_u_bo_unique_t dpa__u_bo_intern(const dpa_u_any_bo_ro_t*const _bo);
+extern dpa_u_bo_unique_t dpa_u_bo_intern_p(const dpa_u_any_bo_ro_t*const _bo);
 
 extern void dpa__u_v_bo_unique__ref(dpa_u_bo_unique_t ubo);
 extern void dpa__u_any_bo_unique__ref(dpa_u_any_bo_unique_t* ubo);

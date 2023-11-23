@@ -83,7 +83,7 @@ source-checks: build/.check-all
 build/.check-header-compile: $(HEADERS)
 	mkdir -p $(dir $@)
 	@echo "Verifying that headers compile on their own..."
-	find include/dpa/ -type f -iname "*.h" -print0 | xargs -0tL1 $(CC) -x c -fPIC -c -o /dev/null $(CFLAGS)
+	find include/dpa/ -type f -iname "*.h" -not -path '*/_*' -print0 | xargs -0tL1 $(CC) -x c -fPIC -c -o /dev/null $(CFLAGS)
 	touch $@
 
 build/.check-inline-export: $(HEADERS)
