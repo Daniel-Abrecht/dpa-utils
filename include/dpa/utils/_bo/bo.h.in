@@ -1,3 +1,0 @@
-#!/bin/bash
-shopt -s globstar
-printf '#include <dpa/utils/_bo/%s>\n' */**/*.h >bo.h

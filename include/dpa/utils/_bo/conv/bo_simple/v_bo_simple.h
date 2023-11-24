@@ -1,3 +1,4 @@
+
 #define dpa_u_v_bo_simple(...) dpa_u_assert_selection(dpa_u_v_bo_simple_g(__VA_ARGS__))
 #define dpa_u_v_bo_simple_g(X) dpa_u_generic((X), \
     dpa__u_helper_v_g(bo_simple, v_bo_simple, (X)), \
@@ -5,9 +6,6 @@
     dpa__u_helper_v_g(bo_refcounted, v_bo_simple, (X)), \
     dpa_u_bo_with_refcount_t*: dpa__u_bo_with_refcount__v_bo_simple(DPA__G(dpa_u_bo_with_refcount_t*,(X))) \
   )
-
-// dpa_u_bo_t and dpa_u_bo_with_hash may refere to dpa_u_bo_inline, so they are not incloded here.
-// Use dpa_u_t_bo_simple instead if you want to use them, but beware of the lifetime.
 
 #define dpa__u_v_bo_simple__v_bo_simple(X) *(X)
 #define dpa__u_p_bo_simple__v_bo_simple(X)  (X)
