@@ -44,6 +44,8 @@ extern dpa_u_bo_ro_t dpa__u_bo_with_hash__v_bo_ro(dpa_u_bo_with_hash_t*const bo)
 extern dpa_u_bo_ro_t dpa__u_bo_with_refcount_ro__v_bo_ro(dpa_u_bo_with_refcount_ro_t*const bo);
 extern dpa_u_bo_ro_t dpa__u_bo_with_refcount_and_hash_ro__v_bo_ro(dpa_u_bo_with_refcount_and_hash_ro_t*const bo);
 
+extern dpa_u_bo_simple_ro_t dpa__u_t_bo_ro__helper_s1_p(dpa_u_bo_simple_ro_t v);
+
 extern dpa_u_bo_t dpa__u_any_bo__v_bo(dpa_u_any_bo_t*const bo);
 extern dpa_u_any_bo_unique_t* dpa__u_cp_bo_unique__ptr(const dpa_u_bo_unique_t*const bo);
 extern dpa_u_any_bo_ro_t* dpa__u_cp_bo_ro__ptr(const dpa_u_bo_ro_t*const bo);
