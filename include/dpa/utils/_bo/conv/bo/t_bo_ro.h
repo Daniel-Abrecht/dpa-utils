@@ -41,7 +41,7 @@ dpa_u_reproducible dpa__u_really_inline dpa_u_export inline dpa_u_bo_simple_ro_t
 #define dpa__u_v_bo_simple_ro__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_simple = (X) }
 #define dpa__u_p_bo_simple_ro__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_simple = *(X) }
 #define dpa__u_cp_bo_simple_ro__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_simple = *(X) }
-#define dpa__u_any_bo_simple_ro__t_bo_ro(X) dpa__u_any_bo_simple_ro__v_bo_ro(X)
+#define dpa__u_any_bo_simple_ro__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1(*(dpa_u_bo_simple_ro_t*)(X))
 
 #define dpa__u_v_bo_unique_hashmap__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (X) }
 #define dpa__u_p_bo_unique_hashmap__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (X) }
@@ -51,7 +51,7 @@ dpa_u_reproducible dpa__u_really_inline dpa_u_export inline dpa_u_bo_simple_ro_t
 #define dpa__u_v_bo_unique__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_unique = (X) }
 #define dpa__u_p_bo_unique__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_unique = *(X) }
 #define dpa__u_cp_bo_unique__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_unique = *(X) }
-#define dpa__u_any_bo_unique__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_unique.bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique.bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)(X) }
+#define dpa__u_any_bo_unique__t_bo_ro(X) (const dpa_u_bo_ro_t){ dpa__u_any_bo_unique__v_bo_ro(X) }
 
 #define dpa__u_v_bo_hashed__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X).bo_simple)
 #define dpa__u_p_bo_hashed__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X)->bo_simple)
