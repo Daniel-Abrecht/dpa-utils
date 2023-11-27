@@ -101,3 +101,11 @@
     char(*)[1]: F((X),(Y), 1), \
     char(*)[2]: F((Y),(X),-1) \
   )
+
+dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline dpa_u_bo_simple_ro_t dpa__u_simple_ro_fix_type(dpa_u_bo_simple_ro_t v){
+  return (dpa_u_bo_simple_ro_t){
+    .type = DPA_U_BO_SIMPLE,
+    .size = v.size,
+    .data = v.data,
+  };
+}

@@ -208,6 +208,7 @@ dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline int dpa_u_ptr_compare
   return (uintptr_t)a < (uintptr_t)b ? -1 : (uintptr_t)b < (uintptr_t)a ? 1 : 0;
 }
 
+#define dpa_u_rescope(T,V) (struct{T v;}){(V)}.v
 
 // TODO: This is currently not a very safe macro
 #define DPA_U_MIN(X,Y) ((X)<(Y)?(X):(Y))
