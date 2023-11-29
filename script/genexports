@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+genexports(){
+  find "$@" -iname "*.h" -exec cat {} \; | sed -n 's/.* inline \([^(]* dpa_[a-zA-Z0-9_]*([^)]*)\).*/extern \1;/p' | sort -u
+}
+
+declare -A extra
+extra=(
+  ["bo.h"]="_bo/"
+)
+
+root="$(realpath "$(dirname "$0")/..")"
+cd "$root"
+
+(
+  cd include/dpa/utils/
+  for h in *.h
+  do (
+    f="$root/src/gen/$h.c"
+    exec >"$f"
+    printf "#include <dpa/utils/%s>\n\n" "$h"
+    genexports "$h" ${extra["$h"]}
+    if [ "$(wc -l <"$f")" -le 2 ]
+      then rm "$f"
+    fi
+  ); done
+)
