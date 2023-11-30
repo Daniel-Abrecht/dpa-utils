@@ -11,6 +11,7 @@ extern const void* dpa__u_cp_bo_ro__data(const dpa_u_bo_ro_t*const bo);
 extern const void* dpa__u_cp_bo_unique__data(const dpa_u_bo_unique_t*const bo);
 extern dpa_u_any_bo_ro_t* dpa__u_cp_bo_ro__ptr(const dpa_u_bo_ro_t*const bo);
 extern dpa_u_any_bo_unique_t* dpa__u_cp_bo_unique__ptr(const dpa_u_bo_unique_t*const bo);
+extern dpa_u_bo_hashed_ro_t dpa__u_bo_with_hash__t_bo_hashed_ro_p(dpa_u_bo_with_hash_t*const bo);
 extern dpa_u_bo_hashed_ro_t dpa__u_bo_with_hash_ro__t_bo_hashed_ro_p(dpa_u_bo_with_hash_ro_t*const bo);
 extern dpa_u_bo_hashed_ro_t dpa__u_hashed_ro_fix_type(dpa_u_bo_hashed_ro_t v);
 extern dpa_u_bo_hashed_ro_t dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(const dpa_u_bo_refcounted_hashed_ro_t bo);
