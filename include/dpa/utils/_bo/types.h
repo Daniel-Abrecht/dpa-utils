@@ -157,3 +157,24 @@ static_assert(alignof(struct dpa_u_bo_ro) == alignof(struct dpa_u_bo_simple), "d
 static_assert(alignof(struct dpa_u_bo_ro) == alignof(struct dpa_u_bo), "dpa_u_bo has wrong alignment");
 static_assert(alignof(struct dpa_u_bo_ro) == alignof(struct dpa_u_bo_unique), "dpa_u_bo_unique has wrong alignment");
 static_assert(alignof(struct dpa_u_bo_ro) == alignof(struct dpa_u_bo_inline), "dpa_u_bo_inline has wrong alignment");
+
+////
+
+// This is an internal type used by some dpa_u_t_bo* conversion macros to change the storage duration & lifetime of
+// inline BOs to the current block scope.
+union dpa__u_simple_conv_helper {
+  dpa__u_bo_meta_t meta;
+  dpa_u_bo_inline_t bo_inline;
+  dpa_u_bo_simple_ro_t bo_simple_ro;
+  dpa_u_bo_simple_t bo_simple;
+};
+
+// This is an internal type used by some dpa_u_t_bo* conversion macros to change the storage duration & lifetime of
+// inline BOs to the current block scope, while retaining enough memory for the hash of a hashed bo.
+union dpa__u_hashed_conv_helper {
+  dpa__u_bo_meta_t meta;
+  dpa_u_bo_inline_t bo_inline;
+  dpa_u_bo_hashed_ro_t bo_hashed_ro;
+  dpa_u_bo_hashed_t bo_hashed;
+};
+static_assert(sizeof(union dpa__u_hashed_conv_helper) == sizeof(dpa_u_bo_hashed_ro_t), "union dpa__u_hashed_conv_helper has an unexpected size");
