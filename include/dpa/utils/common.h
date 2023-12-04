@@ -12,6 +12,10 @@
 #include DPA_U_CONFIG
 #endif
 
+#ifdef _MSC_VER
+#define DPA_U_BO_NOT_PACKED
+#endif
+
 ///////////////////////////////////////
 //////      Internal macros      //////
 ///////////////////////////////////////
