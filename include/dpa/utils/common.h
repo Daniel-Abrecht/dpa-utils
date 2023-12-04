@@ -36,12 +36,12 @@
 #define DPA_U_FIRST(...) DPA_U_FIRST_1(__VA_ARGS__,1)
 
 #if __STDC_VERSION__ < 202311
+#define dpa__u_packed __attribute__((packed))
 #define dpa_u_export __attribute__((visibility("default")))
-#define dpa_u_packed __attribute__((packed))
 #define dpa_u_init __attribute__((constructor))
 #else
+#define dpa__u_packed [[gnu::packed]]
 #define dpa_u_export [[gnu::visibility("default")]]
-#define dpa_u_packed [[gnu::packed]]
 #define dpa_u_init [[gnu::constructor]]
 #endif
 

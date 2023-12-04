@@ -2,11 +2,21 @@
 #include <stddef.h>
 #include <limits.h>
 
+#ifdef DPA_U_BO_NOT_PACKED
+#define dpa__u_bo_packed
 #define DPA__U_BO_META(X) \
-  struct dpa_u_packed { \
-    unsigned type : CHAR_BIT - 4; \
-    unsigned X : 4; \
+  struct dpa__u_bo_packed { \
+    unsigned char type; \
+    unsigned char X; \
   }
+#else
+#define dpa__u_bo_packed dpa__u_packed
+#define DPA__U_BO_META(X) \
+  struct dpa__u_bo_packed { \
+    unsigned char type : CHAR_BIT - 4; \
+    unsigned char X : 4; \
+  }
+#endif
 
 struct dpa__u_bo_a { alignas(DPA__U_BO_ALIGNMENT) char all[DPA__U_BO_COMMON_SIZE]; };
 typedef DPA__U_BO_META(extra) dpa__u_bo_meta_t;
@@ -21,13 +31,12 @@ struct dpa_u_bo_inline {
   };
 };
 static_assert(sizeof(dpa_u_bo_inline_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_inline_t has an unexpected size");
-static_assert(offsetof(dpa_u_bo_inline_t,data) == 1, "Expected data to be at byte 1");
 
 #define DPA__U_BO_SIMPLE_MEMBERS(...) \
   union { \
     struct { \
       DPA__U_BO_META(extra); \
-      struct dpa_u_packed { \
+      struct dpa__u_bo_packed { \
         size_t size : (sizeof(size_t)-1) * CHAR_BIT; \
       }; \
       __VA_ARGS__ void* data; \
@@ -39,7 +48,6 @@ struct dpa_u_bo_simple_ro {
   DPA__U_BO_SIMPLE_MEMBERS(const);
 };
 static_assert(sizeof(dpa_u_bo_simple_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_ro_t has an unexpected size");
-static_assert(offsetof(dpa_u_bo_simple_ro_t,data) == sizeof(size_t), "Expected data to be at a different offset");
 
 struct dpa_u_bo_simple {
   union {
@@ -48,11 +56,10 @@ struct dpa_u_bo_simple {
   };
 };
 static_assert(sizeof(dpa_u_bo_simple_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_t has an unexpected size");
-static_assert(offsetof(dpa_u_bo_simple_t,data) == sizeof(size_t), "Expected data to be at a different offset");
 
 struct dpa_u_bo_unique {
   union {
-    struct { DPA__U_BO_META(extra); char _[DPA__U_BO_COMMON_SIZE-1]; };
+    DPA__U_BO_META(extra);
     dpa_u_bo_inline_t bo_inline;
     struct { DPA__U_BO_META(extra) bo_unique_hashmap_meta; dpa_u_bo_unique_hashmap_t bo_unique_hashmap; };
     dpa__u_bo_a_t all;
@@ -62,7 +69,7 @@ static_assert(sizeof(dpa_u_bo_unique_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_uniq
 
 struct dpa_u_bo_ro {
   union {
-    struct { DPA__U_BO_META(extra); char _[DPA__U_BO_COMMON_SIZE-1]; };
+    DPA__U_BO_META(extra);
     dpa_u_bo_inline_t bo_inline;
     dpa_u_bo_simple_ro_t bo_simple;
     struct { DPA__U_BO_META(extra) bo_unique_hashmap_meta; dpa_u_bo_unique_hashmap_t bo_unique_hashmap; };
@@ -71,11 +78,10 @@ struct dpa_u_bo_ro {
   };
 };
 static_assert(sizeof(dpa_u_bo_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_ro_t has an unexpected size");
-static_assert(offsetof(dpa_u_bo_ro_t,_) == 1, "Expected _ to be at a different offset");
 
 struct dpa_u_bo {
   union {
-    struct { DPA__U_BO_META(extra); char _[DPA__U_BO_COMMON_SIZE-1]; };
+    DPA__U_BO_META(extra);
     dpa_u_bo_ro_t ro;
     dpa_u_bo_inline_t bo_inline;
     dpa_u_bo_simple_t bo_simple;
@@ -83,7 +89,6 @@ struct dpa_u_bo {
   };
 };
 static_assert(sizeof(dpa_u_bo_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_t has an unexpected size");
-static_assert(offsetof(dpa_u_bo_t,_) == 1, "Expected _ to be at a different offset");
 
 ////
 
