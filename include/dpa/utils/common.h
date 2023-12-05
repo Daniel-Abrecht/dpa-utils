@@ -12,8 +12,20 @@
 #include DPA_U_CONFIG
 #endif
 
+#if defined(__STDC_NO_THREADS__) || defined(__STDC_NO_ATOMICS__)
+#ifndef DPA_U_NO_THREADS
+#define DPA_U_NO_THREADS
+#ifdef _MSC_VER
+#pragma message ("DANGER: C atomic or threads support missing, library will not be threadsafe!")
+#else
+#warning "DANGER: C atomic or threads support missing, library will not be threadsafe!"
+#endif
+#endif
+#endif
+
 #ifdef _MSC_VER
 #define DPA_U_BO_NOT_PACKED
+#define __attribute__(X)
 #endif
 
 ///////////////////////////////////////
@@ -49,7 +61,7 @@
 #define dpa_u_init [[gnu::constructor]]
 #endif
 
-#ifdef __llvm__
+#if defined(__llvm__) || defined(_MSC_VER)
 #define DPA__U_STATIC_ASSERT_IN_STRUCT_BUGGY
 #endif
 
@@ -139,7 +151,7 @@ enum {
   DPA_U_LONG_LONG_MAX_B10_DIGITS = CHAR_BIT * sizeof(long long) / 3 + 3,
 };
 
-dpa_u_export dpa_u_format_param(printf, 3, 4) inline char* dpa__u_compound_printf(size_t s, char c[s], const char* format, ...){
+dpa_u_export dpa_u_format_param(printf, 3, 4) inline char* dpa__u_compound_printf(size_t s, char c[], const char* format, ...){
   va_list args;
   va_start(args, format);
   vsnprintf(c,s, format, args);
@@ -229,6 +241,12 @@ dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline int dpa_u_ptr_compare
 //////      Interopability macros      //////
 /////////////////////////////////////////////
 
+#ifdef BITINT_MAXWIDTH
+#define DPA__U_BITINT_MAXWIDTH BITINT_MAXWIDTH
+#else
+#define DPA__U_BITINT_MAXWIDTH 0
+#endif
+
 #ifdef INT128_MAX
 #define DPA_HAS_INT128
 typedef int128_t dpa_int128_t;
@@ -239,7 +257,7 @@ typedef uint128_t dpa_uint128_t;
 typedef intmax_t dpa_int128_t;
 #define DPA_HAS_UINT128
 typedef uintmax_t dpa_uint128_t;
-#elif BITINT_MAXWIDTH >= 128
+#elif DPA__U_BITINT_MAXWIDTH >= 128
 #define DPA_HAS_INT128
 typedef _BitInt(128) dpa_int128_t;
 #define DPA_HAS_UINT128

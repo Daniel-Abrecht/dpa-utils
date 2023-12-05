@@ -67,7 +67,7 @@ export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 
 SHELL_CMD="$$SHELL"
 
-ifeq (0,$(shell echo 'int main(){}' | avr-gcc -o /dev/null --shared -fPIC -x c - 2>/dev/null; echo $$?))
+ifeq (0,$(shell echo 'int main(){}' | $(CC) -o /dev/null --shared -fPIC -x c - 2>/dev/null; echo $$?))
 has_shared := 1
 LIB := lib/$(TYPE)/lib$(SONAME).so
 else

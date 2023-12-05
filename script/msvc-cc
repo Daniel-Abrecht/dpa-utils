@@ -1,0 +1,106 @@
+#!/bin/bash
+
+set -e
+
+winkitincdir="$(printf '%s\n' "/mnt/c/Program Files (x86)/Windows Kits/10/Include/"*/ | tail -n 1)"
+winkitlibdir="$(printf '%s\n' "/mnt/c/Program Files (x86)/Windows Kits/10/Lib/"*/ | tail -n 1)"
+msvcdir="$(printf '%s\n' "/mnt/c/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/"*/ | tail -n 1)"
+export PATH="$PATH:${msvcdir}bin/Hostx64/x64"
+
+args=(
+  "cl.exe"
+  "/I" "C:${msvcdir:6}include/"
+  "/I" "C:${winkitincdir:6}ucrt/"
+#  "/I" "C:${msvcdir:6}lib/x64/"
+  "/permissive-"
+  "/utf-8"
+#  "/Zc:inline" # This option is broken. The exports in the src/gen/*.c files are ignored
+  "/wd4114"
+)
+largs=(
+  "/LIBPATH:C:${msvcdir:6}lib/x64/"
+  "/LIBPATH:C:${winkitlibdir:6}ucrt/x64/"
+  "/LIBPATH:C:${winkitlibdir:6}um/x64/"
+)
+libdir=()
+
+add-lib(){
+  if [ -f "$1" ]
+  then
+    echo "$1"
+    return 0
+  fi
+  if [ "$1" = "m" ]
+    then return 0
+  fi
+  for d in "${libdir[@]}"
+  do
+    if [ -f "${d}lib$1.lib" ]
+    then
+      args+=("${d}lib$1.lib")
+      return 0
+    elif [ -f "${d}lib$1.a" ]
+    then
+      args+=("${d}lib$1.a")
+      return 0
+    fi
+  done
+  echo "library not found: $1" >&2
+  exit 1
+}
+
+type=exe
+outfile=
+
+while [ $# -gt 0 ]
+do
+  arg="$1"; shift
+  case "$arg" in
+      -c) args+=("/c"); type=obj ;;
+      -S) args+=("/c" "/Fo:/dev/null"); type=asm ;;
+ --std=*) args+=("/std:${arg:6}") ;;
+      -I) args+=("/I" "$1"); shift ;;
+     -I*) args+=("/I" "${arg:2}") ;;
+      -L) libdir+=("$1"); shift ;;
+     -L*) libdir+=("${arg:2}") ;;
+     -D*) args+=("-D" "${arg:2}") ;;
+      -l) add-lib "$1"; shift ;;
+     -l*) add-lib "${arg:2}" ;;
+      -o) outfile="$1"; shift ;;
+     -o*) outfile="${arg:2}" ;;
+--shared) args+=("/LD") ;;
+      -x) case "$1"  in c) args+=("/TC");; c++) args+=("/TP");; esac; shift ;;
+     -g*) args+=("/Zi") ;;
+      -*) ;;
+       *) args+=("$arg") ;;
+  esac
+done
+
+if [ -n "$outfile" ]
+then
+  case "$type" in
+    obj) args+=("/Fo:$outfile") ;;
+    asm) args+=("/Fa$outfile") ;;
+    exe)
+      args+=("/Fe:$outfile")
+      args+=("/link" "${largs[@]}")
+    ;;
+  esac
+fi
+
+quote(){
+  local quoted=${1//\'/\'\\\'\'};
+  printf "'%s'" "$quoted"
+}
+
+print_cmd(){
+  qargs=()
+  for x in "$@"
+  do
+    qargs+=("$(quote "$x")")
+  done
+  echo "${qargs[@]}" >&2
+}
+
+print_cmd "${args[@]}"
+exec "${args[@]}"

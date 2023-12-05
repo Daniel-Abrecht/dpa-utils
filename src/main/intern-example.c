@@ -66,7 +66,7 @@ int main(int argc, char* argv[]){
       bo.size -= 1;
     if(!bo.size) continue;
     if(count+1 == list_size){
-      void *tmp = realloc(list, sizeof(dpa_u_bo_unique_t[list_size*2]));
+      void *tmp = realloc(list, sizeof(dpa_u_bo_unique_t)*list_size*2);
       if(!tmp)
         dpa_u_abort("realloc failed (%d): %s\n", errno, strerror(errno));
       list = tmp;
