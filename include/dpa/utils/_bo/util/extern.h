@@ -7,5 +7,5 @@ struct dpa_u_bo_unique_hashmap_stats_s {
   double load_factor;
 };
 
-dpa_u_export extern dpa_u_bo_unique_hashmap_stats_t dpa_u_bo_unique_hashmap_stats(void);
-dpa_u_export extern void dpa_u_bo_unique_verify(void);
+dpa__u_api extern dpa_u_bo_unique_hashmap_stats_t dpa_u_bo_unique_hashmap_stats(void);
+dpa__u_api extern void dpa_u_bo_unique_verify(void);

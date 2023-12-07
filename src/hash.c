@@ -17,9 +17,16 @@ void dpa_u_getrandom(void* _buf, size_t buflen){
     buflen -= i;
   }
 }
+#elif _MSC_VER
+#include <windows.h>
+#include <ntsecapi.h>
+void dpa_u_getrandom(void* buf, size_t buflen){
+  if(!RtlGenRandom(buf, buflen))
+    dpa_u_abort("getrandom failed (%d): %s", errno, strerror(errno));
+}
 #endif
 
-dpa_u_hash_t dpa_hash_offset_basis;
+dpa__u_api dpa_u_hash_t dpa_hash_offset_basis;
 
 dpa_u_init void dpa_u_init_dpa_hash_offset_basis(void){
   static bool init_done = false;

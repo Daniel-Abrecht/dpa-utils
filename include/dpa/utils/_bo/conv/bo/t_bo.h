@@ -15,7 +15,7 @@
 #define dpa__u_p_bo__t_bo(X) dpa_u_rescope(const dpa_u_bo_t,*(X))
 #define dpa__u_cp_bo__t_bo(X) dpa_u_rescope(const dpa_u_bo_t,*(X))
 #define dpa__u_any_bo__t_bo(X) dpa_u_rescope(const dpa_u_bo_t,dpa__u_any_bo__t_bo_p(X))
-dpa_u_reproducible dpa__u_really_inline dpa_u_export inline dpa_u_bo_t dpa__u_any_bo__t_bo_p(dpa_u_any_bo_t*const bo){
+dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_t dpa__u_any_bo__t_bo_p(dpa_u_any_bo_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
       return (const dpa_u_bo_t){
@@ -55,7 +55,7 @@ dpa_u_reproducible dpa__u_really_inline dpa_u_export inline dpa_u_bo_t dpa__u_an
 #define dpa__u_cp_bo_refcounted__t_bo(X) dpa__u_t_bo__helper_s1(X)
 #define dpa__u_any_bo_refcounted__t_bo(X) dpa__u_t_bo__helper_s1(X)
 
-dpa_u_reproducible dpa__u_really_inline dpa_u_export inline dpa_u_bo_t dpa__u_bo_with_hash__t_bo_p(dpa_u_bo_with_hash_t*const bo){
+dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_t dpa__u_bo_with_hash__t_bo_p(dpa_u_bo_with_hash_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
       return (const dpa_u_bo_t){

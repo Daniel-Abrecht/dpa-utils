@@ -1,12 +1,18 @@
 .SECONDARY:
 
+ifdef use
+include $(patsubst %,mk/%.mk,$(use))
+endif
+
 ifndef notest
 HEADERS := $(shell find include -type f -name "*.h" -not -name ".*")
-SOURCES := $(shell find src test -type f -iname "*.c")
+SOURCES := $(shell find src test -not -path "src/special/*" -type f -iname "*.c")
 else
 HEADERS := $(shell find include -type f -name "*.h" -not -name ".*" -not -iname "*test*")
-SOURCES := $(shell find src -type f -iname "*.c" -not -iname "*test*")
+SOURCES := $(shell find src -not -path "src/special/*" -type f -iname "*.c" -not -iname "*test*")
 endif
+
+SOURCES += $(EXTRA_SOURCES)
 
 SONAME = dpa-utils
 MAJOR  = 0
@@ -18,6 +24,11 @@ prefix = /usr/local/
 TYPE := release
 
 unexport LD_PRELOAD
+
+a-ext ?= .a
+so-ext ?= .so
+o-ext ?= .o
+bin-ext ?= 
 
 ifdef debug
 TYPE := debug
@@ -39,7 +50,8 @@ CFLAGS  += --coverage
 LDFLAGS += --coverage
 endif
 
-CFLAGS  += --std=c17
+CSTD ?= c17
+CFLAGS  += --std=$(CSTD)
 CFLAGS  += -Iinclude
 CFLAGS  += -Wall -Wextra -pedantic -Werror
 #CFLAGS  += -fstack-protector-all
@@ -55,23 +67,30 @@ endif
 
 LDLIBS += -lm
 
-OBJECTS := $(patsubst %,build/$(TYPE)/o/%.o,$(SOURCES))
+OBJECTS := $(patsubst %,build/$(TYPE)/o/%$(o-ext),$(SOURCES))
 ASMOUT  := $(patsubst %,build/$(TYPE)/s/%.s,$(SOURCES))
 
 B-TS := bin/$(TYPE)/dpa-testsuite
 
-BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%,$(filter src/main/%.c,$(SOURCES)))
+BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%$(bin-ext),$(filter src/main/%.c,$(SOURCES)))
 TESTS := $(patsubst test/%.c,%,$(filter test/%.c,$(SOURCES)))
 
 export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 
 SHELL_CMD="$$SHELL"
 
-ifeq (0,$(shell echo 'int main(){}' | $(CC) -o /dev/null --shared -fPIC -x c - 2>/dev/null; echo $$?))
-has_shared := 1
-LIB := lib/$(TYPE)/lib$(SONAME).so
+ifndef noshared
+shared_test := $(shell $(CC) -o /dev/null --shared -fPIC src/special/nop.c >/dev/null 2>/dev/null; echo $$?)
 else
-LIB := lib/$(TYPE)/lib$(SONAME).a
+shared_test=1
+endif
+
+ifeq (0,$(shared_test))
+has_shared := 1
+LIB := lib/$(TYPE)/lib$(SONAME)$(so-ext)
+CFLAGS  += -fPIC
+else
+LIB := lib/$(TYPE)/lib$(SONAME)$(a-ext)
 endif
 
 all: source-checks bin lib
@@ -83,13 +102,13 @@ source-checks: build/.check-all
 build/.check-header-compile: $(HEADERS)
 	mkdir -p $(dir $@)
 	@echo "Verifying that headers compile on their own..."
-	find include/dpa/ -type f -iname "*.h" -not -path '*/_*' -print0 | xargs -0tL1 $(CC) -x c -fPIC -c -o /dev/null $(CFLAGS)
+	find include/dpa/ -type f -iname "*.h" -not -path '*/_*' -print0 | xargs -0tL1 $(CC) -x c -c -o /dev/null $(CFLAGS)
 	touch $@
 
 build/.check-inline-export: $(HEADERS)
 	mkdir -p $(dir $@)
-	@echo "Serching for inline functions which have not been exported with dpa_u_export..."
-	! grep -r "\(^\| \)inline .*(" include/ | grep -v "\(:\| \)dpa_u_export "
+	@echo "Serching for inline functions which have not been exported with dpa__u_api..."
+	! grep -r "\(^\| \)inline .*(" include/ | grep -v "\(:\| \)dpa__u_api "
 	touch $@
 
 build/.check-inline-extern: $(HEADERS)
@@ -152,52 +171,57 @@ get//bin:
 get//lib:
 	@echo lib/$(TYPE)/
 
-bin/$(TYPE)/%: build/$(TYPE)/o/src/main/%.c.o $(LIB)
+bin/$(TYPE)/%$(bin-ext): build/$(TYPE)/o/src/main/%.c$(o-ext) $(LIB)
 	mkdir -p $(dir $@)
 	$(CC) -o $@ $(LDFLAGS) $< -Llib/$(TYPE)/ -l$(SONAME) $(LDLIBS)
 
-build/$(TYPE)/bin/%: build/$(TYPE)/o/test/%.c.o $(LIB)
+build/$(TYPE)/bin/%$(bin-ext): build/$(TYPE)/o/test/%.c$(o-ext) $(LIB)
 	mkdir -p $(dir $@)
 	$(CC) -o $@ $(LDFLAGS) $< -Llib/$(TYPE)/ -l$(SONAME)
 
-lib/$(TYPE)/lib$(SONAME).so: lib/$(TYPE)/lib$(SONAME).a
-	ln -sf "lib$(SONAME).so" "$@.0"
-	$(CC) -o $@ -Wl,-Map=$@.map -Wl,--no-undefined -Wl,-soname,lib$(SONAME).so.$(MAJOR) --shared -fPIC $(LDFLAGS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+lib/$(TYPE)/lib$(SONAME)$(so-ext): lib/$(TYPE)/lib$(SONAME)$(a-ext) $(filter build/$(TYPE)/o/src/special/%,$(OBJECTS))
+	mkdir -p $(dir $@)
+	ln -sf "lib$(SONAME)$(so-ext)" "$@.0"
+	$(CC) -o $@ -Wl,-Map=$@.map -Wl,--no-undefined -Wl,-soname,lib$(SONAME)$(so-ext).$(MAJOR) --shared -fPIC $(LDFLAGS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
-lib/$(TYPE)/lib$(SONAME).a: $(filter-out build/$(TYPE)/o/src/main/%,$(filter-out build/$(TYPE)/o/test/%,$(OBJECTS)))
+lib/$(TYPE)/lib$(SONAME)$(a-ext): $(filter-out build/$(TYPE)/o/src/main/%,$(filter-out build/$(TYPE)/o/src/special/%,$(filter-out build/$(TYPE)/o/test/%,$(OBJECTS))))
 	mkdir -p $(dir $@)
 	rm -f $@
 	$(AR) q $@ $^
 
 build/$(TYPE)/s/%.c.s: %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
-	$(CC) -fPIC -S -o $@ $(CFLAGS) $< # -fverbose-asm
+	$(CC) -S -o $@ $(CFLAGS) $< # -fverbose-asm
 
-build/$(TYPE)/o/%.c.o: %.c makefile $(HEADERS)
+build/$(TYPE)/o/%.c$(o-ext): %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
-	$(CC) -fPIC -c -o $@ $(CFLAGS) $<
+	$(CC) -c -o $@ -DDPA__U_BUILD_LIB $(CFLAGS) $<
+
+build/$(TYPE)/o/main/%.c$(o-ext): %.c makefile $(HEADERS)
+	mkdir -p $(dir $@)
+	$(CC) -c -o $@ $(CFLAGS) $<
 
 clean:
 	rm -rf build/$(TYPE)/ bin/$(TYPE)/ lib/$(TYPE)/
 
 install:
 ifdef has_shared
-	cp "lib/$(TYPE)/lib$(SONAME).so" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so.$(MAJOR).$(MINOR).$(PATCH)"
-	ln -sf "lib$(SONAME).so.$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so.$(MAJOR).$(MINOR)"
-	ln -sf "lib$(SONAME).so.$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so.$(MAJOR)"
-	ln -sf "lib$(SONAME).so.$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so"
+	cp "lib/$(TYPE)/lib$(SONAME)$(so-ext)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)"
+	ln -sf "lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR)"
+	ln -sf "lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR)"
+	ln -sf "lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext)"
 endif
-	cp "lib/$(TYPE)/lib$(SONAME).a" "$(DESTDIR)$(prefix)/lib/lib$(SONAME).a"
+	cp "lib/$(TYPE)/lib$(SONAME)$(a-ext)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(a-ext)"
 	cp -a include/dpa/utils/./ "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	cp include/dpa/utils.h "$(DESTDIR)$(prefix)/include/dpa/"
 	ldconfig
 
 uninstall:
-	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so.$(MAJOR).$(MINOR).$(PATCH)"
-	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so.$(MAJOR).$(MINOR)"
-	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so.$(MAJOR)"
-	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME).so"
-	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME).a"
+	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)"
+	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR)"
+	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR)"
+	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext)"
+	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(a-ext)"
 	rm -rf "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	rm -f "$(DESTDIR)$(prefix)/include/dpa/utils.h"
 

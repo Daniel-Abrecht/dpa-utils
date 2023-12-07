@@ -37,7 +37,7 @@
 #define dpa__u_cp_bo_refcounted_hashed_ro__get_hash(X) (X)->hash
 #define dpa__u_any_bo_refcounted_hashed_ro__get_hash(X) ((const dpa_u_bo_refcounted_hashed_ro_t*)X)->hash
 
-dpa_u_reproducible dpa_u_export inline dpa_u_hash_t dpa__u_bo_with_hash_ro__get_hash(dpa_u_bo_with_hash_ro_t*const bo){
+dpa_u_reproducible dpa__u_api inline dpa_u_hash_t dpa__u_bo_with_hash_ro__get_hash(dpa_u_bo_with_hash_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
       return dpa__u_any_bo_inline__get_hash(bo);
@@ -50,7 +50,7 @@ dpa_u_reproducible dpa_u_export inline dpa_u_hash_t dpa__u_bo_with_hash_ro__get_
   dpa_u_unreachable("dpa_u_bo_with_hash_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 
-dpa_u_reproducible dpa_u_export inline dpa_u_hash_t dpa__u_bo_with_hash__get_hash(dpa_u_bo_with_hash_t*const bo){
+dpa_u_reproducible dpa__u_api inline dpa_u_hash_t dpa__u_bo_with_hash__get_hash(dpa_u_bo_with_hash_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
       return dpa__u_any_bo_inline__get_hash(bo);

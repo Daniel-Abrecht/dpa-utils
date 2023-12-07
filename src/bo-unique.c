@@ -1,3 +1,12 @@
+////
+// In MSVC, dllexport functions need to be declared as such from the beginning
+#include <dpa/utils/common.h>
+#include <dpa/utils/_bo/typedefs.h>
+struct dpa_u_refcount_freeable;
+dpa_u_export void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable* ref);
+dpa_u_export dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t*const bo);
+////
+
 #include <dpa/utils/bo.h>
 #include <dpa/utils/math.h>
 #include <dpa/utils/hash.h>
@@ -254,7 +263,7 @@ static void shrink(void){
 }
 #endif
 
-dpa_u_export void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable* ref){
+void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable* ref){
   const dpa__u_bo_unique_hashmap_entry_t* bo = dpa_u_container_of(ref, const dpa__u_bo_unique_hashmap_entry_t, refcount.freeable);
   const dpa_u_hash_t hash = bo->bo_hashed.hash;
 #ifndef DPA_U_NO_THREADS
@@ -294,7 +303,7 @@ dpa_u_export void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_f
   dpa_u_abort("%s", "The dpa_u_bo_unique_hashmap_t to be destroyed could not be found");
 }
 
-dpa_u_export dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t*const bo){
+dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t*const bo){
   const dpa_u_hash_t hash = dpa_u_bo_hash(bo);
   const size_t size = dpa_u_bo_get_size(bo);
   const void*const data = dpa_u_bo_data(bo);

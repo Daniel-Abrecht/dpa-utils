@@ -18,7 +18,7 @@
  * \param hash The old hash to be updated
  * \returns the new Hash
  */
-dpa_u_export inline uint64_t dpa_u_hash_64_FNV_1a_append_p(dpa_u_bo_simple_ro_t bo, uint_fast64_t hash){
+dpa__u_api inline uint64_t dpa_u_hash_64_FNV_1a_append_p(dpa_u_bo_simple_ro_t bo, uint_fast64_t hash){
   const uint8_t* data = dpa_u_bo_data(bo);
   for(size_t i=0, n=dpa_u_bo_get_size(bo); i<n; i++)
     hash = (hash ^ data[i]) * DPA_U_FNV_64_PRIME;
@@ -26,12 +26,12 @@ dpa_u_export inline uint64_t dpa_u_hash_64_FNV_1a_append_p(dpa_u_bo_simple_ro_t 
 }
 #define dpa_u_hash_64_FNV_1a_append(bo, old_hash) dpa_u_hash_64_FNV_1a_append_p(dpa_u_t_bo_simple_ro((bo)), (old_hash))
 
-dpa_u_export inline uint64_t dpa_u_hash_64_FNV_1a_p(dpa_u_bo_simple_ro_t bo){
+dpa__u_api inline uint64_t dpa_u_hash_64_FNV_1a_p(dpa_u_bo_simple_ro_t bo){
   return dpa_u_hash_64_FNV_1a_append(bo, DPA_U_FNV_64_OFFSET_BASIS);
 }
 #define dpa_u_hash_64_FNV_1a(bo) dpa_u_hash_64_FNV_1a_p(dpa_u_t_bo_simple_ro((bo)))
 
-dpa_u_export inline uint32_t dpa_u_hash_32_FNV_1a_append_p(dpa_u_bo_simple_ro_t bo, uint_fast32_t hash){
+dpa__u_api inline uint32_t dpa_u_hash_32_FNV_1a_append_p(dpa_u_bo_simple_ro_t bo, uint_fast32_t hash){
   const uint8_t* data = dpa_u_bo_data(bo);
   for(size_t i=0, n=dpa_u_bo_get_size(bo); i<n; i++)
     hash = (hash ^ data[i]) * DPA_U_FNV_32_PRIME;
@@ -39,13 +39,13 @@ dpa_u_export inline uint32_t dpa_u_hash_32_FNV_1a_append_p(dpa_u_bo_simple_ro_t 
 }
 #define dpa_u_hash_32_FNV_1a_append(bo, old_hash) dpa_u_hash_32_FNV_1a_append_p(dpa_u_t_bo_simple_ro((bo)), (old_hash))
 
-dpa_u_export inline uint32_t dpa_u_hash_32_FNV_1a_p(dpa_u_bo_simple_ro_t bo){
+dpa__u_api inline uint32_t dpa_u_hash_32_FNV_1a_p(dpa_u_bo_simple_ro_t bo){
   return dpa_u_hash_32_FNV_1a_append(bo, DPA_U_FNV_32_OFFSET_BASIS);
 }
 #define dpa_u_hash_32_FNV_1a(bo) dpa_u_hash_32_FNV_1a_p(dpa_u_t_bo_simple_ro((bo)))
 
 
-dpa_u_export inline uint16_t dpa_u_hash_16_append_p(dpa_u_bo_simple_ro_t bo, uint_fast32_t hash){
+dpa__u_api inline uint16_t dpa_u_hash_16_append_p(dpa_u_bo_simple_ro_t bo, uint_fast32_t hash){
   const uint8_t* data = dpa_u_bo_data(bo);
   for(size_t i=0, n=dpa_u_bo_get_size(bo); i<n; i++){
     hash = (hash ^ data[i]) * DPA_U_FNV_32_PRIME;
@@ -55,7 +55,7 @@ dpa_u_export inline uint16_t dpa_u_hash_16_append_p(dpa_u_bo_simple_ro_t bo, uin
 }
 #define dpa_u_hash_16_append(bo, old_hash) dpa_u_hash_16_append_p(dpa_u_t_bo_simple_ro((bo)), (old_hash))
 
-dpa_u_export inline uint16_t dpa_u_hash_16_p(dpa_u_bo_simple_ro_t bo){
+dpa__u_api inline uint16_t dpa_u_hash_16_p(dpa_u_bo_simple_ro_t bo){
   return dpa_u_hash_16_append(bo, DPA_U_FNV_32_OFFSET_BASIS);
 }
 #define dpa_u_hash_16(bo) dpa_u_hash_16_p(dpa_u_t_bo_simple_ro((bo)))
@@ -91,13 +91,13 @@ typedef size_t dpa_u_hash_t;
   )
 #define dpa_u_hash_FNV_1a(bo) dpa_u_hash_FNV_1a_p(dpa_u_t_bo_simple_ro((bo)))
 
-dpa_u_export extern dpa_u_hash_t dpa_hash_offset_basis;
+dpa__u_api_var extern dpa_u_hash_t dpa_hash_offset_basis;
 
 struct dpa__u_default_hash_args {
   dpa_u_bo_simple_ro_t bo;
   dpa_u_hash_t old_hash;
 };
-dpa_u_export inline dpa_u_hash_t dpa_u_bo_hash_p(const struct dpa__u_default_hash_args args){
+dpa__u_api inline dpa_u_hash_t dpa_u_bo_hash_p(const struct dpa__u_default_hash_args args){
   // The xor is to allow an initial old_hash of 0.
   const dpa_u_hash_t basis = dpa_hash_offset_basis;
   return dpa_u_hash_FNV_1a_append(args.bo, args.old_hash ^ basis) ^ basis;
@@ -111,7 +111,7 @@ dpa_u_export inline dpa_u_hash_t dpa_u_bo_hash_p(const struct dpa__u_default_has
  */
 #define dpa_u_bo_hash(...) dpa__u_bo_hash(__VA_ARGS__,)
 
-void dpa_u_getrandom(void* buf, size_t buflen);
-void dpa_u_init_dpa_hash_offset_basis(void);
+dpa__u_api void dpa_u_getrandom(void* buf, size_t buflen);
+dpa__u_api void dpa_u_init_dpa_hash_offset_basis(void);
 
 #endif

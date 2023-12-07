@@ -24,7 +24,7 @@
 #define dpa__u_cp_bo_unique_hashmap__put(X)  dpa_u_refcount_put_s(&(X)->refcount.freeable)
 #define dpa__u_any_bo_unique_hashmap__put(X) dpa_u_refcount_put_s(&((dpa_u_bo_unique_hashmap_t)(X))->refcount.freeable)
 
-dpa__u_really_inline dpa_u_export inline void dpa__u_v_bo_unique__put(dpa_u_bo_unique_t ubo){
+dpa__u_really_inline dpa__u_api inline void dpa__u_v_bo_unique__put(dpa_u_bo_unique_t ubo){
   switch(dpa_u_bo_get_type(ubo)){
     case DPA_U_BO_INLINE: return;
     case DPA_U_BO_UNIQUE_HASHMAP: dpa__u_cp_bo_unique_hashmap__put(ubo.bo_unique_hashmap); return;
@@ -33,7 +33,7 @@ dpa__u_really_inline dpa_u_export inline void dpa__u_v_bo_unique__put(dpa_u_bo_u
 }
 #define dpa__u_p_bo_unique__put(X)   dpa__u_v_bo_unique__put(*(X))
 #define dpa__u_cp_bo_unique__put(X)  dpa__u_v_bo_unique__put(*(X))
-dpa__u_really_inline dpa_u_export inline void dpa__u_any_bo_unique__put(dpa_u_any_bo_unique_t*const ubo){
+dpa__u_really_inline dpa__u_api inline void dpa__u_any_bo_unique__put(dpa_u_any_bo_unique_t*const ubo){
   switch(dpa_u_bo_get_type(ubo)){
     case DPA_U_BO_INLINE: return;
     case DPA_U_BO_UNIQUE_HASHMAP: dpa__u_cp_bo_unique_hashmap__put((dpa_u_bo_unique_hashmap_t)ubo); return;
@@ -56,7 +56,7 @@ dpa__u_really_inline dpa_u_export inline void dpa__u_any_bo_unique__put(dpa_u_an
 #define dpa__u_cp_bo_refcounted_hashed_ro__put(X)  dpa_u_refcount_put_s((X)->bo_refcounted.refcount)
 #define dpa__u_any_bo_refcounted_hashed_ro__put(X) dpa_u_refcount_put_s(((const dpa_u_bo_refcounted_hashed_ro_t*)(X))->bo_refcounted.refcount)
 
-dpa__u_really_inline dpa_u_export inline void dpa__u_bo_gc_ro__put(dpa_u_bo_gc_ro_t*const bo){
+dpa__u_really_inline dpa__u_api inline void dpa__u_bo_gc_ro__put(dpa_u_bo_gc_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: return;
     case DPA_U_BO_UNIQUE_HASHMAP: dpa__u_cp_bo_unique_hashmap__put((dpa_u_bo_unique_hashmap_t)bo); return;

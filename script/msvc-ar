@@ -1,6 +1,6 @@
 #!/bin/bash
 
-msvcdir="$(printf '%s\n' "/mnt/c/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/"*/ | tail -n 1)"
+if [ -z "$msvcdir" ]; then msvcdir="$(printf '%s\n' "/mnt/c/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/"*/ | tail -n 1)"; fi
 export PATH="$PATH:${msvcdir}bin/Hostx64/x64"
 
 options="$1"; shift

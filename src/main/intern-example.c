@@ -4,8 +4,8 @@
 #include <dpa/utils/hash.h>
 #include <inttypes.h>
 #include <stdio.h>
+#include <math.h>
 #include <errno.h>
-#include <tgmath.h>
 
 static void print_hashmap_stats(){
   const dpa_u_bo_unique_hashmap_stats_t stats = dpa_u_bo_unique_hashmap_stats();
@@ -21,7 +21,7 @@ static void print_hashmap_stats(){
     "\n",
     stats.entry_count,
     stats.collision_count,
-    (long long unsigned)(stats.entry_count - stats.total_buckets * (1. - pow((1.-1./stats.total_buckets), stats.entry_count))),
+    (long long unsigned)(stats.entry_count - stats.total_buckets * (1. - powf((1.-1./stats.total_buckets), stats.entry_count))),
     DPA_U_MAX(0,(long long)stats.entry_count-(long long)stats.total_buckets),
     stats.empty_count,
     stats.total_buckets,

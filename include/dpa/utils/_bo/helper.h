@@ -102,7 +102,7 @@
     char(*)[2]: F((Y),(X),-1) \
   )
 
-dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline dpa_u_bo_simple_ro_t dpa__u_simple_ro_fix_type(dpa_u_bo_simple_ro_t v){
+dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline dpa_u_bo_simple_ro_t dpa__u_simple_ro_fix_type(dpa_u_bo_simple_ro_t v){
   return (dpa_u_bo_simple_ro_t){
     .type = DPA_U_BO_SIMPLE,
     .size = v.size,
@@ -110,7 +110,7 @@ dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline dpa_u_bo_simple_ro_t 
   };
 }
 
-dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline dpa_u_bo_simple_t dpa__u_simple_fix_type(dpa_u_bo_simple_t v){
+dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline dpa_u_bo_simple_t dpa__u_simple_fix_type(dpa_u_bo_simple_t v){
   return (dpa_u_bo_simple_t){
     .type = DPA_U_BO_SIMPLE,
     .size = v.size,
@@ -118,7 +118,7 @@ dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline dpa_u_bo_simple_t dpa
   };
 }
 
-dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline dpa_u_bo_hashed_ro_t dpa__u_hashed_ro_fix_type(dpa_u_bo_hashed_ro_t v){
+dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t dpa__u_hashed_ro_fix_type(dpa_u_bo_hashed_ro_t v){
   return (dpa_u_bo_hashed_ro_t){
     .bo_simple = {
       .type = DPA_U_BO_HASHED,

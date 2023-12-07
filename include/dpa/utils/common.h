@@ -51,6 +51,16 @@
 #define DPA_U_FIRST_1(X, ...) X
 #define DPA_U_FIRST(...) DPA_U_FIRST_1(__VA_ARGS__,1)
 
+
+#ifdef _MSC_VER
+
+#define dpa__u_packed 
+#define dpa_u_export __declspec(dllexport)
+#define dpa_u_init /* TODO */
+#define dpa_u_import __declspec(dllimport)
+
+#else
+
 #if __STDC_VERSION__ < 202311
 #define dpa__u_packed __attribute__((packed))
 #define dpa_u_export __attribute__((visibility("default")))
@@ -59,6 +69,22 @@
 #define dpa__u_packed [[gnu::packed]]
 #define dpa_u_export [[gnu::visibility("default")]]
 #define dpa_u_init [[gnu::constructor]]
+#endif
+
+#define dpa_u_import
+
+#endif
+
+#ifdef DPA__U_BUILD_LIB
+#define dpa__u_api dpa_u_export
+// #ifdef _MSC_VER
+// #define dpa__u_api_var dpa_u_import
+// #else
+#define dpa__u_api_var dpa_u_export
+// #endif
+#else
+#define dpa__u_api dpa_u_import
+#define dpa__u_api_var dpa_u_import
 #endif
 
 #if defined(__llvm__) || defined(_MSC_VER)
@@ -151,7 +177,7 @@ enum {
   DPA_U_LONG_LONG_MAX_B10_DIGITS = CHAR_BIT * sizeof(long long) / 3 + 3,
 };
 
-dpa_u_export dpa_u_format_param(printf, 3, 4) inline char* dpa__u_compound_printf(size_t s, char c[], const char* format, ...){
+dpa__u_api dpa_u_format_param(printf, 3, 4) inline char* dpa__u_compound_printf(size_t s, char c[], const char* format, ...){
   va_list args;
   va_start(args, format);
   vsnprintf(c,s, format, args);
@@ -184,10 +210,10 @@ dpa_u_export dpa_u_format_param(printf, 3, 4) inline char* dpa__u_compound_print
 #define DPA_U_ENUM(ENUM) \
   enum ENUM { DPA_U_ENUM_CONST(ENUM ## _list) }; \
   enum { ENUM ## _count = DPA_U_ENUM_COUNT(ENUM ## _list) }; \
-  dpa_u_export extern const char*const ENUM ## _s[];
+  dpa__u_api_var extern const char*const ENUM ## _s[];
 
 #define DPA_U_ENUM_DEF(ENUM) \
-  const char*const ENUM ## _s[] = { DPA_U_ENUM_STR(ENUM ## _list) };
+  dpa__u_api const char*const ENUM ## _s[] = { DPA_U_ENUM_STR(ENUM ## _list) };
 
 #define dpa_u_enum_get_name(ENUM,X) \
   ( (X) < (int)ENUM ## _count && ENUM ## _s[(X)] \
@@ -197,7 +223,7 @@ dpa_u_export dpa_u_format_param(printf, 3, 4) inline char* dpa__u_compound_print
 
 //
 
-dpa_u_export extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_format_param(printf, 1, 2);
+dpa__u_api extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_format_param(printf, 1, 2);
 #define dpa_u_abort(F, ...) { dpa_u_abort_p("%s:%d: %s: " F "\n",  __FILE__, __LINE__, __func__, __VA_ARGS__); }
 
 #if __STDC_VERSION__ >= 202311
@@ -220,7 +246,7 @@ dpa_u_export extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_f
 #define dpa_u_unreachable(...) { abort(); if(0){ dpa_u_abort(__VA_ARGS__); } }
 #endif
 
-dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline int dpa_u_ptr_compare(const void*const a, const void*const b){
+dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline int dpa_u_ptr_compare(const void*const a, const void*const b){
   return (uintptr_t)a < (uintptr_t)b ? -1 : (uintptr_t)b < (uintptr_t)a ? 1 : 0;
 }
 

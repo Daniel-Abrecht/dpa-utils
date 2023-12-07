@@ -2,55 +2,67 @@
 
 set -e
 
-winkitincdir="$(printf '%s\n' "/mnt/c/Program Files (x86)/Windows Kits/10/Include/"*/ | tail -n 1)"
-winkitlibdir="$(printf '%s\n' "/mnt/c/Program Files (x86)/Windows Kits/10/Lib/"*/ | tail -n 1)"
-msvcdir="$(printf '%s\n' "/mnt/c/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/"*/ | tail -n 1)"
+# You can export these variables in your shell to override them
+if [ -z "$winkitdir" ]; then winkitdir="/mnt/c/Program Files (x86)/Windows Kits/10"; fi
+if [ -z "$winkitincdir" ]; then winkitincdir="$(printf '%s\n' "${winkitdir}/Include/"*/ | tail -n 1)"; fi
+if [ -z "$winkitlibdir" ]; then winkitlibdir="$(printf '%s\n' "${winkitdir}/Lib/"*/ | tail -n 1)"; fi
+if [ -z "$msvcdir" ]; then msvcdir="$(printf '%s\n' "/mnt/c/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/"*/ | tail -n 1)"; fi
 export PATH="$PATH:${msvcdir}bin/Hostx64/x64"
 
 args=(
   "cl.exe"
   "/I" "C:${msvcdir:6}include/"
   "/I" "C:${winkitincdir:6}ucrt/"
-#  "/I" "C:${msvcdir:6}lib/x64/"
-  "/permissive-"
+  "/I" "C:${winkitincdir:6}um/"
+  "/I" "C:${winkitincdir:6}shared/"
   "/utf-8"
 #  "/Zc:inline" # This option is broken. The exports in the src/gen/*.c files are ignored
   "/wd4114"
+  "/wd4116"
 )
 largs=(
+  "/MACHINE:X64"
   "/LIBPATH:C:${msvcdir:6}lib/x64/"
   "/LIBPATH:C:${winkitlibdir:6}ucrt/x64/"
   "/LIBPATH:C:${winkitlibdir:6}um/x64/"
+  "Advapi32.Lib"
 )
 libdir=()
 
 add-lib(){
-  if [ -f "$1" ]
-  then
-    echo "$1"
-    return 0
-  fi
   if [ "$1" = "m" ]
     then return 0
   fi
+  if [ -f "$1" ]; then res="$1"; fi
   for d in "${libdir[@]}"
   do
+    if [ -n "$res" ]; then break; fi
     if [ -f "${d}lib$1.lib" ]
     then
-      args+=("${d}lib$1.lib")
-      return 0
+      res="${d}lib$1.lib"
+    elif [ -f "${d}lib$1.a.lib" ]
+    then
+      res="${d}lib$1.a.lib"
     elif [ -f "${d}lib$1.a" ]
     then
-      args+=("${d}lib$1.a")
-      return 0
+      res="${d}lib$1.a"
     fi
   done
-  echo "library not found: $1" >&2
-  exit 1
+  if [ -z "$res" ]
+  then
+    echo "library not found: $1" >&2
+    exit 1
+  fi
+  if [ -n "$wholearchive" ] && [ -n "$shared" ]
+    then largs+=("/WHOLEARCHIVE:$res")
+  fi
+  args+=("$res")
 }
 
 type=exe
 outfile=
+wholearchive=
+shared=
 
 while [ $# -gt 0 ]
 do
@@ -68,10 +80,13 @@ do
      -l*) add-lib "${arg:2}" ;;
       -o) outfile="$1"; shift ;;
      -o*) outfile="${arg:2}" ;;
---shared) args+=("/LD") ;;
+--shared) args+=("/LD"); shared=1; ;;
       -x) case "$1"  in c) args+=("/TC");; c++) args+=("/TP");; esac; shift ;;
      -g*) args+=("/Zi") ;;
+     -Wl,--whole-archive) wholearchive=1 ;;
+     -Wl,--no-whole-archive) wholearchive= ;;
       -*) ;;
+   *.lib) add-lib "$arg" ;;
        *) args+=("$arg") ;;
   esac
 done

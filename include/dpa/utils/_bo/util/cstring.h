@@ -1,6 +1,6 @@
 
 #define DPA_U_BO_DECLARE_UNIQUE_CSTRING(name, ...) \
-  dpa_u_unsequenced dpa__u_really_inline dpa_u_export inline dpa_u_bo_unique_t name (void){ \
+  dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline dpa_u_bo_unique_t name (void){ \
     if((sizeof((const char[]){__VA_ARGS__})-1) <= DPA_U_BO_INLINE_MAX_SIZE){ \
       dpa_u_bo_unique_t ubo = { \
         .bo_inline = { \

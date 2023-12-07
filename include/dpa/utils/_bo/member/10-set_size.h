@@ -37,7 +37,7 @@
 #define dpa__u_p_bo_refcounted_hashed_ro__set_size(X,S) (void)(assert((S) <= DPA_U_BO_MAX_SIZE       ),((X)->size=(S)))
 
 #define dpa__u_v_bo__set_size(X,S) dpa__u_p_bo__set_size(&(X),(S))
-dpa__u_really_inline dpa_u_export inline void dpa__u_p_bo__set_size(dpa_u_bo_t*const bo, size_t size){
+dpa__u_really_inline dpa__u_api inline void dpa__u_p_bo__set_size(dpa_u_bo_t*const bo, size_t size){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: {
       assert(size <= DPA_U_BO_INLINE_MAX_SIZE);

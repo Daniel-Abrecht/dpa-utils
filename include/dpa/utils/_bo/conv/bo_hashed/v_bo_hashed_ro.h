@@ -31,7 +31,7 @@
 #define dpa__u_any_bo_refcounted_hashed_ro__v_bo_hashed_ro(X) dpa__u_v_bo_hashed_ro__helper(any_bo_refcounted_hashed_ro,(X))
 
 #define dpa__u_bo_with_hash__v_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_bo_with_hash__v_bo_hashed_ro_p(X))
-dpa_u_reproducible dpa__u_really_inline dpa_u_export inline dpa_u_bo_hashed_ro_t dpa__u_bo_with_hash__v_bo_hashed_ro_p(dpa_u_bo_with_hash_t*const bo){
+dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t dpa__u_bo_with_hash__v_bo_hashed_ro_p(dpa_u_bo_with_hash_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
       return (const dpa_u_bo_hashed_ro_t){
@@ -55,7 +55,7 @@ dpa_u_reproducible dpa__u_really_inline dpa_u_export inline dpa_u_bo_hashed_ro_t
   dpa_u_unreachable("dpa_u_bo_with_hash_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 #define dpa__u_bo_with_hash_ro__v_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_bo_with_hash_ro__v_bo_hashed_ro_p(X))
-dpa_u_reproducible dpa__u_really_inline dpa_u_export inline dpa_u_bo_hashed_ro_t dpa__u_bo_with_hash_ro__v_bo_hashed_ro_p(dpa_u_bo_with_hash_ro_t*const bo){
+dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t dpa__u_bo_with_hash_ro__v_bo_hashed_ro_p(dpa_u_bo_with_hash_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
       return (const dpa_u_bo_hashed_ro_t){
