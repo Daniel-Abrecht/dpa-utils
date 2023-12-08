@@ -25,7 +25,6 @@
 
 #ifdef _MSC_VER
 #define DPA_U_BO_NOT_PACKED
-#define __attribute__(X)
 #endif
 
 ///////////////////////////////////////
@@ -155,6 +154,14 @@ typedef struct { int x; } dpa_u_invalid_selection_t;
 #define dpa_u_reproducible  __attribute__((pure))
 #else
 #define dpa_u_reproducible
+#endif
+
+#if __STDC_VERSION__ >= 202311
+#define dpa_u_weak [[gnu::weak]]
+#elif defined(__GNUC__) || defined(__llvm__)
+#define dpa_u_weak  __attribute__((weak))
+#else
+#define dpa_u_weak
 #endif
 
 #if __STDC_VERSION__ >= 202311

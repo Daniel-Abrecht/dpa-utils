@@ -83,6 +83,8 @@ do
 --shared) args+=("/LD"); shared=1; ;;
       -x) case "$1"  in c) args+=("/TC");; c++) args+=("/TP");; esac; shift ;;
      -g*) args+=("/Zi") ;;
+     -O1) args+=("/O1") ;;
+     -O2) args+=("/O2") ;;
      -Wl,--whole-archive) wholearchive=1 ;;
      -Wl,--no-whole-archive) wholearchive= ;;
       -*) ;;

@@ -28,8 +28,7 @@ dpa__u_api bool dpa_u_testcase_result(int fd, const char* name, const char* resu
 
 #define DPA_U_TESTCASE(NAME)  \
   static int DPA_U_CONCAT_E(dpa_u_test_f_, __LINE__)(void); \
-  __attribute__((constructor,used)) \
-  static void DPA_U_CONCAT_E(dpa_u_test_c_, __LINE__)(void){ \
+  dpa_u_init static void DPA_U_CONCAT_E(dpa_u_test_c_, __LINE__)(void){ \
     static struct dpa__u_testcase entry = { \
       .name = NAME, \
       .run = DPA_U_CONCAT_E(dpa_u_test_f_, __LINE__), \
@@ -57,8 +56,8 @@ struct dpa__u_testcase {
 };
 extern struct dpa__u_testcase* dpa__u_testcase_list;
 
-__attribute__((weak)) void dpa__u_test_setup(void);
-__attribute__((weak)) void dpa__u_test_teardown(void);
+dpa_u_weak void dpa__u_test_setup(void);
+dpa_u_weak void dpa__u_test_teardown(void);
 
 /** @} */
 /** @} */
