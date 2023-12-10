@@ -1,0 +1,171 @@
+#!/bin/bash
+
+type_k=(
+  "name"
+  "alias"
+  "simple"
+  "variant"
+  "derived"
+  "any"
+  "opaque"
+  "ro"
+  "pointer"
+  # dtypes
+  "di"
+  "du"
+  "ds"
+  "dh"
+  "dr"
+  "drh"
+)
+
+type_v=(
+# name                         alias s v d a o r p  i u s h r rh
+  "bo_inline                    i    1 0 0 0 0 1 0  1 0 0 0 0 0"
+  "bo_unique_hashmap            uh   1 0 0 0 0 1 1  0 1 0 0 0 0"
+  "bo_simple_ro                 sr   1 0 0 0 0 1 0  0 0 1 0 0 0"
+  "bo_simple                    s    1 0 0 0 0 0 0  0 0 1 0 0 0"
+  "bo_unique                    u    0 1 0 0 0 1 0  1 1 0 0 0 0"
+  "bo_ro                        br   0 1 0 0 0 1 0  1 1 1 0 0 0"
+  "bo                           b    0 1 0 0 0 0 0  1 0 1 0 0 0"
+  "bo_hashed_ro                 hr   0 0 1 0 0 1 0  0 0 0 1 0 0"
+  "bo_hashed                    h    0 0 1 0 0 0 0  0 0 0 1 0 0"
+  "bo_refcounted_ro             rr   0 0 1 0 0 1 0  0 0 0 0 1 0"
+  "bo_refcounted                r    0 0 1 0 0 0 0  0 0 0 0 1 0"
+  "bo_refcounted_hashed_ro      rhr  0 0 1 0 0 1 0  0 0 0 0 0 1"
+  "any_bo_inline                ai   0 0 0 1 1 1 0  1 0 0 0 0 0"
+  "any_bo_unique_hashmap        auh  0 0 0 1 1 0 0  0 1 0 0 0 0"
+  "any_bo_simple_ro             asr  0 0 0 1 1 1 0  0 1 1 1 1 1"
+  "any_bo_simple                as   0 0 0 1 1 0 0  0 0 1 1 1 0"
+  "any_bo_unique                au   0 0 0 1 1 1 0  1 1 0 0 0 0"
+  "any_bo_ro                    abr  0 0 0 1 1 1 0  1 1 1 1 1 1"
+  "any_bo                       ab   0 0 0 1 1 0 0  1 0 1 1 1 0"
+  "any_bo_hashed_ro             ahr  0 0 0 1 1 1 0  0 0 0 1 0 0"
+  "any_bo_hashed                ah   0 0 0 1 1 0 0  0 0 0 1 0 0"
+  "any_bo_refcounted_ro         arr  0 0 0 1 1 1 0  0 0 0 0 1 1"
+  "any_bo_refcounted            ar   0 0 0 1 1 0 0  0 0 0 0 1 0"
+  "any_bo_refcounted_hashed_ro  arhr 0 0 0 1 1 1 0  0 0 0 0 0 1"
+  "bo_with_hash_ro              whr  0 0 0 0 1 1 0  1 1 0 1 0 1"
+  "bo_with_hash                 wh   0 0 0 0 1 0 0  1 0 0 1 0 0"
+  "bo_gc_ro                     gcr  0 0 0 0 1 1 0  1 1 0 0 1 1"
+  "bo_with_refcount_ro          wrr  0 0 0 0 1 1 0  0 1 0 0 1 1"
+  "bo_with_refcount             wr   0 0 0 0 1 0 0  0 0 0 0 1 0"
+  "bo_with_refcount_and_hash_ro wrhr 0 0 0 0 1 1 0  0 1 0 0 0 1"
+)
+
+stype_k=(
+  "dname"
+  "dalias"
+  "dvalue"
+  "dderived"
+)
+
+dtype_v=(
+  "BO_INLINE            di  1 0"
+  "BO_UNIQUE_HASHMAP    du  2 0"
+  "BO_SIMPLE            ds  3 0"
+  "BO_HASHED            dh  4 1"
+  "BO_REFCOUNTED        dr  5 1"
+  "BO_REFCOUNTED_HASHED drh 6 1"
+)
+
+declare -A t
+
+type-unpack(){
+  t=()
+  t[name]="$1"; shift
+  t[alias]="$1"; shift
+  t[simple]="$1"; shift
+  t[variant]="$1"; shift
+  t[derived]="$1"; shift
+  t[any]="$1"; shift
+  t[opaque]="$1"; shift
+  t[ro]="$1"; shift
+  t[pointer]="$1"; shift
+  t[di]="$1"; shift
+  t[du]="$1"; shift
+  t[ds]="$1"; shift
+  t[dh]="$1"; shift
+  t[dr]="$1"; shift
+  t[drh]="$1"; shift
+  dtypes=()
+  if [ "$di" = 1 ]; then dtypes+=( BO_INLINE ); fi
+  if [ "$du" = 1 ]; then dtypes+=( BO_UNIQUE_HASHMAP ); fi
+  if [ "$ds" = 1 ]; then dtypes+=( BO_SIMPLE ); fi
+  if [ "$dh" = 1 ]; then dtypes+=( BO_HASHED ); fi
+  if [ "$dr" = 1 ]; then dtypes+=( BO_REFCOUNTED ); fi
+  if [ "$drh" = 1 ]; then dtypes+=( BO_REFCOUNTED_HASHED ); fi
+}
+
+type-k-index(){
+  x="$1"
+  for i in "${!type_k[@]}"
+  do
+    if [[ "${type_k[$i]}" = "$x" ]]
+    then
+      echo "$i"
+      return 0
+    fi
+  done
+  return 1
+}
+
+dtype-k-index(){
+  x="$1"
+  for i in "${!dtype_k[@]}"
+  do
+    if [[ "${dtype_k[$i]}" = "$x" ]]
+    then
+      echo "$i"
+      return 0
+    fi
+  done
+  return 1
+}
+
+type-lookup(){
+  key="$1"; shift
+  value="$1"; shift
+  result=()
+  ki="$(type-k-index "$key")"
+  for e in "${type_v[@]}"
+  do
+    e2=( $e )
+    if [ "${e2[$ki]}" = "$value" ]
+    then
+      result+=("$e")
+    fi
+  done
+}
+
+dtype-lookup(){
+  key="$1"; shift
+  value="$1"; shift
+  result=()
+  ki="$(dtype-k-index "$key")"
+  for e in "${dtype_v[@]}"
+  do
+    e2=( $e )
+    if [ "${e2[$ki]}" = "$value" ]
+    then
+      result+=("$e")
+    fi
+  done
+}
+
+gen-t-conv-list(){
+  for e in "${type_v[@]}"
+  do
+    type-unpack $e
+    declare -A "target=( ${t[@]@K} )"
+    target_dtypes=( "${dtypes[@]}" )
+    for e in "${type_v[@]}"
+    do
+      type-unpack $e
+      if [ "${target[ro]}" = 1 ] && [ "${t[ro]}" = 0 ]; then continue; fi
+      echo "dpa_u_t_${target[name]} ${t[name]}"
+    done
+  done
+}
+
+gen-t-conv-list
