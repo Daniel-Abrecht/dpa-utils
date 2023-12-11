@@ -10,6 +10,9 @@ type_k=(
   "opaque"
   "ro"
   "pointer"
+  "hased"
+  "refcounted"
+  "unconvertable"
   # dtypes
   "di"
   "du"
@@ -20,37 +23,37 @@ type_k=(
 )
 
 type_v=(
-# name                         alias s v d a o r p  i u s h r rh
-  "bo_inline                    i    1 0 0 0 0 1 0  1 0 0 0 0 0"
-  "bo_unique_hashmap            uh   1 0 0 0 0 1 1  0 1 0 0 0 0"
-  "bo_simple_ro                 sr   1 0 0 0 0 1 0  0 0 1 0 0 0"
-  "bo_simple                    s    1 0 0 0 0 0 0  0 0 1 0 0 0"
-  "bo_unique                    u    0 1 0 0 0 1 0  1 1 0 0 0 0"
-  "bo_ro                        br   0 1 0 0 0 1 0  1 1 1 0 0 0"
-  "bo                           b    0 1 0 0 0 0 0  1 0 1 0 0 0"
-  "bo_hashed_ro                 hr   0 0 1 0 0 1 0  0 0 0 1 0 0"
-  "bo_hashed                    h    0 0 1 0 0 0 0  0 0 0 1 0 0"
-  "bo_refcounted_ro             rr   0 0 1 0 0 1 0  0 0 0 0 1 0"
-  "bo_refcounted                r    0 0 1 0 0 0 0  0 0 0 0 1 0"
-  "bo_refcounted_hashed_ro      rhr  0 0 1 0 0 1 0  0 0 0 0 0 1"
-  "any_bo_inline                ai   0 0 0 1 1 1 0  1 0 0 0 0 0"
-  "any_bo_unique_hashmap        auh  0 0 0 1 1 0 0  0 1 0 0 0 0"
-  "any_bo_simple_ro             asr  0 0 0 1 1 1 0  0 1 1 1 1 1"
-  "any_bo_simple                as   0 0 0 1 1 0 0  0 0 1 1 1 0"
-  "any_bo_unique                au   0 0 0 1 1 1 0  1 1 0 0 0 0"
-  "any_bo_ro                    abr  0 0 0 1 1 1 0  1 1 1 1 1 1"
-  "any_bo                       ab   0 0 0 1 1 0 0  1 0 1 1 1 0"
-  "any_bo_hashed_ro             ahr  0 0 0 1 1 1 0  0 0 0 1 0 0"
-  "any_bo_hashed                ah   0 0 0 1 1 0 0  0 0 0 1 0 0"
-  "any_bo_refcounted_ro         arr  0 0 0 1 1 1 0  0 0 0 0 1 1"
-  "any_bo_refcounted            ar   0 0 0 1 1 0 0  0 0 0 0 1 0"
-  "any_bo_refcounted_hashed_ro  arhr 0 0 0 1 1 1 0  0 0 0 0 0 1"
-  "bo_with_hash_ro              whr  0 0 0 0 1 1 0  1 1 0 1 0 1"
-  "bo_with_hash                 wh   0 0 0 0 1 0 0  1 0 0 1 0 0"
-  "bo_gc_ro                     gcr  0 0 0 0 1 1 0  1 1 0 0 1 1"
-  "bo_with_refcount_ro          wrr  0 0 0 0 1 1 0  0 1 0 0 1 1"
-  "bo_with_refcount             wr   0 0 0 0 1 0 0  0 0 0 0 1 0"
-  "bo_with_refcount_and_hash_ro wrhr 0 0 0 0 1 1 0  0 1 0 0 0 1"
+# name                         alias s v d a o r p h r u  i u s h r rh
+  "bo_inline                    i    1 0 0 0 0 X 0 1 0 1  1 0 0 0 0 0"
+  "bo_unique_hashmap            uh   1 0 0 0 0 1 1 1 1 1  0 1 0 0 0 0"
+  "bo_simple_ro                 sr   1 0 0 0 0 1 0 0 0 0  0 0 1 0 0 0"
+  "bo_simple                    s    1 0 0 0 0 0 0 0 0 0  0 0 1 0 0 0"
+  "bo_unique                    u    0 1 0 0 0 1 0 1 X 1  1 1 0 0 0 0"
+  "bo_ro                        br   0 1 0 0 0 1 0 X X 0  1 1 1 0 0 0"
+  "bo                           b    0 1 0 0 0 0 0 X X 0  1 0 1 0 0 0"
+  "bo_hashed_ro                 hr   0 0 1 0 0 1 0 1 0 0  0 0 0 1 0 0"
+  "bo_hashed                    h    0 0 1 0 0 0 0 1 0 0  0 0 0 1 0 0"
+  "bo_refcounted_ro             rr   0 0 1 0 0 1 0 0 1 0  0 0 0 0 1 0"
+  "bo_refcounted                r    0 0 1 0 0 0 0 0 1 0  0 0 0 0 1 0"
+  "bo_refcounted_hashed_ro      rhr  0 0 1 0 0 1 0 1 1 0  0 0 0 0 0 1"
+  "any_bo_inline                ai   0 0 0 1 1 1 0 1 0 1  1 0 0 0 0 0"
+  "any_bo_unique_hashmap        auh  0 0 0 1 1 1 0 1 1 1  0 1 0 0 0 0"
+  "any_bo_simple_ro             asr  0 0 0 1 1 1 0 X X 0  0 1 1 1 1 1"
+  "any_bo_simple                as   0 0 0 1 1 0 0 X X 0  0 0 1 1 1 0"
+  "any_bo_unique                au   0 0 0 1 1 1 0 1 X 1  1 1 0 0 0 0"
+  "any_bo_ro                    abr  0 0 0 1 1 1 0 X X 0  1 1 1 1 1 1"
+  "any_bo                       ab   0 0 0 1 1 0 0 X X 0  1 0 1 1 1 0"
+  "any_bo_hashed_ro             ahr  0 0 0 1 1 1 0 1 0 0  0 0 0 1 0 0"
+  "any_bo_hashed                ah   0 0 0 1 1 0 0 1 0 0  0 0 0 1 0 0"
+  "any_bo_refcounted_ro         arr  0 0 0 1 1 1 0 X 1 0  0 0 0 0 1 1"
+  "any_bo_refcounted            ar   0 0 0 1 1 0 0 0 1 0  0 0 0 0 1 0"
+  "any_bo_refcounted_hashed_ro  arhr 0 0 0 1 1 1 0 1 1 0  0 0 0 0 0 1"
+  "bo_with_hash_ro              whr  0 0 0 0 1 1 0 1 0 0  1 1 0 1 0 1"
+  "bo_with_hash                 wh   0 0 0 0 1 0 0 1 0 0  1 0 0 1 0 0"
+  "bo_gc_ro                     gcr  0 0 0 0 1 1 0 1 X 0  1 1 0 0 1 1"
+  "bo_with_refcount_ro          wrr  0 0 0 0 1 1 0 X 1 0  0 1 0 0 1 1"
+  "bo_with_refcount             wr   0 0 0 0 1 0 0 X 1 0  0 0 0 0 1 0"
+  "bo_with_refcount_and_hash_ro wrhr 0 0 0 0 1 1 0 1 1 0  0 1 0 0 0 1"
 )
 
 stype_k=(
@@ -82,6 +85,9 @@ type-unpack(){
   t[opaque]="$1"; shift
   t[ro]="$1"; shift
   t[pointer]="$1"; shift
+  t[hashed]="$1"; shift
+  t[refcounted]="$1"; shift
+  t[unconvertable]="$1"; shift
   t[di]="$1"; shift
   t[du]="$1"; shift
   t[ds]="$1"; shift
@@ -89,12 +95,16 @@ type-unpack(){
   t[dr]="$1"; shift
   t[drh]="$1"; shift
   dtypes=()
-  if [ "$di" = 1 ]; then dtypes+=( BO_INLINE ); fi
-  if [ "$du" = 1 ]; then dtypes+=( BO_UNIQUE_HASHMAP ); fi
-  if [ "$ds" = 1 ]; then dtypes+=( BO_SIMPLE ); fi
-  if [ "$dh" = 1 ]; then dtypes+=( BO_HASHED ); fi
-  if [ "$dr" = 1 ]; then dtypes+=( BO_REFCOUNTED ); fi
-  if [ "$drh" = 1 ]; then dtypes+=( BO_REFCOUNTED_HASHED ); fi
+  dbtypes=()
+  local dbs=
+  if [ "${t[di]}"  = 1 ]; then dtypes+=( BO_INLINE ); fi
+  if [ "${t[du]}"  = 1 ]; then dtypes+=( BO_UNIQUE_HASHMAP ); fi
+  dbtypes=("${dtypes[@]}")
+  if [ "${t[ds]}"  = 1 ]; then dbs=1; dtypes+=( BO_SIMPLE ); fi
+  if [ "${t[dh]}"  = 1 ]; then dbs=1; dtypes+=( BO_HASHED ); fi
+  if [ "${t[dr]}"  = 1 ]; then dbs=1; dtypes+=( BO_REFCOUNTED ); fi
+  if [ "${t[drh]}" = 1 ]; then dbs=1; dtypes+=( BO_REFCOUNTED_HASHED ); fi
+  if [ "$dbs" = 1 ]; then dbtypes+=( BO_SIMPLE ); fi  
 }
 
 type-k-index(){
@@ -153,19 +163,98 @@ dtype-lookup(){
   done
 }
 
+in-array(){
+  needle="$1"; shift
+  for entry in "$@"
+  do
+    if [ "$entry" = "$needle" ]
+      then return 0
+    fi
+  done
+  return 1
+}
+
+is-subset(){
+  local -n a="$1"
+  local -n b="$2"
+  for v in "${a[@]}"
+  do
+    if ! in-array "$v" "${b[@]}"
+      then return 1
+    fi
+  done
+  return 0
+}
+
+is-same-set(){
+  local -n a="$1"
+  local -n b="$2"
+  [ "${#a[@]}" = "${#a[@]}" ] && is-subset "$1" "$2"
+}
+
 gen-t-conv-list(){
+  t_conv=()
   for e in "${type_v[@]}"
   do
     type-unpack $e
     declare -A "target=( ${t[@]@K} )"
     target_dtypes=( "${dtypes[@]}" )
+    target_dbtypes=( "${dbtypes[@]}" )
     for e in "${type_v[@]}"
     do
       type-unpack $e
-      if [ "${target[ro]}" = 1 ] && [ "${t[ro]}" = 0 ]; then continue; fi
-      echo "dpa_u_t_${target[name]} ${t[name]}"
+      if [ "${target[ro]}" != 1 ] && [ "${t[ro]}" = 1 ]; then continue; fi
+      if ! is-subset dbtypes target_dbtypes && [ "${target[unconvertable]}" = 1 ]; then continue; fi
+      if [ "${target[hashed]}" = 1 ] && [ "${t[hashed]}" != 1 ]; then continue; fi
+      if [ "${target[refcounted]}" = 1 ] && [ "${t[refcounted]}" != 1 ]; then continue; fi
+      if [ "${target[name]}" = bo_gc_ro ] && [ "${t[dh]}" = 1 ]; then continue; fi
+      t_conv+=("${target[name]} ${t[name]}")
     done
   done
 }
-
 gen-t-conv-list
+
+gen-t-conv-test(){
+  to="$1"; shift
+  from="$1"; shift
+  macro="dpa_u_t_$to"
+  to_type="dpa_u_${from}_t"
+  from_type="dpa_u_${from}_t"
+  type-lookup name "$to"
+  declare -A "to=( ${t[@]@K} )"
+  to_dtypes=( "${dtypes[@]}" )
+  type-lookup name "$from"
+  declare -A "from=( ${t[@]@K} )"
+  from_dtypes=( "${dtypes[@]}" )
+  if [ "${to[opaque]}" = 1 ]
+  then
+    to_type+='*'
+    to[pointer]=1
+  fi
+  if [ "${from[opaque]}" = 1 ]
+  then
+    from_type+='*'
+    from[pointer]=1
+  fi
+  for dt in "${from_dtypes[@]}"
+  do
+cat <<EOF
+#include <dpa/utils/bo.h>
+int main(){
+  $from_type source = {
+    .type=DPA_U_$dt
+  };
+  $to_type result = *&$macro(source);
+  (void)result;
+}
+EOF
+  done
+}
+
+gen-t-conv-tests(){
+  for e in "${t_conv[@]}"
+    do gen-t-conv-test $e
+  done
+}
+
+gen-t-conv-tests

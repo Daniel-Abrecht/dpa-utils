@@ -2,7 +2,8 @@
 #define dpa_u_t_bo_hashed_ro_g(X) dpa_u_generic((X), \
     dpa_u_bo_unique_hashmap_t: dpa__u_v_bo_unique_hashmap__t_bo_hashed_ro((X)), \
     dpa_u_any_bo_unique_hashmap_t*: dpa__u_v_any_bo_unique_hashmap__t_bo_hashed_ro((X)), \
-    dpa__u_helper_v_g(bo_inline, t_bo_inline, (X)), \
+    /* dpa__u_helper_v_g(bo_inline, t_bo_inline, (X)), \
+    dpa__u_helper_v_g(bo_unique, t_bo_unique, (X)),*/ \
     dpa__u_helper_v_g(bo_hashed_ro, t_bo_hashed_ro, (X)), \
     dpa__u_helper_v_g(bo_hashed, t_bo_hashed_ro, (X)), \
     dpa__u_helper_v_g(bo_refcounted_hashed_ro, t_bo_hashed_ro, (X)), \
