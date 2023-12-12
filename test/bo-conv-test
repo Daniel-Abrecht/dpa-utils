@@ -218,12 +218,14 @@ gen-t-conv-test(){
   to="$1"; shift
   from="$1"; shift
   macro="dpa_u_t_$to"
-  to_type="dpa_u_${from}_t"
-  from_type="dpa_u_${from}_t"
+  to_type="dpa_u_${to}_t"
   type-lookup name "$to"
+  type-unpack $result
   declare -A "to=( ${t[@]@K} )"
   to_dtypes=( "${dtypes[@]}" )
+  from_type="dpa_u_${from}_t"
   type-lookup name "$from"
+  type-unpack $result
   declare -A "from=( ${t[@]@K} )"
   from_dtypes=( "${dtypes[@]}" )
   if [ "${to[opaque]}" = 1 ]
@@ -236,15 +238,22 @@ gen-t-conv-test(){
     from_type+='*'
     from[pointer]=1
   fi
+  fpp=''
+  if [ "${from[pointer]}" != 1 ]
+    then fpp='*'
+  fi
   for dt in "${from_dtypes[@]}"
   do
+  dtv="P_$dt"
+  if [ "$dt" = BO_UNIQUE_HASHMAP ] && [ "$from_type" != bo_unique_hashmap ] && [ "${from[opaque]}" != 1 ]
+    then dtv="P_BO_UNIQUE"
+  fi
 cat <<EOF
-#include <dpa/utils/bo.h>
+#include <test-common.h>
 int main(){
-  $from_type source = {
-    .type=DPA_U_$dt
-  };
-  $to_type result = *&$macro(source);
+EOF
+  echo "  $to_type result = *&$macro($fpp($from_type$fpp)$dtv);"
+cat <<EOF
   (void)result;
 }
 EOF
