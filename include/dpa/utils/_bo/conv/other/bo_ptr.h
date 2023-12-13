@@ -1,4 +1,4 @@
-#define dpa_u_bo_ptr(...) dpa_u_assert_selection(dpa_u_bo_ptr_g(__VA_ARGS__))
+#define dpa_u_bo_ptr(...) dpa_u_assert_selection(dpa_u_bo_ptr_g((__VA_ARGS__)))
 #define dpa_u_bo_ptr_g(X) dpa_u_generic((X),dpa__u_helper_all_g(ptr,(X)))
 
 #define dpa__u_any_bo_inline__ptr(X) (X)

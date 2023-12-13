@@ -1,4 +1,4 @@
-#define dpa_u_t_bo_ro(...) dpa_u_assert_selection(dpa_u_t_bo_ro_g(__VA_ARGS__))
+#define dpa_u_t_bo_ro(...) dpa_u_assert_selection(dpa_u_t_bo_ro_g((__VA_ARGS__)))
 #define dpa_u_t_bo_ro_g(X) dpa_u_generic((X),dpa__u_helper_all_g(t_bo_ro,(X)))
 
 #define dpa__u_t_bo_ro__helper_s1(X) (const dpa_u_bo_ro_t){ .bo_simple = dpa__u_simple_ro_fix_type((X)) }

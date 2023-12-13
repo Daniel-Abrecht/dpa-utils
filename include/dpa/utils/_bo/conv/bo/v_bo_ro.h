@@ -1,4 +1,4 @@
-#define dpa_u_v_bo_ro(...) dpa_u_assert_selection(dpa_u_v_bo_ro_g(__VA_ARGS__))
+#define dpa_u_v_bo_ro(...) dpa_u_assert_selection(dpa_u_v_bo_ro_g((__VA_ARGS__)))
 #define dpa_u_v_bo_ro_g(X) dpa_u_generic((X),dpa__u_helper_all_g(v_bo_ro,(X)))
 
 #define dpa__u_v_bo__v_bo_ro(X) (X).ro

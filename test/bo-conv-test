@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -e
+
+[ -n "$TYPE" ]
+
 type_k=(
   "name"
   "alias"
@@ -244,26 +248,54 @@ gen-t-conv-test(){
   fi
   for dt in "${from_dtypes[@]}"
   do
-  dtv="P_$dt"
-  if [ "$dt" = BO_UNIQUE_HASHMAP ] && [ "$from_type" != bo_unique_hashmap ] && [ "${from[opaque]}" != 1 ]
-    then dtv="P_BO_UNIQUE"
-  fi
-cat <<EOF
-#include <test-common.h>
+    dtv="P_$dt"
+    if [ "$dt" = BO_UNIQUE_HASHMAP ] && [ "$from_type" != bo_unique_hashmap ] && [ "${from[opaque]}" != 1 ]
+      then dtv="P_BO_UNIQUE"
+    fi
+    (
+      cat <<EOF
+#include <test/common.h>
 int main(){
+      $from_type$fpp from = ($from_type$fpp)$dtv;
 EOF
-  echo "  $to_type result = *&$macro($fpp($from_type$fpp)$dtv);"
-cat <<EOF
-  (void)result;
+      echo "  $to_type result = *&$macro(${fpp}from);"
+      cat <<EOF
+  if(sizeof(${dtv}_DATA)-1 != dpa_u_bo_get_size(result) || memcmp(${dtv}_DATA, dpa_u_bo_data(result), sizeof(${dtv}_DATA))){
+    fprintf(stderr, "Buffer contained unexpected data\n");
+    return 1;
+  }
 }
 EOF
+    ) >"build/c/test/t-conv--${to[name]}-from-${from[name]}+$dtv.c"
+    echo "${to[name]}-from-${from[name]}+$dtv" >>build/c/test/t-conv-tests
   done
 }
 
 gen-t-conv-tests(){
+  ( set -e; cd build; mkdir -p c/test/; rm c/test/t-conv--*.c; )
+  true >build/c/test/t-conv-tests
   for e in "${t_conv[@]}"
     do gen-t-conv-test $e
   done
 }
 
 gen-t-conv-tests
+
+run-gen-t-conv-tests(){
+  mkdir -p "build/$TYPE/bin/build/c/test/"
+  dpa-testsuite t-conv bash <<EOF
+    set +e
+    N=\$(nproc)
+    for test in \$(<build/c/test/t-conv-tests)
+    do
+      rm -f "build/$TYPE/bin/build/c/test/t-conv--\$test.result" "build/$TYPE/bin/build/c/test/t-conv--\$test.mk.err" "build/$TYPE/bin/build/c/test/t-conv--\$test.err"
+      (
+        dpa-testsuite "\$test" bash -c "( make 'build/$TYPE/bin/build/c/test/t-conv--\$test' &>'build/$TYPE/bin/build/c/test/t-conv--\$test.mk.err'; ) && ( 'build/$TYPE/bin/build/c/test/t-conv--\$test' &>'build/$TYPE/bin/build/c/test/t-conv--\$test.err'; )"
+        echo "\$?" >"build/$TYPE/bin/build/c/test/t-conv--\$test.result"
+      ) &
+      while [[ \$(jobs -r -p | wc -l) -ge \$N ]]; do wait -n; done
+    done
+    wait
+EOF
+}
+run-gen-t-conv-tests

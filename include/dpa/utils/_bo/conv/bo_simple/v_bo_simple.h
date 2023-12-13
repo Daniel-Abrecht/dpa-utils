@@ -1,5 +1,5 @@
 
-#define dpa_u_v_bo_simple(...) dpa_u_assert_selection(dpa_u_v_bo_simple_g(__VA_ARGS__))
+#define dpa_u_v_bo_simple(...) dpa_u_assert_selection(dpa_u_v_bo_simple_g((__VA_ARGS__)))
 #define dpa_u_v_bo_simple_g(X) dpa_u_generic((X), \
     dpa__u_helper_v_g(bo_simple, v_bo_simple, (X)), \
     dpa__u_helper_v_g(bo_hashed, v_bo_simple, (X)), \

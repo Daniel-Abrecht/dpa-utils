@@ -93,6 +93,8 @@ else
 LIB := lib/$(TYPE)/lib$(SONAME)$(a-ext)
 endif
 
+export TYPE
+
 all: source-checks bin lib
 
 .PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm
@@ -175,7 +177,7 @@ bin/$(TYPE)/%$(bin-ext): build/$(TYPE)/o/src/main/%.c$(o-ext) $(LIB)
 	mkdir -p $(dir $@)
 	$(CC) -o $@ $(LDFLAGS) $< -Llib/$(TYPE)/ -l$(SONAME) $(LDLIBS)
 
-build/$(TYPE)/bin/%$(bin-ext): build/$(TYPE)/o/test/%.c$(o-ext) $(LIB)
+build/$(TYPE)/bin/%$(bin-ext): build/$(TYPE)/o/%.c$(o-ext) $(LIB)
 	mkdir -p $(dir $@)
 	$(CC) -o $@ $(LDFLAGS) $< -Llib/$(TYPE)/ -l$(SONAME)
 
