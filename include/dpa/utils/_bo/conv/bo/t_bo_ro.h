@@ -103,9 +103,9 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_a
 #define dpa__u_cp_bo_unique__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_unique = *(X) }
 #define dpa__u_any_bo_unique__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_unique = dpa__u_any_bo_unique__t_bo_unique(X) }
 
-#define dpa__u_v_bo_hashed__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X).bo_simple)
-#define dpa__u_p_bo_hashed__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X)->bo_simple)
-#define dpa__u_cp_bo_hashed__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X)->bo_simple)
+#define dpa__u_v_bo_hashed__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X).bo_simple.ro)
+#define dpa__u_p_bo_hashed__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X)->bo_simple.ro)
+#define dpa__u_cp_bo_hashed__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X)->bo_simple.ro)
 #define dpa__u_any_bo_hashed__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1(*(const dpa_u_bo_simple_ro_t*)(X))
 
 #define dpa__u_v_bo_hashed_ro__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X).bo_simple)
@@ -113,9 +113,9 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_a
 #define dpa__u_cp_bo_hashed_ro__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X)->bo_simple)
 #define dpa__u_any_bo_hashed_ro__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1(*(const dpa_u_bo_simple_ro_t*)(X))
 
-#define dpa__u_v_bo_refcounted__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X).bo_simple)
-#define dpa__u_p_bo_refcounted__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X)->bo_simple)
-#define dpa__u_cp_bo_refcounted__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X)->bo_simple)
+#define dpa__u_v_bo_refcounted__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X).bo_simple.ro)
+#define dpa__u_p_bo_refcounted__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X)->bo_simple.ro)
+#define dpa__u_cp_bo_refcounted__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X)->bo_simple.ro)
 #define dpa__u_any_bo_refcounted__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1(*(const dpa_u_bo_simple_ro_t*)(X))
 
 #define dpa__u_v_bo_refcounted_ro__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1((X).bo_simple)
