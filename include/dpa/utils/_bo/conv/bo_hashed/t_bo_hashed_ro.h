@@ -12,19 +12,19 @@
     dpa_u_bo_with_refcount_and_hash_ro_t*: dpa__u_bo_with_refcount_and_hash_ro__t_bo_hashed_ro((X)) \
   )
 
-#define dpa__u_t_bo_hashed_ro__helper_s1(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_hashed_ro_fix_type(X))
+#define dpa__u_t_bo_hashed_ro__helper_s1(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_hashed_ro_fix_type(X))
 
 #define dpa__u_v_bo_unique_hashmap__t_bo_hashed_ro(X) dpa__u_t_bo_hashed_ro__helper_s1((X)->bo_hashed)
 #define dpa__u_v_any_bo_unique_hashmap__t_bo_hashed_ro(X) dpa__u_t_bo_hashed_ro__helper_s1(*(const dpa_u_bo_hashed_ro_t*)(X))
 
-#define dpa__u_v_bo_hashed_ro__t_bo_hashed_ro(X)  dpa_u_rescope(const dpa_u_bo_hashed_ro_t,(X))
-#define dpa__u_p_bo_hashed_ro__t_bo_hashed_ro(X)  dpa_u_rescope(const dpa_u_bo_hashed_ro_t,(X))
-#define dpa__u_cp_bo_hashed_ro__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,(X))
+#define dpa__u_v_bo_hashed_ro__t_bo_hashed_ro(X)  dpa_u_rescope(dpa_u_bo_hashed_ro_t,(X))
+#define dpa__u_p_bo_hashed_ro__t_bo_hashed_ro(X)  dpa_u_rescope(dpa_u_bo_hashed_ro_t,(X))
+#define dpa__u_cp_bo_hashed_ro__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,(X))
 #define dpa__u_any_bo_hashed_ro__t_bo_hashed_ro(X) dpa__u_t_bo_hashed_ro__helper_s1(*(const dpa_u_bo_hashed_ro_t*)(X))
 
-#define dpa__u_v_bo_hashed__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,(X).ro)
-#define dpa__u_p_bo_hashed__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,(X)->ro)
-#define dpa__u_cp_bo_hashed__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,(X)->ro)
+#define dpa__u_v_bo_hashed__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,(X).ro)
+#define dpa__u_p_bo_hashed__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,(X)->ro)
+#define dpa__u_cp_bo_hashed__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,(X)->ro)
 #define dpa__u_any_bo_hashed__t_bo_hashed_ro(X) dpa__u_t_bo_hashed_ro__helper_s1(*(const dpa_u_bo_hashed_ro_t*)(X))
 
 dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(const dpa_u_bo_refcounted_hashed_ro_t bo){
@@ -37,10 +37,10 @@ dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t dp
     .hash = bo.hash,
   };
 }
-#define dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(X))
-#define dpa__u_p_bo_refcounted_hashed_ro__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(*(X)))
-#define dpa__u_cp_bo_refcounted_hashed_ro__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(*(X)))
-#define dpa__u_any_bo_refcounted_hashed_ro__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(*(const dpa_u_bo_refcounted_hashed_ro_t*)(X)))
+#define dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(X))
+#define dpa__u_p_bo_refcounted_hashed_ro__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(*(X)))
+#define dpa__u_cp_bo_refcounted_hashed_ro__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(*(X)))
+#define dpa__u_any_bo_refcounted_hashed_ro__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(*(const dpa_u_bo_refcounted_hashed_ro_t*)(X)))
 
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t dpa__u_v_bo_inline__t_bo_hashed_ro_p(const dpa_u_bo_inline_t* bo){
   return (dpa_u_bo_hashed_ro_t){
@@ -52,12 +52,12 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t d
     .hash = dpa__u_p_bo_inline__get_hash(bo),
   };
 }
-#define dpa__u_v_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(dpa_u_rescope(const dpa_u_bo_inline_t,(X))))
-#define dpa__u_p_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(dpa_u_rescope(const dpa_u_bo_inline_t,(*(X)))))
-#define dpa__u_cp_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(dpa_u_rescope(const dpa_u_bo_inline_t,(*(X)))))
-#define dpa__u_any_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(dpa_u_rescope(const dpa_u_bo_inline_t,(*(const dpa_u_bo_inline_t*)(X)))))
+#define dpa__u_v_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(dpa_u_rescope(const dpa_u_bo_inline_t,(X))))
+#define dpa__u_p_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(dpa_u_rescope(const dpa_u_bo_inline_t,(*(X)))))
+#define dpa__u_cp_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(dpa_u_rescope(const dpa_u_bo_inline_t,(*(X)))))
+#define dpa__u_any_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(dpa_u_rescope(const dpa_u_bo_inline_t,(*(const dpa_u_bo_inline_t*)(X)))))
 
-#define dpa__u_bo_with_hash_ro__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_bo_with_hash_ro__t_bo_hashed_ro_2_p(&dpa_u_rescope(union dpa__u_hashed_conv_helper,dpa__u_bo_with_hash_ro__t_bo_hashed_ro_1_p(X))))
+#define dpa__u_bo_with_hash_ro__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_bo_with_hash_ro__t_bo_hashed_ro_2_p(&dpa_u_rescope(union dpa__u_hashed_conv_helper,dpa__u_bo_with_hash_ro__t_bo_hashed_ro_1_p(X))))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_hashed_conv_helper dpa__u_bo_with_hash_ro__t_bo_hashed_ro_1_p(const dpa_u_bo_with_hash_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
@@ -104,7 +104,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t d
     };
   }
 }
-#define dpa__u_bo_with_hash__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_bo_with_hash_ro__t_bo_hashed_ro_2_p(&dpa_u_rescope(union dpa__u_hashed_conv_helper,dpa__u_bo_with_hash__t_bo_hashed_ro_1_p(X))))
+#define dpa__u_bo_with_hash__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_bo_with_hash_ro__t_bo_hashed_ro_2_p(&dpa_u_rescope(union dpa__u_hashed_conv_helper,dpa__u_bo_with_hash__t_bo_hashed_ro_1_p(X))))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_hashed_conv_helper dpa__u_bo_with_hash__t_bo_hashed_ro_1_p(const dpa_u_bo_with_hash_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE:
@@ -118,7 +118,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_hashed_co
   }
   dpa_u_unreachable("dpa_u_bo_with_hash_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
-#define dpa__u_bo_with_refcount_and_hash_ro__t_bo_hashed_ro(X) dpa_u_rescope(const dpa_u_bo_hashed_ro_t,dpa__u_bo_with_refcount_and_hash_ro__t_bo_hashed_ro_p(X))
+#define dpa__u_bo_with_refcount_and_hash_ro__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_bo_with_refcount_and_hash_ro__t_bo_hashed_ro_p(X))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t dpa__u_bo_with_refcount_and_hash_ro__t_bo_hashed_ro_p(const dpa_u_bo_with_refcount_and_hash_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_UNIQUE_HASHMAP:

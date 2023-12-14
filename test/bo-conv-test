@@ -249,7 +249,7 @@ gen-t-conv-test(){
   for dt in "${from_dtypes[@]}"
   do
     dtv="P_$dt"
-    if [ "$dt" = BO_UNIQUE_HASHMAP ] && [ "$from_type" != bo_unique_hashmap ] && [ "${from[opaque]}" != 1 ]
+    if [ "$dt" = BO_UNIQUE_HASHMAP ] && [ "${from[name]}" != bo_unique_hashmap ] && [ "${from[opaque]}" != 1 ]
       then dtv="P_BO_UNIQUE"
     fi
     (
@@ -272,7 +272,7 @@ EOF
 }
 
 gen-t-conv-tests(){
-  ( set -e; cd build; mkdir -p c/test/; rm c/test/t-conv--*.c; )
+  ( set -e; cd build; mkdir -p c/test/; rm -f c/test/t-conv--*.c; )
   true >build/c/test/t-conv-tests
   for e in "${t_conv[@]}"
     do gen-t-conv-test $e

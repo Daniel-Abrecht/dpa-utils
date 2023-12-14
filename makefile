@@ -160,6 +160,11 @@ build/.check-all: \
 	@echo "Source code checks passed"
 	touch $@
 
+do-test//%: test/% $(B-TS)
+	PATH="bin/$(TYPE)/:scripts/:$$PATH" $(B-TS) $* $<
+
+test: $(B-TS)
+	$(B-TS) utils $(MAKE) do-test//bo-conv-test
 
 bin: $(BINS)
 
@@ -231,6 +236,6 @@ shell:
 	if [ -z "$$SHELL" ]; then SHELL="$$(getent passwd $$(id -u) | cut -d : -f 7)"; fi; \
 	if [ -z "$$SHELL" ]; then SHELL="/bin/sh"; fi; \
 	PROMPT_COMMAND='if [ -z "$$PS_SET" ]; then PS_SET=1; PS1="(dpa-utils) $$PS1"; fi' \
-	PATH="$$PWD/bin/$(TYPE)/:scripts/:$$PATH" \
+	PATH="$$PWD/bin/$(TYPE)/:$$PWD/scripts/:$$PATH" \
 	MANPATH="$$PWD/build/docs/api/man/:$$(man -w)" \
 	  $(SHELL_CMD)
