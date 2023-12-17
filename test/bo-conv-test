@@ -204,6 +204,7 @@ gen-t-conv-list(){
     declare -A "target=( ${t[@]@K} )"
     target_dtypes=( "${dtypes[@]}" )
     target_dbtypes=( "${dbtypes[@]}" )
+    if [ "${t[opaque]}" = 1 ]; then continue; fi # Maybe those will be implemented at a later point
     for e in "${type_v[@]}"
     do
       type-unpack $e

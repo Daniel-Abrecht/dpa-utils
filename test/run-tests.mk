@@ -11,7 +11,7 @@ all: $(tests:%=$(TEST_PREFIX)%.result)
 
 force:
 
-$(TEST_PREFIX)%.result:
+$(TEST_PREFIX)%.result: $(shell find include/ src/ -iname *.h -or -iname *.c)
 	r="$@"; \
 	e="$${r%.result}"; \
 	( $(MAKE) -s --no-print-directory "$$e" 2>"$$e.mk.err"; ) && ( "$$e" 2>"$$e.err"; ); \

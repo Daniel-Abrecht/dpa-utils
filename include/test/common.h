@@ -60,3 +60,8 @@
 #define P_BO_REFCOUNTED (&BO_REFCOUNTED_H(P_BO_REFCOUNTED_DATA))
 #define P_BO_REFCOUNTED_HASHED_DATA "Breeding rabbits is a hare raising experience."
 #define P_BO_REFCOUNTED_HASHED (&BO_REFCOUNTED_HASHED_H(P_BO_REFCOUNTED_HASHED_DATA))
+
+#if defined(__GNUC__) && !defined(__llvm__)
+// The static analyzer of gcc seams to get really confused sometimes...
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
