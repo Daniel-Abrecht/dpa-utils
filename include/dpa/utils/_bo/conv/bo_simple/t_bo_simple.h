@@ -5,7 +5,7 @@
     dpa__u_helper_v_g(bo_simple, t_bo_simple, (X)), \
     dpa__u_helper_v_g(bo_hashed, t_bo_simple, (X)), \
     dpa__u_helper_v_g(bo_refcounted, t_bo_simple, (X)), \
-    dpa_u_bo_with_hash_t*: dpa__u_bo_with_hash__t_bo_simple(DPA__G(dpa_u_bo_with_hash_t*,(X))), \
+    /*dpa_u_bo_with_hash_t*: dpa__u_bo_with_hash__t_bo_simple(DPA__G(dpa_u_bo_with_hash_t*,(X))),*/ \
     dpa_u_bo_with_refcount_t*: dpa__u_bo_with_refcount__t_bo_simple(DPA__G(dpa_u_bo_with_refcount_t*,(X))) \
   )
 

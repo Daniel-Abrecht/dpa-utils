@@ -1,4 +1,4 @@
-#define dpa_u_t_bo(...) dpa_u_assert_selection(dpa_u_v_bo_g((__VA_ARGS__)))
+#define dpa_u_t_bo(...) dpa_u_assert_selection(dpa_u_t_bo_g((__VA_ARGS__)))
 #define dpa_u_t_bo_g(X) dpa_u_generic((X), \
     dpa__u_helper_v_g(bo, t_bo, (X)), \
     dpa__u_helper_v_g(bo_inline, t_bo, (X)), \
@@ -43,17 +43,17 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_t dpa__u_any_
 #define dpa__u_v_bo_simple__t_bo(X) (const dpa_u_bo_t){ .bo_simple = (X).ro }
 #define dpa__u_p_bo_simple__t_bo(X) (const dpa_u_bo_t){ .bo_simple = (X)->ro }
 #define dpa__u_cp_bo_simple__t_bo(X) (const dpa_u_bo_t){ .bo_simple = (X)->ro }
-#define dpa__u_any_bo_simple__t_bo(X) dpa__u_t_bo__helper_s1(X)
+#define dpa__u_any_bo_simple__t_bo(X) dpa__u_t_bo__helper_s1(*(dpa_u_bo_simple_t*)X)
 
-#define dpa__u_v_bo_hashed__t_bo(X) dpa__u_t_bo__helper_s1(X)
-#define dpa__u_p_bo_hashed__t_bo(X) dpa__u_t_bo__helper_s1(X)
-#define dpa__u_cp_bo_hashed__t_bo(X) dpa__u_t_bo__helper_s1(X)
-#define dpa__u_any_bo_hashed__t_bo(X) dpa__u_t_bo__helper_s1(X)
+#define dpa__u_v_bo_hashed__t_bo(X) dpa__u_t_bo__helper_s1((X).bo_simple)
+#define dpa__u_p_bo_hashed__t_bo(X) dpa__u_t_bo__helper_s1((X)->bo_simple)
+#define dpa__u_cp_bo_hashed__t_bo(X) dpa__u_t_bo__helper_s1((X)->bo_simple)
+#define dpa__u_any_bo_hashed__t_bo(X) dpa__u_t_bo__helper_s1(*(dpa_u_bo_simple_t*)(X))
 
-#define dpa__u_v_bo_refcounted__t_bo(X) dpa__u_t_bo__helper_s1(X)
-#define dpa__u_p_bo_refcounted__t_bo(X) dpa__u_t_bo__helper_s1(X)
-#define dpa__u_cp_bo_refcounted__t_bo(X) dpa__u_t_bo__helper_s1(X)
-#define dpa__u_any_bo_refcounted__t_bo(X) dpa__u_t_bo__helper_s1(X)
+#define dpa__u_v_bo_refcounted__t_bo(X) dpa__u_t_bo__helper_s1((X).bo_simple)
+#define dpa__u_p_bo_refcounted__t_bo(X) dpa__u_t_bo__helper_s1((X)->bo_simple)
+#define dpa__u_cp_bo_refcounted__t_bo(X) dpa__u_t_bo__helper_s1((X)->bo_simple)
+#define dpa__u_any_bo_refcounted__t_bo(X) dpa__u_t_bo__helper_s1(*(dpa_u_bo_simple_t*)(X))
 
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_t dpa__u_bo_with_hash__t_bo_p(dpa_u_bo_with_hash_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
