@@ -74,7 +74,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline const void* dpa__u_bo_
   dpa_u_unreachable("dpa_u_bo_with_hash_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 #define dpa__u_bo_with_refcount_ro__data(X) (((const dpa_u_bo_simple_ro_t*)(X))->data)
-#define dpa__u_bo_with_refcount__data(X) (((const dpa_u_bo_simple_ro_t*)(X))->data)
+#define dpa__u_bo_with_refcount__data(X) (((const dpa_u_bo_simple_t*)(X))->data)
 #define dpa__u_bo_with_refcount_and_hash_ro__data(X) (((const dpa_u_bo_simple_ro_t*)(X))->data)
 
 // bo_unique could contain bo_inline. Copying a bo_inline would mean copying it's data.
