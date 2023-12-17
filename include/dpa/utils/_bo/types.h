@@ -103,13 +103,21 @@ struct dpa_u_bo_refcounted_ro {
 
 struct dpa_u_bo_refcounted {
   union {
-    DPA__U_BO_META(extra);
+    struct {
+      union {
+        DPA__U_BO_META(extra);
+        dpa_u_bo_simple_t bo_simple;
+      };
+      // The refcount should be allocated with the data, because it shares the lifetime of the data, not of the bo.
+      dpa_u_refcount_freeable_t* refcount;
+    };
     struct dpa_u_bo_refcounted_ro ro;
-    dpa_u_bo_simple_t bo_simple;
   };
-  // The refcount should be allocated with the data, because it shares the lifetime of the data, not of the bo.
-  dpa_u_refcount_freeable_t* refcount;
 };
+static_assert(sizeof(dpa_u_bo_refcounted_ro_t) == sizeof(dpa_u_bo_refcounted_t), "dpa_u_bo_hashed_t and dpa_u_bo_hashedro_t should have the same size");
+static_assert(offsetof(dpa_u_bo_refcounted_ro_t, bo_simple) == offsetof(dpa_u_bo_refcounted_t, bo_simple), "Member 'bo_simple' at wrong offset");
+static_assert(offsetof(dpa_u_bo_refcounted_ro_t, refcount) == offsetof(dpa_u_bo_refcounted_t, refcount), "Member 'refcount' at wrong offset");
+static_assert(offsetof(dpa_u_bo_refcounted_t, ro) == 0, "Member 'ro' at wrong offset");
 
 struct dpa_u_bo_hashed_ro {
   union {
@@ -121,11 +129,20 @@ struct dpa_u_bo_hashed_ro {
 
 struct dpa_u_bo_hashed {
   union {
-    DPA__U_BO_META(extra);
-    dpa_u_bo_simple_t bo_simple;
+    struct {
+      union {
+        DPA__U_BO_META(extra);
+        dpa_u_bo_simple_t bo_simple;
+      };
+      dpa_u_hash_t hash;
+    };
+    dpa_u_bo_hashed_ro_t ro;
   };
-  dpa_u_hash_t hash;
 };
+static_assert(sizeof(dpa_u_bo_hashed_ro_t) == sizeof(dpa_u_bo_hashed_t), "dpa_u_bo_hashed_t and dpa_u_bo_hashedro_t should have the same size");
+static_assert(offsetof(dpa_u_bo_hashed_ro_t, bo_simple) == offsetof(dpa_u_bo_hashed_t, bo_simple), "Member 'bo_simple' at wrong offset");
+static_assert(offsetof(dpa_u_bo_hashed_ro_t, hash) == offsetof(dpa_u_bo_hashed_t, hash), "Member 'hash' at wrong offset");
+static_assert(offsetof(dpa_u_bo_hashed_t, ro) == 0, "Member 'ro' at wrong offset");
 
 struct dpa_u_bo_refcounted_hashed_ro {
   union {
