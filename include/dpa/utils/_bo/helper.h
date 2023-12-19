@@ -128,3 +128,14 @@ dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t dp
     .hash = v.hash,
   };
 }
+
+dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline dpa_u_bo_refcounted_ro_t dpa__u_refcounted_ro_fix_type(dpa_u_bo_refcounted_ro_t v){
+  return (dpa_u_bo_refcounted_ro_t){
+    .bo_simple = {
+      .type = DPA_U_BO_REFCOUNTED,
+      .size = v.bo_simple.size,
+      .data = v.bo_simple.data,
+    },
+    .refcount = v.refcount,
+  };
+}
