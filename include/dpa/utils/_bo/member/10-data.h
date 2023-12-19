@@ -6,7 +6,7 @@
 #define dpa__u_v_bo_unique_hashmap__data(X)   ((X)->bo_hashed.bo_simple.data)
 #define dpa__u_p_bo_unique_hashmap__data(X)   ((X)->bo_hashed.bo_simple.data)
 #define dpa__u_cp_bo_unique_hashmap__data(X)  ((X)->bo_hashed.bo_simple.data)
-#define dpa__u_any_bo_unique_hashmap__data(X) ((X)->bo_hashed.bo_simple.data)
+#define dpa__u_any_bo_unique_hashmap__data(X) (((dpa_u_bo_unique_hashmap_t)(X))->bo_hashed.bo_simple.data)
 
 #define dpa__u_v_bo_inline__data(X)   ((X).data)
 #define dpa__u_p_bo_inline__data(X)   ((X)->data)

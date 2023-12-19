@@ -3,7 +3,7 @@
     dpa_u_bo_unique_hashmap_t: dpa__u_v_bo_unique_hashmap__t_bo_hashed_ro(DPA__G(dpa_u_bo_unique_hashmap_t,(X))), \
     dpa_u_any_bo_unique_hashmap_t*: dpa__u_v_any_bo_unique_hashmap__t_bo_hashed_ro(DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X))), \
     dpa__u_helper_v_g(bo_inline, t_bo_hashed_ro, (X)), \
-    /*dpa__u_helper_v_g(bo_unique, t_bo_hashed_ro, (X)),*/ \
+    dpa__u_helper_v_g(bo_unique, t_bo_hashed_ro, (X)), \
     dpa__u_helper_v_g(bo_hashed_ro, t_bo_hashed_ro, (X)), \
     dpa__u_helper_v_g(bo_hashed, t_bo_hashed_ro, (X)), \
     dpa__u_helper_v_g(bo_refcounted_hashed_ro, t_bo_hashed_ro, (X)), \
@@ -56,6 +56,34 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t d
 #define dpa__u_p_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(&dpa_u_rescope(const dpa_u_bo_inline_t,(*(X)))))
 #define dpa__u_cp_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(&dpa_u_rescope(const dpa_u_bo_inline_t,(*(X)))))
 #define dpa__u_any_bo_inline__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_inline__t_bo_hashed_ro_p(&dpa_u_rescope(const dpa_u_bo_inline_t,(*(const dpa_u_bo_inline_t*)(X)))))
+
+dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t dpa__u_v_bo_unique__t_bo_hashed_ro_p(const dpa_u_bo_unique_t* bo){
+  switch(dpa_u_bo_get_type(bo)){
+    case DPA_U_BO_UNIQUE_HASHMAP:
+      return (const dpa_u_bo_hashed_ro_t){
+        .bo_simple = {
+          .type = DPA_U_BO_HASHED,
+          .size = dpa__u_v_bo_unique_hashmap__get_size(bo->bo_unique_hashmap),
+          .data = dpa__u_v_bo_unique_hashmap__data(bo->bo_unique_hashmap),
+        },
+        .hash = dpa__u_v_bo_unique_hashmap__get_hash(bo->bo_unique_hashmap),
+      };
+    case DPA_U_BO_INLINE:
+      return (const dpa_u_bo_hashed_ro_t){
+        .bo_simple = {
+          .type = DPA_U_BO_HASHED,
+          .size = dpa__u_v_bo_inline__get_size(bo->bo_inline),
+          .data = dpa__u_v_bo_inline__data(bo->bo_inline),
+        },
+        .hash = dpa__u_v_bo_inline__get_hash(bo->bo_inline),
+      };
+  }
+  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
+}
+#define dpa__u_v_bo_unique__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_unique__t_bo_hashed_ro_p(&dpa_u_rescope(const dpa_u_bo_unique_t,(X))))
+#define dpa__u_p_bo_unique__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_unique__t_bo_hashed_ro_p(&dpa_u_rescope(const dpa_u_bo_unique_t,(*(X)))))
+#define dpa__u_cp_bo_unique__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_unique__t_bo_hashed_ro_p(&dpa_u_rescope(const dpa_u_bo_unique_t,(*(X)))))
+#define dpa__u_any_bo_unique__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_v_bo_unique__t_bo_hashed_ro_p(&dpa__u_any_bo_unique__t_bo_unique(X)))
 
 #define dpa__u_bo_with_hash_ro__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,dpa__u_bo_with_hash_ro__t_bo_hashed_ro_2_p(&dpa_u_rescope(union dpa__u_hashed_conv_helper,dpa__u_bo_with_hash_ro__t_bo_hashed_ro_1_p(X))))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_hashed_conv_helper dpa__u_bo_with_hash_ro__t_bo_hashed_ro_1_p(const dpa_u_bo_with_hash_ro_t*const bo){
@@ -125,10 +153,10 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t d
       return (const dpa_u_bo_hashed_ro_t){
         .bo_simple = {
           .type = DPA_U_BO_HASHED,
-          .size = dpa__u_any_bo_hashed_ro__get_size(bo),
-          .data = dpa__u_any_bo_hashed_ro__data(bo),
+          .size = dpa__u_any_bo_unique_hashmap__get_size(bo),
+          .data = dpa__u_any_bo_unique_hashmap__data(bo),
         },
-        .hash = dpa__u_any_bo_hashed_ro__get_hash(bo),
+        .hash = dpa__u_any_bo_unique_hashmap__get_hash(bo),
       };
     case DPA_U_BO_REFCOUNTED_HASHED:
       return (const dpa_u_bo_hashed_ro_t){

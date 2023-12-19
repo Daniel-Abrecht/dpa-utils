@@ -11,7 +11,7 @@
 #define dpa__u_helper_all_g(S,X) \
     dpa__u_helper_v_g(bo_inline, S, (X)), \
     dpa__u_helper_g(dpa_u_bo_unique_hashmap_t, v_bo_unique_hashmap, S, (X)), \
-    dpa_u_any_bo_unique_hashmap_t*: dpa__u_any_bo_unique_hashmap__ ## S((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X))), \
+    dpa_u_any_bo_unique_hashmap_t*: dpa__u_any_bo_unique_hashmap__ ## S(DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X))), \
     dpa__u_helper_v_g(bo_unique, S, (X)), \
     dpa__u_helper_v_g(bo_simple, S, (X)), \
     dpa__u_helper_v_g(bo_simple_ro, S, (X)), \

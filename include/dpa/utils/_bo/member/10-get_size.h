@@ -5,7 +5,7 @@
 #define dpa__u_v_bo_unique_hashmap__get_size(X) ((X)->bo_hashed.bo_simple.size)
 #define dpa__u_p_bo_unique_hashmap__get_size(X) ((X)->bo_hashed.bo_simple.size)
 #define dpa__u_cp_bo_unique_hashmap__get_size(X) ((X)->bo_hashed.bo_simple.size)
-#define dpa__u_any_bo_unique_hashmap__get_size(X) ((X)->bo_hashed.bo_simple.size)
+#define dpa__u_any_bo_unique_hashmap__get_size(X) (((dpa_u_bo_unique_hashmap_t)(X))->bo_hashed.bo_simple.size)
 
 #define dpa__u_v_bo_inline__get_size(X) ((X).size)
 #define dpa__u_p_bo_inline__get_size(X) ((X)->size)

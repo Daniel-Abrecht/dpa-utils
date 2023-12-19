@@ -20,22 +20,22 @@
 #define dpa__u_v_bo_unique_hashmap__get_hash(X) (X)->bo_hashed.hash
 #define dpa__u_p_bo_unique_hashmap__get_hash(X) (X)->bo_hashed.hash
 #define dpa__u_cp_bo_unique_hashmap__get_hash(X) (X)->bo_hashed.hash
-#define dpa__u_any_bo_unique_hashmap__get_hash(X) ((dpa_u_bo_unique_hashmap_t)X)->bo_hashed.hash
+#define dpa__u_any_bo_unique_hashmap__get_hash(X) ((dpa_u_bo_unique_hashmap_t)(X))->bo_hashed.hash
 
 #define dpa__u_v_bo_hashed_ro__get_hash(X) (X).hash
 #define dpa__u_p_bo_hashed_ro__get_hash(X) (X)->hash
 #define dpa__u_cp_bo_hashed_ro__get_hash(X) (X)->hash
-#define dpa__u_any_bo_hashed_ro__get_hash(X) ((const dpa_u_bo_hashed_ro_t*)X)->hash
+#define dpa__u_any_bo_hashed_ro__get_hash(X) ((const dpa_u_bo_hashed_ro_t*)(X))->hash
 
 #define dpa__u_v_bo_hashed__get_hash(X) (X).hash
 #define dpa__u_p_bo_hashed__get_hash(X) (X)->hash
 #define dpa__u_cp_bo_hashed__get_hash(X) (X)->hash
-#define dpa__u_any_bo_hashed__get_hash(X) ((const dpa_u_bo_hashed_t*)X)->hash
+#define dpa__u_any_bo_hashed__get_hash(X) ((const dpa_u_bo_hashed_t*)(X))->hash
 
 #define dpa__u_v_bo_refcounted_hashed_ro__get_hash(X) (X).hash
 #define dpa__u_p_bo_refcounted_hashed_ro__get_hash(X) (X)->hash
 #define dpa__u_cp_bo_refcounted_hashed_ro__get_hash(X) (X)->hash
-#define dpa__u_any_bo_refcounted_hashed_ro__get_hash(X) ((const dpa_u_bo_refcounted_hashed_ro_t*)X)->hash
+#define dpa__u_any_bo_refcounted_hashed_ro__get_hash(X) ((const dpa_u_bo_refcounted_hashed_ro_t*)(X))->hash
 
 dpa_u_reproducible dpa__u_api inline dpa_u_hash_t dpa__u_bo_with_hash_ro__get_hash(dpa_u_bo_with_hash_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){

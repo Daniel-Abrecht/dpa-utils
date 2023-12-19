@@ -54,7 +54,7 @@ type_v=(
   "any_bo_refcounted_hashed_ro  arhr 0 0 0 1 1 1 0 1 1 0  0 0 0 0 0 1"
   "bo_with_hash_ro              whr  0 0 0 0 1 1 0 1 0 0  1 1 0 1 0 1"
   "bo_with_hash                 wh   0 0 0 0 1 0 0 1 0 0  1 0 0 1 0 0"
-  "bo_gc_ro                     gcr  0 0 0 0 1 1 0 1 X 0  1 1 0 0 1 1"
+  "bo_gc_ro                     gcr  0 0 0 0 1 1 0 X X 0  1 1 0 0 1 1"
   "bo_with_refcount_ro          wrr  0 0 0 0 1 1 0 X 1 0  0 1 0 0 1 1"
   "bo_with_refcount             wr   0 0 0 0 1 0 0 X 1 0  0 0 0 0 1 0"
   "bo_with_refcount_and_hash_ro wrhr 0 0 0 0 1 1 0 1 1 0  0 1 0 0 0 1"
@@ -196,6 +196,16 @@ is-same-set(){
   [ "${#a[@]}" = "${#a[@]}" ] && is-subset "$1" "$2"
 }
 
+dump-dict(){
+  local -n a="$1"
+  printf '{ '
+  for k in "${!a[@]}"
+  do
+    printf '"%q": "%q", ' "$k" "${a[$k]}"
+  done | head -c -2
+  echo ' }'
+}
+
 gen-t-conv-list(){
   t_conv=()
   for e in "${type_v[@]}"
@@ -213,7 +223,13 @@ gen-t-conv-list(){
       if [ "${target[hashed]}" = 1 ] && [ "${t[hashed]}" != 1 ]; then continue; fi
       if [ "${target[refcounted]}" = 1 ] && [ "${t[refcounted]}" != 1 ]; then continue; fi
       if [ "${target[name]}" = bo_gc_ro ] && [ "${t[dh]}" = 1 ]; then continue; fi
-      t_conv+=("${target[name]} ${t[name]}")
+      t_conv+=("${target[name]} ${t[name]} v")
+      if [ "${t[pointer]}" != 1 ] && [ "${t[opaque]}" != 1 ]
+      then
+        t_conv+=("${target[name]} ${t[name]} cv")
+        t_conv+=("${target[name]} ${t[name]} p")
+        t_conv+=("${target[name]} ${t[name]} cp")
+      fi
     done
   done
 }
@@ -222,6 +238,7 @@ gen-t-conv-list
 gen-t-conv-test(){
   to="$1"; shift
   from="$1"; shift
+  from_mode="$1"; shift
   macro="dpa_u_t_$to"
   to_type="dpa_u_${to}_t"
   type-lookup name "$to"
@@ -247,6 +264,10 @@ gen-t-conv-test(){
   if [ "${from[pointer]}" != 1 ]
     then fpp='*'
   fi
+  const=
+  if [ "$from_mode" = cv ] || [ "$from_mode" = cp ]
+    then const='const '
+  fi
   for dt in "${from_dtypes[@]}"
   do
     dtv="P_$dt"
@@ -257,9 +278,12 @@ gen-t-conv-test(){
       cat <<EOF
 #include <test/common.h>
 int main(){
-      $from_type$fpp from = ($from_type$fpp)$dtv;
+  $const$from_type$fpp from = ($const$from_type$fpp)$dtv;
 EOF
-      echo "  $to_type result = *&$macro(${fpp}from);"
+      if [ "$from_mode" = p ] || [ "$from_mode" = cp ]
+        then echo "  $to_type result = *&$macro(from);"
+        else echo "  $to_type result = *&$macro(${fpp}from);"
+      fi
       cat <<EOF
   if(sizeof(${dtv}_DATA)-1 != dpa_u_bo_get_size(result) || memcmp(${dtv}_DATA, dpa_u_bo_data(result), sizeof(${dtv}_DATA))){
     fprintf(stderr, "Buffer contained unexpected data\n");
@@ -267,8 +291,8 @@ EOF
   }
 }
 EOF
-    ) >"build/c/test/t-conv--${to[name]}-from-${from[name]}+$dtv.c"
-    echo "${to[name]}-from-${from[name]}+$dtv" >>build/c/test/t-conv-tests
+    ) >"build/c/test/t-conv--${to[name]}-from-${from[name]}-$from_mode+$dtv.c"
+    echo "${to[name]}-from-${from[name]}-$from_mode+$dtv" >>build/c/test/t-conv-tests
   done
 }
 
