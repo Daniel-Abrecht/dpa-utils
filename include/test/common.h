@@ -41,7 +41,8 @@
       .bo_simple = { \
         .type = DPA_U_BO_REFCOUNTED_HASHED, \
         BO_DS(__VA_ARGS__) \
-      } \
+      }, \
+      .refcount = &dpa_u_refcount_static_v_freeable, \
     }, \
     .hash = dpa_u_bo_hash_p((const struct dpa__u_default_hash_args){BO_SIMPLE_H(__VA_ARGS__).ro}) \
   }

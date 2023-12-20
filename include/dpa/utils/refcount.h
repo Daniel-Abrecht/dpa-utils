@@ -100,9 +100,9 @@ static_assert(offsetof(struct dpa_u_refcount_callback, freeable) == 0, "Unexpect
 #define dpa_u_refcount_i_callback(N)  {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_CALLBACK)}}
 #define dpa_u_refcount_i_bo_unique(N) {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP)}}
 
-extern struct dpa_u_refcount dpa_u_refcount_v_static;
-extern struct dpa_u_refcount_freeable dpa_u_refcount_static_v_freeable;
-extern struct dpa_u_refcount_callback dpa_u_refcount_static_v_callback;
+dpa__u_api_var extern struct dpa_u_refcount dpa_u_refcount_v_static;
+dpa__u_api_var extern struct dpa_u_refcount_freeable dpa_u_refcount_static_v_freeable;
+dpa__u_api_var extern struct dpa_u_refcount_callback dpa_u_refcount_static_v_callback;
 
 /**
  * \see dpa_u_refcount_type

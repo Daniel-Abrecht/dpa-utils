@@ -289,6 +289,16 @@ EOF
     fprintf(stderr, "Buffer contained unexpected data\n");
     return 1;
   }
+EOF
+      if [ "${to[hashed]}" = 1 ]
+      then cat <<EOF
+    if(dpa_u_bo_get_hash(from) != dpa_u_bo_get_hash(result)){
+      fprintf(stderr, "Hash missmatches\n");
+      return 1;
+    }
+EOF
+      fi
+      cat <<EOF
 }
 EOF
     ) >"build/c/test/t-conv--${to[name]}-from-${from[name]}-$from_mode+$dtv.c"
