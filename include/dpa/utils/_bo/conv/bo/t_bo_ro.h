@@ -8,13 +8,14 @@
 #define dpa__u_cp_bo__t_bo_ro(X) dpa_u_rescope(const dpa_u_bo_ro_t,(X)->ro)
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_any_bo__t_bo_ro_p(dpa_u_any_bo_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_INLINE:
+    case DPA_U_BO_INLINE: {
       return (const dpa_u_bo_ro_t){
         .bo_inline = *(const dpa_u_bo_inline_t*)bo,
       };
+    }
     case DPA_U_BO_SIMPLE:
     case DPA_U_BO_HASHED:
-    case DPA_U_BO_REFCOUNTED:
+    case DPA_U_BO_REFCOUNTED: {
       return (const dpa_u_bo_ro_t){
         .bo_simple = {
           .type = DPA_U_BO_SIMPLE,
@@ -22,6 +23,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_a
           .data = dpa__u_any_bo_simple_ro__data(bo),
         }
       };
+    }
   }
   dpa_u_unreachable("dpa_u_any_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
@@ -32,19 +34,21 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_a
 #define dpa__u_cp_bo_ro__t_bo_ro(X) dpa_u_rescope(const dpa_u_bo_ro_t,*(X))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_any_bo_ro__t_bo_ro_p(dpa_u_any_bo_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_INLINE:
+    case DPA_U_BO_INLINE: {
       return (const dpa_u_bo_ro_t){
         .bo_inline = *(const dpa_u_bo_inline_t*)bo,
       };
-    case DPA_U_BO_UNIQUE_HASHMAP:
+    }
+    case DPA_U_BO_UNIQUE_HASHMAP: {
       return (const dpa_u_bo_ro_t){
         .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
         .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)bo,
       };
+    }
     case DPA_U_BO_SIMPLE:
     case DPA_U_BO_HASHED:
     case DPA_U_BO_REFCOUNTED:
-    case DPA_U_BO_REFCOUNTED_HASHED:
+    case DPA_U_BO_REFCOUNTED_HASHED: {
       return (const dpa_u_bo_ro_t){
         .bo_simple = {
           .type = DPA_U_BO_SIMPLE,
@@ -52,6 +56,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_a
           .data = dpa__u_any_bo_simple_ro__data(bo),
         }
       };
+    }
   }
   dpa_u_unreachable("dpa_u_any_bo_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
@@ -72,15 +77,16 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_a
 #define dpa__u_cp_bo_simple_ro__t_bo_ro(X) (const dpa_u_bo_ro_t){ .bo_simple = *(X) }
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_any_bo_simple_ro__t_bo_ro_p(dpa_u_any_bo_simple_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_UNIQUE_HASHMAP:
+    case DPA_U_BO_UNIQUE_HASHMAP: {
       return (const dpa_u_bo_ro_t){
         .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
         .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)bo,
       };
+    }
     case DPA_U_BO_SIMPLE:
     case DPA_U_BO_HASHED:
     case DPA_U_BO_REFCOUNTED:
-    case DPA_U_BO_REFCOUNTED_HASHED:
+    case DPA_U_BO_REFCOUNTED_HASHED: {
       return (const dpa_u_bo_ro_t){
         .bo_simple = {
           .type = DPA_U_BO_SIMPLE,
@@ -88,6 +94,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_a
           .data = dpa__u_any_bo_simple_ro__data(bo),
         }
       };
+    }
   }
   dpa_u_unreachable("dpa_u_any_bo_simple_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
@@ -130,17 +137,19 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_a
 
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_bo_gc_ro__t_bo_ro_p(dpa_u_bo_gc_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_INLINE:
+    case DPA_U_BO_INLINE: {
       return (const dpa_u_bo_ro_t){
         .bo_inline = *(const dpa_u_bo_inline_t*)bo,
       };
-    case DPA_U_BO_UNIQUE_HASHMAP:
+    }
+    case DPA_U_BO_UNIQUE_HASHMAP: {
       return (const dpa_u_bo_ro_t){
         .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
         .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)bo,
       };
+    }
     case DPA_U_BO_REFCOUNTED:
-    case DPA_U_BO_REFCOUNTED_HASHED:
+    case DPA_U_BO_REFCOUNTED_HASHED: {
       return (const dpa_u_bo_ro_t){
         .bo_simple = {
           .type = DPA_U_BO_SIMPLE,
@@ -148,23 +157,26 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_b
           .data = dpa__u_any_bo_simple_ro__data(bo),
         }
       };
+    }
   }
   dpa_u_unreachable("dpa_u_bo_gc_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 #define dpa__u_bo_gc_ro__t_bo_ro(X) dpa_u_rescope(const dpa_u_bo_ro_t,dpa__u_bo_gc_ro__t_bo_ro_p(X))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_bo_with_hash_ro__t_bo_ro_p(dpa_u_bo_with_hash_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_INLINE:
+    case DPA_U_BO_INLINE: {
       return (const dpa_u_bo_ro_t){
         .bo_inline = *(const dpa_u_bo_inline_t*)bo,
       };
-    case DPA_U_BO_UNIQUE_HASHMAP:
+    }
+    case DPA_U_BO_UNIQUE_HASHMAP: {
       return (const dpa_u_bo_ro_t){
         .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
         .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)bo,
       };
+    }
     case DPA_U_BO_HASHED:
-    case DPA_U_BO_REFCOUNTED_HASHED:
+    case DPA_U_BO_REFCOUNTED_HASHED: {
       return (const dpa_u_bo_ro_t){
         .bo_simple = {
           .type = DPA_U_BO_SIMPLE,
@@ -172,17 +184,19 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_b
           .data = dpa__u_any_bo_simple_ro__data(bo),
         }
       };
+    }
   }
   dpa_u_unreachable("dpa_u_bo_with_hash_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 #define dpa__u_bo_with_hash_ro__t_bo_ro(X) dpa_u_rescope(const dpa_u_bo_ro_t,dpa__u_bo_with_hash_ro__t_bo_ro_p(X))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_bo_with_hash__t_bo_ro_p(dpa_u_bo_with_hash_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_INLINE:
+    case DPA_U_BO_INLINE: {
       return (const dpa_u_bo_ro_t){
         .bo_inline = *(const dpa_u_bo_inline_t*)bo,
       };
-    case DPA_U_BO_HASHED:
+    }
+    case DPA_U_BO_HASHED: {
       return (const dpa_u_bo_ro_t){
         .bo_simple = {
           .type = DPA_U_BO_SIMPLE,
@@ -190,19 +204,21 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_b
           .data = dpa__u_any_bo_simple_ro__data(bo),
         }
       };
+    }
   }
   dpa_u_unreachable("dpa_u_bo_with_hash_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
 #define dpa__u_bo_with_hash__t_bo_ro(X) dpa_u_rescope(const dpa_u_bo_ro_t,dpa__u_bo_with_hash__t_bo_ro_p(X))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_bo_with_refcount_ro__t_bo_ro_p(dpa_u_bo_with_refcount_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_UNIQUE_HASHMAP:
+    case DPA_U_BO_UNIQUE_HASHMAP: {
       return (const dpa_u_bo_ro_t){
         .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
         .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)bo,
       };
+    }
     case DPA_U_BO_REFCOUNTED:
-    case DPA_U_BO_REFCOUNTED_HASHED:
+    case DPA_U_BO_REFCOUNTED_HASHED: {
       return (const dpa_u_bo_ro_t){
         .bo_simple = {
           .type = DPA_U_BO_SIMPLE,
@@ -210,6 +226,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_b
           .data = dpa__u_any_bo_simple_ro__data(bo),
         }
       };
+    }
   }
   dpa_u_unreachable("dpa_u_bo_with_refcount_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
@@ -217,12 +234,13 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_b
 #define dpa__u_bo_with_refcount__t_bo_ro(X) dpa__u_t_bo_ro__helper_s1(*(const dpa_u_bo_simple_ro_t*)(X))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_bo_with_refcount_and_hash_ro__t_bo_ro_p(dpa_u_bo_with_refcount_and_hash_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_UNIQUE_HASHMAP:
+    case DPA_U_BO_UNIQUE_HASHMAP: {
       return (const dpa_u_bo_ro_t){
         .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP,
         .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)bo,
       };
-    case DPA_U_BO_REFCOUNTED_HASHED:
+    }
+    case DPA_U_BO_REFCOUNTED_HASHED: {
       return (const dpa_u_bo_ro_t){
         .bo_simple = {
           .type = DPA_U_BO_SIMPLE,
@@ -230,6 +248,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_ro_t dpa__u_b
           .data = dpa__u_any_bo_simple_ro__data(bo),
         }
       };
+    }
   }
   dpa_u_unreachable("dpa_u_bo_with_refcount_and_hash_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }

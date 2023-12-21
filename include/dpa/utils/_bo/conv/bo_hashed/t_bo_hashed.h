@@ -42,14 +42,16 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_t dpa_
 #define dpa__u_bo_with_hash__t_bo_hashed(X) dpa_u_rescope(dpa_u_bo_hashed_t,dpa__u_bo_with_hash__t_bo_hashed_2_p(&dpa_u_rescope(union dpa__u_hashed_conv_helper,dpa__u_bo_with_hash__t_bo_hashed_1_p(X))))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_hashed_conv_helper dpa__u_bo_with_hash__t_bo_hashed_1_p(const dpa_u_bo_with_hash_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_INLINE:
+    case DPA_U_BO_INLINE: {
       return (const union dpa__u_hashed_conv_helper){
         .bo_inline = *(const dpa_u_bo_inline_t*)bo,
       };
-    case DPA_U_BO_HASHED:
+    }
+    case DPA_U_BO_HASHED: {
       return (const union dpa__u_hashed_conv_helper){
         .bo_hashed = *(const dpa_u_bo_hashed_t*)bo,
       };
+    }
   }
   dpa_u_unreachable("dpa_u_bo_with_hash_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }

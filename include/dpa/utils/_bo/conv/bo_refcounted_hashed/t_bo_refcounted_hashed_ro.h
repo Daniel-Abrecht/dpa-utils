@@ -47,5 +47,5 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_refcounted_ha
       return *(const dpa_u_bo_refcounted_hashed_ro_t*)bo;
     }
   }
-  dpa_u_unreachable("dpa_u_bo_unique_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
+  dpa_u_unreachable("dpa_u_bo_with_refcount_and_hash_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }

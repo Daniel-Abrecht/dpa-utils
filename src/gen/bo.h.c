@@ -23,7 +23,10 @@ extern dpa_u_bo_hashed_t dpa__u_bo_with_hash__t_bo_hashed_2_p(union dpa__u_hashe
 extern dpa_u_bo_hashed_t dpa__u_v_bo_inline__t_bo_hashed_p(dpa_u_bo_inline_t*const bo);
 extern dpa_u_bo_refcounted_hashed_ro_t dpa__u_bo_with_refcount_and_hash_ro__t_bo_refcounted_hashed_ro_p(dpa_u_bo_with_refcount_and_hash_ro_t* bo);
 extern dpa_u_bo_refcounted_hashed_ro_t dpa__u_v_bo_unique_hashmap__t_bo_refcounted_hashed_ro_p(dpa_u_bo_unique_hashmap_t bo);
+extern dpa_u_bo_refcounted_ro_t dpa__u_bo_with_refcount_and_hash_ro__t_bo_refcounted_ro_p(const dpa_u_bo_with_refcount_and_hash_ro_t*const bo);
+extern dpa_u_bo_refcounted_ro_t dpa__u_bo_with_refcount_ro__t_bo_refcounted_ro_p(const dpa_u_bo_with_refcount_ro_t*const bo);
 extern dpa_u_bo_refcounted_ro_t dpa__u_refcounted_ro_fix_type(dpa_u_bo_refcounted_ro_t v);
+extern dpa_u_bo_refcounted_ro_t dpa__u_v_bo_unique_hashmap__t_bo_refcounted_ro_p(dpa_u_bo_unique_hashmap_t bo);
 extern dpa_u_bo_ro_t dpa__u_any_bo__t_bo_ro_p(dpa_u_any_bo_t*const bo);
 extern dpa_u_bo_ro_t dpa__u_any_bo_ro__t_bo_ro_p(dpa_u_any_bo_ro_t*const bo);
 extern dpa_u_bo_ro_t dpa__u_any_bo_simple_ro__t_bo_ro_p(dpa_u_any_bo_simple_ro_t*const bo);
@@ -32,7 +35,15 @@ extern dpa_u_bo_ro_t dpa__u_bo_with_hash__t_bo_ro_p(dpa_u_bo_with_hash_t*const b
 extern dpa_u_bo_ro_t dpa__u_bo_with_hash_ro__t_bo_ro_p(dpa_u_bo_with_hash_ro_t*const bo);
 extern dpa_u_bo_ro_t dpa__u_bo_with_refcount_and_hash_ro__t_bo_ro_p(dpa_u_bo_with_refcount_and_hash_ro_t*const bo);
 extern dpa_u_bo_ro_t dpa__u_bo_with_refcount_ro__t_bo_ro_p(dpa_u_bo_with_refcount_ro_t*const bo);
+extern dpa_u_bo_ro_t dpa__u_p_bo_ro__t_bo_simple_ro_p2_sub(dpa_u_any_bo_ro_t*const bo);
+extern dpa_u_bo_simple_ro_t dpa__u_p_bo__t_bo_simple_ro_p(const dpa_u_bo_t* bo);
+extern dpa_u_bo_simple_ro_t dpa__u_p_bo_inline__t_bo_simple_ro_p(dpa_u_bo_inline_t*const bo);
+extern dpa_u_bo_simple_ro_t dpa__u_p_bo_ro__t_bo_simple_ro_p1(const dpa_u_bo_ro_t* bo);
+extern dpa_u_bo_simple_ro_t dpa__u_p_bo_ro__t_bo_simple_ro_p2(const dpa_u_bo_ro_t* bo);
+extern dpa_u_bo_simple_ro_t dpa__u_p_bo_unique__t_bo_simple_ro_p(const dpa_u_bo_unique_t* bo);
 extern dpa_u_bo_simple_ro_t dpa__u_simple_ro_fix_type(dpa_u_bo_simple_ro_t v);
+extern dpa_u_bo_simple_t dpa__u_p_bo__t_bo_simple_p(dpa_u_bo_t* bo);
+extern dpa_u_bo_simple_t dpa__u_p_bo_inline__t_bo_simple_p(dpa_u_bo_inline_t*const bo);
 extern dpa_u_bo_simple_t dpa__u_simple_fix_type(dpa_u_bo_simple_t v);
 extern dpa_u_bo_t dpa__u_any_bo__t_bo_p(dpa_u_any_bo_t*const bo);
 extern dpa_u_bo_t dpa__u_bo_with_hash__t_bo_p(dpa_u_bo_with_hash_t*const bo);

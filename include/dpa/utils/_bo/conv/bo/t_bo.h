@@ -17,13 +17,14 @@
 #define dpa__u_any_bo__t_bo(X) dpa_u_rescope(dpa_u_bo_t,dpa__u_any_bo__t_bo_p(X))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_t dpa__u_any_bo__t_bo_p(dpa_u_any_bo_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
-    case DPA_U_BO_INLINE:
+    case DPA_U_BO_INLINE: {
       return (const dpa_u_bo_t){
         .bo_inline = *(const dpa_u_bo_inline_t*)bo,
       };
+    }
     case DPA_U_BO_SIMPLE:
     case DPA_U_BO_HASHED:
-    case DPA_U_BO_REFCOUNTED:
+    case DPA_U_BO_REFCOUNTED: {
       return (const dpa_u_bo_t){
         .bo_simple = {
           .type = DPA_U_BO_SIMPLE,
@@ -31,6 +32,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_t dpa__u_any_
           .data = dpa__u_any_bo_simple__data(bo),
         }
       };
+    }
   }
   dpa_u_unreachable("dpa_u_any_bo_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }

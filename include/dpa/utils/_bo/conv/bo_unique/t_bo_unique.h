@@ -9,9 +9,9 @@
 #define dpa__u_v_bo_unique_hashmap__t_bo_unique(X) (dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (X) }
 #define dpa__u_any_bo_unique_hashmap__t_bo_unique(X) (dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)(X) }
 
-#define dpa__u_v_bo_unique__t_bo_unique(X) (X)
-#define dpa__u_p_bo_unique__t_bo_unique(X) *(X)
-#define dpa__u_cp_bo_unique__t_bo_unique(X) *(X)
+#define dpa__u_v_bo_unique__t_bo_unique(X) dpa_u_rescope(dpa_u_bo_unique_t, (X))
+#define dpa__u_p_bo_unique__t_bo_unique(X) dpa_u_rescope(dpa_u_bo_unique_t, *(X))
+#define dpa__u_cp_bo_unique__t_bo_unique(X) dpa_u_rescope(dpa_u_bo_unique_t, *(X))
 #define dpa__u_any_bo_unique__t_bo_unique(X) dpa_u_rescope(dpa_u_bo_unique_t, dpa__u_any_bo_unique__v_bo_unique(X))
 
 #define dpa__u_v_bo_inline__t_bo_unique(X) (dpa_u_bo_unique_t){ .bo_inline = (X) }
