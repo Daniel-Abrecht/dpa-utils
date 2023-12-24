@@ -344,22 +344,19 @@
       </p>
     </section>
     <section class="nocolumn">
-      <h4><a class="var" id="dpa_u_v_bo_*" href="#dpa_u_v_bo_*">dpa_u_v_bo_*</a></h4>
+      <h4><a class="var" id="dpa_u_t_bo_*" href="#dpa_u_t_bo_*">dpa_u_t_bo_*</a></h4>
       <p>
-        Convert the BO to the specified static BO type if it is guaranteed to succeed and the lifetime of the data does
-        not change. The resulting BO will not be a pointer. It's runtime type will change if necessary. It may or may
-        not return the same object, and it may not be an lvalue.
+        Convert the BO to the specified static BO type. Always returns an lvalue. The lifetime of the bo will be the
+        same as the enclosing block scope, a compound literal is used to acheeve this. For inline BOs, the lifetime
+        of it's data is the same as the lifetime of the BO object itself. It's runtime type will change if necessary.
       </p>
     </section>
     <section class="nocolumn">
-      <h4><a class="var" id="dpa_u_t_bo_*" href="#dpa_u_t_bo_*">dpa_u_t_bo_*</a></h4>
+      <h4><a class="var" id="dpa_u_v_bo_*" href="#dpa_u_v_bo_*">dpa_u_v_bo_*</a></h4>
       <p>
-        Mostly the same as <var tabindex="0" name="dpa_u_v_bo_*">dpa_u_v_&shy;bo_&shy;*</var>,
-        but it does also take types that may contain inline BOs even if that changes the lifetime of the BOs data.
-        The lifetime of non-pointer inline BOs will always be changed to the lifetime of the current block scope
-        using a compound literal. This is done because otherwise, the lifetime of an inline bo rvalue would have
-        temporary storage duration, which is shorter than the lifetime of a compound literal or a variable with
-        automatic storage duration, and that often wouldn't be very helpful.
+        Convert the BO to the specified static BO type if it is guaranteed to succeed and the lifetime of the data does
+        not change. It's runtime type will change if necessary. It may or may not return the same object, and it may not
+        be an lvalue.
       </p>
     </section>
     <section class="nocolumn">
