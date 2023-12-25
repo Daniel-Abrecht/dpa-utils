@@ -233,7 +233,33 @@ gen-t-conv-list(){
     done
   done
 }
-gen-t-conv-list
+
+gen-tp-conv-list(){
+  tp_conv=()
+  for e in "${type_v[@]}"
+  do
+    type-unpack $e
+    declare -A "target=( ${t[@]@K} )"
+    target_dtypes=( "${dtypes[@]}" )
+    target_dbtypes=( "${dbtypes[@]}" )
+    for e in "${type_v[@]}"
+    do
+      type-unpack $e
+      if [ "${target[ro]}" != 1 ] && [ "${t[ro]}" = 1 ]; then continue; fi
+      if ! is-subset dbtypes target_dbtypes && [ "${target[unconvertable]}" = 1 ]; then continue; fi
+      if [ "${target[hashed]}" = 1 ] && [ "${t[hashed]}" != 1 ]; then continue; fi
+      if [ "${target[refcounted]}" = 1 ] && [ "${t[refcounted]}" != 1 ]; then continue; fi
+      if [ "${target[name]}" = bo_gc_ro ] && [ "${t[dh]}" = 1 ]; then continue; fi
+      tp_conv+=("${target[name]} ${t[name]} v")
+      if [ "${t[pointer]}" != 1 ] && [ "${t[opaque]}" != 1 ]
+      then
+        tp_conv+=("${target[name]} ${t[name]} cv")
+        tp_conv+=("${target[name]} ${t[name]} p")
+        tp_conv+=("${target[name]} ${t[name]} cp")
+      fi
+    done
+  done
+}
 
 gen-t-conv-test(){
   to="$1"; shift
@@ -314,10 +340,104 @@ gen-t-conv-tests(){
   done
 }
 
-gen-t-conv-tests
+
+gen-tp-conv-test(){
+  to="$1"; shift
+  from="$1"; shift
+  from_mode="$1"; shift
+  macro="dpa_u_tp_$to"
+  to_type="dpa_u_${to}_t"
+  type-lookup name "$to"
+  type-unpack $result
+  declare -A "to=( ${t[@]@K} )"
+  to_dtypes=( "${dtypes[@]}" )
+  from_type="dpa_u_${from}_t"
+  type-lookup name "$from"
+  type-unpack $result
+  declare -A "from=( ${t[@]@K} )"
+  from_dtypes=( "${dtypes[@]}" )
+  if [ "${to[opaque]}" = 1 ]
+  then
+    to_type+='*'
+    to[pointer]=1
+  fi
+  if [ "${from[opaque]}" = 1 ]
+  then
+    from_type+='*'
+    from[pointer]=1
+  fi
+  fpp=''
+  if [ "${from[pointer]}" != 1 ]
+    then fpp='*'
+  fi
+  if [ "${to[pointer]}" != 1 ]
+  then
+    to_type+='*'
+  fi
+  const=
+  if [ "$from_mode" = cv ] || [ "$from_mode" = cp ]
+    then const='const '
+  fi
+  for dt in "${from_dtypes[@]}"
+  do
+    dtv="P_$dt"
+    if [ "$dt" = BO_UNIQUE_HASHMAP ] && [ "${from[name]}" != bo_unique_hashmap ] && [ "${from[opaque]}" != 1 ]
+      then dtv="P_BO_UNIQUE"
+    fi
+    (
+      cat <<EOF
+#include <test/common.h>
+int main(){
+  $const$from_type$fpp from = ($const$from_type$fpp)$dtv;
+EOF
+      if [ "$from_mode" = p ] || [ "$from_mode" = cp ]
+        then echo "  $to_type result = $macro(from);"
+        else echo "  $to_type result = $macro(${fpp}from);"
+      fi
+      cat <<EOF
+  if(sizeof(${dtv}_DATA)-1 != dpa_u_bo_get_size(result) || memcmp(${dtv}_DATA, dpa_u_bo_data(result), sizeof(${dtv}_DATA))){
+    fprintf(stderr, "Buffer contained unexpected data\n");
+    return 1;
+  }
+EOF
+      if [ "${to[hashed]}" = 1 ]
+      then cat <<EOF
+    if(dpa_u_bo_get_hash(from) != dpa_u_bo_get_hash(result)){
+      fprintf(stderr, "Hash missmatches\n");
+      return 1;
+    }
+EOF
+      fi
+      cat <<EOF
+}
+EOF
+    ) >"build/c/test/tp-conv--${to[name]}-from-${from[name]}-$from_mode+$dtv.c"
+    echo "${to[name]}-from-${from[name]}-$from_mode+$dtv" >>build/c/test/tp-conv-tests
+  done
+}
+
+gen-tp-conv-tests(){
+  ( set -e; cd build; mkdir -p c/test/; rm -f c/test/tp-conv--*.c; )
+  true >build/c/test/tp-conv-tests
+  for e in "${tp_conv[@]}"
+    do gen-tp-conv-test $e
+  done
+}
 
 run-gen-t-conv-tests(){
   mkdir -p "build/$TYPE/bin/build/c/test/"
   dpa-testsuite t-conv make -r -s -f test/run-tests.mk -j$(nproc) TEST_FILE="build/c/test/t-conv-tests" TEST_PREFIX="build/$TYPE/bin/build/c/test/t-conv--"
 }
+
+run-gen-tp-conv-tests(){
+  mkdir -p "build/$TYPE/bin/build/c/test/"
+  dpa-testsuite tp-conv make -r -s -f test/run-tests.mk -j$(nproc) TEST_FILE="build/c/test/tp-conv-tests" TEST_PREFIX="build/$TYPE/bin/build/c/test/tp-conv--"
+}
+
+gen-t-conv-list
+gen-t-conv-tests
+gen-tp-conv-list
+gen-tp-conv-tests
+
 run-gen-t-conv-tests
+run-gen-tp-conv-tests

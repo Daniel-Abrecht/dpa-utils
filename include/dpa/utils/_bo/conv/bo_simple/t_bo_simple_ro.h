@@ -1,4 +1,5 @@
 #define dpa_u_t_bo_simple_ro(...) dpa_u_assert_selection(dpa_u_t_bo_simple_ro_g((__VA_ARGS__)))
+#define dpa_u_tp_bo_simple_ro(...) &dpa_u_assert_selection(dpa_u_t_bo_simple_ro_g((__VA_ARGS__)))
 #define dpa_u_t_bo_simple_ro_g(X) dpa_u_generic((X),dpa__u_helper_all_g(t_bo_simple_ro,(X)))
 
 #define dpa__u_t_bo_simple_ro__helper_s1(X) dpa_u_rescope(dpa_u_bo_simple_ro_t, dpa__u_simple_ro_fix_type((X)))
