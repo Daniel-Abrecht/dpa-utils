@@ -22,6 +22,7 @@
 #include <dpa/utils/_bo/conv/bo_unique/t_bo_unique.h>
 #include <dpa/utils/_bo/conv/bo_unique/v_bo_unique.h>
 #include <dpa/utils/_bo/conv/bo_unique_hashmap/t_bo_unique_hashmap.h>
+#include <dpa/utils/_bo/conv/bo_unique_hashmap/tp_any_bo_unique_hashmap.h>
 #include <dpa/utils/_bo/conv/bo_unique_hashmap/v_bo_unique_hashmap.h>
 #include <dpa/utils/_bo/conv/other/bo_intern.h>
 #include <dpa/utils/_bo/conv/other/bo_ptr.h>

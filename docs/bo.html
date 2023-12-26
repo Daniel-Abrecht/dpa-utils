@@ -354,8 +354,9 @@
     <section class="nocolumn">
       <h4><a class="var" id="dpa_u_tp_bo_*" href="#dpa_u_tp_bo_*">dpa_u_tp_bo_*</a></h4>
       <p>
-        Same as <a class="var" href="#dpa_u_t_bo_*">dpa_u_t_bo_*</a> but returns a pointer.
-        These macros can also be used to convert to the any bo types.
+        Same as <a class="var" href="#dpa_u_t_bo_*">dpa_u_t_bo_*</a> but returns a pointer. The pointer itself may not
+        be an lvalue, but the type it points to will not be const, and will have the lifetime of the enclosing block
+        scope. These macros can also be used to convert to the any bo types.
       </p>
     </section>
     <section class="nocolumn">
