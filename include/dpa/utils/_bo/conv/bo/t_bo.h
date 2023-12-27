@@ -43,9 +43,9 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_t dpa__u_any_
 #define dpa__u_cp_bo_inline__t_bo(X) (dpa_u_bo_t){ .bo_inline = *(X) }
 #define dpa__u_any_bo_inline__t_bo(X) (dpa_u_bo_t){ .bo_inline = *(const dpa_u_bo_inline_t*)(X) }
 
-#define dpa__u_v_bo_simple__t_bo(X) (dpa_u_bo_t){ .bo_simple = (X).ro }
-#define dpa__u_p_bo_simple__t_bo(X) (dpa_u_bo_t){ .bo_simple = (X)->ro }
-#define dpa__u_cp_bo_simple__t_bo(X) (dpa_u_bo_t){ .bo_simple = (X)->ro }
+#define dpa__u_v_bo_simple__t_bo(X) (dpa_u_bo_t){ .bo_simple = (X) }
+#define dpa__u_p_bo_simple__t_bo(X) (dpa_u_bo_t){ .bo_simple = *(X) }
+#define dpa__u_cp_bo_simple__t_bo(X) (dpa_u_bo_t){ .bo_simple = *(X) }
 #define dpa__u_any_bo_simple__t_bo(X) dpa__u_t_bo__helper_s1(*(dpa_u_bo_simple_t*)X)
 
 #define dpa__u_v_bo_hashed__t_bo(X) dpa__u_t_bo__helper_s1((X).bo_simple)
