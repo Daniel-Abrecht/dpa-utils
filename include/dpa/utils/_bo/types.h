@@ -153,7 +153,7 @@ struct dpa_u_bo_refcounted_hashed_ro {
   dpa_u_hash_t hash;
 };
 
-// Note: There will be no dpa_u_bo_refcounted_hashed type. The hash and refcount depends on the data.
+// Note: There will be no dpa_u_bo_refcounted_hashed_ro type. The hash and refcount depends on the data.
 // The refcount is stored with the data, but the hash is not. Therefore, modifying a refcounted hashed buffer
 // is always wrong.
 
@@ -200,3 +200,18 @@ union dpa__u_hashed_conv_helper {
   dpa_u_bo_hashed_t bo_hashed;
 };
 static_assert(sizeof(union dpa__u_hashed_conv_helper) == sizeof(dpa_u_bo_hashed_ro_t), "union dpa__u_hashed_conv_helper has an unexpected size");
+
+union dpa__u_any_helper {
+  dpa__u_bo_meta_t meta;
+  dpa_u_bo_t bo;
+  dpa_u_bo_hashed_t bo_hashed;
+  dpa_u_bo_refcounted_t bo_refcounted;
+};
+
+union dpa__u_any_ro_helper {
+  dpa__u_bo_meta_t meta;
+  dpa_u_bo_ro_t bo;
+  dpa_u_bo_hashed_ro_t bo_hashed;
+  dpa_u_bo_refcounted_ro_t bo_refcounted;
+  dpa_u_bo_refcounted_hashed_ro_t bo_refcounted_hashed;
+};

@@ -74,6 +74,9 @@ extern size_t dpa__u_bo_with_hash_ro__get_size(const dpa_u_bo_with_hash_ro_t*con
 extern size_t dpa__u_v_bo__get_size(const dpa_u_bo_t bo);
 extern size_t dpa__u_v_bo_ro__get_size(const dpa_u_bo_ro_t bo);
 extern size_t dpa__u_v_bo_unique__get_size(const dpa_u_bo_unique_t bo);
+extern union dpa__u_any_helper dpa__u_any_bo__tp_any_bo_p(dpa_u_any_bo_t*const bo);
+extern union dpa__u_any_helper dpa__u_any_bo_simple__tp_any_bo_p(dpa_u_any_bo_simple_t*const bo);
+extern union dpa__u_any_helper dpa__u_bo_with_hash__tp_any_bo_p(dpa_u_bo_with_hash_t*const bo);
 extern union dpa__u_hashed_conv_helper dpa__u_bo_with_hash__t_bo_hashed_1_p(const dpa_u_bo_with_hash_t*const bo);
 extern union dpa__u_hashed_conv_helper dpa__u_bo_with_hash__t_bo_hashed_ro_1_p(const dpa_u_bo_with_hash_t*const bo);
 extern union dpa__u_hashed_conv_helper dpa__u_bo_with_hash_ro__t_bo_hashed_ro_1_p(const dpa_u_bo_with_hash_ro_t*const bo);
