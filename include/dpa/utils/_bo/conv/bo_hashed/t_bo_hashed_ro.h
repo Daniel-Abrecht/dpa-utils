@@ -26,7 +26,7 @@
 #define dpa__u_v_bo_hashed__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,(X).ro)
 #define dpa__u_p_bo_hashed__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,(X)->ro)
 #define dpa__u_cp_bo_hashed__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,(X)->ro)
-#define dpa__u_any_bo_hashed__t_bo_hashed_ro(X) dpa__u_t_bo_hashed_ro__helper_s1(*(const dpa_u_bo_hashed_ro_t*)(X))
+#define dpa__u_any_bo_hashed__t_bo_hashed_ro(X) dpa_u_rescope(dpa_u_bo_hashed_ro_t,*(const dpa_u_bo_hashed_ro_t*)(X))
 
 dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline dpa_u_bo_hashed_ro_t dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(const dpa_u_bo_refcounted_hashed_ro_t bo){
   return (dpa_u_bo_hashed_ro_t){

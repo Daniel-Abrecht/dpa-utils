@@ -6,6 +6,7 @@
 #include <dpa/utils/_bo/conv/bo/v_bo_ro.h>
 #include <dpa/utils/_bo/conv/bo_hashed/t_bo_hashed.h>
 #include <dpa/utils/_bo/conv/bo_hashed/t_bo_hashed_ro.h>
+#include <dpa/utils/_bo/conv/bo_hashed/tp_any_bo_hashed_ro.h>
 #include <dpa/utils/_bo/conv/bo_hashed/v_bo_hashed.h>
 #include <dpa/utils/_bo/conv/bo_hashed/v_bo_hashed_ro.h>
 #include <dpa/utils/_bo/conv/bo_inline/t_bo_inline.h>

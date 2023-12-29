@@ -213,5 +213,12 @@ union dpa__u_any_ro_helper {
   dpa_u_bo_ro_t bo;
   dpa_u_bo_hashed_ro_t bo_hashed;
   dpa_u_bo_refcounted_ro_t bo_refcounted;
+};
+
+union dpa__u_any_ro_helper_2 {
+  dpa__u_bo_meta_t meta;
+  dpa_u_bo_ro_t bo;
+  dpa_u_bo_hashed_ro_t bo_hashed;
+  dpa_u_bo_refcounted_ro_t bo_refcounted;
   dpa_u_bo_refcounted_hashed_ro_t bo_refcounted_hashed;
 };
