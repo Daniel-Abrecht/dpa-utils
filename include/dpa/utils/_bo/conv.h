@@ -13,6 +13,7 @@
 #include <dpa/utils/_bo/conv/bo_inline/v_bo_inline.h>
 #include <dpa/utils/_bo/conv/bo_refcounted/t_bo_refcounted.h>
 #include <dpa/utils/_bo/conv/bo_refcounted/t_bo_refcounted_ro.h>
+#include <dpa/utils/_bo/conv/bo_refcounted/tp_any_bo_refcounted_ro.h>
 #include <dpa/utils/_bo/conv/bo_refcounted/v_bo_refcounted.h>
 #include <dpa/utils/_bo/conv/bo_refcounted/v_bo_refcounted_ro.h>
 #include <dpa/utils/_bo/conv/bo_refcounted_hashed/t_bo_refcounted_hashed_ro.h>
