@@ -4,7 +4,7 @@
 #include <dpa/utils/common.h>
 #include <stdint.h>
 
-#define utf8_from_code_point(X) utf8_from_code_point_p((char[8]){0},(X))
+#define dpa_u_utf8_from_code_point(X) dpa_u_utf8_from_code_point_p((char[8]){0},(X))
 dpa__u_api inline unsigned char* dpa_u_utf8_from_code_point_p(unsigned char mem[8], uint32_t codepoint){
   if(codepoint < 0x80u){
     mem[0] = codepoint;
