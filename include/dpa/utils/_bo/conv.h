@@ -2,6 +2,7 @@
 #include <dpa/utils/_bo/conv/bo/t_bo.h>
 #include <dpa/utils/_bo/conv/bo/t_bo_ro.h>
 #include <dpa/utils/_bo/conv/bo/tp_any_bo.h>
+#include <dpa/utils/_bo/conv/bo/tp_any_bo_ro.h>
 #include <dpa/utils/_bo/conv/bo/v_bo.h>
 #include <dpa/utils/_bo/conv/bo/v_bo_ro.h>
 #include <dpa/utils/_bo/conv/bo_hashed/t_bo_hashed.h>
