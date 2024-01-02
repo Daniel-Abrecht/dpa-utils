@@ -47,7 +47,7 @@ type_v=(
   "any_bo_unique                au   0 0 0 1 1 1 0 1 X 1  1 1 0 0 0 0"
   "any_bo_ro                    abr  0 0 0 1 1 1 0 X X 0  1 1 1 1 1 1"
   "any_bo                       ab   0 0 0 1 1 0 0 X X 0  1 0 1 1 1 0"
-  "any_bo_hashed_ro             ahr  0 0 0 1 1 1 0 1 0 0  0 0 0 1 0 0"
+  "any_bo_hashed_ro             ahr  0 0 0 1 1 1 0 1 0 0  0 1 0 1 0 0"
   "any_bo_hashed                ah   0 0 0 1 1 0 0 1 0 0  0 0 0 1 0 0"
   "any_bo_refcounted_ro         arr  0 0 0 1 1 1 0 X 1 0  0 0 0 0 1 1"
   "any_bo_refcounted            ar   0 0 0 1 1 0 0 0 1 0  0 0 0 0 1 0"

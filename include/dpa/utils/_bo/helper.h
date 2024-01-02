@@ -139,3 +139,11 @@ dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline dpa_u_bo_refcounted_ro_
     .refcount = v.refcount,
   };
 }
+
+dpa_u_reproducible dpa__u_really_inline dpa__u_api inline const void* dpa__u_bo_any_unpack_ptr(const void*const bo){
+  if(((const dpa__u_bo_meta_t*)bo)->type == DPA_U_BO_UNIQUE_HASHMAP){
+    return ((dpa_u_bo_unique_t*)bo)->bo_unique_hashmap;
+  }else{
+    return bo;
+  }
+}
