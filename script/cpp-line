@@ -3,10 +3,10 @@
 cd "$(dirname "$0")/.."
 
 (
-  cat include/dpa/utils/*.h
+  find include/dpa/ -iname '*.h' -exec cat {} \;
   echo .
   printf "%s\n" "$1"
-) | sed 's|#include *<dpa/utils/.*||g' \
+) | sed 's|#include *<dpa/.*||g' \
   | sed 's/\\$/\x01\\/' \
   | cpp -x c -std=c17 -Wall -Wextra -pedantic - \
   | tail -n 1 \

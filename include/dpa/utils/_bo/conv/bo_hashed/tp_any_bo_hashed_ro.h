@@ -59,7 +59,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_any_ro_he
 #define dpa__u_cp_bo_unique__tp_any_bo_hashed_ro(X) ((dpa_u_any_bo_hashed_ro_t*)&dpa__u_cp_bo_unique__t_bo_hashed_ro((X)))
 #define dpa__u_any_bo_unique__tp_any_bo_hashed_ro(X) ((dpa_u_any_bo_hashed_ro_t*)&dpa__u_any_bo_unique__t_bo_hashed_ro((X)))
 
-#define dpa__u_bo_with_hash_ro__tp_any_bo_hashed_ro(X) ((dpa_u_any_bo_hashed_ro_t*)dpa__u_bo_any_unpack_ptr(&dpa_u_rescope(union dpa__u_any_ro_helper,dpa__u_bo_with_hash_ro__tp_any_bo_hashed_ro_1_p(X))))
+#define dpa__u_bo_with_hash_ro__tp_any_bo_hashed_ro(X) ((dpa_u_any_bo_hashed_ro_t*)dpa__u_bo_any_unpack_ptr(&dpa_u_rescope(union dpa__u_any_ro_helper,dpa__u_bo_with_hash_ro__tp_any_bo_hashed_ro_1_p(X)))) // TODO
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_any_ro_helper dpa__u_bo_with_hash_ro__tp_any_bo_hashed_ro_1_p(const dpa_u_bo_with_hash_ro_t*const bo){
   switch(dpa_u_bo_get_type(bo)){
     case DPA_U_BO_INLINE: {

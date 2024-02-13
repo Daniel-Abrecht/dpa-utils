@@ -183,15 +183,6 @@ static_assert(alignof(struct dpa_u_bo_ro) == alignof(struct dpa_u_bo_inline), "d
 ////
 
 // This is an internal type used by some dpa_u_t_bo* conversion macros to change the storage duration & lifetime of
-// inline BOs to the current block scope.
-union dpa__u_simple_conv_helper {
-  dpa__u_bo_meta_t meta;
-  dpa_u_bo_inline_t bo_inline;
-  dpa_u_bo_simple_ro_t bo_simple_ro;
-  dpa_u_bo_simple_t bo_simple;
-};
-
-// This is an internal type used by some dpa_u_t_bo* conversion macros to change the storage duration & lifetime of
 // inline BOs to the current block scope, while retaining enough memory for the hash of a hashed bo.
 union dpa__u_hashed_conv_helper {
   dpa__u_bo_meta_t meta;
@@ -221,4 +212,12 @@ union dpa__u_any_ro_helper_2 {
   dpa_u_bo_hashed_ro_t bo_hashed;
   dpa_u_bo_refcounted_ro_t bo_refcounted;
   dpa_u_bo_refcounted_hashed_ro_t bo_refcounted_hashed;
+};
+
+union dpa__u_bo_ptr_helper {
+  struct {
+    dpa__u_bo_meta_t meta;
+    const void* ptr;
+  };
+  dpa_u_bo_inline_t bo_inline;
 };

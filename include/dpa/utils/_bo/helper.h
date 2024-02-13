@@ -147,3 +147,19 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline const void* dpa__u_bo_
     return bo;
   }
 }
+
+dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_bo_ptr_helper dpa__u_bo_any_inline_ptr(const void*const bo){
+  const dpa__u_bo_meta_t meta = *(const dpa__u_bo_meta_t*)bo;
+  if(meta.type == DPA_U_BO_INLINE){
+    return (union dpa__u_bo_ptr_helper){
+      .bo_inline = ((dpa_u_bo_unique_t*)bo)->bo_inline,
+    };
+  }else{
+    return (union dpa__u_bo_ptr_helper){
+      .meta = meta,
+      .ptr = bo,
+    };
+  }
+}
+// This is a helper for getting a copy of inline BOs in the current block scope to adjust their lifetime
+#define dpa__u_bo_any_inline_ptr_h(X) &dpa_u_rescope(union dpa__u_bo_ptr_helper,dpa__u_bo_any_inline_ptr((X)))

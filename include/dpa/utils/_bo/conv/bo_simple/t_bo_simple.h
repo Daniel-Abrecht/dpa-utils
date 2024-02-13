@@ -10,7 +10,6 @@
     dpa_u_bo_with_refcount_t*: dpa__u_bo_with_refcount__t_bo_simple(DPA__G(dpa_u_bo_with_refcount_t*,(X))) \
   )
 
-#define dpa__u_t_bo_simple__helper(P,X) (dpa_u_bo_simple_t){ .type = DPA_U_BO_SIMPLE, .size=dpa__u_ ## P ## __get_size((X)), .data=dpa__u_ ## P ## __data((X)) }
 #define dpa__u_t_bo_simple__helper_s1(X) dpa_u_rescope(dpa_u_bo_simple_t, dpa__u_simple_fix_type((X)))
 
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline dpa_u_bo_simple_t dpa__u_p_bo_inline__t_bo_simple_p(dpa_u_bo_inline_t*const bo){
