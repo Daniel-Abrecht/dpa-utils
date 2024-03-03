@@ -22,6 +22,7 @@
 #include <dpa/utils/_bo/conv/bo_simple/t_bo_simple.h>
 #include <dpa/utils/_bo/conv/bo_simple/t_bo_simple_ro.h>
 #include <dpa/utils/_bo/conv/bo_simple/tp_any_bo_simple.h>
+#include <dpa/utils/_bo/conv/bo_simple/tp_any_bo_simple_ro.h>
 #include <dpa/utils/_bo/conv/bo_simple/v_bo_simple.h>
 #include <dpa/utils/_bo/conv/bo_simple/v_bo_simple_ro.h>
 #include <dpa/utils/_bo/conv/bo_unique/t_bo_unique.h>

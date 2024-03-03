@@ -32,7 +32,7 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_any_helpe
     }
     case DPA_U_BO_HASHED: {
       return (const union dpa__u_any_helper){
-        .bo_refcounted = *(dpa_u_bo_refcounted_t*)bo,
+        .bo_hashed = *(dpa_u_bo_hashed_t*)bo,
       };
     }
   }
