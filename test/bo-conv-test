@@ -28,11 +28,11 @@ type_k=(
 
 type_v=(
 # name                         alias s v d a o r p h r u  i u s h r rh
-  "bo_inline                    i    1 0 0 0 0 X 0 1 0 1  1 0 0 0 0 0"
+  "bo_inline                    i    1 0 0 0 0 X 0 1 2 1  1 0 0 0 0 0"
   "bo_unique_hashmap            uh   1 0 0 0 0 1 1 1 1 1  0 1 0 0 0 0"
   "bo_simple_ro                 sr   1 0 0 0 0 1 0 0 0 0  0 0 1 0 0 0"
   "bo_simple                    s    1 0 0 0 0 0 0 0 0 0  0 0 1 0 0 0"
-  "bo_unique                    u    0 1 0 0 0 1 0 1 X 1  1 1 0 0 0 0"
+  "bo_unique                    u    0 1 0 0 0 1 0 1 2 1  1 1 0 0 0 0"
   "bo_ro                        br   0 1 0 0 0 1 0 X X 0  1 1 1 0 0 0"
   "bo                           b    0 1 0 0 0 0 0 X X 0  1 0 1 0 0 0"
   "bo_hashed_ro                 hr   0 0 1 0 0 1 0 1 0 0  0 0 0 1 0 0"
@@ -40,11 +40,11 @@ type_v=(
   "bo_refcounted_ro             rr   0 0 1 0 0 1 0 0 1 0  0 0 0 0 1 0"
   "bo_refcounted                r    0 0 1 0 0 0 0 0 1 0  0 0 0 0 1 0"
   "bo_refcounted_hashed_ro      rhr  0 0 1 0 0 1 0 1 1 0  0 0 0 0 0 1"
-  "any_bo_inline                ai   0 0 0 1 1 1 0 1 0 1  1 0 0 0 0 0"
+  "any_bo_inline                ai   0 0 0 1 1 1 0 1 2 1  1 0 0 0 0 0"
   "any_bo_unique_hashmap        auh  0 0 0 1 1 1 0 1 1 1  0 1 0 0 0 0"
   "any_bo_simple_ro             asr  0 0 0 1 1 1 0 X X 0  0 1 1 1 1 1"
   "any_bo_simple                as   0 0 0 1 1 0 0 X X 0  0 0 1 1 1 0"
-  "any_bo_unique                au   0 0 0 1 1 1 0 1 X 1  1 1 0 0 0 0"
+  "any_bo_unique                au   0 0 0 1 1 1 0 1 2 1  1 1 0 0 0 0"
   "any_bo_ro                    abr  0 0 0 1 1 1 0 X X 0  1 1 1 1 1 1"
   "any_bo                       ab   0 0 0 1 1 0 0 X X 0  1 0 1 1 1 0"
   "any_bo_hashed_ro             ahr  0 0 0 1 1 1 0 1 0 0  0 1 0 1 0 0"
@@ -54,7 +54,7 @@ type_v=(
   "any_bo_refcounted_hashed_ro  arhr 0 0 0 1 1 1 0 1 1 0  0 0 0 0 0 1"
   "bo_with_hash_ro              whr  0 0 0 0 1 1 0 1 0 0  1 1 0 1 0 1"
   "bo_with_hash                 wh   0 0 0 0 1 0 0 1 0 0  1 0 0 1 0 0"
-  "bo_gc_ro                     gcr  0 0 0 0 1 1 0 X X 0  1 1 0 0 1 1"
+  "bo_gc_ro                     gcr  0 0 0 0 1 1 0 X 2 0  1 1 0 0 1 1"
   "bo_with_refcount_ro          wrr  0 0 0 0 1 1 0 X 1 0  0 1 0 0 1 1"
   "bo_with_refcount             wr   0 0 0 0 1 0 0 X 1 0  0 0 0 0 1 0"
   "bo_with_refcount_and_hash_ro wrhr 0 0 0 0 1 1 0 1 1 0  0 1 0 0 0 1"
@@ -222,7 +222,6 @@ gen-t-conv-list(){
       if ! is-subset dbtypes target_dbtypes && [ "${target[unconvertable]}" = 1 ]; then continue; fi
       if [ "${target[hashed]}" = 1 ] && [ "${t[hashed]}" != 1 ]; then continue; fi
       if [ "${target[refcounted]}" = 1 ] && [ "${t[refcounted]}" != 1 ]; then continue; fi
-      if [ "${target[name]}" = bo_gc_ro ] && [ "${t[dh]}" = 1 ]; then continue; fi
       t_conv+=("${target[name]} ${t[name]} v")
       if [ "${t[pointer]}" != 1 ] && [ "${t[opaque]}" != 1 ]
       then
@@ -249,7 +248,7 @@ gen-tp-conv-list(){
       if ! is-subset dbtypes target_dbtypes && [ "${target[unconvertable]}" = 1 ]; then continue; fi
       if [ "${target[hashed]}" = 1 ] && [ "${t[hashed]}" != 1 ]; then continue; fi
       if [ "${target[refcounted]}" = 1 ] && [ "${t[refcounted]}" != 1 ]; then continue; fi
-      if [ "${target[name]}" = bo_gc_ro ] && [ "${t[dh]}" = 1 ]; then continue; fi
+      if [ "${target[refcounted]}" = 2 ] && [ "${t[refcounted]}" != 1 ] && [ "${t[refcounted]}" != 2 ]; then continue; fi
       tp_conv+=("${target[name]} ${t[name]} v")
       if [ "${t[pointer]}" != 1 ] && [ "${t[opaque]}" != 1 ]
       then
