@@ -86,4 +86,4 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_any_ro_he
   }
   dpa_u_unreachable("dpa_u_bo_with_refcount_ro_t can't be of type %s", dpa_u_enum_get_name(dpa_u_bo_any_type, dpa_u_bo_get_type(bo)));
 }
-#define dpa__u_bo_with_refcount__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t,*(dpa_u_bo_refcounted_ro_t*)(X))) /*TODO*/
+#define dpa__u_bo_with_refcount__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t,*(dpa_u_bo_refcounted_ro_t*)(X)))
