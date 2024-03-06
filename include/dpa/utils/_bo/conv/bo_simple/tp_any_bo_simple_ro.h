@@ -114,11 +114,14 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_any_ro_he
   switch(bo->meta.type){
     case DPA_U_BO_INLINE: {
       return (const union dpa__u_any_ro_helper_2){
-        .bo.bo_simple = {
-          .type = DPA_U_BO_SIMPLE,
-          .size = dpa__u_v_bo_inline__get_size(bo->bo_inline),
-          .data = dpa__u_v_bo_inline__data(bo->bo_inline),
-        }
+        .bo_hashed = {
+          .bo_simple = {
+            .type = DPA_U_BO_HASHED,
+            .size = dpa__u_v_bo_inline__get_size(bo->bo_inline),
+            .data = dpa__u_v_bo_inline__data(bo->bo_inline),
+          },
+          .hash = dpa__u_v_bo_inline__get_hash(bo->bo_inline),
+        },
       };
     }
     case DPA_U_BO_SIMPLE: {
