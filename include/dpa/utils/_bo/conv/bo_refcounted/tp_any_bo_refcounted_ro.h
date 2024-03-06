@@ -38,10 +38,10 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_any_ro_he
 #define dpa__u_cp_bo_refcounted__tp_any_bo_refcounted_ro(X)  ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t, (X)->ro))
 #define dpa__u_any_bo_refcounted__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t, *(dpa_u_bo_refcounted_ro_t*)(X)))
 
-#define dpa__u_v_bo_refcounted_hashed_ro__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t, (X).bo_refcounted))
-#define dpa__u_p_bo_refcounted_hashed_ro__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t, (X)->bo_refcounted))
-#define dpa__u_cp_bo_refcounted_hashed_ro__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t, (X)->bo_refcounted))
-#define dpa__u_any_bo_refcounted_hashed_ro__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t, *(dpa_u_bo_refcounted_ro_t*)(X)))
+#define dpa__u_v_bo_refcounted_hashed_ro__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t, (X).bo_refcounted)) /* TODO */
+#define dpa__u_p_bo_refcounted_hashed_ro__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t, (X)->bo_refcounted)) /* TODO */
+#define dpa__u_cp_bo_refcounted_hashed_ro__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_ro_t, (X)->bo_refcounted)) /* TODO */
+#define dpa__u_any_bo_refcounted_hashed_ro__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)&dpa_u_rescope(dpa_u_bo_refcounted_hashed_ro_t, *(dpa_u_bo_refcounted_hashed_ro_t*)(X)))
 
 #define dpa__u_bo_with_refcount_and_hash_ro__tp_any_bo_refcounted_ro(X) ((dpa_u_any_bo_refcounted_ro_t*)dpa__u_bo_any_unpack_ptr(&dpa_u_rescope(union dpa__u_any_ro_helper_2,dpa__u_bo_with_refcount_and_hash_ro__tp_any_bo_refcounted_ro_p(X))))
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_any_ro_helper_2 dpa__u_bo_with_refcount_and_hash_ro__tp_any_bo_refcounted_ro_p(const dpa_u_bo_with_refcount_and_hash_ro_t*const bo){
