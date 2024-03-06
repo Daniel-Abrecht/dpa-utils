@@ -39,3 +39,7 @@ dpa_u_init void dpa_u_init_dpa_hash_offset_basis(void){
   dpa_u_getrandom(buf.data, buf.size);
   dpa_hash_offset_basis = dpa_u_hash_FNV_1a(buf);
 }
+
+dpa_u_reproducible dpa__u_api dpa_u_hash_t dpa__u_cp_bo_inline__get_hash(const dpa_u_bo_inline_t*const bo){
+  return dpa_u_bo_hash(bo);
+}

@@ -13,10 +13,10 @@
     dpa_u_bo_with_refcount_and_hash_ro_t*: dpa__u_bo_with_refcount_and_hash_ro__get_hash(DPA__G(dpa_u_bo_with_refcount_and_hash_ro_t*,(X))) \
   )
 
-#define dpa__u_v_bo_inline__get_hash(X)   ((dpa_u_hash_t)0) // TODO
-#define dpa__u_p_bo_inline__get_hash(X)   dpa__u_v_bo_inline__get_hash(*(X))
-#define dpa__u_cp_bo_inline__get_hash(X)  dpa__u_v_bo_inline__get_hash(*(X))
-#define dpa__u_any_bo_inline__get_hash(X) dpa__u_v_bo_inline__get_hash(*(const dpa_u_bo_inline_t*)(X))
+#define dpa__u_v_bo_inline__get_hash(X)   dpa__u_cp_bo_inline__get_hash(&(X))
+#define dpa__u_p_bo_inline__get_hash(X)   dpa__u_cp_bo_inline__get_hash((X))
+#define dpa__u_any_bo_inline__get_hash(X) dpa__u_cp_bo_inline__get_hash((const dpa_u_bo_inline_t*)(X))
+dpa_u_reproducible dpa__u_api dpa_u_hash_t dpa__u_cp_bo_inline__get_hash(const dpa_u_bo_inline_t*const); // TODO: optimize this
 
 #define dpa__u_v_bo_unique_hashmap__get_hash(X) (X)->bo_hashed.hash
 #define dpa__u_p_bo_unique_hashmap__get_hash(X) (X)->bo_hashed.hash
