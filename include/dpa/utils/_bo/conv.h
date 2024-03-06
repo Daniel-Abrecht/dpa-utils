@@ -32,6 +32,7 @@
 #include <dpa/utils/_bo/conv/bo_unique_hashmap/t_bo_unique_hashmap.h>
 #include <dpa/utils/_bo/conv/bo_unique_hashmap/tp_any_bo_unique_hashmap.h>
 #include <dpa/utils/_bo/conv/bo_unique_hashmap/v_bo_unique_hashmap.h>
+#include <dpa/utils/_bo/conv/bo_with_hash/tp_bo_with_hash.h>
 #include <dpa/utils/_bo/conv/bo_with_hash/tp_bo_with_hash_ro.h>
 #include <dpa/utils/_bo/conv/bo_with_refcount/tp_bo_with_refcount_ro.h>
 #include <dpa/utils/_bo/conv/bo_with_refcount_and_hash/tp_bo_with_refcount_and_hash_ro.h>
