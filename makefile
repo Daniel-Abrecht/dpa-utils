@@ -1,4 +1,5 @@
 .SECONDARY:
+.SUFFIXES:
 
 ifdef use
 include $(patsubst %,mk/%.mk,$(use))
@@ -31,8 +32,11 @@ o-ext ?= .o
 bin-ext ?= 
 
 ifdef debug
+ifeq ($(debug), v)
+CFLAGS += -DDPA_U_DEBUG_VERBOSE
+endif
 TYPE := debug
-CFLAGS  += -O0 -gdwarf-4 -DDPA_U_DEBUG
+CFLAGS  += -Og -gdwarf-4 -DDPA_U_DEBUG
 LDFLAGS += -gdwarf-4
 else
 CFLAGS  += -O2
@@ -52,7 +56,7 @@ endif
 
 CSTD ?= c17
 CFLAGS  += --std=$(CSTD)
-CFLAGS  += -Iinclude
+CFLAGS  += -Iinclude -I.
 CFLAGS  += -Wall -Wextra -pedantic -Werror
 #CFLAGS  += -fstack-protector-all
 CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces
@@ -73,7 +77,8 @@ ASMOUT  := $(patsubst %,build/$(TYPE)/s/%.s,$(SOURCES))
 B-TS := bin/$(TYPE)/dpa-testsuite
 
 BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%$(bin-ext),$(filter src/main/%.c,$(SOURCES)))
-TESTS := $(patsubst test/%.c,%,$(filter test/%.c,$(SOURCES)))
+TESTS := $(patsubst test/%.c,test//%,$(filter test/%.c,$(SOURCES)))
+TESTS += test//bo-conv-test
 
 export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 
@@ -98,6 +103,34 @@ export TYPE
 all: source-checks bin lib
 
 .PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm
+
+do-test//set-map: build/unique-random
+
+# Having a bunch of random, but unique, numbers is useful for tests
+# This makes it easy to get a new unique number, as well as to get an already used one.
+build/unique-random:
+	( \
+	  printf '%02X\n' $$(seq 0 255) | shuf; \
+	  echo; \
+	  printf '%04X\n' $$(seq 0 65535) | shuf; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 8 | head -n 65536 | sort -u | shuf; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 16 | head -n 65536 | sort -u | shuf; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 32 | head -n 65536 | sort -u | shuf; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 64 | head -n 65536 | sort -u | shuf; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 128 | head -n 65536 | sort -u | shuf; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 256 | head -n 65536 | sort -u | shuf; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 512 | head -n 65536 | sort -u | shuf; \
+	  echo; \
+	  cat /usr/share/dict/words | sort -u | shuf | head -n 65536; \
+	  echo; \
+	) >"$@"
 
 source-checks: build/.check-all
 
@@ -160,11 +193,17 @@ build/.check-all: \
 	@echo "Source code checks passed"
 	touch $@
 
+do-test//%: build/$(TYPE)/bin/test/% $(B-TS)
+	$<
+
 do-test//%: test/% $(B-TS)
-	PATH="bin/$(TYPE)/:scripts/:$$PATH" $(B-TS) $* $<
+	$<
+
+test//%: $(B-TS)
+	PATH="bin/$(TYPE)/:scripts/:$$PATH" $(B-TS) $* $(MAKE) "do-test//$*"
 
 test: $(B-TS)
-	$(B-TS) utils $(MAKE) do-test//bo-conv-test
+	$(B-TS) utils $(MAKE) -k $(TESTS)
 
 bin: $(BINS)
 

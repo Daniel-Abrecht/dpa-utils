@@ -26,17 +26,18 @@
  */
 dpa__u_api bool dpa_u_testcase_result(int fd, const char* name, const char* result);
 
+#define DPA_U_TESTCASE_SUFFIX __LINE__
 #define DPA_U_TESTCASE(NAME)  \
-  static int DPA_U_CONCAT_E(dpa_u_test_f_, __LINE__)(void); \
-  dpa_u_init static void DPA_U_CONCAT_E(dpa_u_test_c_, __LINE__)(void){ \
+  static int DPA_U_CONCAT_E(dpa_u_test_f_, DPA_U_TESTCASE_SUFFIX)(void); \
+  dpa_u_init static void DPA_U_CONCAT_E(dpa_u_test_c_, DPA_U_TESTCASE_SUFFIX)(void){ \
     static struct dpa__u_testcase entry = { \
       .name = NAME, \
-      .run = DPA_U_CONCAT_E(dpa_u_test_f_, __LINE__), \
+      .run = DPA_U_CONCAT_E(dpa_u_test_f_, DPA_U_TESTCASE_SUFFIX), \
     }; \
     entry.next = dpa__u_testcase_list; \
     dpa__u_testcase_list = &entry; \
   } \
-  static int DPA_U_CONCAT_E(dpa_u_test_f_, __LINE__)(void)
+  static int DPA_U_CONCAT_E(dpa_u_test_f_, DPA_U_TESTCASE_SUFFIX)(void)
 
 dpa__u_api int dpa_u_test_main(int argc, const char* argv[]);
 
@@ -54,10 +55,10 @@ struct dpa__u_testcase {
   const char* name;
   int(*run)(void);
 };
-extern struct dpa__u_testcase* dpa__u_testcase_list;
+dpa__u_api_var extern struct dpa__u_testcase* dpa__u_testcase_list;
 
-dpa_u_weak void dpa__u_test_setup(void);
-dpa_u_weak void dpa__u_test_teardown(void);
+dpa__u_api dpa_u_weak void dpa__u_test_setup(void);
+dpa__u_api dpa_u_weak void dpa__u_test_teardown(void);
 
 /** @} */
 /** @} */

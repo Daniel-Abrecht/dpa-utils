@@ -1,0 +1,110 @@
+#include <dpa/utils/common.h>
+#include <dpa/utils/math.h>
+#include <stdbool.h>
+
+typedef struct DPA__U_SM_PREFIX DPA__U_SM_TYPE;
+
+#if defined(DPA__U_SM_MICRO_SET) && DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+// For CHAR_BIT == 8, for a set containing one of 256 entries, we only need 256 bits.
+// That'd be 32 bytes/chars (because 8 bits per char). For larger integer types, we need less entries.
+// u8: 32 entries, u16: 16 entries, u32: 8 entries, u64: 4 entries, u128: 2 entries, u256: 1 entry
+// This will not safe any space, but it may make the lookup more efficient. And 32 bytes, is not a lot.
+// We round up the number of entres, in case of CHAR_BIT != 8. In that case, space will be wasted, but who's ever going to use such a platform anyway?
+struct DPA__U_SM_PREFIX {
+  // dpa_u_bitmap_entry_t is designed to be up to 256 bits long
+  dpa_u_bitmap_entry_t bitmask[(((size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT))+(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT-1))/(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT)];
+};
+#else
+struct DPA__U_SM_PREFIX {
+  // After a certain number of entries, it's more efficient to just save the bitmask.
+  // The optimal memory usage for a bitmask of a set in bits is `CHAR_BIT**sizeof(DPA__U_SM_KEY_TYPE)`, but see the comment above for real memory usage.
+  // The memory usage of a set which actually stores the keys is at least `sizeof(DPA__U_SM_KEY_TYPE) * count`, but a set with open addressing should
+  // have a load facter of around 0.75 (75% of allocated entries used), and the memory usage will be that much higher.
+  // This implementation will double the memory used by 2 when the load factor reaches 90%.
+  // If this type is a map rather than a set, a value, which has type void*, has to be allocated for each entry too.
+  // `bitmask` will be used if the amount of memory wasted is <= 50%.
+  // Switching if no memory is wasted would also be possible, but since we already always allocate a power of 2 of memory for the key and value lists, there would be no benefits to that.
+  size_t count; // This is the number of entries stored in the set.
+  unsigned char lbsize; // This is the log 2 of the number of buckets available.
+  union {
+    // The key entry is a reversible hash of the original key. This way, the hash does not need to be recalculated,
+    // even without storing the key and it's hash.
+    DPA__U_SM_KEY_ENTRY_TYPE*restrict key_list;
+    dpa_u_bitmap_entry_t*restrict bitmask;
+  };
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  void**restrict value_list;
+#endif
+};
+#endif
+
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+/**
+ * Adds an entry to the set.
+ * \returns 1 if the entry was already present, 0 if not, -1 on error.
+ */
+dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+/**
+ * Sets an entry in the map and returns the existing one if one exists.
+ * If there was none, the variable will remain unchanged.
+ * \returns 1 if an existing entry was overwritten, 0 if not, -1 on error.
+ */
+dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** value);
+/**
+ * Sets an entry in the map.
+ * \returns 1 if an existing entry was overwritten, 0 if not, -1 on error.
+ */
+dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void* value);
+#endif
+
+/**
+ * Removes an entry.
+ * \returns true if the entry was present, false otherwise.
+ */
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
+
+/**
+ * Checks if an entry is present.
+ * \returns true if the entry was present, false otherwise.
+ */
+dpa_u_reproducible dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
+
+/**
+ * Removes all entries, frees all allocations
+ */
+dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(DPA__U_SM_TYPE* that);
+
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+/**
+ * Returns the entry.
+ */
+dpa_u_reproducible dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
+/**
+ * Removes and returns an entry.
+ */
+dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
+#endif
+
+#if defined(DPA__U_SM_MICRO_SET) && DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+dpa_u_reproducible dpa__u_api inline
+size_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _count)(const DPA__U_SM_TYPE* that){
+  size_t n = 0;
+  const dpa_u_bitmap_entry_t*restrict const bitmask = that->bitmask;
+  for(unsigned i=0; i<(((size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT))+(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT-1))/(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT); i++)
+    n += dpa_u_count_bits(bitmask[i]);
+  return n;
+}
+#else
+dpa_u_reproducible dpa__u_really_inline dpa__u_api inline
+size_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _count)(const DPA__U_SM_TYPE* that){
+  return that->count;
+}
+#endif
+
+/**
+ * For debugging purposes only
+ */
+dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__U_SM_TYPE* that);
+
+//////////////////////////////////////////////

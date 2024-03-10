@@ -132,7 +132,7 @@ static inline struct bucket_index get_bucket_index(size_t hash){
   if(hash >= m_aload(hash_map.move_pending))
     hash &= size_mask>>1;
 #endif
-  int i = dpa_u_log2(hash);
+  int i = dpa_u_log2(hash|1);
   if(hash < (((size_t)1)<<DPA_U_BUCKET_BASE))
     return (struct bucket_index){0, hash};
   return (struct bucket_index){

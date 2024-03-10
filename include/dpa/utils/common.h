@@ -7,6 +7,7 @@
 #include <stdnoreturn.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #ifdef DPA_U_CONFIG
 #include DPA_U_CONFIG
@@ -50,6 +51,8 @@
 #define DPA_U_FIRST_1(X, ...) X
 #define DPA_U_FIRST(...) DPA_U_FIRST_1(__VA_ARGS__,1)
 
+#define DPA_U_STR(X) #X
+#define DPA_U_STR_EVAL(X) DPA_U_STR(X)
 
 #ifdef _MSC_VER
 
@@ -285,7 +288,8 @@ dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline int dpa_u_ptr_compare(c
 typedef int128_t dpa_int128_t;
 #define DPA_HAS_UINT128
 typedef uint128_t dpa_uint128_t;
-#elif UINTMAX_MAX / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) == UINTMAX_C(0xFFFF)
+#elif UINTMAX_MAX / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) \
+                  / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) == UINTMAX_C(0xFFFF)
 #define DPA_HAS_INT128
 typedef intmax_t dpa_int128_t;
 #define DPA_HAS_UINT128
@@ -302,6 +306,49 @@ typedef __int128_t dpa_int128_t;
 typedef __uint128_t dpa_uint128_t;
 #endif
 
+#ifdef INT256_MAX
+#define DPA_HAS_INT256
+typedef int256_t dpa_int256_t;
+#define DPA_HAS_UINT256
+typedef uint256_t dpa_uint256_t;
+#elif UINTMAX_MAX / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) \
+                  / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) \
+                  / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) \
+                  / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) / UINTMAX_C(0x10000) == UINTMAX_C(0xFFFF)
+#define DPA_HAS_INT256
+typedef intmax_t dpa_int256_t;
+#define DPA_HAS_UINT256
+typedef uintmax_t dpa_uint256_t;
+#elif DPA__U_BITINT_MAXWIDTH >= 256
+#define DPA_HAS_INT256
+typedef _BitInt(256) dpa_int256_t;
+#define DPA_HAS_UINT256
+typedef unsigned _BitInt(256) dpa_uint256_t;
+#elif defined(__SIZEOF_INT256__)
+#define DPA_HAS_INT256
+typedef __int256_t dpa_int256_t;
+#define DPA_HAS_UINT256
+typedef __uint256_t dpa_uint256_t;
+#endif
+
+#if defined(DPA_HAS_INT256)
+#define DPA_U_GIANT_INT_WIDTH 256
+#define DPA_U_GIANT_UNSIGNED_INT_WIDTH 256
+typedef dpa_int256_t dpa_u_giant_int_t;
+typedef dpa_uint256_t dpa_u_giant_unsigned_int_t;
+#elif defined(DPA_HAS_INT128)
+#define DPA_U_GIANT_INT_WIDTH 128
+#define DPA_U_GIANT_UNSIGNED_INT_WIDTH 128
+typedef dpa_int128_t dpa_u_giant_int_t;
+typedef dpa_uint128_t dpa_u_giant_unsigned_int_t;
+#else
+typedef long long dpa_u_giant_int_t;
+typedef unsigned long long dpa_u_giant_unsigned_int_t;
+#endif
+
+// This makes it easy to change the type used in bitmaps.
+typedef unsigned dpa_u_bitmap_entry_t;
+
 #ifdef __clang__
 #define DPA__U_ISS_MULTITARGET
 #elif defined(__GNUC__)
@@ -309,5 +356,10 @@ typedef __uint128_t dpa_uint128_t;
 #else
 #define DPA__U_ISS_NONE
 #endif
+
+typedef struct dpa_u_optional_pointer {
+  void* value;
+  bool present;
+} dpa_u_optional_pointer_t;
 
 #endif

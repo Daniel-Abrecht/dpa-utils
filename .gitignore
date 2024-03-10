@@ -7,5 +7,7 @@ lib/
 *.bak
 *.old
 *.*swap*
+.gdb_history
 *~
 src/main/t-*
+tmp/

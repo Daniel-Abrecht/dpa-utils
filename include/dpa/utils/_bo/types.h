@@ -67,6 +67,11 @@ struct dpa_u_bo_unique {
 };
 static_assert(sizeof(dpa_u_bo_unique_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_unique_t has an unexpected size");
 
+typedef struct dpa__u_bo_unique_reversible_hash {
+  size_t hash[(DPA__U_BO_COMMON_SIZE+sizeof(size_t)-1)/sizeof(size_t)];
+} dpa__u_bo_unique_reversible_hash_t;
+static_assert(sizeof(dpa__u_bo_unique_reversible_hash_t) >= DPA__U_BO_COMMON_SIZE, "dpa__u_bo_unique_reversible_hash_t is too small!");
+
 struct dpa_u_bo_ro {
   union {
     DPA__U_BO_META(extra);
