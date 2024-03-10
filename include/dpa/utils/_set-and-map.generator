@@ -1,0 +1,138 @@
+#include <dpa/utils/bo.h>
+#include <stdint.h>
+#include <limits.h>
+
+#define DPA__U_SM_BO
+#define DPA__U_SM_NO_BITSET
+#define DPA__U_SM_KEY_TYPE dpa_u_bo_unique_t
+#define DPA__U_SM_NAME string
+#include DPA__U_SM_TEMPLATE
+#undef DPA__U_SM_NO_BITSET
+#undef DPA__U_SM_BO
+
+#define DPA__U_SM_NO_BITSET
+#define DPA__U_SM_KEY_TYPE void*
+#define DPA__U_SM_NAME pointer
+#include DPA__U_SM_TEMPLATE
+#undef DPA__U_SM_NO_BITSET
+
+#define DPA__U_SM_MICRO_SET
+#define DPA__U_SM_KEY_TYPE unsigned char
+#define DPA__U_SM_NAME uc
+#include DPA__U_SM_TEMPLATE
+#undef DPA__U_SM_MICRO_SET
+
+#if USHRT_MAX >= UINTPTR_MAX
+#define DPA__U_SM_NO_BITSET
+#endif
+#define DPA__U_SM_KEY_TYPE unsigned short
+#define DPA__U_SM_NAME us
+#include DPA__U_SM_TEMPLATE
+#if USHRT_MAX >= UINTPTR_MAX
+#undef DPA__U_SM_NO_BITSET
+#endif
+
+#if UINT_MAX >= UINTPTR_MAX
+#define DPA__U_SM_NO_BITSET
+#endif
+#define DPA__U_SM_KEY_TYPE unsigned
+#define DPA__U_SM_NAME u
+#include DPA__U_SM_TEMPLATE
+#if UINT_MAX >= UINTPTR_MAX
+#undef DPA__U_SM_NO_BITSET
+#endif
+
+#if ULONG_MAX >= UINTPTR_MAX
+#define DPA__U_SM_NO_BITSET
+#endif
+#define DPA__U_SM_KEY_TYPE unsigned long
+#define DPA__U_SM_NAME ul
+#include DPA__U_SM_TEMPLATE
+#if ULONG_MAX >= UINTPTR_MAX
+#undef DPA__U_SM_NO_BITSET
+#endif
+
+#if ULLONG_MAX >= UINTPTR_MAX
+#define DPA__U_SM_NO_BITSET
+#endif
+#define DPA__U_SM_KEY_TYPE unsigned long long
+#define DPA__U_SM_NAME ull
+#include DPA__U_SM_TEMPLATE
+#if ULLONG_MAX >= UINTPTR_MAX
+#undef DPA__U_SM_NO_BITSET
+#endif
+
+#ifdef UINT8_MAX
+#define DPA__U_SM_MICRO_SET
+#define DPA__U_SM_KEY_TYPE uint8_t
+#define DPA__U_SM_NAME u8
+#include DPA__U_SM_TEMPLATE
+#undef DPA__U_SM_MICRO_SET
+#endif
+
+#ifdef UINT16_MAX
+#if UINT16_MAX >= UINTPTR_MAX
+#define DPA__U_SM_NO_BITSET
+#endif
+#define DPA__U_SM_KEY_TYPE uint16_t
+#define DPA__U_SM_NAME u16
+#include DPA__U_SM_TEMPLATE
+#if UINT16_MAX >= UINTPTR_MAX
+#undef DPA__U_SM_NO_BITSET
+#endif
+#endif
+
+#ifdef UINT24_MAX
+#if UINT24_MAX >= UINTPTR_MAX
+#define DPA__U_SM_NO_BITSET
+#endif
+#define DPA__U_SM_KEY_TYPE uint24_t
+#define DPA__U_SM_NAME u24
+#include DPA__U_SM_TEMPLATE
+#if UINT24_MAX >= UINTPTR_MAX
+#undef DPA__U_SM_NO_BITSET
+#endif
+#endif
+
+#ifdef UINT32_MAX
+#if UINT32_MAX >= UINTPTR_MAX
+#define DPA__U_SM_NO_BITSET
+#endif
+#define DPA__U_SM_KEY_TYPE uint32_t
+#define DPA__U_SM_NAME u32
+#include DPA__U_SM_TEMPLATE
+#if UINT32_MAX >= UINTPTR_MAX
+#undef DPA__U_SM_NO_BITSET
+#endif
+#endif
+
+#ifdef UINT64_MAX
+#if UINT64_MAX >= UINTPTR_MAX
+#define DPA__U_SM_NO_BITSET
+#endif
+#define DPA__U_SM_KEY_TYPE uint64_t
+#define DPA__U_SM_NAME u64
+#include DPA__U_SM_TEMPLATE
+#if UINT64_MAX >= UINTPTR_MAX
+#undef DPA__U_SM_NO_BITSET
+#endif
+#endif
+
+#ifdef DPA_HAS_UINT128
+#define DPA__U_SM_NO_BITSET
+#define DPA__U_SM_KEY_TYPE dpa_uint128_t
+#define DPA__U_SM_NAME u128
+#include DPA__U_SM_TEMPLATE
+#undef DPA__U_SM_NO_BITSET
+#endif
+
+#ifdef DPA_HAS_UINT256
+#define DPA__U_SM_NO_BITSET
+#define DPA__U_SM_KEY_TYPE dpa_uint256_t
+#define DPA__U_SM_NAME u256
+#include DPA__U_SM_TEMPLATE
+#undef DPA__U_SM_NO_BITSET
+#endif
+
+#undef DPA__U_SM_TEMPLATE
+#undef DPA__U_SM_KIND

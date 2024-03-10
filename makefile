@@ -52,7 +52,7 @@ endif
 
 CSTD ?= c17
 CFLAGS  += --std=$(CSTD)
-CFLAGS  += -Iinclude
+CFLAGS  += -Iinclude -Isrc/include
 CFLAGS  += -Wall -Wextra -pedantic -Werror
 #CFLAGS  += -fstack-protector-all
 CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces
@@ -195,6 +195,9 @@ lib/$(TYPE)/lib$(SONAME)$(a-ext): $(filter-out build/$(TYPE)/o/src/main/%,$(filt
 	mkdir -p $(dir $@)
 	rm -f $@
 	$(AR) q $@ $^
+
+build/$(TYPE)/s/src/set-and-map.c.s: src/include/dpa/utils/set-and-map.c.template
+build/$(TYPE)/o/src/set-and-map.c$(o-ext): src/include/dpa/utils/set-and-map.c.template
 
 build/$(TYPE)/s/%.c.s: %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
