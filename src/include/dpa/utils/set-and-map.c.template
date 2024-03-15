@@ -11,10 +11,39 @@
 #define REMOVE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove_sub)
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-static struct lookup_result LOOKUP(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key){
-  (void)that;
-  (void)key;
-  return (struct lookup_result){0,false};
+static struct lookup_result LOOKUP(const DPA__U_SM_TYPE* that, const DPA__U_SM_KEY_TYPE key, const size_t size){
+  const uintptr_t hash = DPA__U_SM_HASH_KEY(key);
+  {
+    uintptr_t psl = 0;
+    for(uintptr_t i = hash; i < size; i++, psl++){
+      const DPA__U_SM_KEY_TYPE ekey = that->key_list[i];
+      uintptr_t epsl = (DPA__U_SM_HASH_KEY(ekey) - i) & (size - 1);
+      if(psl > epsl)
+        return (struct lookup_result){i, false};
+      if(psl != epsl)
+        continue;
+      const int cmp = DPA__U_SM_CMP(key, ekey);
+      if(!cmp)
+        return (struct lookup_result){i, true};
+      if(cmp < 0)
+        return (struct lookup_result){i, false};
+    }
+    for(uintptr_t i = 0; i < hash; i++, psl++){
+      const DPA__U_SM_KEY_TYPE ekey = that->key_list[i];
+      uintptr_t epsl = (DPA__U_SM_HASH_KEY(ekey) - i) & (size - 1);
+      if(psl > epsl)
+        return (struct lookup_result){i, false};
+      if(psl != epsl)
+        continue;
+      const int cmp = DPA__U_SM_CMP(key, ekey);
+      if(!cmp)
+        return (struct lookup_result){i, true};
+      if(cmp < 0)
+        return (struct lookup_result){i, false};
+    }
+  }
+  // Unreachable
+  dpa_u_unreachable("Hashmap lookup failed: %s", "That neither an entry is found, nor the PSL ever exceeds the one of any of the entries of the hashmap while earching, should not be possible.");
 }
 #endif
 
@@ -29,7 +58,8 @@ static bool INSERT(
   size_t index
 ){
   (void)that;
-  (void)key;
+  const uintptr_t hash = DPA__U_SM_HASH_KEY(key);
+  (void)hash;
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   (void)value;
 #endif
@@ -46,7 +76,8 @@ static bool REMOVE(
   size_t index
 ){
   (void)that;
-  (void)key;
+  const uintptr_t hash = DPA__U_SM_HASH_KEY(key);
+  (void)hash;
   (void)index;
   return true;
 }
@@ -65,7 +96,8 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE* that, DPA_
   }
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  struct lookup_result result = LOOKUP(that, key);
+  const size_t size = count_to_size(that->count);
+  struct lookup_result result = LOOKUP(that, key, size);
   if(result.found){
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
     that->value_list[result.index] = value;
@@ -110,7 +142,8 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
 #endif
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  struct lookup_result result = LOOKUP(that, key);
+  const size_t size = count_to_size(that->count);
+  struct lookup_result result = LOOKUP(that, key, size);
   if(result.found){
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
     void**restrict pv = &that->value_list[result.index];
@@ -150,7 +183,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
 #endif
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  struct lookup_result result = LOOKUP(that, key);
+  const size_t size = count_to_size(that->count);
+  struct lookup_result result = LOOKUP(that, key, size);
   if(!result.found)
     return false;
   REMOVE(that, key, result.index);
@@ -171,7 +205,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE* tha
 #endif
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  return LOOKUP(that, key).found;
+  const size_t size = count_to_size(that->count);
+  return LOOKUP(that, key, size).found;
 #endif
 }
 
@@ -185,7 +220,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* tha
     return *m & s;
   }
 #endif
-  struct lookup_result result = LOOKUP(that, key);
+  const size_t size = count_to_size(that->count);
+  struct lookup_result result = LOOKUP(that, key, size);
   if(!result.found){
     *value = 0;
     return false;
@@ -205,7 +241,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE
     return r;
   }
 #endif
-  struct lookup_result result = LOOKUP(that, key);
+  const size_t size = count_to_size(that->count);
+  struct lookup_result result = LOOKUP(that, key, size);
   if(!result.found){
     *value = 0;
     return false;
