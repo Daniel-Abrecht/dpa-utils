@@ -13,6 +13,12 @@
 #define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, DPA__U_SM_NAME), _map)
 #endif
 #define DPA__U_SM_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _t)
+
+#ifdef DPA__U_SM_KEY_TYPE_U
+#define DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_KEY_TYPE_U
+#else
+#define DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_KEY_TYPE
+#endif
 //////////////////////////////////////////////
 
 typedef struct DPA__U_SM_PREFIX DPA__U_SM_TYPE;
@@ -39,7 +45,11 @@ struct DPA__U_SM_PREFIX {
   // Switching if no memory is wasted would also be possible, but since we already always allocate a power of 2 of memory for the key and value lists, there would be no benefits to that.
   size_t count; // This is the number of entries stored in the set. count will also determin if the key list or the bit mask is used, and how big the key_list is.
   union {
-    DPA__U_SM_KEY_TYPE* key_list;
+    // Note: The key entrys value for empty entries is key=index+1, as that will result in the highest calculatable PSL.
+    // Because the set can never be full, that PSL (Probe Sequence Length) can never be reached by any entry.
+    // The key entry is a reversible hash of the original key. This way, the hash does not need to be recalculated,
+    // even without storing the key and it's hash.
+    DPA__U_SM_KEY_ENTRY_TYPE* key_list;
     dpa_u_giant_unsigned_int_t* bitmask;
   };
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -93,6 +103,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE
 #endif
 
 //////////////////////////////////////////////
+#undef DPA__U_SM_KEY_ENTRY_TYPE
 #undef DPA__U_SM_TYPE
 #undef DPA__U_SM_KEY_TYPE
 #undef DPA__U_SM_NAME
