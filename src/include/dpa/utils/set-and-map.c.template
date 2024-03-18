@@ -54,24 +54,31 @@ dpa_u_unsequenced static DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE 
   return num;
 }
 
+// We don't need this yet, but we may need it if we add things like iterating over the keys in a set.
+/*
 dpa_u_unsequenced static DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE num){
   return (DPA__U_SM_KEY_TYPE)(num ^ (num<<2));
 }
+*/
 #else
 dpa_u_unsequenced static DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE n){
   DPA__U_SM_KEY_ENTRY_TYPE e;
   memcpy(e.hash, n.all.all, sizeof(n));
-  e.hash[0] = dpa_u_size_t_set_hash_sub(e.hash[0]);
-  e.hash[1] = dpa_u_size_t_set_hash_sub(e.hash[1]) ^ e.hash[0];
+  for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; )
+    e.hash[i] = fh ^= dpa_u_size_t_set_hash_sub(e.hash[i]);
   return e;
 }
+/*
 dpa_u_unsequenced static DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
-  e.hash[1] = dpa_u_size_t_set_hash_sub(e.hash[1] ^ e.hash[0]);
-  e.hash[0] = dpa_u_size_t_set_hash_sub(e.hash[0]);
+  for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; ){
+    size_t hash = e.hash[i];
+    e.hash[i] = dpa_u_size_t_set_unhash_sub(hash ^ fh);
+    fh = hash;
+  }
   DPA__U_SM_KEY_TYPE r;
   memcpy(r.all.all, e.hash, sizeof(r));
   return r;
-}
+}*/
 #endif
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -131,6 +138,13 @@ static void INSERT(
 #ifdef DPA__U_SM_BO
   swap:
 #endif
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    {
+      void* v = that->value_list[i];
+      that->value_list[i] = value;
+      value = v;
+    }
+#endif
     that->key_list[i] = key;
     size_t epsl = KEY_ENTRY_HASH(ekey) >> (sizeof(size_t)*CHAR_BIT-lbsize);
     if(epsl == mask) // Highest calculatable PSL, empty entry, we are done
@@ -139,9 +153,6 @@ static void INSERT(
     psl = epsl;
   }
   dpa_u_unreachable("Hashmap insert failed: %s", "Was the hashmap full? That shouldn't be possible, though...");
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  (void)value;
-#endif
 }
 #endif
 
