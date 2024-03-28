@@ -28,7 +28,7 @@
 #define UNHASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _unhash_sub)
 
 #ifndef DPA__U_SM_BO
-dpa_u_unsequenced static DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE n){
+dpa_u_unsequenced DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE n){
   DPA__U_SM_KEY_ENTRY_TYPE num = (DPA__U_SM_KEY_ENTRY_TYPE)n;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"
@@ -56,12 +56,12 @@ dpa_u_unsequenced static DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE 
 
 // We don't need this yet, but we may need it if we add things like iterating over the keys in a set.
 /*
-dpa_u_unsequenced static DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE num){
+dpa_u_unsequenced DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE num){
   return (DPA__U_SM_KEY_TYPE)(num ^ (num<<2));
 }
 */
 #else
-dpa_u_unsequenced static DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE n){
+dpa_u_unsequenced DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE n){
   DPA__U_SM_KEY_ENTRY_TYPE e;
   memcpy(e.hash, n.all.all, sizeof(n));
   for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; )
@@ -69,7 +69,7 @@ dpa_u_unsequenced static DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE 
   return e;
 }
 /*
-dpa_u_unsequenced static DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
+dpa_u_unsequenced DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
   for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; ){
     size_t hash = e.hash[i];
     e.hash[i] = dpa_u_size_t_set_unhash_sub(hash ^ fh);
@@ -181,7 +181,8 @@ static void REMOVE(
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void* value){
 #ifndef DPA__U_SM_NO_BITSET
-  if(0){ // TODO
+  const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
+  if(that->count >= lobst) insert_bitfield: {
     dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
     dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
     bool r = *m & s;
@@ -200,10 +201,21 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE* that, DPA_
 #endif
     return true;
   }
+  that->count += 1;
+  const size_t nlbsize = count_to_lbsize(that->count);
+#ifndef DPA__U_SM_NO_BITSET
+  if(that->count >= lobst){
+    // TODO: convert list to bitfield
+    goto insert_bitfield;
+  }
+  if(nlbsize != lbsize){
+    // TODO: grow
+  }
+#endif
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
-  INSERT(that, entry, result.index, lbsize);
+  INSERT(that, entry, result.index, nlbsize);
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  INSERT(that, entry, value, result.index, lbsize);
+  INSERT(that, entry, value, result.index, nlbsize);
 #endif
   return false;
 #endif
@@ -220,7 +232,8 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
   (void)key;
 #ifndef DPA__U_SM_NO_BITSET
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  if(0){ // TODO
+  const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
+  if(that->count >= lobst) insert_bitfield: {
 #endif
     dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
     dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
@@ -250,6 +263,17 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
 #endif
     return true;
   }
+#ifndef DPA__U_SM_NO_BITSET
+  that->count += 1;
+  if(that->count >= lobst){
+    // TODO: convert list to bitfield
+    goto insert_bitfield;
+  }
+  const size_t nlbsize = count_to_lbsize(that->count);
+  if(nlbsize != lbsize){
+    // TODO: grow
+  }
+#endif
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
   INSERT(that, entry, result.index, lbsize);
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -265,7 +289,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
   (void)key;
 #ifndef DPA__U_SM_NO_BITSET
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  if(0){ // TODO
+  const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
+  if(that->count >= lobst){
 #endif
     dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
     dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
@@ -274,9 +299,14 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
     that->value_list[key] = 0;
 #endif
-    return r;
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    that->count -= 1;
+    if(that->count >= lobst)
+      return r;
+    // TODO: Convert to list
   }
+#else
+  return r;
 #endif
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -293,7 +323,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key){
 #ifndef DPA__U_SM_NO_BITSET
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  if(0){ // TODO
+  const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
+  if(that->count >= lobst){
 #endif
     const dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
     dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
@@ -312,7 +343,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE* tha
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** value){
 #ifndef DPA__U_SM_NO_BITSET
-  if(0){ // TODO
+  const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
+  if(that->count >= lobst){
     const dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
     dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
     *value = that->value_list[key];
@@ -331,14 +363,18 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* tha
 }
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** value){
 #ifndef DPA__U_SM_NO_BITSET
-  if(0){ // TODO
+  const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
+  if(that->count >= lobst){
     dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
     dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
     bool r = *m & s;
     *m &= ~s;
     *value = that->value_list[key];
     that->value_list[key] = 0;
-    return r;
+    that->count -= 1;
+    if(that->count >= lobst)
+      return r;
+    // TODO: Convert to list
   }
 #endif
   DPA__U_SM_KEY_ENTRY_TYPE entry = HASH(key);

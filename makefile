@@ -1,4 +1,5 @@
 .SECONDARY:
+.SUFFIXES:
 
 ifdef use
 include $(patsubst %,mk/%.mk,$(use))
@@ -73,7 +74,8 @@ ASMOUT  := $(patsubst %,build/$(TYPE)/s/%.s,$(SOURCES))
 B-TS := bin/$(TYPE)/dpa-testsuite
 
 BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%$(bin-ext),$(filter src/main/%.c,$(SOURCES)))
-TESTS := $(patsubst test/%.c,%,$(filter test/%.c,$(SOURCES)))
+TESTS := $(patsubst test/%.c,test//%,$(filter test/%.c,$(SOURCES)))
+TESTS += test//bo-conv-test
 
 export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 
@@ -98,6 +100,24 @@ export TYPE
 all: source-checks bin lib
 
 .PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm
+
+build/$(TYPE)/bin/test/set/add: build/unique-random
+
+# Having a bunch of random, but unique, numbers is useful for tests
+# This makes it easy to get a new unique number, as well as to get an already used one.
+build/unique-random:
+	( \
+	  seq 0 255 | shuf | tr '\n' ' '; \
+	  echo; \
+	  seq 0 65535 | shuf | tr '\n' ' '; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 8 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 16 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 32 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  echo; \
+	) >"$@"
 
 source-checks: build/.check-all
 
@@ -160,11 +180,14 @@ build/.check-all: \
 	@echo "Source code checks passed"
 	touch $@
 
-do-test//%: test/% $(B-TS)
+test//%: build/$(TYPE)/bin/test/% $(B-TS)
+	PATH="bin/$(TYPE)/:scripts/:$$PATH" $(B-TS) $* $<
+
+test//%: test/% $(B-TS)
 	PATH="bin/$(TYPE)/:scripts/:$$PATH" $(B-TS) $* $<
 
 test: $(B-TS)
-	$(B-TS) utils $(MAKE) do-test//bo-conv-test
+	$(B-TS) utils $(MAKE) $(TESTS)
 
 bin: $(BINS)
 
