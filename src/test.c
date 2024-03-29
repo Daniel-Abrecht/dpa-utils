@@ -64,7 +64,7 @@ dpa__u_api int dpa_u_test_main(int argc, const char* argv[]){
       int res = it->run();
       if(dpa__u_test_teardown)
         dpa__u_test_teardown();
-      dpa_u_testcase_result(-1, it->name, ret?"failed":"success");
+      dpa_u_testcase_result(-1, it->name, res?"failed":"success");
       none = false;
       if(argc == 2)
         return res;
