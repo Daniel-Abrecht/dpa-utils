@@ -4,15 +4,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
 #include <assert.h>
 
-struct dpa__u_testcase* dpa__u_testcase_list;
+dpa__u_api struct dpa__u_testcase* dpa__u_testcase_list;
 
-bool dpa_u_testcase_result(int fd, const char* name, const char* result){
+dpa__u_api bool dpa_u_testcase_result(int fd, const char* name, const char* result){
   if(fd < 0){
     static int sfd = -1;
     if(sfd == -1){
@@ -34,6 +35,9 @@ bool dpa_u_testcase_result(int fd, const char* name, const char* result){
   mem[1] = length;
   if(name_length)
     memcpy(mem+2, name, name_length);
+  for(size_t i=0; i<name_length; i++)
+    if(mem[2+i] == '\t')
+      mem[2+i] = 0;
   mem[2+name_length] = 0;
   memcpy(mem+2+name_length+1, result, result_length);
   // This has to be a single write (because this is a SOCK_SEQPACKET socket)
@@ -44,21 +48,31 @@ bool dpa_u_testcase_result(int fd, const char* name, const char* result){
   return true;
 }
 
-int dpa_u_test_main(int argc, const char* argv[]){
-  if(argc == 1){
+dpa__u_api int dpa_u_test_main(int argc, const char* argv[]){
+  if(argc == 2 && !strcmp(argv[1], "-l")){
     for(struct dpa__u_testcase* it=dpa__u_testcase_list; it; it=it->next)
       puts(it->name);
-  }else if(argc == 2){
+    return 0;
+  }else{
+    int ret = 0;
+    bool none = true;
     for(struct dpa__u_testcase* it=dpa__u_testcase_list; it; it=it->next){
-      if(strcmp(it->name, argv[1]) && strcmp(argv[1], "-a"))
+      if(argc > 1 && strcmp(it->name, argv[1]))
         continue;
       if(dpa__u_test_setup)
         dpa__u_test_setup();
       int res = it->run();
       if(dpa__u_test_teardown)
         dpa__u_test_teardown();
-      return res;
+      dpa_u_testcase_result(-1, it->name, ret?"failed":"success");
+      none = false;
+      if(argc == 2)
+        return res;
+      if(res)
+        ret++;
     }
+    ret += none;
+    return ret < 255 ? ret : 255;
   }
   return 10;
 }

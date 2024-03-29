@@ -50,6 +50,8 @@
 #define DPA_U_FIRST_1(X, ...) X
 #define DPA_U_FIRST(...) DPA_U_FIRST_1(__VA_ARGS__,1)
 
+#define DPA_U_STR(X) #X
+#define DPA_U_STR_EVAL(X) DPA_U_STR(X)
 
 #ifdef _MSC_VER
 

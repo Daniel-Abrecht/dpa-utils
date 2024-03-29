@@ -53,7 +53,7 @@ endif
 
 CSTD ?= c17
 CFLAGS  += --std=$(CSTD)
-CFLAGS  += -Iinclude -Isrc/include
+CFLAGS  += -Iinclude -I.
 CFLAGS  += -Wall -Wextra -pedantic -Werror
 #CFLAGS  += -fstack-protector-all
 CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces
@@ -116,6 +116,14 @@ build/unique-random:
 	  tr -dc A-F0-9 </dev/urandom | fold -w 16 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
 	  echo; \
 	  tr -dc A-F0-9 </dev/urandom | fold -w 32 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 64 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 128 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 256 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  echo; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 512 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
 	  echo; \
 	) >"$@"
 
@@ -180,14 +188,17 @@ build/.check-all: \
 	@echo "Source code checks passed"
 	touch $@
 
-test//%: build/$(TYPE)/bin/test/% $(B-TS)
-	PATH="bin/$(TYPE)/:scripts/:$$PATH" $(B-TS) $* $<
+do-test//%: build/$(TYPE)/bin/test/% $(B-TS)
+	$<
 
-test//%: test/% $(B-TS)
-	PATH="bin/$(TYPE)/:scripts/:$$PATH" $(B-TS) $* $<
+do-test//%: test/% $(B-TS)
+	$<
+
+test//%: $(B-TS)
+	PATH="bin/$(TYPE)/:scripts/:$$PATH" $(B-TS) $* $(MAKE) "do-test//$*"
 
 test: $(B-TS)
-	$(B-TS) utils $(MAKE) $(TESTS)
+	$(B-TS) utils $(MAKE) -k $(TESTS)
 
 bin: $(BINS)
 
@@ -218,9 +229,6 @@ lib/$(TYPE)/lib$(SONAME)$(a-ext): $(filter-out build/$(TYPE)/o/src/main/%,$(filt
 	mkdir -p $(dir $@)
 	rm -f $@
 	$(AR) q $@ $^
-
-build/$(TYPE)/s/src/set-and-map.c.s: src/include/dpa/utils/set-and-map.c.template
-build/$(TYPE)/o/src/set-and-map.c$(o-ext): src/include/dpa/utils/set-and-map.c.template
 
 build/$(TYPE)/s/%.c.s: %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
