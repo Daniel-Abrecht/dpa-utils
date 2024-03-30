@@ -107,23 +107,23 @@ build/$(TYPE)/bin/test/set/add: build/unique-random
 # This makes it easy to get a new unique number, as well as to get an already used one.
 build/unique-random:
 	( \
-	  seq 0 255 | shuf | tr '\n' ' '; \
+	  printf '%02X\n' $$(seq 0 255) | shuf; \
 	  echo; \
-	  seq 0 65535 | shuf | tr '\n' ' '; \
+	  printf '%04X\n' $$(seq 0 65535) | shuf; \
 	  echo; \
-	  tr -dc A-F0-9 </dev/urandom | fold -w 8 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 8 | head -n 65536 | sort -u | shuf; \
 	  echo; \
-	  tr -dc A-F0-9 </dev/urandom | fold -w 16 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 16 | head -n 65536 | sort -u | shuf; \
 	  echo; \
-	  tr -dc A-F0-9 </dev/urandom | fold -w 32 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 32 | head -n 65536 | sort -u | shuf; \
 	  echo; \
-	  tr -dc A-F0-9 </dev/urandom | fold -w 64 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 64 | head -n 65536 | sort -u | shuf; \
 	  echo; \
-	  tr -dc A-F0-9 </dev/urandom | fold -w 128 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 128 | head -n 65536 | sort -u | shuf; \
 	  echo; \
-	  tr -dc A-F0-9 </dev/urandom | fold -w 256 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 256 | head -n 65536 | sort -u | shuf; \
 	  echo; \
-	  tr -dc A-F0-9 </dev/urandom | fold -w 512 | head -n 65536 | sort -u | shuf | tr '\n' ' '; \
+	  tr -dc A-F0-9 </dev/urandom | fold -w 512 | head -n 65536 | sort -u | shuf; \
 	  echo; \
 	) >"$@"
 
