@@ -41,7 +41,7 @@ static void hex2bin(void*const res, size_t n, const unsigned char* x){
     r[i] = hex2bin_byte(&x[i*2]);
 }
 
-dpa_u_init static void init(void){
+void dpa__u_test_setup(void){
   FILE* f = fopen("build/unique-random", "rb");
   if(!f) dpa_u_abort("Failed to open build/unique-random: %d %s", errno, strerror(errno));
   unsigned char line[1024];
@@ -83,13 +83,28 @@ DPA_U_TEST_MAIN
 
 //////////////////////////////////////////////
 
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
-  return 1; // TODO
+  DPA__U_SM_TYPE container = {0};
+  DPA__U_SM_KEY_TYPE key = {0};
+  int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
+  if(result < 0){
+    fprintf(stderr, "Error: Failed to add entry\n");
+    return 1;
+  }
+  if(result == true){
+    fprintf(stderr, "Error: Entry was already present, but was never added\n");
+    return 1;
+  }
+  return 0;
 }
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+#endif
 
+/*
 DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add twice")){
   return 1; // TODO
-}
+}*/
 
 //////////////////////////////////////////////
 #undef DPA__U_SM_TYPE

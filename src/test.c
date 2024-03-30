@@ -1,5 +1,5 @@
+#define _DEFAULT_SOURCE
 #include <dpa/utils/test.h>
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -10,6 +10,8 @@
 #include <errno.h>
 #include <unistd.h>
 #include <assert.h>
+#include <spawn.h>
+#include <wait.h>
 
 dpa__u_api struct dpa__u_testcase* dpa__u_testcase_list;
 
@@ -53,9 +55,7 @@ dpa__u_api int dpa_u_test_main(int argc, const char* argv[]){
     for(struct dpa__u_testcase* it=dpa__u_testcase_list; it; it=it->next)
       puts(it->name);
     return 0;
-  }else{
-    int ret = 0;
-    bool none = true;
+  }else if(argc == 2){
     for(struct dpa__u_testcase* it=dpa__u_testcase_list; it; it=it->next){
       if(argc > 1 && strcmp(it->name, argv[1]))
         continue;
@@ -64,15 +64,43 @@ dpa__u_api int dpa_u_test_main(int argc, const char* argv[]){
       int res = it->run();
       if(dpa__u_test_teardown)
         dpa__u_test_teardown();
-      dpa_u_testcase_result(-1, it->name, res?"failed":"success");
-      none = false;
-      if(argc == 2)
-        return res;
-      if(res)
-        ret++;
+      return res;
     }
-    ret += none;
-    return ret < 255 ? ret : 255;
+    fprintf(stderr, "Not test '%s' found\n", argv[1]);
+    return 1;
+  }else{
+    bool any_failed = false;
+    for(struct dpa__u_testcase* it=dpa__u_testcase_list; it; it=it->next){
+      if(argc > 1){
+        for(int i=1; i<argc; i++)
+          if(!strcmp(it->name, argv[i]))
+            goto found;
+        continue;
+        found:;
+      }
+      pid_t pid;
+      extern char **environ;
+      int error = posix_spawn(&pid, "/proc/self/exe", 0, 0, (char**)(const char*[]){argv[0],it->name,0}, environ);
+      if(error){
+        fprintf(stderr, "posix_spawn failed: %d: %s\n", errno, strerror(errno));
+        continue;
+      }
+      int status;
+      retry: if(waitpid(pid, &status, 0) == -1){
+        if(errno == EINTR)
+          goto retry;
+        perror("waitpid failed");
+        continue;
+      }
+      if(WIFEXITED(status) && WEXITSTATUS(status) == 0){
+        dpa_u_testcase_result(-1, it->name, "success");
+        continue;
+      }
+      any_failed = true;
+      dpa_u_testcase_result(-1, it->name, "failed");
+      if(WIFSIGNALED(status))
+        fprintf(stderr, "test '%s' was terminated by signal %d: %s\n", it->name, WTERMSIG(status), strsignal(WTERMSIG(status)));
+    }
+    return any_failed;
   }
-  return 10;
 }
