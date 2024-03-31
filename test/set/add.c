@@ -59,6 +59,10 @@ void dpa__u_test_setup(void){
 
 DPA_U_TEST_MAIN
 
+#define GET_RAND_ENTRY DPA_U_CONCAT_E(DPA__U_SM_PREFIX, __get_rand)
+
+//////////////////////////////////////////////
+
 #define DPA__U_SM_TEMPLATE <test/set/add.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_SET
 #include <dpa/utils/_set-and-map.generator>
@@ -83,22 +87,77 @@ DPA_U_TEST_MAIN
 
 //////////////////////////////////////////////
 
+#ifndef DPA__U_SM_BO
+bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+  if(sizeof(DPA__U_SM_KEY_TYPE) >= sizeof(*ul64)){
+    if(i >= sizeof(ul64)/sizeof(*ul64)) return false;
+    *ret = (DPA__U_SM_KEY_TYPE)ul64[i];
+    return true;
+  }else if(sizeof(DPA__U_SM_KEY_TYPE) >= sizeof(*ul32)){
+    if(i >= sizeof(ul32)/sizeof(*ul32)) return false;
+    *ret = (DPA__U_SM_KEY_TYPE)ul32[i];
+    return true;
+  }else if(sizeof(DPA__U_SM_KEY_TYPE) >= sizeof(*ul16)){
+    if(i >= sizeof(ul16)/sizeof(*ul16)) return false;
+    *ret = (DPA__U_SM_KEY_TYPE)ul16[i];
+    return true;
+  }else{
+    if(i >= sizeof(ul8)/sizeof(*ul8)) return false;
+    *ret = (DPA__U_SM_KEY_TYPE)ul8[i];
+    return true;
+  }
+#pragma GCC diagnostic pop
+}
+
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
   DPA__U_SM_TYPE container = {0};
-  DPA__U_SM_KEY_TYPE key = {0};
-  int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
-  if(result < 0){
-    fprintf(stderr, "Error: Failed to add entry\n");
-    return 1;
-  }
-  if(result == true){
-    fprintf(stderr, "Error: Entry was already present, but was never added\n");
-    return 1;
+  DPA__U_SM_KEY_TYPE key;
+  size_t j=0, k=0;
+  bool done = false;
+  while(!done){
+    k = j;
+    for(size_t i=0; i<50; i++,j++){
+      if(!GET_RAND_ENTRY(&key, j)){
+        done = true;
+        break;
+      }
+      int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
+      if(result < 0){
+        fprintf(stderr, "Error: Failed to add entry\n");
+        return 1;
+      }
+      if(result){
+        fprintf(stderr, "Error: Entry was already present, but was never added\n");
+        return 1;
+      }
+    }
+    j = k;
+    for(size_t i=0; i<50; i++,j++){
+      if(!GET_RAND_ENTRY(&key, j))
+        break;
+      if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
+        fprintf(stderr, "Error: Prevously added entry not found\n");
+        return 1;
+      }
+    }
+    k = j;
+    for(size_t i=0; i<50; i++,j++){
+      if(!GET_RAND_ENTRY(&key, j))
+        break;
+      if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
+        fprintf(stderr, "Error: Entry found, but was never added\n");
+        return 1;
+      }
+    }
+    j = k;
   }
   return 0;
 }
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+#endif
 #endif
 
 /*
