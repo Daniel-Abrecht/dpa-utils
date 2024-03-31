@@ -6,6 +6,7 @@
 
 #include <dpa/utils/test.h>
 #include <dpa/utils/set.h>
+#include <dpa/utils/map.h>
 #include <errno.h>
 #include <stdio.h>
 
@@ -155,7 +156,6 @@ bool GET_RAND_ENTRY(dpa_u_bo_unique_t*const ret, size_t i){
 }
 #endif
 
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
   DPA__U_SM_TYPE container = {0};
   DPA__U_SM_KEY_TYPE key;
@@ -168,13 +168,17 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
         done = true;
         break;
       }
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
       int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (void*)j);
+#endif
       if(result < 0){
-        fprintf(stderr, "Error: Failed to add entry\n");
+        fprintf(stderr, "Error: Failed to add entry %zu\n", j);
         return 1;
       }
       if(result){
-        fprintf(stderr, "Error: Entry was already present, but was never added\n");
+        fprintf(stderr, "Error: Entry %zu was already present, but was never added\n", j);
         return 1;
       }
     }
@@ -183,9 +187,20 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
       if(!GET_RAND_ENTRY(&key, j))
         break;
       if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
-        fprintf(stderr, "Error: Prevously added entry not found\n");
+        fprintf(stderr, "Error: Prevously added entry %zu not found\n", j);
         return 1;
       }
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      void* value = (void*)-1;
+      if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key, &value)){
+        fprintf(stderr, "Error: failed to get entry %zu, but check if it exists did succeed\n", j);
+        return 1;
+      }
+      if((size_t)value != j){
+        fprintf(stderr, "Error: value retrieved from entry %zu is wrong: %zu\n", j, (size_t)value);
+        return 1;
+      }
+#endif
     }
     k = j;
     for(size_t i=0; i<50; i++,j++){
@@ -200,8 +215,6 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
   }
   return 0;
 }
-#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-#endif
 
 //////////////////////////////////////////////
 #undef DPA__U_SM_TYPE
