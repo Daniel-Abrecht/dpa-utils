@@ -101,7 +101,7 @@ all: source-checks bin lib
 
 .PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm
 
-build/$(TYPE)/bin/test/set/add: build/unique-random
+do-test//set-map: build/unique-random
 
 # Having a bunch of random, but unique, numbers is useful for tests
 # This makes it easy to get a new unique number, as well as to get an already used one.
@@ -124,6 +124,8 @@ build/unique-random:
 	  tr -dc A-F0-9 </dev/urandom | fold -w 256 | head -n 65536 | sort -u | shuf; \
 	  echo; \
 	  tr -dc A-F0-9 </dev/urandom | fold -w 512 | head -n 65536 | sort -u | shuf; \
+	  echo; \
+	  cat /usr/share/dict/words | sort -u | shuf | head -n 65536; \
 	  echo; \
 	) >"$@"
 

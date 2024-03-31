@@ -13,6 +13,7 @@ uint_least8_t ul8[0x100];
 uint_least16_t ul16[0x10000];
 uint_least32_t ul32[0x10000];
 uint_least64_t ul64[0x10000];
+dpa_u_bo_unique_t ustr[0x10000];
 
 static int hex2bin_digit(const unsigned char x){
   if(x >= '0' && x <= '9'){
@@ -41,19 +42,35 @@ static void hex2bin(void*const res, size_t n, const unsigned char* x){
     r[i] = hex2bin_byte(&x[i*2]);
 }
 
+static void to_ustring(dpa_u_bo_unique_t*const ret, size_t n, const unsigned char* x){
+  (void)n;
+  dpa_u_bo_simple_ro_t bo = {
+    .type = DPA_U_BO_SIMPLE,
+    .size = strlen((const char*)x),
+    .data = x,
+  };
+  if(bo.size && ((char*)bo.data)[bo.size-1] == '\n')
+    bo.size -= 1;
+  *ret = dpa_u_bo_intern(bo);
+}
+
 void dpa__u_test_setup(void){
   FILE* f = fopen("build/unique-random", "rb");
   if(!f) dpa_u_abort("Failed to open build/unique-random: %d %s", errno, strerror(errno));
   unsigned char line[1024];
-#define READ_NUMBERS(L) \
+#define READ_LINES(L, F) \
   for(size_t i=0; fgets((char*)line, sizeof(line), f) && line[0] != '\n'; i++){ \
     if(i>=sizeof(L)/sizeof(*L)) continue; \
-    hex2bin(&L[i], sizeof(L[i]), line); \
+    F(&L[i], sizeof(L[i]), line); \
   }
-  READ_NUMBERS(ul8);
-  READ_NUMBERS(ul16);
-  READ_NUMBERS(ul32);
-  READ_NUMBERS(ul64);
+  READ_LINES(ul8, hex2bin);
+  READ_LINES(ul16, hex2bin);
+  READ_LINES(ul32, hex2bin);
+  READ_LINES(ul64, hex2bin);
+  int tmp[1];
+  READ_LINES(tmp, hex2bin); // TODO: 128
+  READ_LINES(tmp, hex2bin); // TODO: 256
+  READ_LINES(ustr, to_ustring);
 #undef READ_NUMBERS
 }
 
@@ -63,11 +80,11 @@ DPA_U_TEST_MAIN
 
 //////////////////////////////////////////////
 
-#define DPA__U_SM_TEMPLATE <test/set/add.c>
+#define DPA__U_SM_TEMPLATE <test/set-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_SET
 #include <dpa/utils/_set-and-map.generator>
 
-#define DPA__U_SM_TEMPLATE <test/set/add.c>
+#define DPA__U_SM_TEMPLATE <test/set-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_MAP
 #include <dpa/utils/_set-and-map.generator>
 
@@ -110,6 +127,14 @@ bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
   }
 #pragma GCC diagnostic pop
 }
+#else
+bool GET_RAND_ENTRY(dpa_u_bo_unique_t*const ret, size_t i){
+  if(i >= sizeof(ustr)/sizeof(*ustr))
+    return false;
+  *ret = ustr[i];
+  return true;
+}
+#endif
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
@@ -158,12 +183,6 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
 }
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #endif
-#endif
-
-/*
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add twice")){
-  return 1; // TODO
-}*/
 
 //////////////////////////////////////////////
 #undef DPA__U_SM_TYPE
