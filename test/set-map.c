@@ -13,6 +13,18 @@ uint_least8_t ul8[0x100];
 uint_least16_t ul16[0x10000];
 uint_least32_t ul32[0x10000];
 uint_least64_t ul64[0x10000];
+#ifdef DPA_HAS_UINT128
+dpa_uint128_t ul128[0x10000];
+#elif DPA_HAS_UINT256
+dpa_uint256_t ul128[0x10000];
+#else
+dpa_u_giant_unsigned_int_t ul128[0x10000]; // May not actually be 128 big, but is the biggest we've got
+#endif
+#ifdef DPA_HAS_UINT256
+dpa_uint256_t ul256[0x10000];
+#else
+dpa_u_giant_unsigned_int_t ul256[0x10000]; // May not actually be 256 big, but is the biggest we've got
+#endif
 dpa_u_bo_unique_t ustr[0x10000];
 
 static int hex2bin_digit(const unsigned char x){
@@ -67,9 +79,8 @@ void dpa__u_test_setup(void){
   READ_LINES(ul16, hex2bin);
   READ_LINES(ul32, hex2bin);
   READ_LINES(ul64, hex2bin);
-  int tmp[1];
-  READ_LINES(tmp, hex2bin); // TODO: 128
-  READ_LINES(tmp, hex2bin); // TODO: 256
+  READ_LINES(ul128, hex2bin);
+  READ_LINES(ul256, hex2bin);
   READ_LINES(ustr, to_ustring);
 #undef READ_NUMBERS
 }
@@ -108,15 +119,23 @@ DPA_U_TEST_MAIN
 bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
-  if(sizeof(DPA__U_SM_KEY_TYPE) >= sizeof(*ul64)){
+  if(sizeof(DPA__U_SM_KEY_TYPE) >= 32){
+    if(i >= sizeof(ul256)/sizeof(*ul256)) return false;
+    *ret = (DPA__U_SM_KEY_TYPE)ul256[i];
+    return true;
+  }else if(sizeof(DPA__U_SM_KEY_TYPE) >= 16){
+    if(i >= sizeof(ul128)/sizeof(*ul128)) return false;
+    *ret = (DPA__U_SM_KEY_TYPE)ul128[i];
+    return true;
+  }else if(sizeof(DPA__U_SM_KEY_TYPE) >= 8){
     if(i >= sizeof(ul64)/sizeof(*ul64)) return false;
     *ret = (DPA__U_SM_KEY_TYPE)ul64[i];
     return true;
-  }else if(sizeof(DPA__U_SM_KEY_TYPE) >= sizeof(*ul32)){
+  }else if(sizeof(DPA__U_SM_KEY_TYPE) >= 4){
     if(i >= sizeof(ul32)/sizeof(*ul32)) return false;
     *ret = (DPA__U_SM_KEY_TYPE)ul32[i];
     return true;
-  }else if(sizeof(DPA__U_SM_KEY_TYPE) >= sizeof(*ul16)){
+  }else if(sizeof(DPA__U_SM_KEY_TYPE) >= 2){
     if(i >= sizeof(ul16)/sizeof(*ul16)) return false;
     *ret = (DPA__U_SM_KEY_TYPE)ul16[i];
     return true;
