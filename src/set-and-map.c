@@ -7,6 +7,7 @@
 #include <dpa/utils/set.h>
 #include <dpa/utils/map.h>
 #include <dpa/utils/math.h>
+#include <dpa/utils/_math.h>
 
 #define DPA__U_SM_BITMAP_OFFSET(INDEX) ((INDEX)/(sizeof(dpa_u_giant_unsigned_int_t)*CHAR_BIT))
 #define DPA__U_SM_BITMAP_BIT(INDEX) (((dpa_u_giant_unsigned_int_t)1)<<((INDEX)%(sizeof(dpa_u_giant_unsigned_int_t)*CHAR_BIT)))
@@ -46,9 +47,9 @@ static size_t count_to_lbsize(size_t n){
 //////////////////////////
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
-#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, DPA__U_SM_NAME), _set)
+#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, set_), DPA__U_SM_NAME)
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, DPA__U_SM_NAME), _map)
+#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, map_), DPA__U_SM_NAME)
 #endif
 #define DPA__U_SM_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _t)
 
@@ -75,36 +76,20 @@ static size_t count_to_lbsize(size_t n){
 #define UNHASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _unhash_sub)
 
 #ifndef DPA__U_SM_BO
-dpa_u_unsequenced DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE n){
-  DPA__U_SM_KEY_ENTRY_TYPE num = (DPA__U_SM_KEY_ENTRY_TYPE)n;
+dpa_u_unsequenced DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE x){
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"
-  switch(sizeof(num)){
-    case 32: case 31: case 30: case 29:
-    case 28: case 27: case 26: case 25:
-    case 24: case 23: case 22: case 21:
-    case 20: case 19: case 18:
-    case 17: num ^= num << 128; /* fallthrough */
-    case 16: case 15: case 14: case 13:
-    case 12: case 11: case 10:
-    case 9: num ^= num << 64; /* fallthrough */
-    case 8: case 7: case 6:
-    case 5: num ^= num << 32; /* fallthrough */
-    case 4:
-    case 3: num ^= num << 16; /* fallthrough */
-    case 2: num ^= num << 8; /* fallthrough */
-    case 1:
-      num ^= num << 4;
-      num ^= num << 2;
-  }
+  return ((DPA__U_SM_KEY_ENTRY_TYPE)x) * dpa__u_choose_prime(DPA__U_SM_KEY_ENTRY_TYPE);
 #pragma GCC diagnostic pop
-  return num;
 }
 
 // We don't need this yet, but we may need it if we add things like iterating over the keys in a set.
 /*
-dpa_u_unsequenced DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE num){
-  return (DPA__U_SM_KEY_TYPE)(num ^ (num<<2));
+dpa_u_unsequenced DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE x){
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-count-overflow"
+  return (DPA__U_SM_KEY_TYPE)(x * dpa__u_choose_prime_inverse(DPA__U_SM_KEY_ENTRY_TYPE));
+#pragma GCC diagnostic pop
 }
 */
 #else
@@ -112,7 +97,7 @@ dpa_u_unsequenced DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE n){
   DPA__U_SM_KEY_ENTRY_TYPE e;
   memcpy(e.hash, n.all.all, sizeof(n));
   for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; )
-    e.hash[i] = fh ^= dpa_u_size_t_set_hash_sub(e.hash[i]);
+    e.hash[i] = fh ^= dpa_u_set_size_t_hash_sub(e.hash[i]);
   return e;
 }
 /*
@@ -274,33 +259,53 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
   const size_t lbsize = count_to_lbsize(that->count);
   if(lbsize > that->lbsize || !that->key_list){
     //printf("Old size: %zu, new size: %zu\n", ((size_t)1)<<that->lbsize, ((size_t)1)<<lbsize);
-    DPA__U_SM_KEY_ENTRY_TYPE*const key_list = realloc(that->key_list, (((size_t)1)<<lbsize)*sizeof(*key_list));
+    DPA__U_SM_KEY_ENTRY_TYPE*const key_list = malloc((((size_t)1)<<lbsize)*sizeof(*key_list));
     if(!key_list){
       that->count -= 1;
       return -1;
     }
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    void*const value_list = realloc(that->value_list, (((size_t)1)<<lbsize)*sizeof(*that->value_list));
+    void*const value_list = malloc((((size_t)1)<<lbsize)*sizeof(*that->value_list));
     if(!value_list){
-      that->key_list = key_list;
-      DPA__U_SM_KEY_ENTRY_TYPE*const r = realloc(that->key_list, (((size_t)1)<<that->lbsize)*sizeof(*that->key_list));
-      if(r) that->key_list = r;
+      free(key_list);
       that->count -= 1;
       return -1;
     }
 #endif
     size_t lbsize = count_to_lbsize(that->count);
     if(that->key_list){
-      struct lookup_result tbm = LOOKUP(that, (DPA__U_SM_KEY_ENTRY_TYPE){((ENTRY_HASH_TYPE)1)<<(sizeof(ENTRY_HASH_TYPE)-1)}, that->lbsize);
-      (void)tbm;
+      size_t i, n;
+      for(i=0,n=(((size_t)1)<<lbsize)*sizeof(*that->key_list); i<n; n++)
+        if(!(KEY_ENTRY_HASH(that->key_list[i]) >> (sizeof(size_t)*CHAR_BIT-that->lbsize)))
+          break;
+/*      const size_t m2 = (((size_t)1)<<lbsize)-1;
+      const size_t m1 = m2>>1;
+      const int s = (sizeof(size_t)*CHAR_BIT-lbsize);
+      size_t j=i, k=i*2;
+      do {
+        const size_t hk = KEY_ENTRY_HASH(that->key_list[i]) >> (sizeof(size_t)*CHAR_BIT-lbsize);
+        const size_t psl = (j - (k>>1)) & m1;
+        if(psl == m1){
+          key_list[k++] = (i-1)<<s;
+          j++;
+          continue;
+        }
+        const size_t npsl = (k - hk) & m2;
+        if(!psl && hk & 1)
+          key_list[k++] = (i-1)<<s;
+        key_list
+        j++;
+      } while(i != j);*/
       // TODO
     }else{
-      int s = (sizeof(size_t)*CHAR_BIT-lbsize);
+      const int s = (sizeof(size_t)*CHAR_BIT-lbsize);
       for(size_t i=0,n=((size_t)1)<<lbsize; i<n; i++)
         key_list[i] = (i-1)<<s;
     }
+    free(that->key_list);
     that->key_list = key_list;
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    free(that->value_list);
     that->value_list = value_list;
 #endif
     that->lbsize = lbsize;

@@ -40,7 +40,7 @@
 #define DPA__U_SM_NO_BITSET
 #endif
 #define DPA__U_SM_KEY_TYPE unsigned long
-#define DPA__U_SM_NAME ul
+#define DPA__U_SM_NAME lu
 #include DPA__U_SM_TEMPLATE
 #if ULONG_MAX >= UINTPTR_MAX
 #undef DPA__U_SM_NO_BITSET
@@ -50,7 +50,7 @@
 #define DPA__U_SM_NO_BITSET
 #endif
 #define DPA__U_SM_KEY_TYPE unsigned long long
-#define DPA__U_SM_NAME ull
+#define DPA__U_SM_NAME llu
 #include DPA__U_SM_TEMPLATE
 #if ULLONG_MAX >= UINTPTR_MAX
 #undef DPA__U_SM_NO_BITSET
