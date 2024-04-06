@@ -6,8 +6,11 @@
 #include <dpa/utils/bo.h>
 #include <dpa/utils/io.h>
 #include <dpa/utils/mem.h>
-#include <dpa/utils/math.h>
+#include <dpa/utils/map.h>
+#include <dpa/utils/set.h>
 #include <dpa/utils/hash.h>
+#include <dpa/utils/math.h>
+#include <dpa/utils/utf8.h>
 #include <dpa/utils/refcount.h>
 
 #endif

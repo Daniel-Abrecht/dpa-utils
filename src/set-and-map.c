@@ -9,8 +9,8 @@
 #include <dpa/utils/math.h>
 #include <dpa/utils/_math.h>
 
-#define DPA__U_SM_BITMAP_OFFSET(INDEX) ((INDEX)/(sizeof(dpa_u_giant_unsigned_int_t)*CHAR_BIT))
-#define DPA__U_SM_BITMAP_BIT(INDEX) (((dpa_u_giant_unsigned_int_t)1)<<((INDEX)%(sizeof(dpa_u_giant_unsigned_int_t)*CHAR_BIT)))
+#define DPA__U_SM_BITMAP_OFFSET(INDEX) ((INDEX)/(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT))
+#define DPA__U_SM_BITMAP_BIT(INDEX) (((dpa_u_bitmap_entry_t)1)<<((INDEX)%(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT)))
 
 struct lookup_result {
   size_t index;
@@ -20,13 +20,14 @@ struct lookup_result {
 // Ensure there is some free space left 100/8 = 12.5%
 #define SET_OVERSIZE_INVERSE_FACTOR 8
 
+enum { MIN_LBSIZE = 5 };
+enum { MIN_SIZE = 1u<<MIN_LBSIZE };
 static size_t count_to_lbsize(size_t n){
-  enum { MIN_SIZE = 32 };
   n += n / SET_OVERSIZE_INVERSE_FACTOR;
   return dpa_u_log2(n|(MIN_SIZE-1))+1;
 }
 
-// Note: Not rounded up to dpa_u_giant_unsigned_int_t size.
+// Note: Not rounded up to dpa_u_bitmap_entry_t size.
 #define EXPECTED_BITMAP_SIZE(T) ((1ull<<(sizeof(T)*CHAR_BIT)) / CHAR_BIT)
 #define LIST_OR_BITMAP_SIZE_THRESHOLD(T) (( \
      (1ull<<DPA_U_CONSTEXPR_LOG2(EXPECTED_BITMAP_SIZE(T) / 2 / sizeof(T))) \
@@ -123,7 +124,7 @@ static struct lookup_result LOOKUP(
 ){
   const size_t mask = (((size_t)1)<<lbsize)-1;
   ENTRY_HASH_TYPE hash = KEY_ENTRY_HASH(key);
-  size_t i = hash >> (sizeof(size_t)*CHAR_BIT-lbsize);
+  size_t i = hash >> (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize);
   if(!that->key_list)
     return (struct lookup_result){i, false};
   for(size_t psl=0,s=mask+1; psl<s; psl++, i=((i+1)&mask)){
@@ -140,7 +141,7 @@ static struct lookup_result LOOKUP(
       return (struct lookup_result){i, true};
 #endif
     }
-    if((ENTRY_HASH_TYPE)(diff >> (sizeof(size_t)*CHAR_BIT-lbsize)) <= psl)
+    if((ENTRY_HASH_TYPE)(diff >> (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize)) <= psl)
       return (struct lookup_result){i, false};
   }
   dpa_u_unreachable("Hashmap lookup failed: %s", "That neither an entry is found, nor the PSL ever exceeds the one of any of the entries of the hashmap while earching, should not be possible.");
@@ -159,7 +160,7 @@ static void INSERT(
   const size_t lbsize
 ){
   const size_t mask = (((size_t)1)<<lbsize)-1;
-  size_t psl = (i - (KEY_ENTRY_HASH(key) >> (sizeof(size_t)*CHAR_BIT-lbsize))) & mask;
+  size_t psl = (i - (KEY_ENTRY_HASH(key) >> (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize))) & mask;
   for(size_t s = mask+1; psl<s; psl++, i=((i+1)&mask)){
     const DPA__U_SM_KEY_ENTRY_TYPE ekey = that->key_list[i];
     ENTRY_HASH_TYPE diff = KEY_ENTRY_HASH(ekey) - KEY_ENTRY_HASH(key);
@@ -167,7 +168,7 @@ static void INSERT(
     if(!diff && memcmp(&key, &ekey, sizeof(key))<0)
       goto swap;
 #endif
-    if((ENTRY_HASH_TYPE)(diff >> (sizeof(size_t)*CHAR_BIT-lbsize)) > psl)
+    if((ENTRY_HASH_TYPE)(diff >> (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize)) > psl)
       continue;
 #ifdef DPA__U_SM_BO
   swap:
@@ -180,7 +181,7 @@ static void INSERT(
     }
 #endif
     that->key_list[i] = key;
-    size_t epsl = (i - (KEY_ENTRY_HASH(ekey) >> (sizeof(size_t)*CHAR_BIT-lbsize))) & mask;
+    size_t epsl = (i - (KEY_ENTRY_HASH(ekey) >> (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize))) & mask;
     if(epsl == mask) // Highest calculatable PSL, empty entry, we are done
       return;
     key = ekey;
@@ -202,8 +203,8 @@ static void REMOVE(
   do {
     size_t j = (i+1) & mask;
     // If the PSL is 0 (entry present, optimal position) or -1 (no entry), we are done.
-    if((((KEY_ENTRY_HASH(that->key_list[j])>>(sizeof(size_t)*CHAR_BIT-lbsize))+1-j) & mask) <= 1){
-      KEY_ENTRY_HASH(that->key_list[i]) = j<<(sizeof(size_t)*CHAR_BIT-lbsize);
+    if((((KEY_ENTRY_HASH(that->key_list[j])>>(sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize))+1-j) & mask) <= 1){
+      KEY_ENTRY_HASH(that->key_list[i]) = j<<(sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize);
       return;
     }
     that->key_list[i] = that->key_list[j];
@@ -211,6 +212,18 @@ static void REMOVE(
   } while(i != index);
 }
 #endif
+
+dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(DPA__U_SM_TYPE* that){
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  free(that->key_list);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  free(that->value_list);
+#endif
+  memset(that, 0, sizeof(*that));
+#else
+  (void)that;
+#endif
+}
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key){
@@ -221,8 +234,8 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   if(that->lbsize == sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT) insert_bitfield: {
 #endif
-    dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
-    dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
+    dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
+    dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(key);
     bool r = *m & s;
     *m |= s;
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -237,6 +250,8 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
 #endif
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  if(!that->lbsize)
+    that->lbsize = MIN_LBSIZE;
   DPA__U_SM_KEY_ENTRY_TYPE entry = HASH(key);
   struct lookup_result result = LOOKUP(that, entry, that->lbsize);
   if(result.found){
@@ -248,17 +263,20 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
 #endif
     return true;
   }
-#ifndef DPA__U_SM_NO_BITSET
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   that->count += 1;
+#ifndef DPA__U_SM_NO_BITSET
   const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
   if(that->count >= lobst){
     // TODO: convert list to bitfield
+    dpa_u_abort("TODO: %s", "convert list to bitfield");
     that->lbsize = sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT;
     goto insert_bitfield;
   }
+#endif
   const size_t lbsize = count_to_lbsize(that->count);
   if(lbsize > that->lbsize || !that->key_list){
-    //printf("Old size: %zu, new size: %zu\n", ((size_t)1)<<that->lbsize, ((size_t)1)<<lbsize);
+    printf("Old size: %zu, new size: %zu\n", ((size_t)1)<<that->lbsize, ((size_t)1)<<lbsize);
     DPA__U_SM_KEY_ENTRY_TYPE*const key_list = malloc((((size_t)1)<<lbsize)*sizeof(*key_list));
     if(!key_list){
       that->count -= 1;
@@ -276,31 +294,41 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
     if(that->key_list){
       size_t i, n;
       for(i=0,n=(((size_t)1)<<lbsize)*sizeof(*that->key_list); i<n; n++)
-        if(!(KEY_ENTRY_HASH(that->key_list[i]) >> (sizeof(size_t)*CHAR_BIT-that->lbsize)))
+        if(!(KEY_ENTRY_HASH(that->key_list[i]) >> (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-that->lbsize)))
           break;
-/*      const size_t m2 = (((size_t)1)<<lbsize)-1;
+      const size_t m2 = (((size_t)1)<<lbsize)-1;
       const size_t m1 = m2>>1;
-      const int s = (sizeof(size_t)*CHAR_BIT-lbsize);
-      size_t j=i, k=i*2;
+      const int s = (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize);
+      size_t j=i-1, k=i*2-1, o=-1;
       do {
-        const size_t hk = KEY_ENTRY_HASH(that->key_list[i]) >> (sizeof(size_t)*CHAR_BIT-lbsize);
-        const size_t psl = (j - (k>>1)) & m1;
-        if(psl == m1){
-          key_list[k++] = (i-1)<<s;
-          j++;
+        o++;
+        k = (k+1) & m2;
+        j = (j+1) & m1;
+        const size_t hk = KEY_ENTRY_HASH(that->key_list[j]) >> s;
+        const size_t psl = ((k>>1)-j) & m1;
+        if(psl < o){
+          // Consecutive entries
+          key_list[k] = key_list[j];
           continue;
         }
-        const size_t npsl = (k - hk) & m2;
-        if(!psl && hk & 1)
-          key_list[k++] = (i-1)<<s;
-        key_list
-        j++;
-      } while(i != j);*/
-      // TODO
+        for(size_t l=(k-hk)&m2; l--; ){
+          key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(k-1)<<s}; // Empty entries
+          k = (k+1) & m2;
+        }
+        // End of consecutive entry without PSL=0. Next entry either PSL=0, or empty
+        if(psl == m1){
+          // Empty entry
+          key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(k-1)<<s};
+          o = -1;
+        }else{
+          key_list[k] = that->key_list[j];
+          o = 0;
+        }
+      } while(i != j);
     }else{
-      const int s = (sizeof(size_t)*CHAR_BIT-lbsize);
+      const int s = (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize);
       for(size_t i=0,n=((size_t)1)<<lbsize; i<n; i++)
-        key_list[i] = (i-1)<<s;
+        key_list[i] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)(i-1)<<s};
     }
     free(that->key_list);
     that->key_list = key_list;
@@ -333,8 +361,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
   const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
   if(that->count >= lobst){
 #endif
-    dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
-    dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
+    dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
+    dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(key);
     bool r = *m & s;
     *m &= ~s;
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -367,8 +395,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE* tha
   const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
   if(that->count >= lobst){
 #endif
-    const dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
-    dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
+    const dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
+    dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(key);
     return *m & s;
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   }
@@ -386,8 +414,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* tha
 #ifndef DPA__U_SM_NO_BITSET
   const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
   if(that->count >= lobst){
-    const dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
-    dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
+    const dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
+    dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(key);
     *value = that->value_list[key];
     return *m & s;
   }
@@ -406,8 +434,8 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE
 #ifndef DPA__U_SM_NO_BITSET
   const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
   if(that->count >= lobst){
-    dpa_u_giant_unsigned_int_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
-    dpa_u_giant_unsigned_int_t s = DPA__U_SM_BITMAP_BIT(key);
+    dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
+    dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(key);
     bool r = *m & s;
     *m &= ~s;
     *value = that->value_list[key];

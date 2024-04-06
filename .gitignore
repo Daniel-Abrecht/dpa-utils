@@ -9,3 +9,4 @@ lib/
 *.*swap*
 *~
 src/main/t-*
+tmp/

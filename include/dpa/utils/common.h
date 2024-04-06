@@ -345,6 +345,9 @@ typedef long long dpa_u_giant_int_t;
 typedef unsigned long long dpa_u_giant_unsigned_int_t;
 #endif
 
+// This makes it easy to change the type used in bitmaps.
+typedef unsigned dpa_u_bitmap_entry_t;
+
 #ifdef __clang__
 #define DPA__U_ISS_MULTITARGET
 #elif defined(__GNUC__)

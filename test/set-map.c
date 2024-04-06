@@ -163,7 +163,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
   bool done = false;
   while(!done){
     k = j;
-    for(size_t i=0; i<50; i++,j++){
+    for(size_t i=0; i<20; i++,j++){
       if(!GET_RAND_ENTRY(&key, j)){
         done = true;
         break;
@@ -175,45 +175,49 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
 #endif
       if(result < 0){
         fprintf(stderr, "Error: Failed to add entry %zu\n", j);
-        return 1;
+        goto error;
       }
       if(result){
         fprintf(stderr, "Error: Entry %zu was already present, but was never added\n", j);
-        return 1;
+        goto error;
       }
     }
     j = k;
-    for(size_t i=0; i<50; i++,j++){
+    for(size_t i=0; i<20; i++,j++){
       if(!GET_RAND_ENTRY(&key, j))
         break;
       if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
         fprintf(stderr, "Error: Prevously added entry %zu not found\n", j);
-        return 1;
+        goto error;
       }
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
       void* value = (void*)-1;
       if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key, &value)){
         fprintf(stderr, "Error: failed to get entry %zu, but check if it exists did succeed\n", j);
-        return 1;
+        goto error;
       }
       if((size_t)value != j){
         fprintf(stderr, "Error: value retrieved from entry %zu is wrong: %zu\n", j, (size_t)value);
-        return 1;
+        goto error;
       }
 #endif
     }
     k = j;
-    for(size_t i=0; i<50; i++,j++){
+    for(size_t i=0; i<20; i++,j++){
       if(!GET_RAND_ENTRY(&key, j))
         break;
       if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
         fprintf(stderr, "Error: Entry found, but was never added\n");
-        return 1;
+        goto error;
       }
     }
     j = k;
   }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
   return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
 }
 
 //////////////////////////////////////////////
