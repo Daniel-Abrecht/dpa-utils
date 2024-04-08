@@ -10,10 +10,10 @@
 #include <errno.h>
 #include <stdio.h>
 
-uint_least8_t ul8[0x100];
-uint_least16_t ul16[0x10000];
-uint_least32_t ul32[0x10000];
-uint_least64_t ul64[0x10000];
+uint_least8_t  ul8 [  0x100]; size_t ul8_count;
+uint_least16_t ul16[0x10000]; size_t ul16_count;
+uint_least32_t ul32[0x10000]; size_t ul32_count;
+uint_least64_t ul64[0x10000]; size_t ul64_count;
 #ifdef DPA_HAS_UINT128
 dpa_uint128_t ul128[0x10000];
 #elif DPA_HAS_UINT256
@@ -21,12 +21,14 @@ dpa_uint256_t ul128[0x10000];
 #else
 dpa_u_giant_unsigned_int_t ul128[0x10000]; // May not actually be 128 big, but is the biggest we've got
 #endif
+size_t ul128_count;
 #ifdef DPA_HAS_UINT256
 dpa_uint256_t ul256[0x10000];
 #else
 dpa_u_giant_unsigned_int_t ul256[0x10000]; // May not actually be 256 big, but is the biggest we've got
 #endif
-dpa_u_bo_unique_t ustr[0x10000];
+size_t ul256_count;
+dpa_u_bo_unique_t ustr[0x10000]; size_t ustr_count;
 
 static int hex2bin_digit(const unsigned char x){
   if(x >= '0' && x <= '9'){
@@ -51,8 +53,13 @@ static void hex2bin(void*const res, size_t n, const unsigned char* x){
   if(x[m-1] == '\n') m--;
   m /= 2;
   if(m > n) m = n;
-  for(size_t i=0; i<m; i++)
-    r[i] = hex2bin_byte(&x[i*2]);
+  if(1 == *(char*)&(unsigned){1}){ // little endian
+    for(size_t i=0; i<m; i++)
+      r[m-i-1] = hex2bin_byte(&x[i*2]);
+  }else{ // big endian
+    for(size_t i=0; i<m; i++)
+      r[i] = hex2bin_byte(&x[i*2]);
+  }
 }
 
 static void to_ustring(dpa_u_bo_unique_t*const ret, size_t n, const unsigned char* x){
@@ -72,9 +79,9 @@ void dpa__u_test_setup(void){
   if(!f) dpa_u_abort("Failed to open build/unique-random: %d %s", errno, strerror(errno));
   unsigned char line[1024];
 #define READ_LINES(L, F) \
-  for(size_t i=0; fgets((char*)line, sizeof(line), f) && line[0] != '\n'; i++){ \
-    if(i>=sizeof(L)/sizeof(*L)) continue; \
-    F(&L[i], sizeof(L[i]), line); \
+  for(L##_count=0; fgets((char*)line, sizeof(line), f) && line[0] != '\n'; L##_count++){ \
+    if(L##_count>=sizeof(L)/sizeof(*L)) continue; \
+    F(&L[L##_count], sizeof(L[L##_count]), line); \
   }
   READ_LINES(ul8, hex2bin);
   READ_LINES(ul16, hex2bin);
@@ -121,27 +128,27 @@ bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
   if(sizeof(DPA__U_SM_KEY_TYPE) >= 32){
-    if(i >= sizeof(ul256)/sizeof(*ul256)) return false;
+    if(i >= ul256_count) return false;
     *ret = (DPA__U_SM_KEY_TYPE)ul256[i];
     return true;
   }else if(sizeof(DPA__U_SM_KEY_TYPE) >= 16){
-    if(i >= sizeof(ul128)/sizeof(*ul128)) return false;
+    if(i >= ul128_count) return false;
     *ret = (DPA__U_SM_KEY_TYPE)ul128[i];
     return true;
   }else if(sizeof(DPA__U_SM_KEY_TYPE) >= 8){
-    if(i >= sizeof(ul64)/sizeof(*ul64)) return false;
+    if(i >= ul64_count) return false;
     *ret = (DPA__U_SM_KEY_TYPE)ul64[i];
     return true;
   }else if(sizeof(DPA__U_SM_KEY_TYPE) >= 4){
-    if(i >= sizeof(ul32)/sizeof(*ul32)) return false;
+    if(i >= ul32_count) return false;
     *ret = (DPA__U_SM_KEY_TYPE)ul32[i];
     return true;
   }else if(sizeof(DPA__U_SM_KEY_TYPE) >= 2){
-    if(i >= sizeof(ul16)/sizeof(*ul16)) return false;
+    if(i >= ul16_count) return false;
     *ret = (DPA__U_SM_KEY_TYPE)ul16[i];
     return true;
   }else{
-    if(i >= sizeof(ul8)/sizeof(*ul8)) return false;
+    if(i >= ul8_count) return false;
     *ret = (DPA__U_SM_KEY_TYPE)ul8[i];
     return true;
   }
@@ -149,7 +156,7 @@ bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
 }
 #else
 bool GET_RAND_ENTRY(dpa_u_bo_unique_t*const ret, size_t i){
-  if(i >= sizeof(ustr)/sizeof(*ustr))
+  if(i >= ustr_count)
     return false;
   *ret = ustr[i];
   return true;
