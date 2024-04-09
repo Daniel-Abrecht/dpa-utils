@@ -108,6 +108,11 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* tha
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** result);
 #endif
 
+/**
+ * For debugging purposes only
+ */
+dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__U_SM_TYPE* that);
+
 //////////////////////////////////////////////
 #undef DPA__U_SM_KEY_ENTRY_TYPE
 #undef DPA__U_SM_TYPE

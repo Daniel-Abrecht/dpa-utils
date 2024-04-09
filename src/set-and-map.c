@@ -120,25 +120,26 @@ dpa_u_unsequenced DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
 // For values with the same PSL, entries are implicitly sorted by the keys values.
 static struct lookup_result LOOKUP(
   const DPA__U_SM_TYPE* that,
-  const DPA__U_SM_KEY_ENTRY_TYPE key,
+  DPA__U_SM_KEY_ENTRY_TYPE key,
   const size_t lbsize
 ){
   const size_t mask = (((size_t)1)<<lbsize)-1;
-  ENTRY_HASH_TYPE hash = KEY_ENTRY_HASH(key);
   const int shift = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize;
-  size_t i = hash >> shift;
+  size_t i = KEY_ENTRY_HASH(key) >> shift;
   if(!that->key_list)
     return (struct lookup_result){i, false};
   // The actual PSL is psl>>shift. We take the difference of our current hash with the entries hash,
   // instead of considering it's psl (the difference to it's index), so the entries PSL will have an offset.
   // On the other hand, we don't need to compare entries with the same psl to get a higher total order.
   const ENTRY_HASH_TYPE I = 1<<shift;
-  ENTRY_HASH_TYPE psl = ((ENTRY_HASH_TYPE)i<<shift) - hash; // equivalnet to: hash & (I-1) + 1; This is because the actual PSL is 0.
+  KEY_ENTRY_HASH(key) -= I;
+  ENTRY_HASH_TYPE hash = KEY_ENTRY_HASH(key);
+  ENTRY_HASH_TYPE psl = hash - ((ENTRY_HASH_TYPE)i<<shift);
   while(1){
     const DPA__U_SM_KEY_ENTRY_TYPE ekey = that->key_list[i];
-    ENTRY_HASH_TYPE diff = KEY_ENTRY_HASH(ekey) - hash;
-    // printf("L d: %zX %zX %zX %zX %zX\n", (size_t)diff, (size_t)psl, (size_t)(psl-diff), (size_t)(ENTRY_HASH_TYPE)((psl-diff) >> shift), i);
-    if(!diff){
+    ENTRY_HASH_TYPE diff = KEY_ENTRY_HASH(ekey) - ((ENTRY_HASH_TYPE)i<<shift);
+    // printf("L d: %zX %zX %zX %zX %zX\n", (size_t)psl, (size_t)diff, (size_t)(psl-diff), (size_t)(ENTRY_HASH_TYPE)((psl-diff) >> shift), i);
+    if(diff == psl){
 #ifdef DPA__U_SM_BO
       const int cmp = memcmp(&key, &ekey, sizeof(key));
       if(!cmp)
@@ -149,16 +150,11 @@ static struct lookup_result LOOKUP(
       return (struct lookup_result){i, true};
 #endif
     }
-    diff ^= I-1;
-    printf("L a:%zX b:%zX d:%zX, p:%zX, d-p:%zX psl:%zX=%zX, i=%zX\n" , (size_t)hash, (size_t)KEY_ENTRY_HASH(ekey), (size_t)diff, (size_t)psl, (size_t)(diff-psl), (size_t)((i-(KEY_ENTRY_HASH(ekey)>>shift))&mask), (size_t)(((diff-psl)>>shift)&mask), i);
-    if(diff > psl)
+    //printf("L a:%zX b:%zX d:%zX, p:%zX, d-p:%zX psl:%zX=%zX, i=%zX\n" , (size_t)hash, (size_t)KEY_ENTRY_HASH(ekey), (size_t)diff, (size_t)psl, (size_t)(diff-psl), (size_t)((i-(KEY_ENTRY_HASH(ekey)>>shift))&mask), (size_t)(((diff-psl)>>shift)&mask), i);
+    if(psl <= (diff-1)) // We use the highest possible PSL for the empty entry. The highest PSL always wins! For an empty entry, diff is going to be 0, we subtract 1 to force an overflow.
       return (struct lookup_result){i, false};
-    psl += I;
+    psl -= I;
     i = (i+1) & mask;
-#ifdef DPA_U_DEBUG
-    if(!(psl>>shift))
-      break;
-#endif
   }
   dpa_u_unreachable("Hashmap lookup failed: %s", "That neither an entry is found, nor the PSL ever exceeds the one of any of the entries of the hashmap while earching, should not be possible.");
 }
@@ -181,20 +177,20 @@ static void INSERT(
   // instead of considering it's psl (the difference to it's index), so the entries PSL will have an offset.
   // On the other hand, we don't need to compare entries with the same psl to get a higher total order.
   const ENTRY_HASH_TYPE I = 1<<shift;
-  // Note: We add 1 to the extended PSL. The longest PSL is -1, so it'l shift to 0, and equal will be 1 instead of 0.
+  KEY_ENTRY_HASH(key) -= I;
   ENTRY_HASH_TYPE psl = KEY_ENTRY_HASH(key) - ((ENTRY_HASH_TYPE)i<<shift);
   for(;; psl -= I, i=((i+1)&mask)){
     const DPA__U_SM_KEY_ENTRY_TYPE ekey = that->key_list[i];
-    ENTRY_HASH_TYPE diff = KEY_ENTRY_HASH(key) - KEY_ENTRY_HASH(ekey);
-    printf("i a:%zX b:%zX d-p:%zX psl:%zX=%zX, i=%zX\n" , (size_t)KEY_ENTRY_HASH(key), (size_t)KEY_ENTRY_HASH(ekey),(size_t)(diff-psl), (size_t)((i-(KEY_ENTRY_HASH(ekey)>>shift))&mask), (size_t)(((diff-psl)>>shift)&mask), i);
-//    printf("i d: %zX %zX %zX %zX %zX\n", (size_t)diff, (size_t)psl, (size_t)(psl-diff), (size_t)(ENTRY_HASH_TYPE)((psl-diff) >> shift), i);
+    ENTRY_HASH_TYPE diff = KEY_ENTRY_HASH(ekey) - ((ENTRY_HASH_TYPE)i<<shift);
+    //printf("i a:%zX b:%zX d-p:%zX psl:%zX=%zX, i=%zX\n" , (size_t)KEY_ENTRY_HASH(key), (size_t)KEY_ENTRY_HASH(ekey),(size_t)(diff-psl), (size_t)((i-(KEY_ENTRY_HASH(ekey)>>shift))&mask), (size_t)(((diff-psl)>>shift)&mask), i);
+    // printf("i d: %zX %zX %zX %zX %zX\n", (size_t)psl, (size_t)diff, (size_t)(psl-diff), (size_t)(ENTRY_HASH_TYPE)((psl-diff) >> shift), i);
 #ifdef DPA__U_SM_BO
-    if(!diff && memcmp(&key, &ekey, sizeof(key))<0)
+    if(diff == psl && memcmp(&key, &ekey, sizeof(key))<0)
       goto swap;
 #endif
-    diff += I;
-    //if(diff < psl)
-    //  continue;
+    // Allow diff == 0
+    if(psl > (diff-1))
+      continue;
 #ifdef DPA__U_SM_BO
   swap:
 #endif
@@ -205,10 +201,10 @@ static void INSERT(
       value = v;
     }
 #endif
-    printf("swap: %zX %zX %zX %zX %zX\n", i, (size_t)KEY_ENTRY_HASH(ekey)>>shift, (size_t)KEY_ENTRY_HASH(key)>>shift, (size_t)KEY_ENTRY_HASH(ekey), (size_t)KEY_ENTRY_HASH(key));
+    // printf("swap: %zX %zX %zX %zX %zX\n", i, (size_t)KEY_ENTRY_HASH(ekey)>>shift, (size_t)KEY_ENTRY_HASH(key)>>shift, (size_t)KEY_ENTRY_HASH(ekey), (size_t)KEY_ENTRY_HASH(key));
     that->key_list[i] = key;
-    printf("%zX %zX\n",(size_t)diff,(size_t)psl);
-    //if(diff == psl) // Highest calculatable PSL, empty entry, we are done
+    // printf("%zX %zX\n",(size_t)diff,(size_t)psl);
+    if(!diff) // Highest calculatable PSL, empty entry, we are done
       return;
     key = ekey;
     psl = KEY_ENTRY_HASH(ekey) - ((ENTRY_HASH_TYPE)i<<shift);
@@ -279,7 +275,7 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
   if(!that->lbsize)
     that->lbsize = MIN_LBSIZE;
   DPA__U_SM_KEY_ENTRY_TYPE entry = HASH(key);
-lt:;
+// lt:;
   struct lookup_result result = LOOKUP(that, entry, that->lbsize);
   printf("add: lookup 0x%zX, 0x%zX: %c 0x%zX\n", (size_t)KEY_ENTRY_HASH(entry), (size_t)(KEY_ENTRY_HASH(entry)>>(sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-that->lbsize)), result.found ? 'Y' : 'N', result.index);
   if(result.found){
@@ -303,6 +299,7 @@ lt:;
   }
 #endif
   const size_t lbsize = count_to_lbsize(that->count);
+  const int s = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT - lbsize;
   if(lbsize > that->lbsize || !that->key_list){
     printf("Old size: %zu, new size: %zu\n", ((size_t)1)<<that->lbsize, ((size_t)1)<<lbsize);
     DPA__U_SM_KEY_ENTRY_TYPE*const key_list = malloc((((size_t)1)<<lbsize)*sizeof(*key_list));
@@ -318,47 +315,56 @@ lt:;
       return -1;
     }
 #endif
-    size_t lbsize = count_to_lbsize(that->count);
     if(that->key_list){
+      DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(that);
       size_t i, n;
-      for(i=0,n=(((size_t)1)<<lbsize)*sizeof(*that->key_list); i<n; n++)
-        if(!(KEY_ENTRY_HASH(that->key_list[i]) >> (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-that->lbsize)))
+      for(i=0,n=(((size_t)1)<<that->lbsize)*sizeof(*that->key_list); i<n; i++)
+        if(i == (size_t)((KEY_ENTRY_HASH(that->key_list[i])+(((ENTRY_HASH_TYPE)1)<<(s+1))) >> (s+1)))
           break;
       const size_t m2 = (((size_t)1)<<lbsize)-1;
       const size_t m1 = m2>>1;
-      const int s = (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize);
-      size_t j=i-1, k=i*2-1, o=-1;
+      size_t j=i, k=i*2, o=0;
       do {
-        o++;
-        k = (k+1) & m2;
-        j = (j+1) & m1;
-        const size_t hk = KEY_ENTRY_HASH(that->key_list[j]) >> s;
-        const size_t psl = ((k>>1)-j) & m1;
+        // FIXME: For convenience, the PSL bits are pre-subtracted with 1, I haven't updated this loop to deal with that yet!
+        const size_t hk = ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 2) & m2;
+        const size_t psl = (j-(hk>>1)) & m1;
+        const size_t psl2 = (k-hk) & m2;
+        printf("%zX,%zX: %zX %zX %zX %zX\n", j,k, psl, psl2, o, hk);
         if(psl < o){
           // Consecutive entries
-          key_list[k] = key_list[j];
-          continue;
-        }
-        for(size_t l=(k-hk)&m2; l--; ){
-          key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(k+1)<<s}; // Empty entries
+          printf("Copying consecutive entry old[%zX] -> new[%zX]\n",j,k);
+          key_list[k] = that->key_list[j];
+          KEY_ENTRY_HASH(key_list[k]) += (ENTRY_HASH_TYPE)1<<s;
           k = (k+1) & m2;
+          goto next;
+        }
+        for(; k!=hk; k=(k+1)&m2){
+          printf("Entry %zX empty\n", k);
+          key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){k<<s}; // Empty entries
         }
         // End of consecutive entry without PSL=0. Next entry either PSL=0, or empty
         if(psl == m1){
           // Empty entry
-          key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(k+1)<<s};
+          /*printf("One more empty entry at %zX\n",k);
+          key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){k<<s};
+          o = -1;*/
           o = -1;
         }else{
+          printf("Copying entry old[%zX] -> new[%zX]\n",j,k);
           key_list[k] = that->key_list[j];
-          o = 0;
+          KEY_ENTRY_HASH(key_list[k]) += (ENTRY_HASH_TYPE)1<<s;
+          o = -1;
+          k = (k+1) & m2;
         }
+      next:
+        o++;
+        j = (j+1) & m1;
       } while(i != j);
     }else{
-      const int s = (sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize);
       for(size_t i=0,n=((size_t)1)<<lbsize; i<n; i++)
-        key_list[i] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)(i+1)<<s};
-       that->key_list = key_list;
-       goto lt;
+        key_list[i] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)i<<s};
+       // that->key_list = key_list;
+       // goto lt;
     }
     free(that->key_list);
     that->key_list = key_list;
@@ -490,6 +496,31 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE
   return true;
 }
 #endif
+
+dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__U_SM_TYPE* that){
+  (void)that;
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+#ifndef DPA__U_SM_NO_BITSET
+  const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD(DPA__U_SM_KEY_TYPE);
+  if(that->count >= lobst)
+    return;
+#endif
+  printf("%8s: %8s %4s %8s\n", "index", "hash idx", "PSL", "hash");
+  dpa_u_bitmap_entry_t s = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT - that->lbsize;
+  dpa_u_bitmap_entry_t i_mask = ((size_t)1<<that->lbsize)-1;
+  for(size_t i=0,n=(size_t)1<<that->lbsize; i<n; i++){
+    ENTRY_HASH_TYPE h = KEY_ENTRY_HASH(that->key_list[i]);
+    h += (ENTRY_HASH_TYPE)1 << s;
+    size_t hindex = h >> s;
+    size_t PSL = (i - hindex) & i_mask;
+    printf("%8zX: %8zX %4zX ", i, hindex, PSL);
+    for(unsigned i=(sizeof(ENTRY_HASH_TYPE)*CHAR_BIT);i;i-=4)
+      printf("%01X",(unsigned)((h>>(i-4))&0xF));
+    puts("");
+  }
+#endif
+}
+
 
 #undef HASH
 #undef UNHASH
