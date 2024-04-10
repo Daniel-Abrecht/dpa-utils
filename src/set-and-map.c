@@ -408,7 +408,7 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
         printf("A: %zX,%zX: %zX %zX %zX %zX\n", j,k, psl, psl2, o, hk);
         for(; k!=hk; k=(k+1)&m2){
           printf("Entry %zX empty\n", k);
-          key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){k<<s}; // Empty entries
+          key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
         }
         if(psl == m1){
           j = (j+1) & m1;
@@ -440,7 +440,7 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
       } while(i != j);
       for(const size_t hk = ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 2) & m2; k!=hk; k=(k+1)&m2){
         printf("Entry %zX empty\n", k);
-        key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){k<<s}; // Empty entries
+        key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
       }
       free(that->key_list);
       that->key_list = key_list;
@@ -585,7 +585,7 @@ dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__
     h += (ENTRY_HASH_TYPE)1 << s;
     size_t hindex = h >> s;
     size_t PSL = (i - hindex) & i_mask;
-    printf("%8zX: %8zX %4zX ", i, hindex, PSL);
+    printf("%8zX: %8zX %5zX ", i, hindex, PSL);
     for(unsigned i=(sizeof(ENTRY_HASH_TYPE)*CHAR_BIT);i;i-=4)
       printf("%01X",(unsigned)((h>>(i-4))&0xF));
     puts("");
