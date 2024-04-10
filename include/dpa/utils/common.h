@@ -356,4 +356,10 @@ typedef unsigned dpa_u_bitmap_entry_t;
 #define DPA__U_ISS_NONE
 #endif
 
+#if defined(DPA_U_DEBUG) && defined(DPA_U_DEBUG_VERBOSE)
+#define dpa_u_debug_ct_printf(...) printf(__VA_ARGS__)
+#else
+#define dpa_u_debug_ct_printf(...)
+#endif
+
 #endif

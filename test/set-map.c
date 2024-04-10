@@ -169,7 +169,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
   size_t j=0, k=0;
   bool done = false;
   while(!done){
-    puts("");
+    // puts("");
     k = j;
     for(size_t i=0; i<1; i++,j++){
       if(!GET_RAND_ENTRY(&key, j)){
@@ -221,11 +221,11 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
     }
     j = k;
   }
-  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(&container); // This is only for debugging
+  // DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(&container); // This is only for debugging
   DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
   return 0;
 error:
-  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(&container); // This is only for debugging
+  // DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(&container); // This is only for debugging
   DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
   return 1;
 }

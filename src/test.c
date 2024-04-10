@@ -66,7 +66,7 @@ dpa__u_api int dpa_u_test_main(int argc, const char* argv[]){
         dpa__u_test_teardown();
       return res;
     }
-    fprintf(stderr, "Not test '%s' found\n", argv[1]);
+    fprintf(stderr, "No test '%s' found\n", argv[1]);
     return 1;
   }else{
     bool any_failed = false;
