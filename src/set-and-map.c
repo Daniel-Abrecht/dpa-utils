@@ -130,7 +130,7 @@ static struct lookup_result LOOKUP(
   // The actual PSL is psl>>shift. We take the difference of our current hash with the entries hash,
   // instead of considering it's psl (the difference to it's index), so the entries PSL will have an offset.
   // On the other hand, we don't need to compare entries with the same psl to get a higher total order.
-  const ENTRY_HASH_TYPE I = 1<<shift;
+  const ENTRY_HASH_TYPE I = (ENTRY_HASH_TYPE)1<<shift;
   KEY_ENTRY_HASH(key) -= I;
   ENTRY_HASH_TYPE hash = KEY_ENTRY_HASH(key);
   ENTRY_HASH_TYPE psl = hash - ((ENTRY_HASH_TYPE)i<<shift);
@@ -182,7 +182,7 @@ static void INSERT(
   // The actual PSL is psl>>shift. We take the difference of our current hash with the entries hash,
   // instead of considering it's psl (the difference to it's index), so the entries PSL will have an offset.
   // On the other hand, we don't need to compare entries with the same psl to get a higher total order.
-  const ENTRY_HASH_TYPE I = 1<<shift;
+  const ENTRY_HASH_TYPE I = (ENTRY_HASH_TYPE)1<<shift;
   KEY_ENTRY_HASH(key) -= I;
   ENTRY_HASH_TYPE psl = KEY_ENTRY_HASH(key) - ((ENTRY_HASH_TYPE)i<<shift);
 #ifdef DPA_U_DEBUG
@@ -578,8 +578,8 @@ dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__
     return;
 #endif
   printf("%8s: %8s %4s %8s\n", "index", "hash idx", "PSL", "hash");
-  dpa_u_bitmap_entry_t s = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT - that->lbsize;
-  dpa_u_bitmap_entry_t i_mask = ((size_t)1<<that->lbsize)-1;
+  int s = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT - that->lbsize;
+  size_t i_mask = ((size_t)1<<that->lbsize)-1;
   for(size_t i=0,n=(size_t)1<<that->lbsize; i<n; i++){
     ENTRY_HASH_TYPE h = KEY_ENTRY_HASH(that->key_list[i]);
     h += (ENTRY_HASH_TYPE)1 << s;
