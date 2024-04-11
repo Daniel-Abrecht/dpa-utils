@@ -171,7 +171,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
   while(!done){
     // puts("");
     k = j;
-    for(size_t i=0; i<1; i++,j++){
+    for(size_t i=0; i<16; i++,j++){
       if(!GET_RAND_ENTRY(&key, j)){
         done = true;
         break;
@@ -182,40 +182,55 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
       int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (void*)j);
 #endif
       if(result < 0){
-        fprintf(stderr, "Error: Failed to add entry %zu\n", j);
+        fprintf(stderr, "Error 1: Failed to add entry %zu\n", j);
         goto error;
       }
       if(result){
-        fprintf(stderr, "Error: Entry %zu was already present, but was never added\n", j);
+        fprintf(stderr, "Error 2: Entry %zu was already present, but was never added\n", j);
         goto error;
       }
-    }
-    j = k;
-    for(size_t i=0; i<1; i++,j++){
-      if(!GET_RAND_ENTRY(&key, j))
-        break;
       if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
-        fprintf(stderr, "Error: Prevously added entry %zu not found\n", j);
+        fprintf(stderr, "Error 3: Prevously added entry %zu not found\n", j);
         goto error;
       }
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
       void* value = (void*)-1;
       if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key, &value)){
-        fprintf(stderr, "Error: failed to get entry %zu, but check if it exists did succeed\n", j);
+        fprintf(stderr, "Error 4: failed to get entry %zu, but check if it exists did succeed\n", j);
         goto error;
       }
       if((size_t)value != j){
-        fprintf(stderr, "Error: value retrieved from entry %zu is wrong: %zu\n", j, (size_t)value);
+        fprintf(stderr, "Error 5: value retrieved from entry %zu is wrong: %zu\n", j, (size_t)value);
+        goto error;
+      }
+#endif
+    }
+    j = k;
+    for(size_t i=0; i<16; i++,j++){
+      if(!GET_RAND_ENTRY(&key, j))
+        break;
+      if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
+        fprintf(stderr, "Error 6: Prevously added entry %zu not found\n", j);
+        goto error;
+      }
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      void* value = (void*)-1;
+      if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key, &value)){
+        fprintf(stderr, "Error 7: failed to get entry %zu, but check if it exists did succeed\n", j);
+        goto error;
+      }
+      if((size_t)value != j){
+        fprintf(stderr, "Error 8: value retrieved from entry %zu is wrong: %zu\n", j, (size_t)value);
         goto error;
       }
 #endif
     }
     k = j;
-    for(size_t i=0; i<1; i++,j++){
+    for(size_t i=0; i<16; i++,j++){
       if(!GET_RAND_ENTRY(&key, j))
         break;
       if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
-        fprintf(stderr, "Error: Entry found, but was never added\n");
+        fprintf(stderr, "Error 9: Entry found, but was never added\n");
         goto error;
       }
     }
