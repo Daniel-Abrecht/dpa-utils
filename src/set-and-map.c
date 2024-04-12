@@ -19,9 +19,12 @@ struct lookup_result {
 
 // Ensure there is some free space left 100/8 = 12.5%
 #define SET_OVERSIZE_INVERSE_FACTOR 8
+/* At any point, 1 entry needs to be free for this to work. Or is it 2? Anyways, this ensures there will be enough. */
+#define REQUIRED_MIN_FREE_ENTRIES 1
+#define MIN_LBSIZE 5
 
-enum { MIN_LBSIZE = 5 };
-enum { MIN_SIZE = 1u<<MIN_LBSIZE };
+#define MIN_SIZE (1u<<MIN_LBSIZE)
+
 static size_t count_to_lbsize(size_t n){
   n += n / SET_OVERSIZE_INVERSE_FACTOR;
   return dpa_u_log2(n|(MIN_SIZE-1))+1;
@@ -133,14 +136,14 @@ static struct lookup_result LOOKUP(
 ){
   const size_t mask = (((size_t)1)<<lbsize)-1;
   const int shift = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize;
-  size_t i = KEY_ENTRY_HASH(key) >> shift;
+  const ENTRY_HASH_TYPE I = (ENTRY_HASH_TYPE)1<<shift;
+  size_t i = (ENTRY_HASH_TYPE)(KEY_ENTRY_HASH(key)+I) >> shift;
   if(!that->key_list)
     return (struct lookup_result){i, false};
   // The actual PSL is psl>>shift. We take the difference of our current hash with the entries hash,
   // instead of considering it's psl (the difference to it's index), so the entries PSL will have an offset.
   // On the other hand, we don't need to compare entries with the same psl to get a higher total order.
-  const ENTRY_HASH_TYPE I = (ENTRY_HASH_TYPE)1<<shift;
-  KEY_ENTRY_HASH(key) -= I;
+  //KEY_ENTRY_HASH(key) -= I;
   ENTRY_HASH_TYPE hash = KEY_ENTRY_HASH(key);
   ENTRY_HASH_TYPE psl = hash - ((ENTRY_HASH_TYPE)i<<shift);
 #ifdef DPA_U_DEBUG
@@ -192,7 +195,7 @@ static void INSERT(
   // instead of considering it's psl (the difference to it's index), so the entries PSL will have an offset.
   // On the other hand, we don't need to compare entries with the same psl to get a higher total order.
   const ENTRY_HASH_TYPE I = (ENTRY_HASH_TYPE)1<<shift;
-  KEY_ENTRY_HASH(key) -= I;
+  //KEY_ENTRY_HASH(key) -= I;
   ENTRY_HASH_TYPE psl = KEY_ENTRY_HASH(key) - ((ENTRY_HASH_TYPE)i<<shift);
 #ifdef DPA_U_DEBUG
   size_t si = mask+1;
@@ -331,12 +334,11 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
     }
 #endif
     const int s = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT - olbsize;
-    const ENTRY_HASH_TYPE I = (ENTRY_HASH_TYPE)1<<s;
+    //const ENTRY_HASH_TYPE I = (ENTRY_HASH_TYPE)1<<s;
     for(size_t i=0,n=(size_t)1<<olbsize; i<n; i++){
       ENTRY_HASH_TYPE hash = KEY_ENTRY_HASH(that->key_list[i]);
       if(hash == i<<s) // empty entry
         continue;
-      hash += I;
       const DPA__U_SM_KEY_TYPE key = UNHASH(hash);
       dpa_u_debug_ct_printf("%zX %zX %zX\n", i, (size_t)key, (size_t)hash);
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -405,15 +407,15 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
 #endif
       const size_t m2 = (((size_t)1)<<lbsize)-1;
       const size_t m1 = m2>>1;
-      size_t j=i, k=i*2;
+      size_t j=i, k=(i*2-1) & m2;
 #ifdef DPA_U_DEBUG
       size_t si = 0;
 #endif
       do {
-        const size_t hk = ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 2) & m2;
-        const size_t psl = (j-(hk>>1)) & m1;
-        dpa_u_debug_ct_printf("A: %zX,%zX: %zX %zX\n", j,k, psl, hk);
-        for(; k!=hk; k=(k+1)&m2){
+        const size_t hk = KEY_ENTRY_HASH(that->key_list[j]) >> s;
+        const size_t psl = (j-(hk>>1)-1) & m1;
+        dpa_u_debug_ct_printf("A: %zX,%zX: %zX %zX %zX\n", j,k, psl, ((hk>>1)+1)&m1, (hk+1)&m2);
+        for(size_t l=(hk-k+1)&m2; l--; k=(k+1)&m2){
           dpa_u_debug_ct_printf("Entry %zX empty\n", k);
           key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
         }
@@ -424,22 +426,22 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
           si++;
 #endif
         }
-        dpa_u_debug_ct_printf("B: %zX,%zX: %zX %zX\n", j,k, (size_t)((k - ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 2)) & m2), hk);
-        for(size_t l=1; ((k - ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 2)) & m2) < l; l++){
+        dpa_u_debug_ct_printf("B: %zX,%zX: %zX %zX %zX\n", j,k, (size_t)((k - ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 2)) & m2), ((hk>>1)+1)&m1, (hk+1)&m2);
+        for(size_t l=1; ((k - ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 1)) & m2) < l; l++){
           dpa_u_debug_ct_printf("Copying entry old[%zX] -> new[%zX]\n",j,k);
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
           value_list[k] = that->value_list[j];
 #endif
           key_list[k] = that->key_list[j];
-          KEY_ENTRY_HASH(key_list[k]) += (ENTRY_HASH_TYPE)1<<s;
+          // KEY_ENTRY_HASH(key_list[k]) += (ENTRY_HASH_TYPE)1<<s;
           k = (k+1) & m2;
           j = (j+1) & m1;
           if(j == i) break;
 #ifdef DPA_U_DEBUG
           si++;
 #endif
-          // const size_t hk = ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 2) & m2;
-          // dpa_u_debug_ct_printf("C: %zX,%zX: %zX %zX\n", j,k, (size_t)((k - ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 2)) & m2), hk);
+           // const size_t hk = KEY_ENTRY_HASH(that->key_list[j]) >> s;
+           // dpa_u_debug_ct_printf("C: %zX,%zX: %zX %zX %zX\n", j,k, (size_t)((k - hk + 1) & m2), ((hk>>1)+1)&m1, (hk+1)&m2);
         }
 #ifdef DPA_U_DEBUG
         if(si > m1+1){
@@ -449,7 +451,7 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
         }
 #endif
       } while(i != j);
-      for(const size_t hk = ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 2) & m2; k!=hk; k=(k+1)&m2){
+      for(const size_t hk = ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 1) & m2; k!=hk; k=(k+1)&m2){
         dpa_u_debug_ct_printf("Entry %zX empty\n", k);
         key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
       }
@@ -592,9 +594,9 @@ dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__
   size_t i_mask = ((size_t)1<<that->lbsize)-1;
   for(size_t i=0,n=(size_t)1<<that->lbsize; i<n; i++){
     ENTRY_HASH_TYPE h = KEY_ENTRY_HASH(that->key_list[i]);
-    h += (ENTRY_HASH_TYPE)1 << s;
+    //h += (ENTRY_HASH_TYPE)1 << s;
     size_t hindex = h >> s;
-    size_t PSL = (i - hindex) & i_mask;
+    size_t PSL = (i - hindex - 1) & i_mask;
     printf("%8zX: %8zX %5zX ", i, hindex, PSL);
     for(unsigned i=(sizeof(ENTRY_HASH_TYPE)*CHAR_BIT);i;i-=4)
       printf("%01X",(unsigned)((h>>(i-4))&0xF));
