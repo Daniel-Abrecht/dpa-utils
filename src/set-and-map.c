@@ -64,6 +64,7 @@ static size_t count_to_lbsize(size_t n){
 #define REMOVE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove_sub)
 #define HASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _hash_sub)
 #define UNHASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _unhash_sub)
+#define GROW DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _grow_sub)
 
 ////////////////////////////////////////////////////////////
 
@@ -128,8 +129,8 @@ dpa_u_unsequenced static inline DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TY
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 static struct lookup_result LOOKUP(
-  const DPA__U_SM_TYPE* that,
-  DPA__U_SM_KEY_ENTRY_TYPE key,
+  const DPA__U_SM_TYPE*restrict const that,
+  const DPA__U_SM_KEY_ENTRY_TYPE key,
   const size_t lbsize
 ){
   const size_t mask = (((size_t)1)<<lbsize)-1;
@@ -175,7 +176,7 @@ static struct lookup_result LOOKUP(
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 // This subroutine is used after an existing value was already found, so we have the index of where to insert it.
 static void INSERT(
-  DPA__U_SM_TYPE* that,
+  DPA__U_SM_TYPE*restrict const that,
   DPA__U_SM_KEY_ENTRY_TYPE key,
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   void* value,
@@ -228,7 +229,7 @@ static void INSERT(
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 // This subroutine is used after an existing value was already found, so we have the index of the entry to be removed already.
 static void REMOVE(
-  DPA__U_SM_TYPE* that,
+  DPA__U_SM_TYPE*restrict const that,
   const size_t index,
   const size_t lbsize // Always a power of 2
 ){
@@ -244,6 +245,72 @@ static void REMOVE(
     that->key_list[i] = that->key_list[j];
     i = j;
   } while(i != index);
+}
+#endif
+
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+static void GROW(
+  DPA__U_SM_TYPE*restrict const that,
+  DPA__U_SM_KEY_ENTRY_TYPE*restrict const key_list
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  ,void**restrict const value_list
+#endif
+){
+  const size_t olbsize=that->lbsize;
+  const size_t lbsize=olbsize+1;
+  const int s = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT - lbsize;
+  size_t i, n;
+  for(i=0,n=(((size_t)1)<<olbsize)*sizeof(*that->key_list); i<n; i++)
+    if(i == (size_t)((ENTRY_HASH_TYPE)(KEY_ENTRY_HASH(that->key_list[i])+(((ENTRY_HASH_TYPE)1)<<(s+1))) >> (s+1)))
+      break;
+#ifdef DPA_U_DEBUG
+  if(i >= n)
+    dpa_u_abort("Bad state: %s\n", "No entry with PSL 0 found!");
+#endif
+  const size_t m2 = (((size_t)1)<<lbsize)-1;
+  const size_t m1 = m2>>1;
+  size_t j=i, k=(i*2-1) & m2;
+#ifdef DPA_U_DEBUG
+  size_t si = 0;
+#endif
+  do {
+    const size_t hk = KEY_ENTRY_HASH(that->key_list[j]) >> s;
+    const size_t psl = (j-(hk>>1)-1) & m1;
+    for(size_t l=(hk-k+1)&m2; l--; k=(k+1)&m2)
+      key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
+    if(psl == m1){
+      j = (j+1) & m1;
+      if(j == i) break;
+#ifdef DPA_U_DEBUG
+      si++;
+#endif
+    }
+    for(size_t l=1; ((k - ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 1)) & m2) < l; l++){
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      value_list[k] = that->value_list[j];
+#endif
+      key_list[k] = that->key_list[j];
+      k = (k+1) & m2;
+      j = (j+1) & m1;
+      if(j == i) break;
+#ifdef DPA_U_DEBUG
+      si++;
+#endif
+    }
+#ifdef DPA_U_DEBUG
+    if(si > m1+1)
+      dpa_u_abort("Error: %s", "Resize loop did not terminate!");
+#endif
+  } while(i != j);
+  for(const size_t hk = ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 1) & m2; k!=hk; k=(k+1)&m2)
+    key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
+  that->lbsize = lbsize;
+  free(that->key_list);
+  that->key_list = key_list;
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  free(that->value_list);
+  that->value_list = value_list;
+#endif
 }
 #endif
 
@@ -288,7 +355,6 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
 #endif
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-// lt:;
   struct lookup_result result = LOOKUP(that, entry, olbsize);
   if(result.found){
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -303,7 +369,7 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
   that->count += 1;
 #ifndef DPA__U_SM_NO_BITSET
   const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD;
-  if(that->count >= lobst){
+  if(dpa_u_unlikely(that->count >= lobst)){
     dpa_u_bitmap_entry_t*const restrict bitmask = calloc((((size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT)) + (sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT-1)) / (sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT), sizeof(dpa_u_bitmap_entry_t));
     if(!bitmask){
       that->count -= 1;
@@ -344,7 +410,7 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
     void**restrict value_list = 0;
 #endif
-    if(lbsize > olbsize || !that->key_list){
+    if(dpa_u_unlikely(lbsize > olbsize || !that->key_list)){
       key_list = malloc((((size_t)1)<<lbsize)*sizeof(*key_list));
       if(!key_list){
         that->count -= 1;
@@ -374,60 +440,12 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
     INSERT(that, entry, *value, result.index, olbsize);
     *value = 0;
 #endif
-    if(lbsize > olbsize){
-      that->lbsize = lbsize;
-      size_t i, n;
-      for(i=0,n=(((size_t)1)<<olbsize)*sizeof(*that->key_list); i<n; i++)
-        if(i == (size_t)((ENTRY_HASH_TYPE)(KEY_ENTRY_HASH(that->key_list[i])+(((ENTRY_HASH_TYPE)1)<<(s+1))) >> (s+1)))
-          break;
-#ifdef DPA_U_DEBUG
-      if(i >= n)
-        dpa_u_abort("Bad state: %s\n", "No entry with PSL 0 found!");
+    if(dpa_u_unlikely(lbsize > olbsize))
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+      GROW(that, key_list);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      GROW(that, key_list, value_list);
 #endif
-      const size_t m2 = (((size_t)1)<<lbsize)-1;
-      const size_t m1 = m2>>1;
-      size_t j=i, k=(i*2-1) & m2;
-#ifdef DPA_U_DEBUG
-      size_t si = 0;
-#endif
-      do {
-        const size_t hk = KEY_ENTRY_HASH(that->key_list[j]) >> s;
-        const size_t psl = (j-(hk>>1)-1) & m1;
-        for(size_t l=(hk-k+1)&m2; l--; k=(k+1)&m2)
-          key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
-        if(psl == m1){
-          j = (j+1) & m1;
-          if(j == i) break;
-#ifdef DPA_U_DEBUG
-          si++;
-#endif
-        }
-        for(size_t l=1; ((k - ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 1)) & m2) < l; l++){
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-          value_list[k] = that->value_list[j];
-#endif
-          key_list[k] = that->key_list[j];
-          k = (k+1) & m2;
-          j = (j+1) & m1;
-          if(j == i) break;
-#ifdef DPA_U_DEBUG
-          si++;
-#endif
-        }
-#ifdef DPA_U_DEBUG
-        if(si > m1+1)
-          dpa_u_abort("Error: %s", "Resize loop did not terminate!");
-#endif
-      } while(i != j);
-      for(const size_t hk = ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 1) & m2; k!=hk; k=(k+1)&m2)
-        key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
-      free(that->key_list);
-      that->key_list = key_list;
-  #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-      free(that->value_list);
-      that->value_list = value_list;
-  #endif
-    }
   }
 #endif
   return false;
