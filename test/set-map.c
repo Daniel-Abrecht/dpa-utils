@@ -97,7 +97,7 @@ DPA_U_TEST_MAIN
 
 #define GET_RAND_ENTRY DPA_U_CONCAT_E(DPA__U_SM_PREFIX, __get_rand)
 
-//////////////////////////////////////////////
+///////////////////////////////////////////
 
 #define DPA__U_SM_TEMPLATE <test/set-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_SET
@@ -107,21 +107,15 @@ DPA_U_TEST_MAIN
 #define DPA__U_SM_KIND DPA__U_SM_KIND_MAP
 #include <dpa/utils/_set-and-map.generator>
 
+///////////////////////////////////////////
+
 #else
 //////////////////////////
 //// Template section ////
 //////////////////////////
 
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
-#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, set_), DPA__U_SM_NAME)
-#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, map_), DPA__U_SM_NAME)
-#endif
-#define DPA__U_SM_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _t)
 #undef DPA_U_TESTCASE_SUFFIX
 #define DPA_U_TESTCASE_SUFFIX DPA_U_CONCAT_E(DPA__U_SM_PREFIX, __LINE__)
-
-//////////////////////////////////////////////
 
 #ifndef DPA__U_SM_BO
 bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
@@ -244,11 +238,5 @@ error:
   DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
   return 1;
 }
-
-//////////////////////////////////////////////
-#undef DPA__U_SM_TYPE
-#undef DPA__U_SM_KEY_TYPE
-#undef DPA__U_SM_NAME
-#undef DPA__U_SM_PREFIX
 
 #endif

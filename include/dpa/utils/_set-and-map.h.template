@@ -1,26 +1,6 @@
 #include <dpa/utils/common.h>
 #include <stdbool.h>
 
-#ifndef DPA__U_SET_AND_MAP_TEMPLATE
-#define DPA__U_SET_AND_MAP_TEMPLATE
-#define DPA__U_SM_KIND_SET 1
-#define DPA__U_SM_KIND_MAP 2
-#endif
-
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
-#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, set_), DPA__U_SM_NAME)
-#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, map_), DPA__U_SM_NAME)
-#endif
-#define DPA__U_SM_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _t)
-
-#ifdef DPA__U_SM_KEY_TYPE_U
-#define DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_KEY_TYPE_U
-#else
-#define DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_KEY_TYPE
-#endif
-//////////////////////////////////////////////
-
 typedef struct DPA__U_SM_PREFIX DPA__U_SM_TYPE;
 
 #if defined(DPA__U_SM_MICRO_SET) && DPA__U_SM_KIND == DPA__U_SM_KIND_SET
@@ -112,8 +92,3 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE
 dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__U_SM_TYPE* that);
 
 //////////////////////////////////////////////
-#undef DPA__U_SM_KEY_ENTRY_TYPE
-#undef DPA__U_SM_TYPE
-#undef DPA__U_SM_KEY_TYPE
-#undef DPA__U_SM_NAME
-#undef DPA__U_SM_PREFIX

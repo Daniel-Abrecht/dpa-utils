@@ -59,6 +59,14 @@ static size_t count_to_lbsize(size_t n){
    * SET_OVERSIZE_INVERSE_FACTOR + SET_OVERSIZE_INVERSE_FACTOR \
   ) / (SET_OVERSIZE_INVERSE_FACTOR+1))
 
+#define LOOKUP DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _lookup_sub)
+#define INSERT DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _insert_sub)
+#define REMOVE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove_sub)
+#define HASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _hash_sub)
+#define UNHASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _unhash_sub)
+
+////////////////////////////////////////////////////////////
+
 #define DPA__U_SM_TEMPLATE <src/set-and-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_SET
 #include <dpa/utils/_set-and-map.generator>
@@ -67,45 +75,12 @@ static size_t count_to_lbsize(size_t n){
 #define DPA__U_SM_KIND DPA__U_SM_KIND_MAP
 #include <dpa/utils/_set-and-map.generator>
 
+////////////////////////////////////////////////////////////
+
 #else
 //////////////////////////
 //// Template section ////
 //////////////////////////
-
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
-#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, set_), DPA__U_SM_NAME)
-#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, map_), DPA__U_SM_NAME)
-#endif
-#define DPA__U_SM_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _t)
-
-#ifdef DPA__U_SM_KEY_TYPE_U
-#define DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_KEY_TYPE_U
-#else
-#define DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_KEY_TYPE
-#endif
-
-#ifdef DPA__U_SM_BO
-#define KEY_ENTRY_HASH(X) (X).hash[0]
-#define ENTRY_HASH_TYPE size_t
-#else
-#define KEY_ENTRY_HASH(X) (X)
-#define ENTRY_HASH_TYPE DPA__U_SM_KEY_ENTRY_TYPE
-#endif
-
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
-#define LIST_OR_BITMAP_SIZE_THRESHOLD LIST_OR_BITMAP_SIZE_THRESHOLD_SET(DPA__U_SM_KEY_TYPE)
-#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-#define LIST_OR_BITMAP_SIZE_THRESHOLD LIST_OR_BITMAP_SIZE_THRESHOLD_MAP(DPA__U_SM_KEY_TYPE)
-#endif
-
-//////////////////////////////////////////////
-
-#define LOOKUP DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _lookup_sub)
-#define INSERT DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _insert_sub)
-#define REMOVE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove_sub)
-#define HASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _hash_sub)
-#define UNHASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _unhash_sub)
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #define BITMAP_KEY entry
@@ -592,24 +567,6 @@ dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__
 #endif
 }
 
-
-#undef HASH
-#undef UNHASH
-
-#undef LOOKUP
-#undef INSERT
-#undef REMOVE
-
 #undef BITMAP_KEY
-
-//////////////////////////////////////////////
-#undef KEY_ENTRY_HASH
-#undef ENTRY_HASH_TYPE
-#undef LIST_OR_BITMAP_SIZE_THRESHOLD
-#undef DPA__U_SM_KEY_ENTRY_TYPE
-#undef DPA__U_SM_TYPE
-#undef DPA__U_SM_KEY_TYPE
-#undef DPA__U_SM_NAME
-#undef DPA__U_SM_PREFIX
 
 #endif
