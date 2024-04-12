@@ -46,8 +46,6 @@ struct DPA__U_SM_PREFIX {
   size_t count; // This is the number of entries stored in the set.
   unsigned char lbsize; // This is the log 2 of the number of buckets available.
   union {
-    // Note: The key entrys value for empty entries is key=index+1, as that will result in the highest calculatable PSL.
-    // Because the set can never be full, that PSL (Probe Sequence Length) can never be reached by any entry.
     // The key entry is a reversible hash of the original key. This way, the hash does not need to be recalculated,
     // even without storing the key and it's hash.
     DPA__U_SM_KEY_ENTRY_TYPE*restrict key_list;
