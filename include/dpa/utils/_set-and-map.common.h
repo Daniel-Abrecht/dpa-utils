@@ -29,8 +29,10 @@
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 #define LIST_OR_BITMAP_SIZE_THRESHOLD LIST_OR_BITMAP_SIZE_THRESHOLD_SET(DPA__U_SM_KEY_TYPE)
+#define IF_MAP(...)
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #define LIST_OR_BITMAP_SIZE_THRESHOLD LIST_OR_BITMAP_SIZE_THRESHOLD_MAP(DPA__U_SM_KEY_TYPE)
+#define IF_MAP(...) __VA_ARGS__
 #endif
 
 ///////////////////////////////////////////
@@ -47,6 +49,7 @@
 
 #undef KEY_ENTRY_HASH
 #undef ENTRY_HASH_TYPE
+#undef IF_MAP
 #undef LIST_OR_BITMAP_SIZE_THRESHOLD
 
 #ifdef DPA__U_SM_NO_BITSET

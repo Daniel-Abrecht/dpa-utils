@@ -65,6 +65,7 @@ static size_t count_to_lbsize(size_t n){
 #define HASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _hash_sub)
 #define UNHASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _unhash_sub)
 #define GROW DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _grow_sub)
+#define ALLOCATE_HMS DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _allocate_hms_sub)
 
 ////////////////////////////////////////////////////////////
 
@@ -178,9 +179,7 @@ static struct lookup_result LOOKUP(
 static void INSERT(
   DPA__U_SM_TYPE*restrict const that,
   DPA__U_SM_KEY_ENTRY_TYPE key,
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  void* value,
-#endif
+  IF_MAP(void* value,)
   size_t i,
   const size_t lbsize
 ){
@@ -249,19 +248,55 @@ static void REMOVE(
 #endif
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-static void GROW(
+static bool ALLOCATE_HMS(
   DPA__U_SM_TYPE*restrict const that,
-  DPA__U_SM_KEY_ENTRY_TYPE*restrict const key_list
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  ,void**restrict const value_list
-#endif
+  const size_t lbsize,
+  bool init // If GROW() is used to populate the set, it'll fill in the empty keys too, no need to initialize it.
 ){
-  const size_t olbsize=that->lbsize;
-  const size_t lbsize=olbsize+1;
+  DPA__U_SM_KEY_ENTRY_TYPE*const key_list = malloc((((size_t)1)<<lbsize)*sizeof(*key_list));
+  if(!key_list) return false;
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  void**const value_list = malloc((((size_t)1)<<lbsize)*sizeof(*value_list));
+  if(!value_list){
+    free(key_list);
+    return false;
+  }
+#endif
+  if(init){
+    const int s = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT - lbsize;
+    for(size_t i=0,n=((size_t)1)<<lbsize; i<n; i++)
+      key_list[i] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)i<<s};
+  }
+  that->key_list = key_list;
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  that->value_list = value_list;
+#endif
+  that->lbsize = lbsize;
+  that->count = 0;
+  return true;
+}
+#endif
+
+
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+static void GROW(
+  DPA__U_SM_TYPE*restrict const old,
+  DPA__U_SM_TYPE*restrict const new
+){
+  DPA__U_SM_KEY_ENTRY_TYPE*restrict const old_key_list = old->key_list;
+  DPA__U_SM_KEY_ENTRY_TYPE*restrict const new_key_list = new->key_list;
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  void**restrict const old_value_list = old->value_list;
+  void**restrict const new_value_list = new->value_list;
+#endif
+  const size_t olbsize = old->lbsize;
+  const size_t lbsize = new->lbsize;
+  // Arbitrary growth may be implement in the future, currently only supports growing by 1 lbsize.
+  assert(olbsize+1 == lbsize);
   const int s = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT - lbsize;
   size_t i, n;
-  for(i=0,n=(((size_t)1)<<olbsize)*sizeof(*that->key_list); i<n; i++)
-    if(i == (size_t)((ENTRY_HASH_TYPE)(KEY_ENTRY_HASH(that->key_list[i])+(((ENTRY_HASH_TYPE)1)<<(s+1))) >> (s+1)))
+  for(i=0,n=(((size_t)1)<<olbsize)*sizeof(*old_key_list); i<n; i++)
+    if(i == (size_t)((ENTRY_HASH_TYPE)(KEY_ENTRY_HASH(old_key_list[i])+(((ENTRY_HASH_TYPE)1)<<(s+1))) >> (s+1)))
       break;
 #ifdef DPA_U_DEBUG
   if(i >= n)
@@ -274,10 +309,10 @@ static void GROW(
   size_t si = 0;
 #endif
   do {
-    const size_t hk = KEY_ENTRY_HASH(that->key_list[j]) >> s;
+    const size_t hk = KEY_ENTRY_HASH(old_key_list[j]) >> s;
     const size_t psl = (j-(hk>>1)-1) & m1;
     for(size_t l=(hk-k+1)&m2; l--; k=(k+1)&m2)
-      key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
+      new_key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
     if(psl == m1){
       j = (j+1) & m1;
       if(j == i) break;
@@ -285,11 +320,11 @@ static void GROW(
       si++;
 #endif
     }
-    for(size_t l=1; ((k - ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 1)) & m2) < l; l++){
+    for(size_t l=1; ((k - ((KEY_ENTRY_HASH(old_key_list[j]) >> s) + 1)) & m2) < l; l++){
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-      value_list[k] = that->value_list[j];
+      new_value_list[k] = old_value_list[j];
 #endif
-      key_list[k] = that->key_list[j];
+      new_key_list[k] = old_key_list[j];
       k = (k+1) & m2;
       j = (j+1) & m1;
       if(j == i) break;
@@ -302,15 +337,8 @@ static void GROW(
       dpa_u_abort("Error: %s", "Resize loop did not terminate!");
 #endif
   } while(i != j);
-  for(const size_t hk = ((KEY_ENTRY_HASH(that->key_list[j]) >> s) + 1) & m2; k!=hk; k=(k+1)&m2)
-    key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
-  that->lbsize = lbsize;
-  free(that->key_list);
-  that->key_list = key_list;
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  free(that->value_list);
-  that->value_list = value_list;
-#endif
+  for(const size_t hk = ((KEY_ENTRY_HASH(old_key_list[j]) >> s) + 1) & m2; k!=hk; k=(k+1)&m2)
+    new_key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
 }
 #endif
 
@@ -404,48 +432,27 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
   }
 #endif
   const size_t lbsize = count_to_lbsize(that->count);
-  const int s = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT - lbsize;
   {
-    DPA__U_SM_KEY_ENTRY_TYPE*restrict key_list = 0;
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    void**restrict value_list = 0;
-#endif
+    DPA__U_SM_TYPE new;
     if(dpa_u_unlikely(lbsize > olbsize || !that->key_list)){
-      key_list = malloc((((size_t)1)<<lbsize)*sizeof(*key_list));
-      if(!key_list){
-        that->count -= 1;
+      if(!ALLOCATE_HMS(lbsize == olbsize ? that : &new, lbsize, lbsize == olbsize)){
+        that->count--;
         return -1;
       }
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-      value_list = malloc((((size_t)1)<<lbsize)*sizeof(*that->value_list));
-      if(!value_list){
-        free(key_list);
-        that->count -= 1;
-        return -1;
-      }
-#endif
-      if(!that->key_list){
-        for(size_t i=0,n=((size_t)1)<<lbsize; i<n; i++)
-          key_list[i] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)i<<s};
-        that->lbsize = lbsize;
-        that->key_list = key_list;
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-        that->value_list = value_list;
-#endif
-      }
+      new.count = that->count;
     }
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
-    INSERT(that, entry, result.index, olbsize);
-#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    INSERT(that, entry, *value, result.index, olbsize);
+    INSERT(that, entry, IF_MAP(*value,) result.index, olbsize);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
     *value = 0;
 #endif
-    if(dpa_u_unlikely(lbsize > olbsize))
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
-      GROW(that, key_list);
-#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-      GROW(that, key_list, value_list);
+    if(dpa_u_unlikely(lbsize > olbsize)){
+      GROW(that, &new);
+      free(that->key_list);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      free(that->value_list);
 #endif
+      *that = new;
+    }
   }
 #endif
   return false;
