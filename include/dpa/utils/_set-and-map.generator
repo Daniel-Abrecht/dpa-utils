@@ -58,7 +58,7 @@
 
 #define DPA__U_SM_NO_BITSET
 #define DPA__U_SM_KEY_TYPE size_t
-#define DPA__U_SM_NAME size_t
+#define DPA__U_SM_NAME z
 #include DPA__U_SM_TEMPLATE
 #undef DPA__U_SM_NO_BITSET
 

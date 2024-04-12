@@ -55,7 +55,7 @@ static size_t count_to_lbsize(size_t n){
    * SET_OVERSIZE_INVERSE_FACTOR + SET_OVERSIZE_INVERSE_FACTOR \
   ) / (SET_OVERSIZE_INVERSE_FACTOR+1))
 #define LIST_OR_BITMAP_SIZE_THRESHOLD_MAP(T) (( \
-     (1ull<<DPA_U_CONSTEXPR_LOG2(EXPECTED_BITMAP_SIZE(T) * (1 + sizeof(void*)*CHAR_BIT) / (sizeof(T) + sizeof(void*)) / 2 )) \
+     (1ull<<DPA_U_CONSTEXPR_LOG2(EXPECTED_BITMAP_SIZE(T) / 2 * (1 + sizeof(void*)*CHAR_BIT) / (sizeof(T) + sizeof(void*)) )) \
    * SET_OVERSIZE_INVERSE_FACTOR + SET_OVERSIZE_INVERSE_FACTOR \
   ) / (SET_OVERSIZE_INVERSE_FACTOR+1))
 
@@ -114,7 +114,7 @@ static size_t count_to_lbsize(size_t n){
 #endif
 
 #ifndef DPA__U_SM_BO
-dpa_u_unsequenced DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE x){
+dpa_u_unsequenced static inline DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE x){
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"
   // return ((DPA__U_SM_KEY_ENTRY_TYPE)x);
@@ -123,7 +123,7 @@ dpa_u_unsequenced DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE x){
 }
 
 // We don't need this yet, but we may need it if we add things like iterating over the keys in a set.
-dpa_u_unsequenced DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE x){
+dpa_u_unsequenced static inline DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE x){
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"
   // return ((DPA__U_SM_KEY_TYPE)x);
@@ -131,24 +131,24 @@ dpa_u_unsequenced DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE x){
 #pragma GCC diagnostic pop
 }
 #else
-dpa_u_unsequenced DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE n){
+dpa_u_unsequenced static inline DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE n){
   DPA__U_SM_KEY_ENTRY_TYPE e;
   memcpy(e.hash, n.all.all, sizeof(n));
   for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; )
-    e.hash[i] = fh ^= dpa_u_set_size_t_hash_sub(e.hash[i]);
+    e.hash[i] = fh ^= dpa_u_set_z_hash_sub(e.hash[i]);
   return e;
 }
-/*
-dpa_u_unsequenced DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
+
+dpa_u_unsequenced static inline DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
   for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; ){
     size_t hash = e.hash[i];
-    e.hash[i] = dpa_u_size_t_set_unhash_sub(hash ^ fh);
+    e.hash[i] = dpa_u_set_z_unhash_sub(hash ^ fh);
     fh = hash;
   }
   DPA__U_SM_KEY_TYPE r;
   memcpy(r.all.all, e.hash, sizeof(r));
   return r;
-}*/
+}
 #endif
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
