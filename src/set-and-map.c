@@ -233,13 +233,14 @@ static void REMOVE(
   const size_t index,
   const size_t lbsize // Always a power of 2
 ){
+  const int shift = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize;
   const size_t mask = (((size_t)1)<<lbsize)-1;
   size_t i = index;
   do {
     size_t j = (i+1) & mask;
     // If the PSL is 0 (entry present, optimal position) or -1 (no entry), we are done.
-    if((((KEY_ENTRY_HASH(that->key_list[j])>>(sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize))+1-j) & mask) <= 1){
-      KEY_ENTRY_HASH(that->key_list[i]) = j<<(sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize);
+    if(((j-(KEY_ENTRY_HASH(that->key_list[j])>>shift)) & mask) <= 1){
+      KEY_ENTRY_HASH(that->key_list[i]) = i<<shift;
       return;
     }
     that->key_list[i] = that->key_list[j];

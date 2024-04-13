@@ -239,4 +239,163 @@ error:
   return 1;
 }
 
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add twice")){
+  DPA__U_SM_TYPE container = {0};
+  size_t j=0;
+  for(size_t i=0; i<16; i++,j++){
+    DPA__U_SM_KEY_TYPE key;
+    if(!GET_RAND_ENTRY(&key, i)){
+      fprintf(stderr, "Error 1: not enough test entries\n");
+      return false;
+    }
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (void*)j);
+  #endif
+    if(result < 0){
+      fprintf(stderr, "Error 2: Failed to add entry %zu\n", i);
+      goto error;
+    }
+    if(result){
+      fprintf(stderr, "Error 3: Entry %zu was already present, but was never added\n", i);
+      goto error;
+    }
+    if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
+      fprintf(stderr, "Error 4: Prevously added entry %zu not found\n", i);
+      goto error;
+    }
+  }
+  for(size_t i=0; i<16; i++){
+    DPA__U_SM_KEY_TYPE key;
+    if(!GET_RAND_ENTRY(&key, i)){
+      fprintf(stderr, "Error 5: not enough test entries\n");
+      return false;
+    }
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (void*)(i+j));
+  #endif
+    if(result < 0){
+      fprintf(stderr, "Error 6: Failed to add entry %zu\n", i);
+      goto error;
+    }
+    if(!result){
+      fprintf(stderr, "Error 7: Entry %zu should have been already present, but wasn't\n", i);
+      goto error;
+    }
+    if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
+      fprintf(stderr, "Error 8: Prevously added entry %zu not found\n", i);
+      goto error;
+    }
+  }
+  for(size_t i=0; i<16; i++){
+    DPA__U_SM_KEY_TYPE key;
+    if(!GET_RAND_ENTRY(&key, i)){
+      fprintf(stderr, "Error 9: not enough test entries\n");
+      return false;
+    }
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    void* value = (void*)-1;
+    if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key, &value)){
+      fprintf(stderr, "Error 10: failed to get entry %zu, but check if it exists did succeed\n", i);
+      goto error;
+    }
+    if((size_t)value != i+j){
+      fprintf(stderr, "Error 11: value retrieved from entry %zu is wrong: %zu\n", i, (size_t)value);
+      goto error;
+    }
+#endif
+  }
+  // DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(&container); // This is only for debugging
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  // DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(&container); // This is only for debugging
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "exchange value")){
+  DPA__U_SM_TYPE container = {0};
+  size_t j=0;
+  for(size_t i=0; i<16; i++,j++){
+    DPA__U_SM_KEY_TYPE key;
+    if(!GET_RAND_ENTRY(&key, i)){
+      fprintf(stderr, "Error 1: not enough test entries\n");
+      return false;
+    }
+    void* p = (void*)j;
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(&container, key, &p);
+    if(result < 0){
+      fprintf(stderr, "Error 2: Failed to add entry %zu\n", i);
+      goto error;
+    }
+    if(result){
+      fprintf(stderr, "Error 3: Entry %zu was already present, but was never added\n", i);
+      goto error;
+    }
+    if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
+      fprintf(stderr, "Error 4: Prevously added entry %zu not found\n", i);
+      goto error;
+    }
+    if(p != (void*)j){
+      fprintf(stderr, "Error 5: return parameter was modified\n");
+      goto error;
+    }
+  }
+  for(size_t i=0; i<16; i++){
+    DPA__U_SM_KEY_TYPE key;
+    if(!GET_RAND_ENTRY(&key, i)){
+      fprintf(stderr, "Error 6: not enough test entries\n");
+      return false;
+    }
+    void* p = (void*)(i+j);
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(&container, key, &p);
+    if(result < 0){
+      fprintf(stderr, "Error 7: Failed to add entry %zu\n", i);
+      goto error;
+    }
+    if(!result){
+      fprintf(stderr, "Error 8: Entry %zu should have been already present, but wasn't\n", i);
+      goto error;
+    }
+    if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
+      fprintf(stderr, "Error 9: Prevously added entry %zu not found\n", i);
+      goto error;
+    }
+    if(p != (void*)i){
+      fprintf(stderr, "Error 10: wrong value was returned\n");
+      goto error;
+    }
+  }
+  for(size_t i=0; i<16; i++){
+    DPA__U_SM_KEY_TYPE key;
+    if(!GET_RAND_ENTRY(&key, i)){
+      fprintf(stderr, "Error 11: not enough test entries\n");
+      return false;
+    }
+    void* value = (void*)-1;
+    if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key, &value)){
+      fprintf(stderr, "Error 12: failed to get entry %zu, but check if it exists did succeed\n", i);
+      goto error;
+    }
+    if((size_t)value != i+j){
+      fprintf(stderr, "Error 13: value retrieved from entry %zu is wrong: %zu\n", i, (size_t)value);
+      goto error;
+    }
+  }
+  // DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(&container); // This is only for debugging
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  // DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(&container); // This is only for debugging
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+#endif
+
 #endif

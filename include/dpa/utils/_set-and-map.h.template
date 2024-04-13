@@ -46,6 +46,7 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(DPA__U_SM_TYPE* that, DPA_
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 /**
  * Sets an entry in the map and returns the existing one if one exists.
+ * If there was none, the variable will remain unchanged.
  * \returns 1 if an existing entry was overwritten, 0 if not, -1 on error.
  */
 dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** value);
