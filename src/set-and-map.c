@@ -38,7 +38,7 @@ struct lookup_result {
 
 // TODO: Make these parameters changable using the config
 // TODO: Handle MIN_SIZE >= EXPECTED_BITMAP_SIZE
-// TODO: A too low SET_OVERSIZE_INVERSE_FACTOR may allow a small set to fully fill up, make sure there is always at least 2 free.
+// TODO: A too low MIN_LBSIZE or SET_OVERSIZE_INVERSE_FACTOR may allow a small set to fully fill up, make sure there is always at least 2 free.
 
 // Ensure there is some free space left 100/8 = 12.5%
 #define SET_OVERSIZE_INVERSE_FACTOR 8
