@@ -36,6 +36,10 @@ struct lookup_result {
   bool found;
 };
 
+// TODO: Make these parameters changable using the config
+// TODO: Handle MIN_SIZE >= EXPECTED_BITMAP_SIZE
+// TODO: A too low SET_OVERSIZE_INVERSE_FACTOR may allow a small set to fully fill up, make sure there is always at least 2 free.
+
 // Ensure there is some free space left 100/8 = 12.5%
 #define SET_OVERSIZE_INVERSE_FACTOR 8
 /* At any point, 1 entry needs to be free for this to work. Or is it 2? Anyways, this ensures there will be enough. */
@@ -537,7 +541,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
     that->count -= 1;
     if(that->count >= lobst)
       return r;
-    // TODO: Convert to list
+    dpa_u_abort("TODO: %s", "Convert to list");
   }
 #else
   return r;

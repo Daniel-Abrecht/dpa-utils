@@ -398,4 +398,40 @@ error:
 }
 #endif
 
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "remove")){
+  DPA__U_SM_TYPE container = {0};
+  DPA__U_SM_KEY_TYPE key;
+  for(size_t i=0; GET_RAND_ENTRY(&key, i); i++){
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (void*)i);
+  #endif
+    if(result < 0){
+      fprintf(stderr, "Error 1: Failed to add entry %zu\n", i);
+      goto error;
+    }
+  }
+  for(size_t i=0; GET_RAND_ENTRY(&key, i); i++){
+    if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
+      fprintf(stderr, "Error 2: Prevously added entry %zu not found\n", i);
+      goto error;
+    }
+    if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(&container, key)){
+      fprintf(stderr, "Error 3: Failed to remove entry %zu!\n", i);
+      goto error;
+    }
+    if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(&container, key)){
+      fprintf(stderr, "Error 4: Entry %zu still present\n", i);
+      goto error;
+    }
+  }
+  // TODO: Check item count is 0 again
+  return 0;
+error:
+  // DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(&container); // This is only for debugging
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
 #endif
