@@ -69,6 +69,7 @@ static size_t count_to_lbsize(size_t n){
 #define HASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _hash_sub)
 #define UNHASH DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _unhash_sub)
 #define GROW DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _grow_sub)
+#define SHRINK DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _shrink_sub)
 #define ALLOCATE_HMS DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _allocate_hms_sub)
 #define CONVERT_TO_BITFIELD DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _convert_to_bitfield_sub)
 #define CONVERT_TO_LIST DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _convert_to_list_sub)
@@ -437,6 +438,13 @@ static void CONVERT_TO_LIST(DPA__U_SM_TYPE*const restrict that){
 }
 #endif
 
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+static void SHRINK(DPA__U_SM_TYPE*const restrict that){
+  int lbsize = count_to_lbsize(that->count)+1;
+  (void)lbsize; // TODO
+}
+#endif
+
 dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(DPA__U_SM_TYPE* that){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   free(that->key_list);
@@ -609,6 +617,9 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
 #endif
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  const int lbsize = count_to_lbsize(that->count);
+  if(that->lbsize-lbsize >= 2)
+    SHRINK(that);
   struct lookup_result result = LOOKUP(that, entry, that->lbsize);
   if(!result.found)
     return false;
