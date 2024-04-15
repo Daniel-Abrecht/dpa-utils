@@ -388,7 +388,8 @@ static bool CONVERT_TO_BITFIELD(DPA__U_SM_TYPE*restrict const that){
 #if !defined(DPA__U_SM_NO_BITSET) && (!defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP)
 static void CONVERT_TO_LIST(DPA__U_SM_TYPE*const restrict that){
   // TODO
-  int lbsize = count_to_lbsize(that->count);
+  // +1 means it's twice as big as it needs to be. But it also means adding an entry won't expand it immediately.
+  int lbsize = count_to_lbsize(that->count)+1;
   const size_t mask = (((size_t)1)<<lbsize)-1;
   const int shift = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize;
   DPA__U_SM_TYPE new;
