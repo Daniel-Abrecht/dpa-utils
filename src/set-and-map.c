@@ -71,6 +71,7 @@ static size_t count_to_lbsize(size_t n){
 #define GROW DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _grow_sub)
 #define ALLOCATE_HMS DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _allocate_hms_sub)
 #define CONVERT_TO_BITFIELD DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _convert_to_bitfield_sub)
+#define CONVERT_TO_LIST DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _convert_to_list_sub)
 
 ////////////////////////////////////////////////////////////
 
@@ -244,10 +245,13 @@ static void REMOVE(
     size_t j = (i+1) & mask;
     // If the PSL is 0 (entry present, optimal position) or -1 (no entry), we are done.
     if(((j-(KEY_ENTRY_HASH(that->key_list[j])>>shift)) & mask) <= 1){
-      KEY_ENTRY_HASH(that->key_list[i]) = i<<shift;
+      KEY_ENTRY_HASH(that->key_list[i]) = (ENTRY_HASH_TYPE)i<<shift;
       return;
     }
     that->key_list[i] = that->key_list[j];
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    that->value_list[i] = that->value_list[j];
+#endif
     i = j;
   } while(i != index);
 }
@@ -278,7 +282,6 @@ static bool ALLOCATE_HMS(
   that->value_list = value_list;
 #endif
   that->lbsize = lbsize;
-  that->count = 0;
   return true;
 }
 #endif
@@ -382,6 +385,57 @@ static bool CONVERT_TO_BITFIELD(DPA__U_SM_TYPE*restrict const that){
 }
 #endif
 
+#if !defined(DPA__U_SM_NO_BITSET) && (!defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP)
+static void CONVERT_TO_LIST(DPA__U_SM_TYPE*const restrict that){
+  // TODO
+  int lbsize = count_to_lbsize(that->count);
+  const size_t mask = (((size_t)1)<<lbsize)-1;
+  const int shift = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize;
+  DPA__U_SM_TYPE new;
+  if(!ALLOCATE_HMS(&new, lbsize, false)){
+    // TODO: log warning
+    return;
+  }
+  new.count = that->count;
+  size_t j=0;
+  ENTRY_HASH_TYPE i=0;
+  // Add all the entries
+  do {
+    if( that->bitmask[DPA__U_SM_BITMAP_OFFSET(i)] & DPA__U_SM_BITMAP_BIT(i) ){
+      j = (j+1) & mask;
+      new.key_list[j] = i;
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      new.value_list[j] = that->value_list[i];
+#endif
+    }else{
+      if((j<<shift)+((1<<shift)-1) == i){
+        j = (j+1) & mask;
+        new.key_list[j] = j<<shift;
+      }
+    }
+  } while((i=i+1));
+  size_t k=0;
+  // j may have overflowed, we need to re-add / move the following entries.
+  do {
+    k += 1;
+    if((j<<shift)+((1<<shift)-1) == i)
+      break; // Empty or same entry, nothing to move anymore, we are done.
+    if(!( that->bitmask[DPA__U_SM_BITMAP_OFFSET(i)] & DPA__U_SM_BITMAP_BIT(i) ))
+      continue;
+    j = (j+1) & mask;
+    new.key_list[j] = i;
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    new.value_list[j] = that->value_list[i];
+#endif
+  } while((i=i+1));
+  free(that->bitmask);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  free(that->value_list);
+#endif
+  *that = new;
+}
+#endif
+
 dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(DPA__U_SM_TYPE* that){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   free(that->key_list);
@@ -411,6 +465,7 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
     }
     *o = *value;
     *m |= s;
+    that->count++;
     return false;
   }
 #endif
@@ -422,13 +477,12 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that,
     *value = v;
     return true;
   }
-  that->count += 1;
+  that->count++;
 #ifndef DPA__U_SM_NO_BITSET
   if(dpa_u_unlikely(that->count >= LIST_OR_BITMAP_SIZE_THRESHOLD)){
-    if(!CONVERT_TO_BITFIELD(that)){
-      that->count -= 1;
+    that->count--;
+    if(!CONVERT_TO_BITFIELD(that))
       return -1;
-    }
     goto insert_bitfield;
   }
 #endif
@@ -474,6 +528,9 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE* that, DPA_
     const dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(BITMAP_KEY);
     const bool r = *m & s;
     *m |= s;
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    if(!r) that->count++;
+#endif
     return r;
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   }
@@ -488,13 +545,12 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE* that, DPA_
     return true;
   }
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  that->count += 1;
+  that->count++;
 #ifndef DPA__U_SM_NO_BITSET
   if(dpa_u_unlikely(that->count >= LIST_OR_BITMAP_SIZE_THRESHOLD)){
-    if(!CONVERT_TO_BITFIELD(that)){
-      that->count -= 1;
+    that->count--;
+    if(!CONVERT_TO_BITFIELD(that))
       return -1;
-    }
     goto insert_bitfield;
   }
 #endif
@@ -526,6 +582,8 @@ dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE* that, DPA_
 
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  if(!that->count)
+    return false;
   const DPA__U_SM_KEY_ENTRY_TYPE entry = HASH(key);
 #endif
 #ifndef DPA__U_SM_NO_BITSET
@@ -540,9 +598,9 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
     that->value_list[BITMAP_KEY] = 0;
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    that->count -= 1;
+    if(r) that->count--;
     if(that->count < LIST_OR_BITMAP_SIZE_THRESHOLD/2)
-      {} // TODO: Convert to list
+      CONVERT_TO_LIST(that);
     return r;
   }
 #else
@@ -550,17 +608,20 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
 #endif
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  const size_t lbsize = count_to_lbsize(that->count);
-  struct lookup_result result = LOOKUP(that, entry, lbsize);
+  struct lookup_result result = LOOKUP(that, entry, that->lbsize);
   if(!result.found)
     return false;
-  REMOVE(that, result.index, lbsize);
-#endif
+  REMOVE(that, result.index, that->lbsize);
+  if(dpa_u_unlikely(!--that->count))
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(that);
   return true;
+#endif
 }
 
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  if(!that->count)
+    return false;
   const DPA__U_SM_KEY_ENTRY_TYPE entry = HASH(key);
 #endif
 #ifndef DPA__U_SM_NO_BITSET
@@ -578,25 +639,29 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE* tha
 }
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** value){
+dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key){
+  if(!that->count)
+    return (dpa_u_optional_pointer_t){0};
   const DPA__U_SM_KEY_ENTRY_TYPE entry = HASH(key);
 #ifndef DPA__U_SM_NO_BITSET
   if(that->lbsize == sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT){
     const dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(BITMAP_KEY)];
     dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(BITMAP_KEY);
     if(!(*m&s))
-      return false;
-    *value = that->value_list[BITMAP_KEY];
-    return true;
+      return (dpa_u_optional_pointer_t){0};
+    return (dpa_u_optional_pointer_t){
+      .value = that->value_list[BITMAP_KEY],
+      .present = true
+    };
   }
 #endif
   struct lookup_result result = LOOKUP(that, entry, that->lbsize);
-  if(!result.found){
-    *value = 0;
-    return false;
-  }
-  *value = that->value_list[result.index];
-  return true;
+  if(!result.found)
+    return (dpa_u_optional_pointer_t){0};
+  return (dpa_u_optional_pointer_t){
+    .value = that->value_list[result.index],
+    .present = true
+  };
 }
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** value){
 #ifndef DPA__U_SM_NO_BITSET
@@ -649,6 +714,8 @@ dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__
   }
 #endif
 }
+
+ extern size_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _count)(const DPA__U_SM_TYPE* that);
 
 #undef BITMAP_KEY
 

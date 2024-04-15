@@ -1,4 +1,5 @@
 #include <dpa/utils/common.h>
+#include <dpa/utils/math.h>
 #include <stdbool.h>
 
 typedef struct DPA__U_SM_PREFIX DPA__U_SM_TYPE;
@@ -11,7 +12,7 @@ typedef struct DPA__U_SM_PREFIX DPA__U_SM_TYPE;
 // We round up the number of entres, in case of CHAR_BIT != 8. In that case, space will be wasted, but who's ever going to use such a platform anyway?
 struct DPA__U_SM_PREFIX {
   // dpa_u_bitmap_entry_t is designed to be up to 256 bits long
-  dpa_u_bitmap_entry_t bitmask[((1lu<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT))+(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT-1))/(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT)];
+  dpa_u_bitmap_entry_t bitmask[(((size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT))+(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT-1))/(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT)];
 };
 #else
 struct DPA__U_SM_PREFIX {
@@ -67,7 +68,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
  * Checks if an entry is present.
  * \returns true if the entry was present, false otherwise.
  */
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
+dpa_u_reproducible dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
 
 /**
  * Removes all entries, frees all allocations
@@ -79,12 +80,28 @@ dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(DPA__U_SM_TYPE* that);
  * Returns an entry by setting the result pointer.
  * \returns true if the entry was found, false otherwise.
  */
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** result);
+dpa_u_reproducible dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
 /**
  * Removes and returns an entry by setting the result pointer.
  * \returns true if the entry was present, false otherwise.
  */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** result);
+#endif
+
+#if defined(DPA__U_SM_MICRO_SET) && DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+dpa_u_reproducible dpa__u_api inline
+size_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _count)(const DPA__U_SM_TYPE* that){
+  size_t n = 0;
+  const dpa_u_bitmap_entry_t*restrict const bitmask = that->bitmask;
+  for(unsigned i=0; i<(((size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT))+(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT-1))/(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT); i++)
+    n += dpa_u_count_bits(bitmask[i]);
+  return n;
+}
+#else
+dpa_u_reproducible dpa__u_really_inline dpa__u_api inline
+size_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _count)(const DPA__U_SM_TYPE* that){
+  return that->count;
+}
 #endif
 
 /**

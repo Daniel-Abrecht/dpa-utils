@@ -3,6 +3,7 @@
 
 #include <dpa/utils/common.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #define DPA_U_CONSTEXPR_LOG2(X) ( \
     (X)<=0x0000000000000001llu? 0: \
@@ -82,16 +83,18 @@ dpa_u_unsequenced dpa__u_api inline int dpa_u_log2(long long unsigned int x){
 #endif
 }
 
-dpa_u_unsequenced dpa__u_api inline int dpa_u_ctzll(long long unsigned int x){
-#if DPA__U__has_builtin(__builtin_ctzll)
-  return __builtin_ctzll(x);
+#if DPA__U__has_builtin(__builtin_ctzg)
+#define dpa_u_ctzll __builtin_ctzg
+#elif DPA__U__has_builtin(__builtin_ctzll)
+#define dpa_u_ctzll __builtin_ctzll
 #else
+dpa_u_unsequenced dpa__u_api inline int dpa_u_ctzll(long long unsigned int x){
   int i = 0;
   for(; i<64 && !(1&x); i++)
     x >>= 1;
   return i;
-#endif
 }
+#endif
 
 
 dpa_u_unsequenced dpa__u_api inline bool dpa_u_rbit_less_than_unsigned(long long unsigned x, long long unsigned y){
@@ -105,6 +108,20 @@ dpa_u_unsequenced dpa__u_api inline bool dpa_u_rbit_less_than_unsigned(long long
   return y & (1llu<<i);
 #endif
 }
+
+#if DPA__U__has_builtin(__builtin_popcountg)
+#define dpa_u_count_bits __builtin_popcountg
+#elif DPA__U__has_builtin(__builtin_popcountll)
+#define dpa_u_count_bits __builtin_popcountll
+#else
+dpa_u_unsequenced dpa__u_api inline int dpa_u_count_bits(long long unsigned int x){
+  int n = 0;
+  for(unsigned i=0; i<sizeof(x)*CHAR_BIT; i++)
+    if(x & (1llu<<i))
+      n++;
+  return n;
+}
+#endif
 
 dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline bool dpa_u_sign(long long x){
   return (x > 0) - (x < 0);

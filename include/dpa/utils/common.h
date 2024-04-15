@@ -7,6 +7,7 @@
 #include <stdnoreturn.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #ifdef DPA_U_CONFIG
 #include DPA_U_CONFIG
@@ -361,5 +362,10 @@ typedef unsigned dpa_u_bitmap_entry_t;
 #else
 #define dpa_u_debug_ct_printf(...)
 #endif
+
+typedef struct dpa_u_optional_pointer {
+  void* value;
+  bool present;
+} dpa_u_optional_pointer_t;
 
 #endif

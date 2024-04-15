@@ -36,7 +36,7 @@ ifeq ($(debug), v)
 CFLAGS += -DDPA_U_DEBUG_VERBOSE
 endif
 TYPE := debug
-CFLAGS  += -O0 -gdwarf-4 -DDPA_U_DEBUG
+CFLAGS  += -Og -gdwarf-4 -DDPA_U_DEBUG
 LDFLAGS += -gdwarf-4
 else
 CFLAGS  += -O2
