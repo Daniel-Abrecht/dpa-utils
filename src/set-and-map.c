@@ -416,10 +416,8 @@ static void CONVERT_TO_LIST(DPA__U_SM_TYPE*const restrict that){
       }
     }
   } while((i=i+1));
-  size_t k=0;
   // j may have overflowed, we need to re-add / move the following entries.
   do {
-    k += 1;
     if((j<<shift)+((1<<shift)-1) == i)
       break; // Empty or same entry, nothing to move anymore, we are done.
     if(!( that->bitmask[DPA__U_SM_BITMAP_OFFSET(i)] & DPA__U_SM_BITMAP_BIT(i) ))
@@ -441,7 +439,53 @@ static void CONVERT_TO_LIST(DPA__U_SM_TYPE*const restrict that){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 static void SHRINK(DPA__U_SM_TYPE*const restrict that){
   int lbsize = count_to_lbsize(that->count)+1;
-  (void)lbsize; // TODO
+  const int i_shift = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-that->lbsize;
+  const int j_shift = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize;
+  const ENTRY_HASH_TYPE I = (ENTRY_HASH_TYPE)1<<i_shift;
+  const ENTRY_HASH_TYPE J = (ENTRY_HASH_TYPE)1<<j_shift;
+  DPA__U_SM_TYPE new;
+  if(!ALLOCATE_HMS(&new, lbsize, false)){
+    // TODO: log warning
+    return;
+  }
+  new.count = that->count;
+  ENTRY_HASH_TYPE j=0, i=0;
+  do {
+    const size_t l = j>>j_shift;
+    const size_t k = i>>i_shift;
+    if( KEY_ENTRY_HASH(that->key_list[k]) != i ){
+      new.key_list[l] = that->key_list[k];
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      new.value_list[l] = that->value_list[k];
+#endif
+      j += J;
+    }else{
+      if(j == i){
+        new.key_list[l] = (DPA__U_SM_KEY_ENTRY_TYPE){j};
+        j += J;
+      }
+    }
+    i += I;
+  } while(i);
+  do {
+    if(j == i)
+      break; // Empty or same entry, nothing to move anymore, we are done.
+    const size_t k = i>>i_shift;
+    if( KEY_ENTRY_HASH(that->key_list[k]) != i ){
+      const size_t l = j>>j_shift;
+      new.key_list[l] = that->key_list[k];
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      new.value_list[l] = that->value_list[k];
+#endif
+      j += J;
+    }
+    i += I;
+  } while(i);
+  free(that->key_list);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  free(that->value_list);
+#endif
+  *that = new;
 }
 #endif
 
