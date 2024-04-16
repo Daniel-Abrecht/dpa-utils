@@ -719,32 +719,45 @@ dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const
     .present = true
   };
 }
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** value){
+#endif
+
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key){
+  if(!that->count)
+    return (dpa_u_optional_pointer_t){0};
+  const DPA__U_SM_KEY_ENTRY_TYPE entry = HASH(key);
 #ifndef DPA__U_SM_NO_BITSET
-  const size_t lobst = LIST_OR_BITMAP_SIZE_THRESHOLD;
-  if(that->count >= lobst){
-    dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
-    dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(key);
+  if(that->lbsize == sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT){
+    dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(BITMAP_KEY)];
+    const dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(BITMAP_KEY);
     bool r = *m & s;
+    if(!r)
+      return (dpa_u_optional_pointer_t){0};
     *m &= ~s;
-    *value = that->value_list[key];
-    that->value_list[key] = 0;
-    that->count -= 1;
-    if(that->count >= lobst)
-      return r;
-    // TODO: Convert to list
+    const dpa_u_optional_pointer_t ret = {
+      .value = that->value_list[BITMAP_KEY],
+      .present = true
+    };
+    that->value_list[BITMAP_KEY] = 0;
+    if(--that->count < LIST_OR_BITMAP_SIZE_THRESHOLD/2)
+      CONVERT_TO_LIST(that);
+    return ret;
   }
 #endif
-  DPA__U_SM_KEY_ENTRY_TYPE entry = HASH(key);
-  const size_t lbsize = count_to_lbsize(that->count);
-  struct lookup_result result = LOOKUP(that, entry, lbsize);
-  if(!result.found){
-    *value = 0;
-    return false;
-  }
-  *value = that->value_list[result.index];
-  REMOVE(that, result.index, lbsize);
-  return true;
+  const int lbsize = count_to_lbsize(that->count);
+  if(that->lbsize-lbsize >= 2)
+    SHRINK(that);
+  struct lookup_result result = LOOKUP(that, entry, that->lbsize);
+  if(!result.found)
+    return (dpa_u_optional_pointer_t){0};
+  const dpa_u_optional_pointer_t ret = {
+    .value = that->value_list[result.index],
+    .present = true
+  };
+  REMOVE(that, result.index, that->lbsize);
+  if(dpa_u_unlikely(!--that->count))
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(that);
+  return ret;
 }
 #endif
 
