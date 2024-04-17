@@ -74,7 +74,7 @@ LDLIBS += -lm
 OBJECTS := $(patsubst %,build/$(TYPE)/o/%$(o-ext),$(SOURCES))
 ASMOUT  := $(patsubst %,build/$(TYPE)/s/%.s,$(SOURCES))
 
-B-TS := bin/$(TYPE)/dpa-testsuite
+B-TS := bin/$(TYPE)/dpa-testsuite$(bin-ext)
 
 BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%$(bin-ext),$(filter src/main/%.c,$(SOURCES)))
 TESTS := $(patsubst test/%.c,test//%,$(filter test/%.c,$(SOURCES)))
@@ -193,7 +193,7 @@ build/.check-all: \
 	@echo "Source code checks passed"
 	touch $@
 
-do-test//%: build/$(TYPE)/bin/test/% $(B-TS)
+do-test//%: build/$(TYPE)/bin/test/%$(bin-ext) $(B-TS)
 	$<
 
 do-test//%: test/% $(B-TS)

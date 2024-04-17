@@ -1,6 +1,17 @@
+#ifndef DPA__U_SET_AND_MAP_TEMPLATE
+#define DPA__U_SET_AND_MAP_TEMPLATE
+
 #include <dpa/utils/bo.h>
 #include <stdint.h>
 #include <limits.h>
+
+#define DPA__U_SM_KIND_SET 1
+#define DPA__U_SM_KIND_MAP 2
+
+// This variable is to help with benchmarks
+dpa__u_api_var extern long dpa_u_total_resize_time;
+
+#endif
 
 #define DPA__U_SM_NO_BITSET
 #define DPA__U_SM_KEY_TYPE void*

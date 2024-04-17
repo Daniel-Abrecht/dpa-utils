@@ -1,11 +1,3 @@
-// Included by _set-and-map.generator. Internal header.
-
-#ifndef DPA__U_SET_AND_MAP_TEMPLATE
-#define DPA__U_SET_AND_MAP_TEMPLATE
-#define DPA__U_SM_KIND_SET 1
-#define DPA__U_SM_KIND_MAP 2
-#endif
-
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 #define DPA__U_SM_PREFIX DPA_U_CONCAT_E(DPA_U_CONCAT_E(dpa_u_, set_), DPA__U_SM_NAME)
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP

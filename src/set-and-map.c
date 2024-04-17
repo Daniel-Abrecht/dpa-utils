@@ -27,6 +27,7 @@
 #include <dpa/utils/map.h>
 #include <dpa/utils/math.h>
 #include <dpa/utils/_math.h>
+#include <time.h>
 
 #define DPA__U_SM_BITMAP_OFFSET(INDEX) ((INDEX)/(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT))
 #define DPA__U_SM_BITMAP_BIT(INDEX) (((dpa_u_bitmap_entry_t)1)<<((INDEX)%(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT)))
@@ -52,6 +53,8 @@ static size_t count_to_lbsize(size_t n){
   n += n / SET_OVERSIZE_INVERSE_FACTOR;
   return dpa_u_log2(n|(MIN_SIZE-1))+1;
 }
+
+dpa__u_api long dpa_u_total_resize_time;
 
 #define EXPECTED_BITMAP_SIZE(T) ((1ull<<(sizeof(T)*CHAR_BIT)) / CHAR_BIT)
 #define LIST_OR_BITMAP_SIZE_THRESHOLD_SET(T) (( \
@@ -99,20 +102,38 @@ static size_t count_to_lbsize(size_t n){
 
 #ifndef DPA__U_SM_BO
 dpa_u_unsequenced static inline DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE x){
+#if defined(__GNUC__) || defined(__llvm__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"
+#elif defined(_MSC_VER)
+#pragma warning( push )
+#pragma warning( disable : 4293 )
+#endif
   // return ((DPA__U_SM_KEY_ENTRY_TYPE)x);
   return ((DPA__U_SM_KEY_ENTRY_TYPE)x) * dpa__u_choose_prime(DPA__U_SM_KEY_ENTRY_TYPE);
+#if defined(__GNUC__) || defined(__llvm__)
 #pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning( pop )
+#endif
 }
 
 // We don't need this yet, but we may need it if we add things like iterating over the keys in a set.
 dpa_u_unsequenced static inline DPA__U_SM_KEY_TYPE UNHASH(DPA__U_SM_KEY_ENTRY_TYPE x){
+#if defined(__GNUC__) || defined(__llvm__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"
+#elif defined(_MSC_VER)
+#pragma warning( push )
+#pragma warning( disable : 4293 )
+#endif
   // return ((DPA__U_SM_KEY_TYPE)x);
   return (DPA__U_SM_KEY_TYPE)(x * dpa__u_choose_prime_inverse(DPA__U_SM_KEY_ENTRY_TYPE));
+#if defined(__GNUC__) || defined(__llvm__)
 #pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning( pop )
+#endif
 }
 #else
 dpa_u_unsequenced static inline DPA__U_SM_KEY_ENTRY_TYPE HASH(const DPA__U_SM_KEY_TYPE n){
@@ -264,6 +285,7 @@ static bool ALLOCATE_HMS(
   const size_t lbsize,
   bool init // If GROW() is used to populate the set, it'll fill in the empty keys too, no need to initialize it.
 ){
+  const volatile clock_t start = clock();
   DPA__U_SM_KEY_ENTRY_TYPE*const key_list = malloc((((size_t)1)<<lbsize)*sizeof(*key_list));
   if(!key_list) return false;
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -283,6 +305,8 @@ static bool ALLOCATE_HMS(
   that->value_list = value_list;
 #endif
   that->lbsize = lbsize;
+  const volatile clock_t end = clock();
+  dpa_u_total_resize_time += end - start;
   return true;
 }
 #endif
@@ -293,6 +317,7 @@ static void GROW(
   DPA__U_SM_TYPE*restrict const old,
   DPA__U_SM_TYPE*restrict const new
 ){
+  const volatile clock_t start = clock();
   DPA__U_SM_KEY_ENTRY_TYPE*restrict const old_key_list = old->key_list;
   DPA__U_SM_KEY_ENTRY_TYPE*restrict const new_key_list = new->key_list;
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -349,11 +374,14 @@ static void GROW(
   } while(i != j);
   for(const size_t hk = ((KEY_ENTRY_HASH(old_key_list[j]) >> s) + 1) & m2; k!=hk; k=(k+1)&m2)
     new_key_list[k] = (DPA__U_SM_KEY_ENTRY_TYPE){(ENTRY_HASH_TYPE)k<<s}; // Empty entries
+  const volatile clock_t end = clock();
+  dpa_u_total_resize_time += end - start;
 }
 #endif
 
 #if !defined(DPA__U_SM_NO_BITSET) && (!defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP)
 static bool CONVERT_TO_BITFIELD(DPA__U_SM_TYPE*restrict const that){
+  const volatile clock_t start = clock();
   dpa_u_bitmap_entry_t*const restrict bitmask = calloc((((size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT)) + (sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT-1)) / (sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT), sizeof(dpa_u_bitmap_entry_t));
   if(!bitmask){
     return false;
@@ -382,13 +410,15 @@ static bool CONVERT_TO_BITFIELD(DPA__U_SM_TYPE*restrict const that){
   that->value_list = value_list;
 #endif
   that->lbsize = sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT;
+  const volatile clock_t end = clock();
+  dpa_u_total_resize_time += end - start;
   return true;
 }
 #endif
 
 #if !defined(DPA__U_SM_NO_BITSET) && (!defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP)
 static void CONVERT_TO_LIST(DPA__U_SM_TYPE*const restrict that){
-  // TODO
+  const volatile clock_t start = clock();
   // +1 means it's twice as big as it needs to be. But it also means adding an entry won't expand it immediately.
   int lbsize = count_to_lbsize(that->count)+1;
   const size_t mask = (((size_t)1)<<lbsize)-1;
@@ -433,11 +463,14 @@ static void CONVERT_TO_LIST(DPA__U_SM_TYPE*const restrict that){
   free(that->value_list);
 #endif
   *that = new;
+  const volatile clock_t end = clock();
+  dpa_u_total_resize_time += end - start;
 }
 #endif
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 static void SHRINK(DPA__U_SM_TYPE*const restrict that){
+  const volatile clock_t start = clock();
   int lbsize = count_to_lbsize(that->count)+1;
   const int i_shift = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-that->lbsize;
   const int j_shift = sizeof(ENTRY_HASH_TYPE)*CHAR_BIT-lbsize;
@@ -486,6 +519,8 @@ static void SHRINK(DPA__U_SM_TYPE*const restrict that){
   free(that->value_list);
 #endif
   *that = new;
+  const volatile clock_t end = clock();
+  dpa_u_total_resize_time += end - start;
 }
 #endif
 

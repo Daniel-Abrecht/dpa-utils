@@ -11,7 +11,6 @@ typedef struct DPA__U_SM_PREFIX DPA__U_SM_TYPE;
 // This will not safe any space, but it may make the lookup more efficient. And 32 bytes, is not a lot.
 // We round up the number of entres, in case of CHAR_BIT != 8. In that case, space will be wasted, but who's ever going to use such a platform anyway?
 struct DPA__U_SM_PREFIX {
-  // dpa_u_bitmap_entry_t is designed to be up to 256 bits long
   dpa_u_bitmap_entry_t bitmask[(((size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT))+(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT-1))/(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT)];
 };
 #else

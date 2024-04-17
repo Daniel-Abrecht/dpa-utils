@@ -61,6 +61,10 @@
 #define dpa_u_init /* TODO */
 #define dpa_u_import __declspec(dllimport)
 
+// MSVC just doesn't define max_align_t...
+// We need it internally, so we define an internal type dpa__u_max_align_t as a workaround
+typedef long dpa__u_max_align_t;
+
 #else
 
 #if __STDC_VERSION__ < 202311
@@ -74,6 +78,8 @@
 #endif
 
 #define dpa_u_import
+
+typedef max_align_t dpa__u_max_align_t;
 
 #endif
 

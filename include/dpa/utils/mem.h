@@ -9,7 +9,7 @@ typedef struct dpa_u_refcount_freeable_data dpa_u_refcount_freeable_data_t;
 
 struct dpa_u_refcount_freeable_data {
   struct dpa_u_refcount_freeable refcount;
-  alignas(max_align_t) char data[];
+  alignas(dpa__u_max_align_t) char data[];
 };
 
 dpa__u_api struct dpa_u_refcount_freeable_data* dpa_u_refcount_freeable_allocate(size_t size, uint_least64_t iref);
