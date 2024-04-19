@@ -24,8 +24,53 @@
 #endif
 #endif
 
-#ifdef _MSC_VER
+///////////////////////////////////////
+//////        Compat Code        //////
+///////////////////////////////////////
+#if __STDC_VERSION__ < 202311
+#if defined(__has_attribute)
+#define DPA__U__has_c_attribute_opt(ext,c23) __has_attribute(ext)
+#define DPA__U__has_c_attribute(ext,c23) __has_attribute(ext)
+#elif defined(__has_c_attribute)
+#define DPA__U__has_c_attribute_opt(ext,c23)  __has_c_attribute(ext)
+#define DPA__U__has_c_attribute(ext,c23) __has_c_attribute(ext)
+#else
+#define DPA__U__has_c_attribute_opt 0
+#define DPA__U__has_c_attribute 1
+#endif
+#else
+#define DPA__U__has_c_attribute_opt(ext,c23)  __has_c_attribute(c23)
+#define DPA__U__has_c_attribute(ext,c23) __has_c_attribute(c23)
+#endif
+
+#if __STDC_VERSION__ < 202311
+#define dpa_u_attribute(ext,c23) __attribute__((ext))
+#else
+#define dpa_u_attribute(ext,c23) [[c23]]
+#endif
+
+#if DPA__U__has_c_attribute_opt(gcc_struct,gnu::gcc_struct)
+#define dpa__u_gcc_struct dpa_u_attribute(gcc_struct,gnu::gcc_struct)
+#endif
+#if DPA__U__has_c_attribute_opt(packed,gnu::packed)
+#define dpa__u_packed dpa_u_attribute(packed,gnu::packed) dpa__u_gcc_struct
+#endif
+#if DPA__U__has_c_attribute_opt(visibility,gnu::visibility)
+#define dpa_u_export dpa_u_attribute(visibility("default"),gnu::visibility("default"))
+#endif
+#if DPA__U__has_c_attribute_opt(constructor,gnu::constructor)
+#define dpa_u_init dpa_u_attribute(constructor,gnu::constructor)
+#endif
+
+#ifndef dpa__u_gcc_struct
+#if defined(_MSC_VER) && !defined(DPA_U_BO_NOT_PACKED)
 #define DPA_U_BO_NOT_PACKED
+#endif
+#endif
+
+#ifdef _MSC_VER
+#define dpa_u_export __declspec(dllexport)
+#define dpa_u_import __declspec(dllimport)
 #endif
 
 ///////////////////////////////////////
@@ -54,46 +99,41 @@
 #define DPA_U_STR(X) #X
 #define DPA_U_STR_EVAL(X) DPA_U_STR(X)
 
-#ifdef _MSC_VER
-
-#define dpa__u_packed 
-#define dpa_u_export __declspec(dllexport)
-#define dpa_u_init /* TODO */
-#define dpa_u_import __declspec(dllimport)
-
+#ifndef dpa__u_gcc_struct
 #define dpa__u_gcc_struct
+#endif
+#ifndef dpa_u_export
+#define dpa_u_export
+#endif
+#ifndef dpa_u_import
+#define dpa_u_import
+#endif
+#ifndef dpa__u_packed
+#define dpa__u_packed dpa__u_gcc_struct
+#ifndef DPA_U_BO_NOT_PACKED
+#define DPA_U_BO_NOT_PACKED
+#endif
+#endif
+#ifndef dpa_u_init
+#define dpa_u_init
+#ifdef _MSC_VER
+#pragma message ("WARNING: No attribute for initializer functions available. Some things may not work correctly!")
+#else
+#warning "WARNING: No attribute for initializer functions available. Some things may not work correctly!"
+#endif
+#endif
 
+#ifdef _MSC_VER
 // MSVC just doesn't define max_align_t...
 // We need it internally, so we define an internal type dpa__u_max_align_t as a workaround
 typedef long dpa__u_max_align_t;
-
 #else
-
-#if __STDC_VERSION__ < 202311
-#define dpa__u_gcc_struct __attribute__((gcc_struct))
-#define dpa__u_packed __attribute__((packed)) dpa__u_gcc_struct
-#define dpa_u_export __attribute__((visibility("default")))
-#define dpa_u_init __attribute__((constructor))
-#else
-#define dpa__u_gcc_struct [[gnu::gcc_struct]]
-#define dpa__u_packed [[gnu::packed]] dpa__u_gcc_struct
-#define dpa_u_export [[gnu::visibility("default")]]
-#define dpa_u_init [[gnu::constructor]]
-#endif
-
-#define dpa_u_import
-
 typedef max_align_t dpa__u_max_align_t;
-
 #endif
 
 #ifdef DPA__U_BUILD_LIB
 #define dpa__u_api dpa_u_export
-// #ifdef _MSC_VER
-// #define dpa__u_api_var dpa_u_import
-// #else
 #define dpa__u_api_var dpa_u_export
-// #endif
 #else
 #define dpa__u_api dpa_u_import
 #define dpa__u_api_var dpa_u_import
@@ -153,34 +193,38 @@ typedef struct { int x; } dpa_u_invalid_selection_t;
 #define dpa_u_unlikely(X) (X)
 #endif
 
-#if __STDC_VERSION__ >= 202311
-#define dpa_u_unsequenced [[unsequenced, gnu::const]]
-#elif defined(__GNUC__) || defined(__llvm__)
-#define dpa_u_unsequenced __attribute__((const))
+#if DPA__U__has_c_attribute_opt(unsequenced,unsequenced)
+#define dpa__u_unsequenced_1 dpa_u_attribute(unsequenced,unsequenced)
 #else
-#define dpa_u_unsequenced
+#define dpa__u_unsequenced_1
 #endif
-
-#if __STDC_VERSION__ >= 202311
-#define dpa_u_reproducible [[reproducible, gnu::pure]]
-#elif defined(__GNUC__) || defined(__llvm__)
-#define dpa_u_reproducible  __attribute__((pure))
+#if DPA__U__has_c_attribute_opt(const,gnu::const)
+#define dpa__u_unsequenced_2 dpa_u_attribute(const,gnu::const)
 #else
-#define dpa_u_reproducible
+#define dpa__u_unsequenced_2
 #endif
+#define dpa_u_unsequenced dpa__u_unsequenced_1 dpa__u_unsequenced_2
 
-#if __STDC_VERSION__ >= 202311
-#define dpa_u_weak [[gnu::weak]]
-#elif defined(__GNUC__) || defined(__llvm__)
-#define dpa_u_weak  __attribute__((weak))
+#if DPA__U__has_c_attribute_opt(reproducible,reproducible)
+#define dpa__u_reproducible_1 dpa_u_attribute(reproducible,reproducible)
+#else
+#define dpa__u_reproducible_1
+#endif
+#if DPA__U__has_c_attribute_opt(pure,gnu::pure)
+#define dpa__u_reproducible_2 dpa_u_attribute(pure,gnu::pure)
+#else
+#define dpa__u_reproducible_2
+#endif
+#define dpa_u_reproducible dpa__u_reproducible_1 dpa__u_reproducible_2
+
+#if DPA__U__has_c_attribute_opt(weak,gnu::weak)
+#define dpa_u_weak dpa_u_attribute(weak,gnu::weak)
 #else
 #define dpa_u_weak
 #endif
 
-#if __STDC_VERSION__ >= 202311
-#define dpa_u_format_param(...) [[gnu::format(__VA_ARGS__)]]
-#elif defined(__GNUC__) || defined(__llvm__)
-#define dpa_u_format_param(...) __attribute__((format(__VA_ARGS__)))
+#if DPA__U__has_c_attribute_opt(format,gnu::format)
+#define dpa_u_format_param(...) dpa_u_attribute(format(__VA_ARGS__),gnu::format(__VA_ARGS__))
 #else
 #define dpa_u_format_param(...)
 #endif
@@ -243,13 +287,11 @@ dpa__u_api dpa_u_format_param(printf, 3, 4) inline char* dpa__u_compound_printf(
 
 //
 
-dpa__u_api extern noreturn void dpa_u_abort_p(const char* format, ...) dpa_u_format_param(printf, 1, 2);
+dpa__u_api dpa_u_format_param(printf, 1, 2) extern noreturn void dpa_u_abort_p(const char* format, ...);
 #define dpa_u_abort(F, ...) { dpa_u_abort_p("%s:%d: %s: " F "\n",  __FILE__, __LINE__, __func__, __VA_ARGS__); }
 
-#if __STDC_VERSION__ >= 202311
-#define dpa__u_really_inline [[gnu::always_inline]]
-#elif !defined(DPA_U_DEBUG) && defined(__GNUC__)
-#define dpa__u_really_inline __attribute__((always_inline))
+#if DPA__U__has_c_attribute_opt(always_inline,gnu::always_inline)
+#define dpa__u_really_inline dpa_u_attribute(always_inline,gnu::always_inline)
 #else
 #define dpa__u_really_inline
 #endif
