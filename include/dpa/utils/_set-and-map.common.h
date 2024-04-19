@@ -27,11 +27,16 @@
 #define IF_MAP(...) __VA_ARGS__
 #endif
 
+#define DPA__U_SM_TYPE_IT_S DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t)
+#define DPA__U_SM_TYPE_IT_F DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t)
+
 ///////////////////////////////////////////
 
 #include DPA__U_SM_TEMPLATE
 
 ///////////////////////////////////////////
+
+#undef DPA__U_SM_TYPE_IT
 
 #undef DPA__U_SM_KEY_ENTRY_TYPE
 #undef DPA__U_SM_TYPE

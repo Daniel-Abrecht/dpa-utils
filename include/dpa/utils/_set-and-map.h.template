@@ -3,6 +3,8 @@
 #include <stdbool.h>
 
 typedef struct DPA__U_SM_PREFIX DPA__U_SM_TYPE;
+typedef struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _safe) DPA__U_SM_TYPE_IT_S;
+typedef struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _fast) DPA__U_SM_TYPE_IT_F;
 
 #if defined(DPA__U_SM_MICRO_SET) && DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 // For CHAR_BIT == 8, for a set containing one of 256 entries, we only need 256 bits.
@@ -36,6 +38,40 @@ struct DPA__U_SM_PREFIX {
 #endif
 };
 #endif
+
+/**
+ * This iterator is resilient to changes to the container, and is even usable on different containers.
+ * All containers of the same type order their values in the same way, although that order will appear random-ish.
+ * If an entry is inserted, that could happen before or after the current iterator position, which determines if it will
+ * be iterated over.
+ * Before iterating, it is checked if the current entry resides at the current index. If this is not the case, the entry
+ * is looked up to determine it's index, or the index it would have had, and the next entry is determined based on the
+ * index.
+ * The iterator should be 0 initialized. The zero entry can never occur at index 0.
+ */
+struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _safe) {
+  DPA__U_SM_KEY_ENTRY_TYPE entry;
+#ifdef DPA__U_SM_NO_BITSET
+  size_t index;
+#else
+  ENTRY_HASH_TYPE index;
+#endif
+};
+
+/**
+ * This iterator is fast & simple, but if a set or map is changed in any way, it will be invalid.
+ */
+struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _fast) {
+  size_t index;
+};
+
+/**
+ * \returns True if the next entry was found, false otherwise.
+ */
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 /**

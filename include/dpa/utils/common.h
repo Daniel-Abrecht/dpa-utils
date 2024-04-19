@@ -61,6 +61,8 @@
 #define dpa_u_init /* TODO */
 #define dpa_u_import __declspec(dllimport)
 
+#define dpa__u_gcc_struct
+
 // MSVC just doesn't define max_align_t...
 // We need it internally, so we define an internal type dpa__u_max_align_t as a workaround
 typedef long dpa__u_max_align_t;
@@ -68,11 +70,13 @@ typedef long dpa__u_max_align_t;
 #else
 
 #if __STDC_VERSION__ < 202311
-#define dpa__u_packed __attribute__((packed))
+#define dpa__u_gcc_struct __attribute__((gcc_struct))
+#define dpa__u_packed __attribute__((packed)) dpa__u_gcc_struct
 #define dpa_u_export __attribute__((visibility("default")))
 #define dpa_u_init __attribute__((constructor))
 #else
-#define dpa__u_packed [[gnu::packed]]
+#define dpa__u_gcc_struct [[gnu::gcc_struct]]
+#define dpa__u_packed [[gnu::packed]] dpa__u_gcc_struct
 #define dpa_u_export [[gnu::visibility("default")]]
 #define dpa_u_init [[gnu::constructor]]
 #endif

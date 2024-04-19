@@ -18,7 +18,7 @@
   }
 #endif
 
-struct dpa__u_bo_a { alignas(DPA__U_BO_ALIGNMENT) char all[DPA__U_BO_COMMON_SIZE]; };
+struct dpa__u_gcc_struct dpa__u_bo_a { alignas(DPA__U_BO_ALIGNMENT) char all[DPA__U_BO_COMMON_SIZE]; };
 typedef DPA__U_BO_META(extra) dpa__u_bo_meta_t;
 
 struct dpa_u_bo_inline {
@@ -44,12 +44,12 @@ static_assert(sizeof(dpa_u_bo_inline_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_inli
     dpa__u_bo_a_t all; \
   }
 
-struct dpa_u_bo_simple_ro {
+struct dpa__u_gcc_struct dpa_u_bo_simple_ro {
   DPA__U_BO_SIMPLE_MEMBERS(const);
 };
 static_assert(sizeof(dpa_u_bo_simple_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_ro_t has an unexpected size");
 
-struct dpa_u_bo_simple {
+struct dpa__u_gcc_struct dpa_u_bo_simple {
   union {
     dpa_u_bo_simple_ro_t ro;
     DPA__U_BO_SIMPLE_MEMBERS();
@@ -57,7 +57,7 @@ struct dpa_u_bo_simple {
 };
 static_assert(sizeof(dpa_u_bo_simple_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_simple_t has an unexpected size");
 
-struct dpa_u_bo_unique {
+struct dpa__u_gcc_struct dpa_u_bo_unique {
   union {
     DPA__U_BO_META(extra);
     dpa_u_bo_inline_t bo_inline;
@@ -67,12 +67,12 @@ struct dpa_u_bo_unique {
 };
 static_assert(sizeof(dpa_u_bo_unique_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_unique_t has an unexpected size");
 
-typedef struct dpa__u_bo_unique_reversible_hash {
+typedef dpa__u_gcc_struct struct dpa__u_bo_unique_reversible_hash {
   size_t hash[(DPA__U_BO_COMMON_SIZE+sizeof(size_t)-1)/sizeof(size_t)];
 } dpa__u_bo_unique_reversible_hash_t;
 static_assert(sizeof(dpa__u_bo_unique_reversible_hash_t) >= DPA__U_BO_COMMON_SIZE, "dpa__u_bo_unique_reversible_hash_t is too small!");
 
-struct dpa_u_bo_ro {
+struct dpa__u_gcc_struct dpa_u_bo_ro {
   union {
     DPA__U_BO_META(extra);
     dpa_u_bo_inline_t bo_inline;
@@ -84,7 +84,7 @@ struct dpa_u_bo_ro {
 };
 static_assert(sizeof(dpa_u_bo_ro_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_ro_t has an unexpected size");
 
-struct dpa_u_bo {
+struct dpa__u_gcc_struct dpa_u_bo {
   union {
     DPA__U_BO_META(extra);
     dpa_u_bo_ro_t ro;
@@ -97,7 +97,7 @@ static_assert(sizeof(dpa_u_bo_t) == DPA__U_BO_COMMON_SIZE, "dpa_u_bo_t has an un
 
 ////
 
-struct dpa_u_bo_refcounted_ro {
+struct dpa__u_gcc_struct dpa_u_bo_refcounted_ro {
   union {
     DPA__U_BO_META(extra);
     dpa_u_bo_simple_ro_t bo_simple;
@@ -106,7 +106,7 @@ struct dpa_u_bo_refcounted_ro {
   dpa_u_refcount_freeable_t* refcount;
 };
 
-struct dpa_u_bo_refcounted {
+struct dpa__u_gcc_struct dpa_u_bo_refcounted {
   union {
     struct {
       union {
@@ -124,7 +124,7 @@ static_assert(offsetof(dpa_u_bo_refcounted_ro_t, bo_simple) == offsetof(dpa_u_bo
 static_assert(offsetof(dpa_u_bo_refcounted_ro_t, refcount) == offsetof(dpa_u_bo_refcounted_t, refcount), "Member 'refcount' at wrong offset");
 static_assert(offsetof(dpa_u_bo_refcounted_t, ro) == 0, "Member 'ro' at wrong offset");
 
-struct dpa_u_bo_hashed_ro {
+struct dpa__u_gcc_struct dpa_u_bo_hashed_ro {
   union {
     DPA__U_BO_META(extra);
     dpa_u_bo_simple_ro_t bo_simple;
@@ -132,7 +132,7 @@ struct dpa_u_bo_hashed_ro {
   dpa_u_hash_t hash;
 };
 
-struct dpa_u_bo_hashed {
+struct dpa__u_gcc_struct dpa_u_bo_hashed {
   union {
     struct {
       union {
@@ -149,7 +149,7 @@ static_assert(offsetof(dpa_u_bo_hashed_ro_t, bo_simple) == offsetof(dpa_u_bo_has
 static_assert(offsetof(dpa_u_bo_hashed_ro_t, hash) == offsetof(dpa_u_bo_hashed_t, hash), "Member 'hash' at wrong offset");
 static_assert(offsetof(dpa_u_bo_hashed_t, ro) == 0, "Member 'ro' at wrong offset");
 
-struct dpa_u_bo_refcounted_hashed_ro {
+struct dpa__u_gcc_struct dpa_u_bo_refcounted_hashed_ro {
   union {
     DPA__U_BO_META(extra);
     dpa_u_bo_simple_ro_t bo_simple;
@@ -164,14 +164,14 @@ struct dpa_u_bo_refcounted_hashed_ro {
 
 ////
 
-struct dpa__u_bo_unique_hashmap_entry {
+struct dpa__u_gcc_struct dpa__u_bo_unique_hashmap_entry {
   dpa_u_bo_hashed_ro_t bo_hashed;
   struct dpa__u_refcount_bo_unique refcount;
   struct dpa__u_bo_unique_hashmap_entry* next;
 };
 static_assert(offsetof(struct dpa__u_bo_unique_hashmap_entry, bo_hashed) == 0, "Expected first member to be of dpa_u_bo_hashed_ro_t type");
 
-struct dpa__u_bo_entry_refcounted {
+struct dpa__u_gcc_struct dpa__u_bo_entry_refcounted {
   dpa__u_bo_unique_hashmap_entry_t entry;
   dpa_u_refcount_freeable_t* refcount;
 };
@@ -189,7 +189,7 @@ static_assert(alignof(struct dpa_u_bo_ro) == alignof(struct dpa_u_bo_inline), "d
 
 // This is an internal type used by some dpa_u_t_bo* conversion macros to change the storage duration & lifetime of
 // inline BOs to the current block scope, while retaining enough memory for the hash of a hashed bo.
-union dpa__u_hashed_conv_helper {
+union dpa__u_gcc_struct dpa__u_hashed_conv_helper {
   dpa__u_bo_meta_t meta;
   dpa_u_bo_inline_t bo_inline;
   dpa_u_bo_hashed_ro_t bo_hashed_ro;
@@ -197,21 +197,21 @@ union dpa__u_hashed_conv_helper {
 };
 static_assert(sizeof(union dpa__u_hashed_conv_helper) == sizeof(dpa_u_bo_hashed_ro_t), "union dpa__u_hashed_conv_helper has an unexpected size");
 
-union dpa__u_any_helper {
+union dpa__u_gcc_struct dpa__u_any_helper {
   dpa__u_bo_meta_t meta;
   dpa_u_bo_t bo;
   dpa_u_bo_hashed_t bo_hashed;
   dpa_u_bo_refcounted_t bo_refcounted;
 };
 
-union dpa__u_any_ro_helper {
+union dpa__u_gcc_struct dpa__u_any_ro_helper {
   dpa__u_bo_meta_t meta;
   dpa_u_bo_ro_t bo;
   dpa_u_bo_hashed_ro_t bo_hashed;
   dpa_u_bo_refcounted_ro_t bo_refcounted;
 };
 
-union dpa__u_any_ro_helper_2 {
+union dpa__u_gcc_struct dpa__u_any_ro_helper_2 {
   dpa__u_bo_meta_t meta;
   dpa_u_bo_ro_t bo;
   dpa_u_bo_hashed_ro_t bo_hashed;
@@ -219,7 +219,7 @@ union dpa__u_any_ro_helper_2 {
   dpa_u_bo_refcounted_hashed_ro_t bo_refcounted_hashed;
 };
 
-union dpa__u_bo_ptr_helper {
+union dpa__u_gcc_struct dpa__u_bo_ptr_helper {
   struct {
     dpa__u_bo_meta_t meta;
     const void* ptr;
