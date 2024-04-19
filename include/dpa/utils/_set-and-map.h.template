@@ -1,5 +1,6 @@
 #include <dpa/utils/common.h>
 #include <dpa/utils/math.h>
+#include <dpa/utils/_math.h>
 #include <stdbool.h>
 
 typedef struct DPA__U_SM_PREFIX DPA__U_SM_TYPE;
@@ -39,6 +40,75 @@ struct DPA__U_SM_PREFIX {
 };
 #endif
 
+
+
+#ifndef DPA__U_SM_BO
+dpa__u_api dpa_u_unsequenced dpa__u_really_inline inline
+DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE x){
+#if defined(__GNUC__) || defined(__llvm__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-count-overflow"
+#elif defined(_MSC_VER)
+#pragma warning( push )
+#pragma warning( disable : 4293 )
+#endif
+  return ((DPA__U_SM_KEY_ENTRY_TYPE)x) * dpa__u_choose_prime(DPA__U_SM_KEY_ENTRY_TYPE);
+#if defined(__GNUC__) || defined(__llvm__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning( pop )
+#endif
+}
+
+dpa__u_api dpa_u_unsequenced dpa__u_really_inline inline
+DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE x){
+#if defined(__GNUC__) || defined(__llvm__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-count-overflow"
+#elif defined(_MSC_VER)
+#pragma warning( push )
+#pragma warning( disable : 4293 )
+#endif
+  return (DPA__U_SM_KEY_TYPE)(x * dpa__u_choose_prime_inverse(DPA__U_SM_KEY_ENTRY_TYPE));
+#if defined(__GNUC__) || defined(__llvm__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning( pop )
+#endif
+}
+#else
+dpa__u_api dpa_u_unsequenced dpa__u_really_inline inline
+DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE n){
+  DPA__U_SM_KEY_ENTRY_TYPE e;
+  memcpy(e.hash, n.all.all, sizeof(n));
+  for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; )
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    e.hash[i] = fh ^= dpa__u_set_z_hash_sub(e.hash[i]);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    e.hash[i] = fh ^= dpa__u_map_z_hash_sub(e.hash[i]);
+#endif
+  return e;
+}
+
+dpa__u_api dpa_u_unsequenced dpa__u_really_inline inline
+DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
+  for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; ){
+    size_t hash = e.hash[i];
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    e.hash[i] = dpa__u_set_z_unhash_sub(hash ^ fh);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    e.hash[i] = dpa__u_map_z_unhash_sub(hash ^ fh);
+#endif
+    fh = hash;
+  }
+  DPA__U_SM_KEY_TYPE r;
+  memcpy(r.all.all, e.hash, sizeof(r));
+  return r;
+}
+#endif
+
+
+
 /**
  * This iterator is resilient to changes to the container, and is even usable on different containers.
  * All containers of the same type order their values in the same way, although that order will appear random-ish.
@@ -54,12 +124,13 @@ struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _safe) {
 #ifdef DPA__U_SM_NO_BITSET
   size_t index;
 #else
-  ENTRY_HASH_TYPE index;
+  DPA__U_SM_ENTRY_HASH_TYPE index;
 #endif
 };
 
 /**
  * This iterator is fast & simple, but if a set or map is changed in any way, it will be invalid.
+ * Also, the first / last entries may be different from the *_it_safe_t iterator, we don't necessarely start at 0 here.
  */
 struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _fast) {
   size_t index;
@@ -69,8 +140,20 @@ struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _fast) {
  * \returns True if the next entry was found, false otherwise.
  */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+
+/**
+ * \returns True if the previous entry was found, false otherwise.
+ */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+
+/**
+ * \returns True if the next entry was found, false otherwise.
+ */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
+
+/**
+ * \returns True if the previous entry was found, false otherwise.
+ */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET

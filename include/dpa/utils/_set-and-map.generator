@@ -11,6 +11,36 @@
 // This variable is to help with benchmarks
 dpa__u_api_var extern long dpa_u_total_resize_time;
 
+#define DPA__U_SM_BITMAP_OFFSET(INDEX) ((INDEX)/(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT))
+#define DPA__U_SM_BITMAP_BIT(INDEX) (((dpa_u_bitmap_entry_t)1)<<((INDEX)%(sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT)))
+
+// TODO: Make these parameters changable using the config
+// TODO: Handle DPA__U_SM_MIN_SIZE >= DPA__U_SM_EXPECTED_BITMAP_SIZE
+// TODO: A too low DPA__U_SM_MIN_LBSIZE or DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR may allow a small set to fully fill up, make sure there is always at least 2 free.
+
+#ifndef DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR
+// Ensure there is some free space left 100/8 = 12.5%
+#define DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR 8
+#endif
+/* At any point, 1 entry needs to be free for this to work. Or is it 2? Anyways, this ensures there will be enough. */
+#define DPA__U_SM_REQUIRED_MIN_FREE_ENTRIES 1
+#ifndef DPA__U_SM_MIN_LBSIZE
+#define DPA__U_SM_MIN_LBSIZE 5
+#endif
+
+#define DPA__U_SM_MIN_SIZE (1u<<DPA__U_SM_MIN_LBSIZE)
+
+#define DPA__U_SM_EXPECTED_BITMAP_SIZE(T) ((1ull<<(sizeof(T)*CHAR_BIT)) / CHAR_BIT)
+#define DPA__U_SM_LIST_OR_BITMAP_SIZE_THRESHOLD_SET(T) (( \
+     (1ull<<DPA_U_CONSTEXPR_LOG2(DPA__U_SM_EXPECTED_BITMAP_SIZE(T) / 2 / sizeof(T))) \
+   * DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR + DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR \
+  ) / (DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR+1))
+#define DPA__U_SM_LIST_OR_BITMAP_SIZE_THRESHOLD_MAP(T) (( \
+     (1ull<<DPA_U_CONSTEXPR_LOG2(DPA__U_SM_EXPECTED_BITMAP_SIZE(T) / 2 * (1 + sizeof(void*)*CHAR_BIT) / (sizeof(T) + sizeof(void*)) )) \
+   * DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR + DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR \
+  ) / (DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR+1))
+
+
 #endif
 
 #define DPA__U_SM_NO_BITSET
