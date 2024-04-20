@@ -74,6 +74,7 @@ dpa__u_api long dpa_u_total_resize_time;
 
  extern DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE n);
  extern DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e);
+ extern DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_get)(const DPA__U_SM_TYPE_IT_S*const it);
 
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -82,43 +83,38 @@ static struct lookup_result LOOKUP(
   const DPA__U_SM_KEY_ENTRY_TYPE key,
   const size_t lbsize
 ){
-  const size_t mask = (((size_t)1)<<lbsize)-1;
   const int shift = sizeof(DPA__U_SM_ENTRY_HASH_TYPE)*CHAR_BIT-lbsize;
   const DPA__U_SM_ENTRY_HASH_TYPE I = (DPA__U_SM_ENTRY_HASH_TYPE)1<<shift;
-  size_t i = (DPA__U_SM_ENTRY_HASH_TYPE)(DPA__U_SM_KEY_ENTRY_HASH(key)+I) >> shift;
+  DPA__U_SM_ENTRY_HASH_TYPE i = DPA__U_SM_KEY_ENTRY_HASH(key)+I;
   if(!that->key_list)
-    return (struct lookup_result){i, false};
+    return (struct lookup_result){i>>shift, false};
   DPA__U_SM_ENTRY_HASH_TYPE hash = DPA__U_SM_KEY_ENTRY_HASH(key);
   // Note: this is actually inverted. The real PSL is ~psl_a>>shift and ~psl_b>>shift.
-  DPA__U_SM_ENTRY_HASH_TYPE psl_a = hash - ((DPA__U_SM_ENTRY_HASH_TYPE)i<<shift);
-#ifdef DPA_U_DEBUG
-  size_t si = i;
-#endif
+  DPA__U_SM_ENTRY_HASH_TYPE psl_a = hash - i - 1;
+  DPA__U_SM_ENTRY_HASH_TYPE psl_b;
   while(1){
-    const DPA__U_SM_KEY_ENTRY_TYPE ekey = that->key_list[i];
-    DPA__U_SM_ENTRY_HASH_TYPE psl_b = DPA__U_SM_KEY_ENTRY_HASH(ekey) - ((DPA__U_SM_ENTRY_HASH_TYPE)i<<shift);
-    if(psl_b == psl_a){
-#ifdef DPA__U_SM_BO
-      const int cmp = memcmp(&key, &ekey, sizeof(key));
-      if(!cmp)
-        return (struct lookup_result){i, true};
-      if(cmp < 0)
-        return (struct lookup_result){i, false};
-#else
-      return (struct lookup_result){i, true};
-#endif
-    }
+    psl_b = DPA__U_SM_KEY_ENTRY_HASH(that->key_list[i>>shift]) - i - 1;
     // We use the highest possible PSL for the empty entry. The highest PSL always wins! For an empty entry, psl_b is going to be 0, we subtract 1 to force an overflow.
-    if(psl_a <= (DPA__U_SM_ENTRY_HASH_TYPE)(psl_b-1))
-      return (struct lookup_result){i, false};
-    psl_a -= I;
-    i = (i+1) & mask;
-#ifdef DPA_U_DEBUG
-    if(si == i)
+    if(psl_a <= (DPA__U_SM_ENTRY_HASH_TYPE)(psl_b))
       break;
+#ifdef DPA__U_SM_BO
+false_match:;
 #endif
+    psl_a -= I;
+    i += I;
   }
-  dpa_u_unreachable("Hashmap lookup failed: %s", "That neither an entry is found, nor the PSL ever exceeds the one of any of the entries of the hashmap while earching, should not be possible.");
+#ifdef DPA__U_SM_BO
+  if(psl_b == psl_a){
+    const int cmp = memcmp(&key, &that->key_list[i>>shift], sizeof(key));
+    if(!cmp)
+      return (struct lookup_result){i>>shift, true};
+    if(cmp > 0)
+      goto false_match;
+  }
+  return (struct lookup_result){i>>shift, false};
+#else
+  return (struct lookup_result){i>>shift, psl_b == psl_a};
+#endif
 }
 #endif
 
