@@ -124,48 +124,27 @@ static void INSERT(
   DPA__U_SM_TYPE*restrict const that,
   DPA__U_SM_KEY_ENTRY_TYPE key,
   DPA__U_SM_IF_MAP(void* value,)
-  size_t i,
+  size_t index,
   const size_t lbsize
 ){
   const int shift = sizeof(DPA__U_SM_ENTRY_HASH_TYPE)*CHAR_BIT-lbsize;
-  const size_t mask = (((size_t)1)<<lbsize)-1;
   const DPA__U_SM_ENTRY_HASH_TYPE I = (DPA__U_SM_ENTRY_HASH_TYPE)1<<shift;
-  // Note: this is actually inverted. The real PSL is ~psl_a>>shift and ~psl_b>>shift.
-  DPA__U_SM_ENTRY_HASH_TYPE psl_a = DPA__U_SM_KEY_ENTRY_HASH(key) - ((DPA__U_SM_ENTRY_HASH_TYPE)i<<shift);
-#ifdef DPA_U_DEBUG
-  size_t si = mask+1;
-#endif
-  for(;; psl_a -= I, i=((i+1)&mask)){
-#ifdef DPA_U_DEBUG
-    if(!si--)
-      break;
-#endif
-    const DPA__U_SM_KEY_ENTRY_TYPE ekey = that->key_list[i];
-    DPA__U_SM_ENTRY_HASH_TYPE psl_b = DPA__U_SM_KEY_ENTRY_HASH(ekey) - ((DPA__U_SM_ENTRY_HASH_TYPE)i<<shift);
-#ifdef DPA__U_SM_BO
-    if(psl_b == psl_a && memcmp(&key, &ekey, sizeof(key))<0)
-      goto swap;
-#endif
-    // Allow psl_b == 0
-    if(psl_a > (DPA__U_SM_ENTRY_HASH_TYPE)(psl_b-1))
-      continue;
-#ifdef DPA__U_SM_BO
-  swap:
-#endif
+  DPA__U_SM_ENTRY_HASH_TYPE i = (DPA__U_SM_ENTRY_HASH_TYPE)index << shift;
+  for(;; i+=I){
+    const size_t j = i>>shift;
+    const DPA__U_SM_KEY_ENTRY_TYPE ekey = that->key_list[j];
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
     {
-      void* v = that->value_list[i];
-      that->value_list[i] = value;
+      void* v = that->value_list[j];
+      that->value_list[j] = value;
       value = v;
     }
 #endif
-    that->key_list[i] = key;
-    if(!psl_b) // Highest calculatable PSL, empty entry, we are done
+    that->key_list[j] = key;
+    if(DPA__U_SM_KEY_ENTRY_HASH(ekey) == i) // Highest calculatable PSL, empty entry, we are done
       return;
     key = ekey;
-    psl_a = DPA__U_SM_KEY_ENTRY_HASH(ekey) - ((DPA__U_SM_ENTRY_HASH_TYPE)i<<shift);
   }
-  dpa_u_unreachable("Hashmap insert failed: %s", "Was the hashmap full? That shouldn't be possible, though...");
 }
 #endif
 

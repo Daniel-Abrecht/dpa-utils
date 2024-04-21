@@ -77,7 +77,7 @@ DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE x){
 #endif
 }
 #else
-dpa__u_api dpa_u_unsequenced dpa__u_really_inline inline
+dpa__u_api dpa_u_unsequenced inline
 DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE n){
   DPA__U_SM_KEY_ENTRY_TYPE e;
   memcpy(e.hash, n.all.all, sizeof(n));
@@ -90,7 +90,7 @@ DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE n){
   return e;
 }
 
-dpa__u_api dpa_u_unsequenced dpa__u_really_inline inline
+dpa__u_api dpa_u_unsequenced inline
 DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
   for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; ){
     size_t hash = e.hash[i];
@@ -147,6 +147,14 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_next)(const DPA__U_SM_T
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
 
 /**
+ * \returns The value
+ */
+dpa__u_api dpa_u_reproducible inline
+DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_get)(const DPA__U_SM_TYPE_IT_S*const it){
+  return DPA__U_SM_UNHASH(it->entry);
+}
+
+/**
  * \returns True if the next entry was found, false otherwise.
  */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
@@ -155,6 +163,24 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_next)(const DPA__U_SM_T
  * \returns True if the previous entry was found, false otherwise.
  */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
+
+/**
+ * \returns The value
+ */
+dpa__u_api dpa_u_reproducible inline
+DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_get)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it){
+  (void)that;
+  const size_t i = it->index-1;
+#ifndef DPA__U_SM_NO_BITSET
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  if(that->lbsize == sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT)
+#endif
+    return DPA__U_SM_UNHASH(i);
+#endif
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  return DPA__U_SM_UNHASH(that->key_list[i]);
+#endif
+}
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 /**

@@ -47,7 +47,7 @@ static inline dpa_u_bo_unique_t i2e_ubo(size_t i){
   IF_u128(X(u128, dpa_uint128_t, (dpa_uint128_t), IDENTITY)) \
   IF_u256(X(u256, dpa_uint256_t, (dpa_uint256_t), IDENTITY)) \
   X(pointer, void*, IDENTITY, (void*)) \
-  X(string, dpa_u_bo_unique_t, IDENTITY, i2e_ubo) \
+  X(string, dpa_u_bo_unique_t, IDENTITY, i2e_ubo)
 
 int main(){
 #define B_SET_ADD(T,U,C,P) \
@@ -69,7 +69,7 @@ int main(){
     const clock_t result = end - start; \
     printf("%21s | %6.3lfs | %6.3lfs | %6.3lfs\n", "dpa_u_set_"#T"_add", (double)result/CLOCKS_PER_SEC, (double)(result-dpa_u_total_resize_time)/CLOCKS_PER_SEC, (double)dpa_u_total_resize_time/CLOCKS_PER_SEC); \
   }
-  printf("%21s | %7s | %7s | %7s\n", "Function","total","work","resize"); \
+  printf("%21s | %7s | %7s | %7s\n", "Function","total","work","resize");
   GENERATE(B_SET_ADD)
   puts("");
 #define B_MAP_SET(T,U,C,P) \
@@ -91,7 +91,7 @@ int main(){
     const clock_t result = end - start; \
     printf("%21s | %6.3lfs | %6.3lfs | %6.3lfs\n", "dpa_u_map_"#T"_set", (double)result/CLOCKS_PER_SEC, (double)(result-dpa_u_total_resize_time)/CLOCKS_PER_SEC, (double)dpa_u_total_resize_time/CLOCKS_PER_SEC); \
   }
-  printf("%21s | %7s | %7s | %7s\n", "Function","total","work","resize"); \
+  printf("%21s | %7s | %7s | %7s\n", "Function","total","work","resize");
   GENERATE(B_MAP_SET)
   puts("");
 }
