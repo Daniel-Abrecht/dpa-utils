@@ -272,6 +272,58 @@ static void GROW(
   const volatile clock_t end = clock();
   dpa_u_total_resize_time += end - start;
 }
+
+/*
+// The following version is a little bit slower, except for dpa_uint128_t and dpa_u_bo_unique_t, for those it's faster.
+static void GROW(
+  DPA__U_SM_TYPE*restrict const old,
+  DPA__U_SM_TYPE*restrict const new
+){
+  const volatile clock_t start = clock();
+  DPA__U_SM_KEY_ENTRY_TYPE*restrict const old_key_list = old->key_list;
+  DPA__U_SM_KEY_ENTRY_TYPE*restrict const new_key_list = new->key_list;
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  void**restrict const old_value_list = old->value_list;
+  void**restrict const new_value_list = new->value_list;
+#endif
+  const size_t olbsize = old->lbsize;
+  const size_t lbsize = new->lbsize;
+  // Arbitrary growth may be implement in the future, currently only supports growing by 1 lbsize.
+  assert(olbsize+1 == lbsize);
+  const int j_shift = sizeof(DPA__U_SM_ENTRY_HASH_TYPE)*CHAR_BIT - olbsize;
+  const int k_shift = sizeof(DPA__U_SM_ENTRY_HASH_TYPE)*CHAR_BIT - lbsize;
+  const DPA__U_SM_ENTRY_HASH_TYPE J = (DPA__U_SM_ENTRY_HASH_TYPE)1<<j_shift;
+  const DPA__U_SM_ENTRY_HASH_TYPE K = (DPA__U_SM_ENTRY_HASH_TYPE)1<<k_shift;
+  DPA__U_SM_ENTRY_HASH_TYPE i=0;
+  do if(i>>j_shift == (DPA__U_SM_KEY_ENTRY_HASH(old_key_list[i>>j_shift])+J)>>j_shift){
+    break;
+  } while(i+=J);
+  DPA__U_SM_ENTRY_HASH_TYPE j=i, k=i-K;
+  do {
+    const DPA__U_SM_ENTRY_HASH_TYPE hash = DPA__U_SM_KEY_ENTRY_HASH(old_key_list[j>>j_shift]);
+    for(size_t l=(DPA__U_SM_ENTRY_HASH_TYPE)(hash-k+K)>>k_shift; l--; k+=K)
+      new_key_list[k>>k_shift] = (DPA__U_SM_KEY_ENTRY_TYPE){k}; // Empty entries
+    if(j == hash){
+      j += J;
+      if(j == i) break;
+    }
+    for(DPA__U_SM_ENTRY_HASH_TYPE l=K; (DPA__U_SM_ENTRY_HASH_TYPE)(k-DPA__U_SM_KEY_ENTRY_HASH(old_key_list[j>>j_shift])-1) < l; l+=K){
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      new_value_list[k>>k_shift] = old_value_list[j>>j_shift];
+#endif
+      new_key_list[k>>k_shift] = old_key_list[j>>j_shift];
+      k += K;
+      j += J;
+      if(j == i) break;
+    }
+  } while(j != i);
+  for(const DPA__U_SM_ENTRY_HASH_TYPE hash = DPA__U_SM_KEY_ENTRY_HASH(old_key_list[j>>j_shift])+K; (DPA__U_SM_ENTRY_HASH_TYPE)(hash-k)>>k_shift; k+=K)
+    new_key_list[k>>k_shift] = (DPA__U_SM_KEY_ENTRY_TYPE){k}; // Empty entries
+  const volatile clock_t end = clock();
+  dpa_u_total_resize_time += end - start;
+}
+*/
+
 #endif
 
 #if !defined(DPA__U_SM_NO_BITSET) && (!defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP)
