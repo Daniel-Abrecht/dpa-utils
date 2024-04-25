@@ -258,6 +258,7 @@ ifdef has_shared
 	ln -sf "lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext)"
 endif
 	cp "lib/$(TYPE)/lib$(SONAME)$(a-ext)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(a-ext)"
+	mkdir -p "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	cp -a include/dpa/utils/./ "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	cp include/dpa/utils.h "$(DESTDIR)$(prefix)/include/dpa/"
 	ldconfig

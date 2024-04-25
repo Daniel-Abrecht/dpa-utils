@@ -78,7 +78,7 @@ dpa__u_api long dpa_u_total_resize_time;
 
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-static struct lookup_result LOOKUP(
+dpa__u_really_inline static inline struct lookup_result LOOKUP(
   const DPA__U_SM_TYPE*restrict const that,
   const DPA__U_SM_KEY_ENTRY_TYPE key,
   const size_t lbsize
@@ -120,7 +120,7 @@ false_match:;
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 // This subroutine is used after an existing value was already found, so we have the index of where to insert it.
-static void INSERT(
+dpa__u_really_inline static inline void INSERT(
   DPA__U_SM_TYPE*restrict const that,
   DPA__U_SM_KEY_ENTRY_TYPE key,
   DPA__U_SM_IF_MAP(void* value,)
