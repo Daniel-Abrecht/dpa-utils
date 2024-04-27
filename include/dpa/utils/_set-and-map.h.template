@@ -191,7 +191,8 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_add)(DPA__U_SM_TYPE*res
  * Adds an entry to the set.
  * \returns 1 if the entry was already present, 0 if not, -1 on error.
  */
-dpa__u_api inline int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+dpa__u_api inline
+int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_first)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
 dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
@@ -249,7 +250,8 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_exchange)(DPA__U_SM_TYP
  * If there was none, the variable will remain unchanged.
  * \returns 1 if an existing entry was overwritten, 0 if not, -1 on error.
  */
-dpa__u_api inline int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict*const value){
+dpa__u_api inline
+int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict*const value){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   switch(that->mode){
     case DPA__U_SM_EMPTY:
@@ -291,9 +293,10 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
 #ifdef DPA__U_SM_NO_BITSET
 dpa_u_reproducible dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
 #else
-dpa_u_reproducible dpa__u_api inline bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+dpa_u_reproducible dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_has)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa_u_reproducible dpa__u_api inline
+bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  dpa_u_reproducible dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_has)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
   switch(that->mode){
     case DPA__U_SM_EMPTY: return false;
     case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_has)(that, key);
@@ -318,7 +321,38 @@ dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(DPA__U_SM_TYPE* that);
 /**
  * Returns the entry.
  */
-dpa_u_reproducible dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
+#ifdef DPA__U_SM_NO_BITSET
+dpa_u_reproducible dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+#else
+dpa_u_reproducible dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa_u_reproducible dpa__u_api inline
+dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  switch(that->mode){
+    case DPA__U_SM_EMPTY: return (dpa_u_optional_pointer_t){0};
+    case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_get)(that, key);
+    case DPA__U_SM_BITMAP: {
+      const DPA__U_SM_ENTRY_HASH_TYPE hash = DPA__U_SM_HASH(key);
+      if(!(that->bitmask[DPA__U_SM_BITMAP_OFFSET(hash)] & DPA__U_SM_BITMAP_BIT(hash)))
+        return (dpa_u_optional_pointer_t){0};
+      return (dpa_u_optional_pointer_t){
+        .value = that->value_list[hash],
+        .present = true
+      };
+    }
+  }
+  dpa_u_unreachable("set/map: %s"," invalid state");
+#else
+  if(!that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)] & DPA__U_SM_BITMAP_BIT(key))
+    return (dpa_u_optional_pointer_t){0};
+  return (dpa_u_optional_pointer_t){
+    .value = that->value_list[key],
+    .present = true
+  };
+#endif
+}
+#endif
+
 /**
  * Removes and returns an entry.
  */

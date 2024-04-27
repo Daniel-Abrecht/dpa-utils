@@ -682,24 +682,21 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_has)(const DPA__U_SM_TYP
 }
 #endif
 
+
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key){
+
+#ifndef DPA__U_SM_NO_BITSET
+extern dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+#endif
+
+#ifdef DPA__U_SM_NO_BITSET
+dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
   if(!that->count)
     return (dpa_u_optional_pointer_t){0};
-  const DPA__U_SM_KEY_ENTRY_TYPE entry = DPA__U_SM_HASH(key);
-#ifndef DPA__U_SM_NO_BITSET
-  if(that->lbsize == sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT){
-    const dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(BITMAP_KEY)];
-    dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(BITMAP_KEY);
-    if(!(*m&s))
-      return (dpa_u_optional_pointer_t){0};
-    return (dpa_u_optional_pointer_t){
-      .value = that->value_list[BITMAP_KEY],
-      .present = true
-    };
-  }
+#else
+dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #endif
-  struct lookup_result result = LOOKUP(that, entry, that->lbsize);
+  const struct lookup_result result = LOOKUP(that, DPA__U_SM_HASH(key), that->lbsize);
   if(!result.found)
     return (dpa_u_optional_pointer_t){0};
   return (dpa_u_optional_pointer_t){
@@ -707,7 +704,9 @@ dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const
     .present = true
   };
 }
+
 #endif
+
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key){
