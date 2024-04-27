@@ -237,7 +237,7 @@ lib/$(TYPE)/lib$(SONAME)$(a-ext): $(filter-out build/$(TYPE)/o/src/main/%,$(filt
 
 build/$(TYPE)/s/%.c.s: %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
-	$(CC) -S -o $@ $(CFLAGS) $< # -fverbose-asm
+	$(CC) -S -o $@ $(CFLAGS) $< -fverbose-asm
 
 build/$(TYPE)/o/%.c$(o-ext): %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)

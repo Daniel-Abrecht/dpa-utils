@@ -15,7 +15,7 @@ static inline size_t my_puts_p(dpa_u_bo_simple_ro_t bo){
 }
 #define my_puts(bo) my_puts_p(dpa_u_t_bo_simple_ro((bo)))
 
-static void print_hashmap_stats(){
+static void print_hashmap_stats(void){
   const dpa_u_bo_unique_hashmap_stats_t stats = dpa_u_bo_unique_hashmap_stats();
   printf(
     "\n"

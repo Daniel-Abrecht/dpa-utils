@@ -7,7 +7,7 @@
 #include <math.h>
 #include <errno.h>
 
-static void print_hashmap_stats(){
+static void print_hashmap_stats(void){
   const dpa_u_bo_unique_hashmap_stats_t stats = dpa_u_bo_unique_hashmap_stats();
   printf(
     "\n"

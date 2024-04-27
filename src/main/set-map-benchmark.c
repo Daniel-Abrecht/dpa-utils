@@ -49,7 +49,7 @@ static inline dpa_u_bo_unique_t i2e_ubo(size_t i){
   X(pointer, void*, IDENTITY, (void*)) \
   X(string, dpa_u_bo_unique_t, IDENTITY, i2e_ubo)
 
-int main(){
+int main(void){
 #define B_SET_ADD(T,U,C,P) \
   { \
     dpa_u_total_resize_time = 0; \

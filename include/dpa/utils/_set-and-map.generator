@@ -41,6 +41,13 @@ dpa__u_api_var extern long dpa_u_total_resize_time;
   ) / (DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR+1))
 
 
+enum dpa__u_sm_mode {
+  DPA__U_SM_EMPTY,
+  DPA__U_SM_LIST,
+  DPA__U_SM_FINAL, // It won't grow any more than it already has
+  DPA__U_SM_BITMAP = DPA__U_SM_FINAL,
+};
+
 #endif
 
 #define DPA__U_SM_NO_BITSET

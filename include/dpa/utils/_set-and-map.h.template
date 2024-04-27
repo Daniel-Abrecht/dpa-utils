@@ -18,6 +18,8 @@ struct DPA__U_SM_PREFIX {
 };
 #else
 struct DPA__U_SM_PREFIX {
+  unsigned char mode; // enum dpa__u_sm_mode. Used to directly select the correct method (empty, list, bitmap)
+  unsigned char lbsize; // This is the log 2 of the number of buckets available.
   // After a certain number of entries, it's more efficient to just save the bitmask.
   // The optimal memory usage for a bitmask of a set in bits is `CHAR_BIT**sizeof(DPA__U_SM_KEY_TYPE)`, but see the comment above for real memory usage.
   // The memory usage of a set which actually stores the keys is at least `sizeof(DPA__U_SM_KEY_TYPE) * count`, but a set with open addressing should
@@ -27,7 +29,6 @@ struct DPA__U_SM_PREFIX {
   // `bitmask` will be used if the amount of memory wasted is <= 50%.
   // Switching if no memory is wasted would also be possible, but since we already always allocate a power of 2 of memory for the key and value lists, there would be no benefits to that.
   size_t count; // This is the number of entries stored in the set.
-  unsigned char lbsize; // This is the log 2 of the number of buckets available.
   union {
     // The key entry is a reversible hash of the original key. This way, the hash does not need to be recalculated,
     // even without storing the key and it's hash.
@@ -183,23 +184,98 @@ DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_get)(const DPA__U_SM
 }
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_add_first)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_add)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_add)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
 /**
  * Adds an entry to the set.
  * \returns 1 if the entry was already present, 0 if not, -1 on error.
  */
-dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api inline int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_first)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
+/**
+ * Sets an entry in the map.
+ * \returns 1 if an existing entry was overwritten, 0 if not, -1 on error.
+ */
+dpa__u_api inline int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value){
+#endif
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  switch(that->mode){
+    case DPA__U_SM_EMPTY:
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_first)(that, key, value);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_add_first)(that, key);
+#endif
+    case DPA__U_SM_LIST:
+#ifdef DPA__U_SM_NO_BITSET
+    case DPA__U_SM_FINAL:
+#endif
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set)(that, key, value);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_add)(that, key);
+#endif
+#ifndef DPA__U_SM_NO_BITSET
+    case DPA__U_SM_BITMAP:
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set)(that, key, value);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_add)(that, key);
+#endif
+#endif
+  }
+  dpa_u_unreachable("set/map: %s"," invalid state");
+#else
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  that->value_list[key] = value;
+#endif
+  dpa_u_bitmap_entry_t*restrict const b = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
+  const dpa_u_bitmap_entry_t m = DPA__U_SM_BITMAP_BIT(key);
+  const bool r = *b & m;
+  *b |= m;
+  return r;
+#endif
+}
+
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict* value);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict* value);
 /**
  * Sets an entry in the map and returns the existing one if one exists.
  * If there was none, the variable will remain unchanged.
  * \returns 1 if an existing entry was overwritten, 0 if not, -1 on error.
  */
-dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void** value);
-/**
- * Sets an entry in the map.
- * \returns 1 if an existing entry was overwritten, 0 if not, -1 on error.
- */
-dpa__u_api int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key, void* value);
+dpa__u_api inline int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict*const value){
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  switch(that->mode){
+    case DPA__U_SM_EMPTY:
+      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_first)(that, key, *value);
+    case DPA__U_SM_LIST:
+#ifdef DPA__U_SM_NO_BITSET
+    case DPA__U_SM_FINAL:
+#endif
+      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_exchange)(that, key, value);
+#ifndef DPA__U_SM_NO_BITSET
+    case DPA__U_SM_BITMAP:
+      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_exchange)(that, key, value);
+#endif
+  }
+  dpa_u_unreachable("set/map: %s"," invalid state");
+#else
+  dpa_u_bitmap_entry_t*restrict const b = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
+  const dpa_u_bitmap_entry_t m = DPA__U_SM_BITMAP_BIT(key);
+  const bool r = *b & m;
+  *b |= m;
+  void*const v = *value;
+  if(r) *value = that->value_list[key];
+  that->value_list[key] = v;
+  return r;
+#endif
+}
 #endif
 
 /**
@@ -212,7 +288,26 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, 
  * Checks if an entry is present.
  * \returns true if the entry was present, false otherwise.
  */
-dpa_u_reproducible dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
+#ifdef DPA__U_SM_NO_BITSET
+dpa_u_reproducible dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+#else
+dpa_u_reproducible dpa__u_api inline bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  dpa_u_reproducible dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_has)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+  switch(that->mode){
+    case DPA__U_SM_EMPTY: return false;
+    case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_has)(that, key);
+    case DPA__U_SM_BITMAP: {
+      const DPA__U_SM_ENTRY_HASH_TYPE hash = DPA__U_SM_HASH(key);
+      return that->bitmask[DPA__U_SM_BITMAP_OFFSET(hash)] & DPA__U_SM_BITMAP_BIT(hash);
+    }
+  }
+  dpa_u_unreachable("set/map: %s"," invalid state");
+#else
+  return that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)] & DPA__U_SM_BITMAP_BIT(key);
+#endif
+}
+#endif
 
 /**
  * Removes all entries, frees all allocations
