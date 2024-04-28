@@ -756,6 +756,58 @@ dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_r
 #endif
 
 
+#if defined(DPA__U_SM_MICRO_SET) && DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+ extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _copy)(DPA__U_SM_TYPE*restrict dst, const DPA__U_SM_TYPE*restrict src);
+#else
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _copy)(DPA__U_SM_TYPE*restrict dst, const DPA__U_SM_TYPE*restrict src){
+  if(src->mode == DPA__U_SM_EMPTY){
+    memset(dst, 0, sizeof(*dst));
+    return true;
+  }
+  const size_t lbsize = src->lbsize;
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  void**const value_list = malloc((((size_t)1)<<lbsize)*sizeof(*value_list));
+  if(!value_list)
+    goto error;
+#endif
+  switch(src->mode){
+    case DPA__U_SM_LIST: {
+      DPA__U_SM_KEY_ENTRY_TYPE*const key_list = malloc((((size_t)1)<<lbsize)*sizeof(*key_list));
+      if(!key_list)
+        goto error_1;
+      *dst = *src;
+      memcpy(key_list, src->key_list, (((size_t)1)<<lbsize)*sizeof(*key_list));
+      dst->key_list = key_list;
+    } break;
+#ifndef DPA__U_SM_NO_BITSET
+    case DPA__U_SM_BITMAP: {
+      const size_t size = ((((size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT)) + (sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT-1)) / (sizeof(dpa_u_bitmap_entry_t)*CHAR_BIT)) * sizeof(dpa_u_bitmap_entry_t);
+      dpa_u_bitmap_entry_t*const bitmask = malloc(size);
+      if(!bitmask)
+        goto error_1;
+      *dst = *src;
+      memcpy(bitmask, src->bitmask, size);
+      dst->bitmask = bitmask;
+    } break;
+#endif
+  }
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  memcpy(value_list, src->value_list, (((size_t)1)<<lbsize)*sizeof(*value_list));
+  dst->value_list = value_list;
+#endif
+  return true;
+error_1:
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  free(value_list);
+#endif
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+error:
+#endif
+  return false;
+}
+#endif
+
+
 dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__U_SM_TYPE* that){
   (void)that;
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP

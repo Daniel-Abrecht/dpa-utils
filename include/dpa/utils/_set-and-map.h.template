@@ -431,6 +431,19 @@ size_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _count)(const DPA__U_SM_TYPE* that){
 #endif
 
 /**
+ * Copy a map/set
+ */
+#if defined(DPA__U_SM_MICRO_SET) && DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+dpa__u_api inline
+bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _copy)(DPA__U_SM_TYPE*restrict dst, const DPA__U_SM_TYPE*restrict src){
+  *dst = *src;
+  return true;
+}
+#else
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _copy)(DPA__U_SM_TYPE*restrict dst, const DPA__U_SM_TYPE*restrict src);
+#endif
+
+/**
  * For debugging purposes only
  */
 dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__U_SM_TYPE* that);
