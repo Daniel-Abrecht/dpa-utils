@@ -626,46 +626,44 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set)(DPA__U_SM_TYPE*res
 #endif
 #endif
 
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key){
+
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+#ifndef DPA__U_SM_NO_BITSET
+dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _remove_bitmap)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+  const DPA__U_SM_KEY_ENTRY_TYPE entry = DPA__U_SM_HASH(key);
+  dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(entry)];
+  const dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(entry);
+  bool r = *m & s;
+  *m &= ~s;
+  if(r && --that->count < DPA__U_SM_LIST_OR_BITMAP_SIZE_THRESHOLD/2)
+    CONVERT_TO_LIST(that);
+  return r;
+}
+#endif
+
+#ifdef DPA__U_SM_NO_BITSET
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
   if(!that->count)
     return false;
-  const DPA__U_SM_KEY_ENTRY_TYPE entry = DPA__U_SM_HASH(key);
-#endif
-#ifndef DPA__U_SM_NO_BITSET
-#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  if(that->lbsize == sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT){
-#endif
-    dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(BITMAP_KEY)];
-    const dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(BITMAP_KEY);
-    bool r = *m & s;
-    *m &= ~s;
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    that->value_list[BITMAP_KEY] = 0;
-#endif
-#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    if(r) that->count--;
-    if(that->count < DPA__U_SM_LIST_OR_BITMAP_SIZE_THRESHOLD/2)
-      CONVERT_TO_LIST(that);
-    return r;
-  }
 #else
-  return r;
+extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _remove_list)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #endif
-#endif
-#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  const int lbsize = count_to_lbsize(that->count);
-  if(that->lbsize-lbsize >= 2)
-    SHRINK(that);
+  const DPA__U_SM_KEY_ENTRY_TYPE entry = DPA__U_SM_HASH(key);
   struct lookup_result result = LOOKUP(that, entry, that->lbsize);
   if(!result.found)
     return false;
   REMOVE(that, result.index, that->lbsize);
-  if(dpa_u_unlikely(!--that->count))
+  const size_t count = --that->count;
+  if(dpa_u_unlikely(!count))
     DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(that);
+  const int lbsize = count_to_lbsize(count);
+  if(that->lbsize-lbsize >= 2)
+    SHRINK(that);
   return true;
-#endif
 }
+#endif
+
 
 #ifndef DPA__U_SM_NO_BITSET
 extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
