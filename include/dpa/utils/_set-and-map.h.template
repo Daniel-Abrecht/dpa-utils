@@ -380,7 +380,38 @@ dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_
 /**
  * Removes and returns an entry.
  */
-dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE* that, DPA__U_SM_KEY_TYPE key);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+#ifdef DPA__U_SM_NO_BITSET
+dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+#else
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_list)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_bitmap)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+#endif
+dpa__u_api inline
+dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  switch(that->mode){
+    case DPA__U_SM_EMPTY: return (dpa_u_optional_pointer_t){0};
+    case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_list)(that, key);
+    case DPA__U_SM_BITMAP: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_bitmap)(that, key);
+  }
+  dpa_u_unreachable("set/map: %s"," invalid state");
+#else
+  dpa_u_bitmap_entry_t*restrict const b = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)];
+  const dpa_u_bitmap_entry_t m = DPA__U_SM_BITMAP_BIT(key);
+  const bool r = *b & m;
+  *b &= ~m;
+  if(!r) return (dpa_u_optional_pointer_t){0};
+  return (dpa_u_optional_pointer_t){
+    .value = that->value_list[key],
+    .present = true,
+  };
+#endif
+}
+#endif
+#endif
+
 #endif
 
 #if defined(DPA__U_SM_MICRO_SET) && DPA__U_SM_KIND == DPA__U_SM_KIND_SET
