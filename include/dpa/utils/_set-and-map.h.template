@@ -119,6 +119,7 @@ DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
  * is looked up to determine it's index, or the index it would have had, and the next entry is determined based on the
  * index.
  * The iterator should be 0 initialized. The zero entry can never occur at index 0.
+ * The iterator stores the current key if any, it is always safe to retrive it, even after deleting it.
  */
 struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _safe) {
   DPA__U_SM_KEY_ENTRY_TYPE entry;
@@ -140,48 +141,126 @@ struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _fast) {
 /**
  * \returns True if the next entry was found, false otherwise.
  */
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+
+/**
+ * Same as `it_safe_next`, except it returns the value in the last parameter.
+ * This allows getting the value efficiently, without having to worry about what it the entry got removed.
+ * Note that there is no `it_safe_get_value` method for the same reason, if you want the value of a key from another map,
+ * use the key to do a lookup instead of the iterator, unless the maps share most keys, it won't be signifficantly less
+ * efficient than otherwise possible.
+ * \returns True if the next entry was found, false otherwise.
+ */
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
 
 /**
  * \returns True if the previous entry was found, false otherwise.
  */
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
 
 /**
- * \returns The value
+ * Same as `it_safe_next`, except it returns the value in the last parameter.
+ * This allows getting the value efficiently, without having to worry about what it the entry got removed.
+ * Note that there is no `it_safe_get_value` method for the same reason, if you want the value of a key from another map,
+ * use the key to do a lookup instead of the iterator, unless the maps share most keys, it won't be signifficantly less
+ * efficient than otherwise possible.
+ * \returns True if the next entry was found, false otherwise.
+ */
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
+
+/**
+ * \returns The key
  */
 dpa__u_api dpa_u_reproducible inline
-DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_get)(const DPA__U_SM_TYPE_IT_S*const it){
+DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_get_key)(const DPA__U_SM_TYPE_IT_S*const it){
   return DPA__U_SM_UNHASH(it->entry);
 }
 
 /**
  * \returns True if the next entry was found, false otherwise.
  */
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
+dpa__u_api inline
+bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it){
+  size_t i = it->index;
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+#ifndef DPA__U_SM_NO_BITSET
+  switch(that->mode){
+    case DPA__U_SM_LIST: {
+#endif
+      const int shift = sizeof(DPA__U_SM_ENTRY_HASH_TYPE)*CHAR_BIT-that->lbsize;
+      const size_t count = (size_t)1<<that->lbsize;
+      while(1){
+        if(dpa_u_unlikely(i >= count)){
+          it->index = 0;
+          return false;
+        }
+        if(DPA__U_SM_KEY_ENTRY_HASH(that->key_list[i]) != ((DPA__U_SM_ENTRY_HASH_TYPE)i<<shift))
+          break;
+        i++;
+      }
+      it->index = i+1;
+      return true;
+#ifndef DPA__U_SM_NO_BITSET
+    }
+    case DPA__U_SM_BITMAP: {
+#endif
+#endif
+#ifndef DPA__U_SM_NO_BITSET
+      const size_t count = (size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT);
+      while(1){
+        if(dpa_u_unlikely(i >= count)){
+          it->index = 0;
+          return false;
+        }
+        if(that->bitmask[DPA__U_SM_BITMAP_OFFSET(i)] & DPA__U_SM_BITMAP_BIT(i))
+          break;
+        i++;
+      }
+      it->index = i+1;
+      return true;
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    }
+  }
+#endif
+#endif
+  dpa_u_unreachable("set/map: %s"," invalid state");
+}
 
 /**
  * \returns True if the previous entry was found, false otherwise.
  */
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
 
 /**
- * \returns The value
+ * \returns The key
  */
 dpa__u_api dpa_u_reproducible inline
-DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_fast_get)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it){
-  (void)that;
+DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_key)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it){
   const size_t i = it->index-1;
-#ifndef DPA__U_SM_NO_BITSET
-#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  if(that->lbsize == sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT)
-#endif
-    return DPA__U_SM_UNHASH(i);
-#endif
-#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+#if defined(DPA__U_SM_MICRO_SET) && DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+  (void)that;
+  return i;
+#else
+#ifdef DPA__U_SM_NO_BITSET
   return DPA__U_SM_UNHASH(that->key_list[i]);
+#else
+  switch(that->mode){
+    case DPA__U_SM_LIST:
+      return DPA__U_SM_UNHASH(that->key_list[i]);
+    case DPA__U_SM_BITMAP:
+      return DPA__U_SM_UNHASH(i);
+  }
 #endif
+#endif
+  dpa_u_unreachable("set/map: %s"," invalid state");
 }
+
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+dpa__u_api dpa_u_reproducible inline
+void* DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_value)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it){
+  return that->value_list[it->index-1];
+}
+#endif
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_add_first)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);

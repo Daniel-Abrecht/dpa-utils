@@ -74,8 +74,9 @@ dpa__u_api long dpa_u_total_resize_time;
 
  extern DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE n);
  extern DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e);
- extern DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, it_safe_get)(const DPA__U_SM_TYPE_IT_S*const it);
-
+ extern DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_get_key)(const DPA__U_SM_TYPE_IT_S*const it);
+ extern DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_key)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it);
+ extern void* DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_value)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it);
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 static struct lookup_result LOOKUP(
