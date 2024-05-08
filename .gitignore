@@ -1,0 +1,13 @@
+bin/
+build/
+*~
+*.o
+*.so
+*.a
+*.bak
+*.old
+*.*swap*
+.gdb_history
+*~
+tmp/
+res/
