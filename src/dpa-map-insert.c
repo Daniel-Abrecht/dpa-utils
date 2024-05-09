@@ -5,8 +5,6 @@
 #include <stddef.h>
 #include <time.h>
 
-#define AMOUNT 0x10000000llu
-
 #define IDENTITY(X) X
 
 static inline dpa_u_bo_unique_t i2e_ubo(size_t i){
@@ -64,7 +62,7 @@ void dpa_set_bench(void){
         dpa_u_set_##T##_clear(&container); \
         start -= clock(); \
       } \
-    } while(i<AMOUNT); \
+    } while(i<INSERT_AMOUNT); \
     volatile const clock_t end = clock(); \
     dpa_u_set_##T##_clear(&container); \
     const clock_t result = end - start; \
@@ -87,7 +85,7 @@ void dpa_map_bench(void){
         dpa_u_map_##T##_clear(&container); \
         start -= clock(); \
       } \
-    } while(i<AMOUNT); \
+    } while(i<INSERT_AMOUNT); \
     volatile const clock_t end = clock(); \
     dpa_u_map_##T##_clear(&container); \
     const clock_t result = end - start; \

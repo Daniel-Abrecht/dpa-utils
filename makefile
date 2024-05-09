@@ -33,13 +33,13 @@ build/all.a: $(filter-out build/o/src/main/%,$(OBJECTS))
 	rm -f $@
 	$(AR) q $@ $^
 
-build/o/%.c.o: %.c
+build/o/%.c.o: %.c $(HEADERS)
 	mkdir -p $(dir $@)
-	$(CC) -c -o $@ $(CFLAGS) $^
+	$(CC) -c -o $@ $(CFLAGS) $<
 
-build/o/%.cpp.o: %.cpp
+build/o/%.cpp.o: %.cpp $(HEADERS)
 	mkdir -p $(dir $@)
-	$(CXX) -c -o $@ $(CXXFLAGS) $^
+	$(CXX) -c -o $@ $(CXXFLAGS) $<
 
 clean:
 	rm -rf res bin build
