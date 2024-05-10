@@ -11,4 +11,11 @@ int main(){
     dpa_g_set_destroy(set);
     puts("");
   }
+  for(const dpa_if_map_t* it=dpa_map_impl_list; it; it=it->next){
+    const char*const name = it->name;
+    dpa_g_map_t*const map = dpa_g_map_create(it);
+    printf("%s\t", name);
+    dpa_g_map_destroy(map);
+    puts("");
+  }
 }
