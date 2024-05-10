@@ -19,6 +19,7 @@ static bool set_has(dpa_g_set_t* set, unsigned x){
 }
 
 static dpa_if_set_t dpa_set_u_impl = {
+  .name = "dpa_u_set_u_t",
   .size = sizeof(dpa_u_set_u_t),
   .add = set_add,
   .has = set_has,
@@ -43,6 +44,7 @@ static dpa_u_optional_pointer_t map_get(dpa_g_map_t* map, unsigned x){
 }
 
 static dpa_if_map_t dpa_map_u_impl = {
+  .name = "dpa_u_map_u_t",
   .size = sizeof(dpa_u_map_u_t),
   .destroy = map_destroy,
   .set = map_set,

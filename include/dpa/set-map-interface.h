@@ -69,7 +69,7 @@ static inline dpa_g_set_t* dpa_g_set_create(const dpa_if_set_t*const iface){
   void*const mem = calloc(sizeof(dpa_if_set_t*) + iface->size, 1);
   if(!mem) return 0;
   *(const dpa_if_set_t**)mem = iface;
-  dpa_g_set_t*const gset = (dpa_g_set_t*)((const dpa_if_set_t**)gset + 1);
+  dpa_g_set_t*const gset = (dpa_g_set_t*)((const dpa_if_set_t**)mem + 1);
   if(iface->init)
   if(!iface->init(gset)){
     free(mem);
@@ -81,7 +81,7 @@ static inline dpa_g_set_t* dpa_g_set_create(const dpa_if_set_t*const iface){
 static inline void dpa_g_set_destroy(dpa_g_set_t*const set){
   const dpa_if_set_t*const iface = ((const dpa_if_set_t*const*)set)[-1];
   iface->destroy(set);
-  free(set);
+  free(((dpa_if_set_t**)set)-1);
 }
 
 static inline void dpa_g_set_add(dpa_g_set_t* set, unsigned x){
@@ -104,7 +104,7 @@ static inline dpa_g_map_t* dpa_g_map_create(const dpa_if_map_t*const iface){
   void*const mem = calloc(sizeof(dpa_if_map_t*) + iface->size, 1);
   if(!mem) return 0;
   *(const dpa_if_map_t**)mem = iface;
-  dpa_g_map_t*const gmap = (dpa_g_map_t*)((const dpa_if_map_t*const*)gmap + 1);
+  dpa_g_map_t*const gmap = (dpa_g_map_t*)((const dpa_if_map_t*const*)mem + 1);
   if(iface->init)
   if(!iface->init(gmap)){
     free(mem);
@@ -116,6 +116,7 @@ static inline dpa_g_map_t* dpa_g_map_create(const dpa_if_map_t*const iface){
 static inline void dpa_g_map_destroy(dpa_g_map_t* map){
   const dpa_if_map_t*const iface = ((const dpa_if_map_t*const*)map)[-1];
   iface->destroy(map);
+  free(((dpa_if_map_t**)map)-1);
 }
 
 static inline void dpa_g_map_set(dpa_g_map_t* map, unsigned key, void* value){
