@@ -15,9 +15,9 @@ static void set_add(const char* name){
   do {
     container.insert((T)i++);
     if(!(T)(i)){
-      start += clock();
+      start = start + clock();
       container.clear();
-      start -= clock();
+      start = start - clock();
     }
   } while(i<INSERT_AMOUNT);
   volatile const clock_t end = clock();
@@ -34,9 +34,9 @@ static void map_add(const char* name){
   do {
     container[(T)i++] = (void*)0;
     if(!(T)(i)){
-      start += clock();
+      start = start + clock();
       container.clear();
-      start -= clock();
+      start = start - clock();
     }
   } while(i<INSERT_AMOUNT);
   volatile const clock_t end = clock();

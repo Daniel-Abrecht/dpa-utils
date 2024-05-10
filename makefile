@@ -3,13 +3,17 @@
 .PHONY: all bin clean
 
 CFLAGS += -std=c17
+CXXFLAGS += -std=gnu++20
+
 CXFLAGS += -Wall -Wextra -pedantic
 CXFLAGS += -Wno-missing-field-initializers -Wno-missing-braces
 CXFLAGS += -ffunction-sections -fdata-sections
 CXFLAGS += -O2
 CXFLAGS += -Iinclude
 CFLAGS += $(CXFLAGS)
+
 CXXFLAGS += $(CXFLAGS)
+
 LDFLAGS += -Wl,--gc-sections
 LDLIBS += -ldpa-utils
 
