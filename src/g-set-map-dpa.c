@@ -52,9 +52,27 @@ static dpa_if_map_t dpa_map_u_impl = {
   .get = map_get,
 };
 
+
+static void nop_destroy(dpa_g_set_t* set){(void)set;}
+static void nop_add(dpa_g_set_t* set, unsigned x){(void)set;(void)x;}
+static void nop_remove(dpa_g_set_t* set, unsigned x){(void)set;(void)x;}
+static bool nop_has(dpa_g_set_t* set, unsigned x){(void)set;(void)x;return false;}
+
+static dpa_if_set_t nop_set_impl = {
+  .name = "nop",
+  .size = 0,
+  .add = nop_add,
+  .has = nop_has,
+  .remove = nop_remove,
+  .destroy = nop_destroy,
+};
+
+
 dpa_u_init static void init(void){
   dpa_set_u_impl.next = dpa_set_impl_list;
   dpa_set_impl_list = &dpa_set_u_impl;
+  nop_set_impl.next = dpa_set_impl_list;
+  dpa_set_impl_list = &nop_set_impl;
   dpa_map_u_impl.next = dpa_map_impl_list;
   dpa_map_impl_list = &dpa_map_u_impl;
 }

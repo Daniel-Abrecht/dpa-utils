@@ -7,7 +7,8 @@ set term svg size 960,540 dynamic
 set grid xtics ytics mxtics mytics
 set logscale
 set autoscale fix
-set key top left
+set key bottom left
+set pointsize 0.5
 #set xtics 2
 #set ytics 2
 
