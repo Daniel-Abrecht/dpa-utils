@@ -3,6 +3,7 @@
 .PHONY: all bin clean
 
 CFLAGS += -std=c17
+CFLAGS += -D_DEFAULT_SOURCE
 CXXFLAGS += -std=gnu++20
 
 CXFLAGS += -Wall -Wextra -pedantic

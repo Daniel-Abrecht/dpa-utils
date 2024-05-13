@@ -1,11 +1,11 @@
 #include <dpa/set-map-interface.h>
+#include <dpa/benchmark.h>
 #include <stdio.h>
-#include <time.h>
 
 #define INSERT_AMOUNT 0x2000000llu
 #define POINTS 0x80
 
-int main(void){
+__attribute__((optimize("O0"))) int main(void){
   setvbuf(stdout, 0, _IOLBF, 0);
   puts("#!gnuplot/line-log-rows.gp");
   printf("#fx:%llu\n", (long long unsigned)INSERT_AMOUNT/POINTS);
@@ -15,16 +15,16 @@ int main(void){
     dpa_g_set_t*const set = dpa_g_set_create(it);
     printf("%s", name);
     for(size_t i=0; i<INSERT_AMOUNT; ){
-      volatile clock_t start, end;
-      start = clock();
-      for(size_t j=0; j<INSERT_AMOUNT/POINTS; j++,i++){
+      long long unsigned start, end;
+      start = get_time_us();
+      for(size_t j=0; j<INSERT_AMOUNT/POINTS; j++){
         dpa_g_set_has(set, ~i);
       }
-      end = clock();
+      end = get_time_us();
       for(size_t j=0; j<INSERT_AMOUNT/POINTS; j++){
-        dpa_g_set_add(set, i);
+        dpa_g_set_add(set, i++);
       }
-      printf("\t%lf", (double)(end-start)/CLOCKS_PER_SEC*1000000);
+      printf("\t%llu", end-start);
     }
     dpa_g_set_destroy(set);
     puts("");
@@ -34,16 +34,16 @@ int main(void){
     dpa_g_map_t*const map = dpa_g_map_create(it);
     printf("%s", name);
     for(size_t i=0; i<INSERT_AMOUNT; ){
-      volatile clock_t start, end;
-      start = clock();
-      for(size_t j=0; j<INSERT_AMOUNT/POINTS; j++,i++){
+      long long unsigned start, end;
+      start = get_time_us();
+      for(size_t j=0; j<INSERT_AMOUNT/POINTS; j++){
         dpa_g_map_get(map, ~i);
       }
-      end = clock();
+      end = get_time_us();
       for(size_t j=0; j<INSERT_AMOUNT/POINTS; j++){
-        dpa_g_map_set(map, i, 0);
+        dpa_g_map_set(map, i++, 0);
       }
-      printf("\t%lf", (double)(end-start)/CLOCKS_PER_SEC*1000000);
+      printf("\t%llu", end-start);
     }
     dpa_g_map_destroy(map);
     puts("");
