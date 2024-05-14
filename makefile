@@ -57,10 +57,11 @@ endif
 CSTD ?= c17
 CFLAGS  += --std=$(CSTD)
 CFLAGS  += -Iinclude -I.
-CFLAGS  += -Wall -Wextra -pedantic -Werror
+CFLAGS  += -Wall -Wextra -pedantic #-Werror
 #CFLAGS  += -fstack-protector-all
-CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces
+CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces -Wno-static-in-inline
 #CFLAGS  += -fmax-errors=2
+CFLAGS  += -fdiagnostics-color=always
 
 CFLAGS  += -fvisibility=hidden
 
@@ -85,7 +86,7 @@ export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 SHELL_CMD="$$SHELL"
 
 ifndef noshared
-shared_test := $(shell $(CC) -o /dev/null --shared -fPIC src/special/nop.c >/dev/null 2>/dev/null; echo $$?)
+shared_test := $(shell $(CC) -o build/.shared-test$(so-ext) --shared -fPIC src/special/nop.c >/dev/null 2>/dev/null; echo $$?)
 else
 shared_test=1
 endif
@@ -206,6 +207,8 @@ test: $(B-TS)
 	$(B-TS) utils $(MAKE) -k $(TESTS)
 
 bin: $(BINS)
+	@f="$$(find build/$(TYPE) -iname '*$(o-ext).err')"; \
+	if [ -n "$$f" ]; then printf "\nThere have been warnings, see logs:\n%s\n" "$$f"; fi
 
 asm: $(ASMOUT)
 
@@ -228,7 +231,7 @@ build/$(TYPE)/bin/%$(bin-ext): build/$(TYPE)/o/%.c$(o-ext) $(LIB)
 lib/$(TYPE)/lib$(SONAME)$(so-ext): lib/$(TYPE)/lib$(SONAME)$(a-ext) $(filter build/$(TYPE)/o/src/special/%,$(OBJECTS))
 	mkdir -p $(dir $@)
 	ln -sf "lib$(SONAME)$(so-ext)" "$@.0"
-	$(CC) -o $@ -Wl,-Map=$@.map -Wl,--no-undefined -Wl,-soname,lib$(SONAME)$(so-ext).$(MAJOR) --shared -fPIC $(LDFLAGS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+	$(CC) -o $@ -Wl,-Map=$@.map -Wl,--no-undefined -Wl,-soname,lib$(SONAME)$(so-ext).$(MAJOR) --shared -fPIC $(LDFLAGS) -Wl,--whole-archive $^ -Wl,--no-whole-archive  $(LDLIBS)
 
 lib/$(TYPE)/lib$(SONAME)$(a-ext): $(filter-out build/$(TYPE)/o/src/main/%,$(filter-out build/$(TYPE)/o/src/special/%,$(filter-out build/$(TYPE)/o/test/%,$(OBJECTS))))
 	mkdir -p $(dir $@)
@@ -241,11 +244,13 @@ build/$(TYPE)/s/%.c.s: %.c makefile $(HEADERS)
 
 build/$(TYPE)/o/%.c$(o-ext): %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
-	$(CC) -c -o $@ -DDPA__U_BUILD_LIB $(CFLAGS) $<
+	( $(CC) -c -o $@ -DDPA__U_BUILD_LIB $(CFLAGS) $< 2>&1 >&3 | tee "$@.err" >&2; ) 3>&1
+	@if [ ! -s "$@.err" ]; then rm -f "$@.err"; fi
 
 build/$(TYPE)/o/main/%.c$(o-ext): %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
-	$(CC) -c -o $@ $(CFLAGS) $<
+	( $(CC) -c -o $@ $(CFLAGS) $< >&3 2>&1 | tee "$@.err" >&2; ) 3>&1
+	@if [ ! -s "$@.err" ]; then rm -f "$@.err"; fi
 
 clean:
 	rm -rf build/$(TYPE)/ bin/$(TYPE)/ lib/$(TYPE)/

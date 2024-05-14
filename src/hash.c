@@ -3,7 +3,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#if DPA__U__has_include(<sys/random.h>)
+#ifdef _WIN32
+#include <windows.h>
+#include <ntsecapi.h>
+void dpa_u_getrandom(void* buf, size_t buflen){
+  if(!RtlGenRandom(buf, buflen))
+    dpa_u_abort("getrandom failed (%d): %s", errno, strerror(errno));
+}
+#elif DPA__U__has_include(<sys/random.h>)
 #include <sys/random.h>
 void dpa_u_getrandom(void* _buf, size_t buflen){
   char* buf = _buf;
@@ -16,13 +23,6 @@ void dpa_u_getrandom(void* _buf, size_t buflen){
     buf += i;
     buflen -= i;
   }
-}
-#elif _MSC_VER
-#include <windows.h>
-#include <ntsecapi.h>
-void dpa_u_getrandom(void* buf, size_t buflen){
-  if(!RtlGenRandom(buf, buflen))
-    dpa_u_abort("getrandom failed (%d): %s", errno, strerror(errno));
 }
 #endif
 

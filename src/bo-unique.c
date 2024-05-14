@@ -19,7 +19,8 @@ dpa_u_export dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t*con
 
 #ifndef DPA_U_NO_THREADS
 #include <stdatomic.h>
-#include <threads.h>
+// c11 has <threads.h>, some platforms have atomics and pthreads, but not c11 threads. In that case, this'll polyfill it.
+#include <dpa/utils/threads.h>
 #endif
 
 #undef dpa_u_refcount_is_zero_s

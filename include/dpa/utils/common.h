@@ -13,14 +13,11 @@
 #include DPA_U_CONFIG
 #endif
 
-#if defined(__STDC_NO_THREADS__) || defined(__STDC_NO_ATOMICS__)
-#ifndef DPA_U_NO_THREADS
-#define DPA_U_NO_THREADS
+#ifdef DPA_U_NO_THREADS
 #ifdef _MSC_VER
 #pragma message ("DANGER: C atomic or threads support missing, library will not be threadsafe!")
 #else
 #warning "DANGER: C atomic or threads support missing, library will not be threadsafe!"
-#endif
 #endif
 #endif
 
