@@ -6,7 +6,12 @@
 #define POINTS 0x80
 #define REPEAT 4
 
-__attribute__((optimize("O0"))) int main(void){
+#ifdef __llvm__
+__attribute__((optnone))
+#elif defined(__GNUC__)
+__attribute__((optimize("0")))
+#endif
+int main(void){
   setvbuf(stdout, 0, _IOLBF, 0);
   puts("#!gnuplot/line-log-rows.gp");
   printf("#title: Reading %llu values, %u times, at various fill-levels, in us\n", (long long unsigned)INSERT_AMOUNT/POINTS, REPEAT);

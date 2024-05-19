@@ -3,7 +3,7 @@
 
 #include <time.h>
 
-static inline long long unsigned get_time_us(){
+static inline long long unsigned get_time_us(void){
   struct timespec ts;
   clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
   return ts.tv_nsec / 1000 + ts.tv_sec * 1000000;

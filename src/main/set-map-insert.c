@@ -6,6 +6,7 @@ int main(void){
   puts("#!script/barchart");
   printf("#title: Insert of %llu entries in seconds\n", (long long unsigned)INSERT_AMOUNT);
   puts("implementation\ttype\ttotal\twork\tresize");
+  dpa_nop_bench();
   dpa_set_bench();
   dpa_map_bench();
   cpp_std_unordered_set_bench();

@@ -9,10 +9,13 @@ extern "C" {
 
 void dpa_set_bench(void);
 void dpa_map_bench(void);
+void dpa_nop_bench(void);
 void cpp_std_unordered_set_bench(void);
 void cpp_std_unordered_map_bench(void);
 void cpp_std_set_bench(void);
 void cpp_std_map_bench(void);
+
+int f_nop(void*,...);
 
 #ifdef __cplusplus
 }
