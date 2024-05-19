@@ -3,7 +3,7 @@
 set -e
 
 genexports(){
-  find "$@" -iname "*.h" -exec cat {} \; | sed -n 's/.* inline \([^(]* dpa_[a-zA-Z0-9_]*([^)]*)\).*/extern \1;/p' | sort -u
+  find "$@" -iname "*.h" -not -iname "_*" -exec cat {} \; | sed -n 's/.* inline \([^(]* dpa_[a-zA-Z0-9_]*([^)]*)\).*/extern \1;/p' | sort -u
 }
 
 declare -A extra

@@ -226,3 +226,24 @@ union dpa__u_gcc_struct dpa__u_bo_ptr_helper {
   };
   dpa_u_bo_inline_t bo_inline;
 };
+
+// dpa_u_bo_unique_t is designed to be the size of 2 size_t (unless DPA_U_BO_NOT_PACKED is set), that's still fairly small.
+// If there is an DPA_HAS_UINT128, it may be big enough to hold it. Otherwise, we assume long long unsigned is the biggest integer.
+// Actually checking if 2 size_t fit in long long unsigned is a bit tricky though. The _WIDTH macros aren't available before c11,
+// and we can't just check SIZE_MAX*2 <= ULLONG_MAX, because that may overflow.
+#if ( defined(DPA_HAS_UINT128) && !defined(DPA_U_BO_NOT_PACKED) ) || (ULLONG_MAX/SIZE_MAX >= 2llu && ULLONG_MAX/SIZE_MAX-2llu >= SIZE_MAX)
+#if UINT_MAX/SIZE_MAX >= 2llu && UINT_MAX/SIZE_MAX-2llu >= SIZE_MAX
+typedef unsigned dpa_u_bo_unique_as_uint_t;
+#define DPA_U_BO_UNIQUE_UINT_COMPATIBLE u
+#elif ULONG_MAX/SIZE_MAX >= 2llu && ULONG_MAX/SIZE_MAX-2llu >= SIZE_MAX
+typedef unsigned long dpa_u_bo_unique_as_uint_t;
+#define DPA_U_BO_UNIQUE_UINT_COMPATIBLE lu
+#elif ULLONG_MAX/SIZE_MAX >= 2llu && ULLONG_MAX/SIZE_MAX-2llu >= SIZE_MAX
+typedef unsigned long long dpa_u_bo_unique_as_uint_t;
+#define DPA_U_BO_UNIQUE_UINT_COMPATIBLE llu
+#else
+typedef dpa_uint128_t dpa_u_bo_unique_as_uint_t;
+#define DPA_U_BO_UNIQUE_UINT_COMPATIBLE u128
+#endif
+static_assert(sizeof(dpa_u_bo_unique_as_uint_t) >= sizeof(dpa_u_bo_unique_t));
+#endif

@@ -4,8 +4,8 @@
 #include <stdbool.h>
 
 typedef struct DPA__U_SM_PREFIX DPA__U_SM_TYPE;
-typedef struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _safe) DPA__U_SM_TYPE_IT_S;
-typedef struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _fast) DPA__U_SM_TYPE_IT_F;
+typedef struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe) DPA__U_SM_TYPE_IT_S;
+typedef struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast) DPA__U_SM_TYPE_IT_F;
 
 #if defined(DPA__U_SM_MICRO_SET) && DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 // For CHAR_BIT == 8, for a set containing one of 256 entries, we only need 256 bits.
@@ -122,7 +122,7 @@ DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
  * The iterator stores the current key if any, it is always safe to retrive it, even after deleting it.
  * The initial and final state will be the same, you can reuse an iterator to iterate over everything again.
  */
-struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _safe) {
+struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe) {
   DPA__U_SM_KEY_ENTRY_TYPE entry;
 #ifdef DPA__U_SM_NO_BITSET
   size_t index;
@@ -136,7 +136,7 @@ struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _safe) {
  * Also, the first / last entries may be different from the *_it_safe_t iterator, we don't necessarely start at 0 here.
  * The initial and final state will be the same, you can reuse an iterator to iterate over everything again.
  */
-struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _fast) {
+struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast) {
   size_t index;
 };
 
@@ -145,6 +145,7 @@ struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _fast) {
  */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
 
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 /**
  * Same as `it_safe_next`, except it returns the value in the last parameter.
  * This allows getting the value efficiently, without having to worry about what it the entry got removed.
@@ -154,12 +155,14 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_
  * \returns True if the next entry was found, false otherwise.
  */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
+#endif
 
 /**
  * \returns True if the previous entry was found, false otherwise.
  */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
 
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 /**
  * Same as `it_safe_next`, except it returns the value in the last parameter.
  * This allows getting the value efficiently, without having to worry about what it the entry got removed.
@@ -169,6 +172,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_
  * \returns True if the next entry was found, false otherwise.
  */
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
+#endif
 
 /**
  * \returns The key

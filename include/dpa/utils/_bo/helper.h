@@ -163,3 +163,18 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline union dpa__u_bo_ptr_he
 }
 // This is a helper for getting a copy of inline BOs in the current block scope to adjust their lifetime
 #define dpa__u_bo_any_inline_ptr_h(X) &dpa_u_rescope(union dpa__u_bo_ptr_helper,dpa__u_bo_any_inline_ptr((X)))
+
+#ifdef DPA_U_BO_UNIQUE_UINT_COMPATIBLE
+dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline
+dpa_u_bo_unique_as_uint_t dpa_u_bo_unique_to_uint(dpa_u_bo_unique_t v){
+  dpa_u_bo_unique_as_uint_t r;
+  memcpy(&r, &v, sizeof(v));
+  return r;
+}
+dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline
+dpa_u_bo_unique_t dpa_u_bo_unique_from_uint(dpa_u_bo_unique_as_uint_t v){
+  dpa_u_bo_unique_t r;
+  memcpy(&r, &v, sizeof(r));
+  return r;
+}
+#endif

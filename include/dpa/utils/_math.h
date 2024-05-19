@@ -369,7 +369,7 @@
     char(*)[29]: ((T)0x6BB6DC3llu), \
     char(*)[30]: ((T)0x393A422Bllu), \
     char(*)[31]: ((T)0xF77E3CFllu), \
-    char(*)[32]: ((T)0x5E5BAEBDllu), \
+    char(*)[32]: ((T)0x2B5EFFABllu), \
     char(*)[33]: ((T)0x16E503027llu), \
     char(*)[34]: ((T)0x3E0592CE3llu), \
     char(*)[35]: ((T)0x2E5818CC9llu), \
@@ -660,7 +660,7 @@
     char(*)[29]: ((T)0x120AEAEBllu), \
     char(*)[30]: ((T)0x14D26C83llu), \
     char(*)[31]: ((T)0x6342432Fllu), \
-    char(*)[32]: ((T)0x4CDB3C95llu), \
+    char(*)[32]: ((T)0xCEAC0303llu), \
     char(*)[33]: ((T)0x1A4963F97llu), \
     char(*)[34]: ((T)0x1FDF578CBllu), \
     char(*)[35]: ((T)0x2CD0C4D79llu), \

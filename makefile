@@ -1,6 +1,8 @@
 .SECONDARY:
 .SUFFIXES:
 
+SHELL=/bin/bash
+
 ifdef use
 include $(patsubst %,mk/%.mk,$(use))
 endif
@@ -244,11 +246,13 @@ build/$(TYPE)/s/%.c.s: %.c makefile $(HEADERS)
 
 build/$(TYPE)/o/%.c$(o-ext): %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
+	set -e -o pipefail; \
 	( $(CC) -c -o $@ -DDPA__U_BUILD_LIB $(CFLAGS) $< 2>&1 >&3 | tee "$@.err" >&2; ) 3>&1
 	@if [ ! -s "$@.err" ]; then rm -f "$@.err"; fi
 
 build/$(TYPE)/o/main/%.c$(o-ext): %.c makefile $(HEADERS)
 	mkdir -p $(dir $@)
+	set -e -o pipefail; \
 	( $(CC) -c -o $@ $(CFLAGS) $< >&3 2>&1 | tee "$@.err" >&2; ) 3>&1
 	@if [ ! -s "$@.err" ]; then rm -f "$@.err"; fi
 

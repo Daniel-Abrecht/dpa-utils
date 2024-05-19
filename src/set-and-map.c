@@ -51,10 +51,12 @@ dpa__u_api long dpa_u_total_resize_time;
 
 ////////////////////////////////////////////////////////////
 
+#define DPA__U_STR_AS_UINT_IMPL <dpa/utils/nop>
 #define DPA__U_SM_TEMPLATE <src/set-and-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_SET
 #include <dpa/utils/_set-and-map.generator>
 
+#define DPA__U_STR_AS_UINT_IMPL <dpa/utils/nop>
 #define DPA__U_SM_TEMPLATE <src/set-and-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_MAP
 #include <dpa/utils/_set-and-map.generator>
