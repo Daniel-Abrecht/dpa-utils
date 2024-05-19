@@ -245,5 +245,5 @@ typedef unsigned long long dpa_u_bo_unique_as_uint_t;
 typedef dpa_uint128_t dpa_u_bo_unique_as_uint_t;
 #define DPA_U_BO_UNIQUE_UINT_COMPATIBLE u128
 #endif
-static_assert(sizeof(dpa_u_bo_unique_as_uint_t) >= sizeof(dpa_u_bo_unique_t));
+static_assert(sizeof(dpa_u_bo_unique_as_uint_t) >= sizeof(dpa_u_bo_unique_t), "dpa_u_bo_unique_t was unexpectedly bigger than dpa_u_bo_unique_as_uint_t!");
 #endif
