@@ -143,7 +143,39 @@ struct DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast) {
 /**
  * \returns True if the next entry was found, false otherwise.
  */
+#ifdef DPA__U_SM_NO_BITSET
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+#else
+dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+dpa__u_api inline
+bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it){
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  switch(that->mode){
+    case DPA__U_SM_EMPTY: memset(it, 0, sizeof(*it)); return false;
+    case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next)(that, it);
+    case DPA__U_SM_BITMAP: {
+#endif
+      size_t i = it->index;
+      const size_t count = (size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT);
+      while(1){
+        if(dpa_u_unlikely(i >= count)){
+          it->index = 0;
+          return false;
+        }
+        if(that->bitmask[DPA__U_SM_BITMAP_OFFSET(i)] & DPA__U_SM_BITMAP_BIT(i))
+          break;
+        i++;
+      }
+      it->entry = i;
+      it->index = i+1;
+      return true;
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    }
+  }
+#endif
+  dpa_u_unreachable("set/map: %s"," invalid state");
+}
+#endif
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 /**
@@ -154,13 +186,78 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_
  * efficient than otherwise possible.
  * \returns True if the next entry was found, false otherwise.
  */
+#ifdef DPA__U_SM_NO_BITSET
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
+#else
+dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
+dpa__u_api inline
+bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret){
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  switch(that->mode){
+    case DPA__U_SM_EMPTY: memset(it, 0, sizeof(*it)); return false;
+    case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next_value)(that, it, ret);
+    case DPA__U_SM_BITMAP: {
+#endif
+      size_t i = it->index;
+      const size_t count = (size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT);
+      while(1){
+        if(dpa_u_unlikely(i >= count)){
+          it->index = 0;
+          return false;
+        }
+        if(that->bitmask[DPA__U_SM_BITMAP_OFFSET(i)] & DPA__U_SM_BITMAP_BIT(i))
+          break;
+        i++;
+      }
+      *ret = that->value_list[i];
+      it->entry = i;
+      it->index = i+1;
+      return true;
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    }
+  }
+#endif
+  dpa_u_unreachable("set/map: %s"," invalid state");
+}
+#endif
 #endif
 
 /**
  * \returns True if the previous entry was found, false otherwise.
  */
+#ifdef DPA__U_SM_NO_BITSET
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+#else
+dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+dpa__u_api inline bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it){
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  switch(that->mode){
+    case DPA__U_SM_EMPTY: memset(it, 0, sizeof(*it)); return false;
+    case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev)(that, it);
+    case DPA__U_SM_BITMAP: {
+#endif
+      const size_t count = (size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT);
+      size_t i = it->index;
+      if(!i) i = count + 1;
+      i--;
+      while(1){
+        if(dpa_u_unlikely(--i >= count)){
+          it->index = 0;
+          return false;
+        }
+        if(that->bitmask[DPA__U_SM_BITMAP_OFFSET(i)] & DPA__U_SM_BITMAP_BIT(i))
+          break;
+      }
+      it->entry = i;
+      it->index = i+1;
+      return true;
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    }
+  }
+#endif
+  dpa_u_unreachable("set/map: %s"," invalid state");
+}
+#endif
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 /**
@@ -171,7 +268,40 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_
  * efficient than otherwise possible.
  * \returns True if the next entry was found, false otherwise.
  */
+#ifdef DPA__U_SM_NO_BITSET
 dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
+#else
+dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
+dpa__u_api inline bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret){
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  switch(that->mode){
+    case DPA__U_SM_EMPTY: memset(it, 0, sizeof(*it)); return false;
+    case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev_value)(that, it, ret);
+    case DPA__U_SM_BITMAP: {
+#endif
+      const size_t count = (size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT);
+      size_t i = it->index;
+      if(!i) i = count + 1;
+      i--;
+      while(1){
+        if(dpa_u_unlikely(--i >= count)){
+          it->index = 0;
+          return false;
+        }
+        if(that->bitmask[DPA__U_SM_BITMAP_OFFSET(i)] & DPA__U_SM_BITMAP_BIT(i))
+          break;
+      }
+      *ret = that->value_list[i];
+      it->entry = i;
+      it->index = i+1;
+      return true;
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    }
+  }
+#endif
+  dpa_u_unreachable("set/map: %s"," invalid state");
+}
+#endif
 #endif
 
 /**
@@ -179,7 +309,11 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA_
  */
 dpa__u_api dpa_u_reproducible inline
 DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_get_key)(const DPA__U_SM_TYPE_IT_S*const it){
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   return DPA__U_SM_UNHASH(it->entry);
+#else
+  return it->entry;
+#endif
 }
 
 /**
@@ -240,6 +374,7 @@ bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(const DPA__U_SM_TYPE* that,
  */
 dpa__u_api inline
 bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it){
+  size_t i = it->index;
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #ifndef DPA__U_SM_NO_BITSET
   switch(that->mode){
@@ -249,7 +384,6 @@ bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(const DPA__U_SM_TYPE* that,
     case DPA__U_SM_LIST: {
 #endif
       const size_t count = (size_t)1<<that->lbsize;
-      size_t i = it->index;
       if(!i) i = count + 1;
       i--;
       const int shift = sizeof(DPA__U_SM_ENTRY_HASH_TYPE)*CHAR_BIT-that->lbsize;
@@ -270,7 +404,6 @@ bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(const DPA__U_SM_TYPE* that,
 #endif
 #ifndef DPA__U_SM_NO_BITSET
       const size_t count = (size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT);
-      size_t i = it->index;
       if(!i) i = count + 1;
       i--;
       while(1){
