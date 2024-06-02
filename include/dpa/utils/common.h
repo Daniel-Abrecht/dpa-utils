@@ -380,6 +380,42 @@ typedef __int256_t dpa_int256_t;
 typedef __uint256_t dpa_uint256_t;
 #endif
 
+#ifdef UINT8_MAX
+#define DPA_U_IF_HAS_UINT8(...) __VA_ARGS__
+#else
+#define DPA_U_IF_HAS_UINT8(...)
+#endif
+#ifdef UINT16_MAX
+#define DPA_U_IF_HAS_UINT16(...) __VA_ARGS__
+#else
+#define DPA_U_IF_HAS_UINT16(...)
+#endif
+#ifdef UINT24_MAX
+#define DPA_U_IF_HAS_UINT24(...) __VA_ARGS__
+#else
+#define DPA_U_IF_HAS_UINT24(...)
+#endif
+#ifdef UINT32_MAX
+#define DPA_U_IF_HAS_UINT32(...) __VA_ARGS__
+#else
+#define DPA_U_IF_HAS_UINT32(...)
+#endif
+#ifdef UINT64_MAX
+#define DPA_U_IF_HAS_UINT64(...) __VA_ARGS__
+#else
+#define DPA_U_IF_HAS_UINT64(...)
+#endif
+#ifdef DPA_HAS_UINT128
+#define DPA_U_IF_HAS_DPA_UINT128(...) __VA_ARGS__
+#else
+#define DPA_U_IF_HAS_DPA_UINT128(...)
+#endif
+#ifdef DPA_HAS_UINT256
+#define DPA_U_IF_HAS_DPA_UINT256(...) __VA_ARGS__
+#else
+#define DPA_U_IF_HAS_DPA_UINT256(...)
+#endif
+
 #if defined(DPA_HAS_INT256)
 #define DPA_U_GIANT_INT_WIDTH 256
 #define DPA_U_GIANT_UNSIGNED_INT_WIDTH 256

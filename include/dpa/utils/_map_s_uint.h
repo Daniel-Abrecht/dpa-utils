@@ -19,7 +19,7 @@ struct dpa_u_map_string_it_fast {
 };
 
 
-/*
+
 dpa__u_api dpa__u_really_inline inline bool dpa_u_map_string_it_safe_next(const dpa_u_map_string_t* that, dpa_u_map_string_it_safe_t* it){
   return DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(&that->v, &it->v);
 }
@@ -31,7 +31,7 @@ dpa__u_api dpa__u_really_inline inline bool dpa_u_map_string_it_safe_prev(const 
 }
 dpa__u_api dpa__u_really_inline inline bool dpa_u_map_string_it_safe_prev_value(const dpa_u_map_string_t* that, dpa_u_map_string_it_safe_t* it, void** ret){
   return DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(&that->v, &it->v, ret);
-}*/
+}
 dpa__u_api dpa__u_really_inline inline dpa_u_bo_unique_t dpa_u_map_string_it_safe_get_key(const dpa_u_map_string_it_safe_t*const it){
   return dpa_u_bo_unique_from_uint(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_get_key)(&it->v));
 }
