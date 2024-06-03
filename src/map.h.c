@@ -15,6 +15,7 @@ extern dpa_u_bo_unique_t dpa_u_map_string_it_safe_get_key(const dpa_u_map_string
 extern dpa_u_optional_pointer_t dpa_u_map_string_get(const dpa_u_map_string_t*restrict that, dpa_u_bo_unique_t key);
 extern dpa_u_optional_pointer_t dpa_u_map_string_get_and_remove(dpa_u_map_string_t*restrict that, dpa_u_bo_unique_t key);
 extern int dpa_u_map_string_exchange(dpa_u_map_string_t*restrict that, dpa_u_bo_unique_t key, void*restrict*const value);
+extern int dpa_u_map_string_set_if_unset(dpa_u_map_string_t*restrict that, dpa_u_bo_unique_t key, void*restrict value);
 extern int dpa_u_map_string_set(dpa_u_map_string_t*restrict that, dpa_u_bo_unique_t key, void*restrict value);
 extern size_t dpa_u_map_string_count(const dpa_u_map_string_t* that);
 extern void dpa_u_map_string_clear(dpa_u_map_string_t* that);

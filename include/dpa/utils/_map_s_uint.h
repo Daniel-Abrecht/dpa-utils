@@ -51,6 +51,9 @@ dpa__u_api dpa_u_reproducible dpa__u_really_inline inline void* dpa_u_map_string
 dpa__u_api dpa__u_really_inline inline int dpa_u_map_string_set(dpa_u_map_string_t*restrict that, dpa_u_bo_unique_t key, void*restrict value){
   return DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&that->v, dpa_u_bo_unique_to_uint(key), value);
 }
+dpa__u_api dpa__u_really_inline inline int dpa_u_map_string_set_if_unset(dpa_u_map_string_t*restrict that, dpa_u_bo_unique_t key, void*restrict value){
+  return DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set_if_unset)(&that->v, dpa_u_bo_unique_to_uint(key), value);
+}
 dpa__u_api dpa__u_really_inline inline int dpa_u_map_string_exchange(dpa_u_map_string_t*restrict that, dpa_u_bo_unique_t key, void*restrict*const value){
   return DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(&that->v, dpa_u_bo_unique_to_uint(key), value);
 }

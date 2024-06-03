@@ -125,6 +125,7 @@
 
 #define dpa_u_map_set(THAT, KEY, VAL) DPA_U__MAP_GENERIC_WRAPPER(set, (THAT))((THAT), (KEY), (VAL))
 #define dpa_u_map_exchange(THAT, KEY, VAL) DPA_U__MAP_GENERIC_WRAPPER(exchange, (THAT))((THAT), (KEY), (VAL))
+#define dpa_u_map_set_if_unset(THAT, KEY, VAL) DPA_U__MAP_GENERIC_WRAPPER(set_if_unset, (THAT))((THAT), (KEY), (VAL))
 #define dpa_u_map_remove(THAT, KEY) DPA_U__MAP_GENERIC_WRAPPER(remove, (THAT))((THAT), (KEY))
 #define dpa_u_map_has(THAT, KEY) DPA_U__MAP_GENERIC_WRAPPER(has, (THAT))((THAT), (KEY))
 #define dpa_u_map_get(THAT, KEY) DPA_U__MAP_GENERIC_WRAPPER(get, (THAT))((THAT), (KEY))
