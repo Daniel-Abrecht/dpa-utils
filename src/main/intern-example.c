@@ -49,7 +49,7 @@ int main(int argc, char* argv[]){
       }
     }
   }
-  printf("dpa_hash_offset_basis: %zX\n", dpa_hash_offset_basis);
+  //printf("dpa_hash_offset_basis: %zX\n", dpa_hash_offset_basis);
   FILE* f = fopen(file, "rb");
   if(!f) dpa_u_abort("fopen failed (%d): %s", errno, strerror(errno));
   size_t count = 0;

@@ -7,6 +7,7 @@
 #include <stdnoreturn.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdalign.h>
 #include <stdbool.h>
 
 #ifdef DPA_U_CONFIG
@@ -446,5 +447,7 @@ typedef struct dpa_u_optional_pointer {
   void* value;
   bool present;
 } dpa_u_optional_pointer_t;
+
+dpa__u_api_var extern alignas(256) char dpa_u_seed[256];
 
 #endif

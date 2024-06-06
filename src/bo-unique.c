@@ -428,7 +428,7 @@ dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern(dpa_u_any_bo_ro_t*const bo){
 }
 
 dpa_u_export dpa_u_bo_unique_hashmap_t dpa__u_bo_do_intern_early(dpa_u_any_bo_ro_t*const bo){
-  dpa_u_init_dpa_hash_offset_basis();
+  dpa_u_init_seed();
   return dpa__u_bo_do_intern(bo);
 }
 

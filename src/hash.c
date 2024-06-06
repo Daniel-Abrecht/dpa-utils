@@ -26,18 +26,13 @@ void dpa_u_getrandom(void* _buf, size_t buflen){
 }
 #endif
 
-dpa__u_api dpa_u_hash_t dpa_hash_offset_basis;
+dpa__u_api alignas(256) char dpa_u_seed[256];
 
-dpa_u_init void dpa_u_init_dpa_hash_offset_basis(void){
+dpa_u_init void dpa_u_init_seed(void){
   static bool init_done = false;
   if(init_done) return;
   init_done = true;
-  dpa_u_bo_inline_t buf = {
-    .type = DPA_U_BO_INLINE,
-    .size = DPA_U_BO_INLINE_MAX_SIZE
-  };
-  dpa_u_getrandom(buf.data, buf.size);
-  dpa_hash_offset_basis = dpa_u_hash_FNV_1a(buf);
+  dpa_u_getrandom(dpa_u_seed, sizeof(dpa_u_seed));
 }
 
 dpa_u_reproducible dpa__u_api dpa_u_hash_t dpa__u_cp_bo_inline__get_hash(const dpa_u_bo_inline_t*const bo){

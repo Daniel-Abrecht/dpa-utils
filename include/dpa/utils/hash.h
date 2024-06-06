@@ -91,15 +91,13 @@ typedef size_t dpa_u_hash_t;
   )
 #define dpa_u_hash_FNV_1a(bo) dpa_u_hash_FNV_1a_p(dpa_u_t_bo_simple_ro((bo)))
 
-dpa__u_api_var extern dpa_u_hash_t dpa_hash_offset_basis;
-
 struct dpa__u_default_hash_args {
   dpa_u_bo_simple_ro_t bo;
   dpa_u_hash_t old_hash;
 };
 dpa__u_api inline dpa_u_hash_t dpa_u_bo_hash_p(const struct dpa__u_default_hash_args args){
   // The xor is to allow an initial old_hash of 0.
-  const dpa_u_hash_t basis = dpa_hash_offset_basis;
+  const dpa_u_hash_t basis = *(dpa_u_hash_t*)dpa_u_seed;
   return dpa_u_hash_FNV_1a_append(args.bo, args.old_hash ^ basis) ^ basis;
 }
 
@@ -112,6 +110,6 @@ dpa__u_api inline dpa_u_hash_t dpa_u_bo_hash_p(const struct dpa__u_default_hash_
 #define dpa_u_bo_hash(...) dpa__u_bo_hash(__VA_ARGS__,)
 
 dpa__u_api void dpa_u_getrandom(void* buf, size_t buflen);
-dpa__u_api void dpa_u_init_dpa_hash_offset_basis(void);
+dpa__u_api void dpa_u_init_seed(void);
 
 #endif

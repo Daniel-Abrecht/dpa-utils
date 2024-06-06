@@ -53,7 +53,8 @@ DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE x){
 #pragma warning( push )
 #pragma warning( disable : 4293 )
 #endif
-  return ((DPA__U_SM_KEY_ENTRY_TYPE)x) * dpa__u_choose_prime(DPA__U_SM_KEY_ENTRY_TYPE);
+  // The xor doesn't make things more random, but it will change the order of entries between program runs. This will help avoid DOS attacks.
+  return ((DPA__U_SM_KEY_ENTRY_TYPE)x ^ *(DPA__U_SM_KEY_ENTRY_TYPE*)dpa_u_seed) * dpa__u_choose_prime(DPA__U_SM_KEY_ENTRY_TYPE);
 #if defined(__GNUC__) || defined(__llvm__)
 #pragma GCC diagnostic pop
 #elif defined(_MSC_VER)
@@ -70,7 +71,7 @@ DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE x){
 #pragma warning( push )
 #pragma warning( disable : 4293 )
 #endif
-  return (DPA__U_SM_KEY_TYPE)(x * dpa__u_choose_prime_inverse(DPA__U_SM_KEY_ENTRY_TYPE));
+  return (DPA__U_SM_KEY_TYPE)((x * dpa__u_choose_prime_inverse(DPA__U_SM_KEY_ENTRY_TYPE)) ^ *(DPA__U_SM_KEY_ENTRY_TYPE*)dpa_u_seed);
 #if defined(__GNUC__) || defined(__llvm__)
 #pragma GCC diagnostic pop
 #elif defined(_MSC_VER)
