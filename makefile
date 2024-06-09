@@ -105,7 +105,8 @@ export TYPE
 
 all: source-checks bin lib
 
-.PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm
+.PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm FORCE
+FORCE:
 
 do-test//set-map: build/unique-random
 
@@ -202,7 +203,7 @@ do-test//%: build/$(TYPE)/bin/test/%$(bin-ext) $(B-TS)
 do-test//%: test/% $(B-TS)
 	$<
 
-test//%: $(B-TS)
+test//%: $(B-TS) FORCE
 	PATH="bin/$(TYPE)/:scripts/:$$PATH" $(B-TS) $* $(MAKE) "do-test//$*"
 
 test: $(B-TS)
