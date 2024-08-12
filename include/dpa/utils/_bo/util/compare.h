@@ -7,11 +7,7 @@
     dpa_u_bo_unique_hashmap_t: dpa__u_bo_compare_unique_hashmap_g(DPA__G(dpa_u_bo_unique_hashmap_t,(X)),(Y),(S)), \
     dpa_u_any_bo_unique_hashmap_t*: dpa__u_bo_compare_unique_hashmap_g((dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X)),(Y),(S)), \
     DPA__U_BOCVHV(bo_unique, dpa__u_bo_compare_unique_g, (X), (Y), (S)), \
-    default: dpa_u_generic_if_selection(dpa_u_p_any_bo_ro(X), \
-      dpa_u_generic_if_selection(dpa_u_p_any_bo_ro(Y), \
-        dpa__u_bo_compare_default(dpa_u_p_any_bo_ro(X), dpa_u_p_any_bo_ro(Y)) \
-      ) \
-    ) \
+    default: dpa__u_bo_compare_default(dpa_u_vp_any_bo_ro(X), dpa_u_vp_any_bo_ro(Y)) \
   )
 
 dpa_u_unsequenced dpa__u_api inline int dpa__u_bo_compare_default_sub(const dpa_u_bo_simple_ro_t a, const dpa_u_bo_simple_ro_t b){

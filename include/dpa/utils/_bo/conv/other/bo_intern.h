@@ -5,7 +5,7 @@
     dpa_u_any_bo_unique_hashmap_t*: (dpa__u_any_bo_unique_hashmap__ref(DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X))),(const dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)DPA__G(dpa_u_any_bo_unique_hashmap_t*,(X)) }), \
     dpa__u_helper_v_g(bo_inline, v_bo_unique, (X)), \
     dpa__u_helper_v_g(bo_unique, intern, (X)), \
-    default: dpa_u_generic_if_selection( dpa_u_p_any_bo_ro_g(X), dpa_u_bo_intern_p((dpa_u_any_bo_ro_t*)dpa_u_p_any_bo_ro_g(X)) ) \
+    default: dpa_u_generic_if_selection( dpa_u_vp_any_bo_ro_g(X), dpa_u_bo_intern_p((dpa_u_any_bo_ro_t*)dpa_u_vp_any_bo_ro_g(X)) ) \
   )
 
 #define dpa__u_v_bo_unique__intern(X) (dpa__u_v_bo_unique__ref((X)),(X))

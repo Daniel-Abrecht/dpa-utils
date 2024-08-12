@@ -360,6 +360,14 @@
       </p>
     </section>
     <section class="nocolumn">
+      <h4><a class="var" id="dpa_u_utp_bo_*" href="#dpa_u_utp_bo_*">dpa_u_utp_bo_*</a></h4>
+      <p>
+        Same as <a class="var" href="#dpa_u_tp_bo_*">dpa_u_t_bo_*</a>, but also handles types where the conversion is
+        not guaranteed to succeed. In those cases, if this is possible depends on the dynamic type, if it turns out not
+        to be possible at runtime, it returns 0.
+      </p>
+    </section>
+    <section class="nocolumn">
       <h4><a class="var" id="dpa_u_v_bo_*" href="#dpa_u_v_bo_*">dpa_u_v_bo_*</a></h4>
       <p>
         Convert the BO to the specified static BO type if it is guaranteed to succeed and the lifetime of the data does
@@ -368,7 +376,7 @@
       </p>
     </section>
     <section class="nocolumn">
-      <h4><a class="var" id="dpa_u_p_bo_*" href="#dpa_u_p_bo_*">dpa_u_p_bo_*</a></h4>
+      <h4><a class="var" id="dpa_u_vp_bo_*" href="#dpa_u_vp_bo_*">dpa_u_vp_bo_*</a></h4>
       <p>
         Cast the BO to a pointer to the specified static BO type if it is compatible. It does not take BO types were
         this is not possible. The pointer will point to the original BO object, except if the source BO is a variant
@@ -377,9 +385,9 @@
       </p>
     </section>
     <section class="nocolumn">
-      <h4><a class="var" id="dpa_u_up_bo_*" href="#dpa_u_up_bo_*">dpa_u_up_bo_*</a></h4>
+      <h4><a class="var" id="dpa_u_uvp_bo_*" href="#dpa_u_uvp_bo_*">dpa_u_uvp_bo_*</a></h4>
       <p>
-        Cast the BO to a pointer to the specified static BO type. For types where if this is possible depends on the
+        Cast the BO to a pointer to the specified static BO type. If this is possible depends on the
         dynamic type, if it turns out not to be possible at runtime, it returns 0. The pointer will point to the
         original BO object, except if the source BO is a variant type that is being converted to a <var tabindex="0" name="dpa_u_bo_unique_hashmap_t">dpa_u_&shy;bo_&shy;unique_&shy;hashmap_t</var>
         or an opaque pointer type, because that type is already a pointer.

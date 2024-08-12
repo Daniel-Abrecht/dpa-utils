@@ -246,9 +246,9 @@ gen-v-conv-list(){
     do
       type-unpack $e
       if [ "${target[ro]}" != 1 ] && [ "${t[ro]}" = 1 ]; then continue; fi
-      if ! is-subset dtypes target_dtypes; then continue; fi
-#       if [ "${target[hashed]}" = 1 ] && [ "${t[hashed]}" != 1 ]; then echo "(${dbtypes[*]}) (${target_dbtypes[*]})"; continue; fi
-#       if [ "${target[refcounted]}" = 1 ] && [ "${t[refcounted]}" != 1 ]; then continue; fi
+      if ! is-subset dbtypes target_dbtypes && [ "${target[unconvertable]}" = 1 ]; then continue; fi
+      if [ "${target[hashed]}" = 1 ] && [ "${t[hashed]}" != 1 ]; then continue; fi
+      if [ "${target[refcounted]}" = 1 ] && [ "${t[refcounted]}" != 1 ]; then continue; fi
       v_conv+=("${target[name]} ${t[name]} v")
       if [ "${t[pointer]}" != 1 ] && [ "${t[opaque]}" != 1 ]
       then
