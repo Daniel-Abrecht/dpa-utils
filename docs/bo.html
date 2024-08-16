@@ -371,8 +371,13 @@
       <h4><a class="var" id="dpa_u_v_bo_*" href="#dpa_u_v_bo_*">dpa_u_v_bo_*</a></h4>
       <p>
         Convert the BO to the specified static BO type if it is guaranteed to succeed and the lifetime of the data does
-        not change. It's runtime type will change if necessary. It may or may not return the same object, and it may not
-        be an lvalue.
+        not change. It's runtime type will change if and only if necessary, in which case the BO object will be copied.
+        An inline BO is never copied. If other BOs are copied is undefined. If a bo is not copied, it will return the
+        same object as an lvalue. A special case is the conversion between opaque pointer types, for which an rvalue
+        will be returned. If the original type was an rvalue, and the resulting object is the same, the result will
+        still be an lvalue, but the object will have temporary storage duration, beware of that.<br/>
+        The constness of the object will be preserved if the same object is returned, unless the resulting static type
+        supports dynamic types which are incompatible with the original static type, in which case the object will be const.
       </p>
     </section>
     <section class="nocolumn">

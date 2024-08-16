@@ -1,5 +1,7 @@
 #include <dpa/utils/bo.h>
 
+extern const dpa_u_bo_t* dpa__u_any_bo__v_bo_sub(dpa_u_any_bo_t*const restrict orig, dpa_u_bo_t*const restrict copy);
+extern const dpa_u_bo_t* dpa__u_bo_with_hash__v_bo_sub(dpa_u_bo_with_hash_t*const restrict orig, dpa_u_bo_t*const restrict copy);
 extern const void* dpa__u_any_bo__data(const dpa_u_any_bo_t* const bo);
 extern const void* dpa__u_any_bo_ro__data(const dpa_u_any_bo_ro_t* const bo);
 extern const void* dpa__u_any_bo_unique__data(const dpa_u_any_bo_unique_t*const bo);

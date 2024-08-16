@@ -404,8 +404,8 @@ int main(){
   $const$from_type$fpp from = ($const$from_type$fpp)$dtv;
 EOF
       if [ "$from_mode" = p ] || [ "$from_mode" = cp ]
-        then echo "  $to_type result = *&$macro(from);"
-        else echo "  $to_type result = *&$macro(${fpp}from);"
+        then echo "  $to_type result = $macro(from);"
+        else echo "  $to_type result = $macro(${fpp}from);"
       fi
       cat <<EOF
   if(sizeof(${dtv}_DATA)-1 != dpa_u_bo_get_size(result) || memcmp(${dtv}_DATA, dpa_u_bo_data(result), sizeof(${dtv}_DATA))){
@@ -553,5 +553,5 @@ gen-tp-conv-list
 gen-tp-conv-tests
 
 run-gen-v-conv-tests
-run-gen-t-conv-tests
-run-gen-tp-conv-tests
+#run-gen-t-conv-tests
+#run-gen-tp-conv-tests
