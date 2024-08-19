@@ -22,6 +22,7 @@ extern dpa_u_bo_hashed_ro_t dpa__u_hashed_ro_fix_type(dpa_u_bo_hashed_ro_t v);
 extern dpa_u_bo_hashed_ro_t dpa__u_v_bo_inline__t_bo_hashed_ro_p(const dpa_u_bo_inline_t* bo);
 extern dpa_u_bo_hashed_ro_t dpa__u_v_bo_refcounted_hashed_ro__t_bo_hashed_ro_p(const dpa_u_bo_refcounted_hashed_ro_t bo);
 extern dpa_u_bo_hashed_ro_t dpa__u_v_bo_unique__t_bo_hashed_ro_p(const dpa_u_bo_unique_t* bo);
+extern dpa_u_bo_hashed_ro_t dpa__u_v_bo_unique_hashmap__v_bo_hashed_ro_sub(const dpa_u_bo_unique_hashmap_t bo);
 extern dpa_u_bo_hashed_t dpa__u_bo_with_hash__t_bo_hashed_2_p(union dpa__u_hashed_conv_helper*const bo);
 extern dpa_u_bo_hashed_t dpa__u_bo_with_hash__v_bo_hashed_sub(dpa_u_bo_with_hash_t*const bo);
 extern dpa_u_bo_hashed_t dpa__u_v_bo_inline__t_bo_hashed_p(dpa_u_bo_inline_t*const bo);
