@@ -7,6 +7,7 @@
     dpa__u_helper_v_g(bo_inline, t_bo_unique, (X)) \
   )
 
+// TODO
 #define dpa__u_v_bo_unique_hashmap__t_bo_unique(X) (dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (X) }
 #define dpa__u_any_bo_unique_hashmap__t_bo_unique(X) (dpa_u_bo_unique_t){ .bo_unique_hashmap_meta.type = DPA_U_BO_UNIQUE_HASHMAP, .bo_unique_hashmap = (dpa_u_bo_unique_hashmap_t)(X) }
 
