@@ -158,7 +158,7 @@ struct dpa__u_gcc_struct dpa_u_bo_refcounted_hashed_ro {
   dpa_u_hash_t hash;
 };
 
-// Note: There will be no dpa_u_bo_refcounted_hashed_ro type. The hash and refcount depends on the data.
+// Note: There will be no dpa_u_bo_refcounted_hashed type. The hash and refcount depends on the data.
 // The refcount is stored with the data, but the hash is not. Therefore, modifying a refcounted hashed buffer
 // is always wrong.
 
