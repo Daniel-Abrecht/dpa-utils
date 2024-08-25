@@ -10,7 +10,6 @@
     dpa_u_bo_with_refcount_t*: dpa__u_bo_with_refcount__v_bo_refcounted_ro(DPA__G(dpa_u_bo_with_refcount_t*,(X))) \
   )
 
-#define dpa__u_v_bo_refcounted_ro__helper(P,X) 0 // (const dpa_u_bo_refcount_ro_t){ .bo_simple = { .type = DPA_U_BO_REFCOUNTED, .size=dpa__u_ ## P ## __get_size((X)), .data=dpa__u_ ## P ## __data((X)) }, .refcount=dpa__u_ ## P ## __get_refcount((X)) }
 #define dpa__u_v_bo_refcounted_ro__helper_s1(X) dpa_u_rescope(const dpa_u_bo_refcounted_ro_t, dpa__u_refcounted_ro_fix_type(X))
 
 #define dpa__u_v_bo_unique_hashmap__v_bo_refcounted_ro(X) dpa_u_rescope(const dpa_u_bo_refcounted_ro_t, dpa__u_v_bo_unique_hashmap__t_bo_refcounted_ro_p((X)))
