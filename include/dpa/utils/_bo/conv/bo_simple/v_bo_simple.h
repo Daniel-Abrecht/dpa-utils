@@ -8,10 +8,12 @@
     dpa_u_bo_with_refcount_t*: dpa__u_bo_with_refcount__v_bo_simple(DPA__G(dpa_u_bo_with_refcount_t*,(X))) \
   )
 
-// TODO: check not const dpa_u_bo_inline_t
-#define dpa__u_v_bo_inline__v_bo_simple(X) dpa_u_rescope(const dpa_u_bo_simple_t, dpa__u_p_bo_inline__t_bo_simple_p((dpa_u_bo_inline_t*)(X).all.all))
+#define dpa__u_v_bo_inline__v_bo_simple(X) dpa_u_generic((X).all.all, \
+    const char*: dpa_u_invalid_selection, \
+    char*: dpa_u_rescope(const dpa_u_bo_simple_t, dpa__u_p_bo_inline__t_bo_simple_p((dpa_u_bo_inline_t*)(X).all.all)) \
+  )
 #define dpa__u_p_bo_inline__v_bo_simple(X) dpa_u_rescope(const dpa_u_bo_simple_t, dpa__u_p_bo_inline__t_bo_simple_p((X)))
-#define dpa__u_cp_bo_inline__v_bo_simple(X) dpa_u_rescope(const dpa_u_bo_simple_t, dpa__u_p_bo_inline__t_bo_simple_p((X)))
+#define dpa__u_cp_bo_inline__v_bo_simple(X) dpa_u_invalid_selection
 #define dpa__u_any_bo_inline__v_bo_simple(X) dpa_u_rescope(const dpa_u_bo_simple_t, dpa__u_p_bo_inline__t_bo_simple_p((dpa_u_bo_inline_t*)(X)))
 
 #define dpa__u_v_bo_simple__v_bo_simple(X)   (X)
