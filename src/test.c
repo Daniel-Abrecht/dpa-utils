@@ -1,4 +1,3 @@
-#define _DEFAULT_SOURCE
 #include <dpa/utils/test.h>
 #include <stdio.h>
 #include <string.h>

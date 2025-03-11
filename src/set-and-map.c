@@ -27,6 +27,8 @@
 #include <dpa/utils/map.h>
 #include <dpa/utils/math.h>
 #include <time.h>
+#include <stdlib.h>
+#include <assert.h>
 
 struct lookup_result {
   size_t index;

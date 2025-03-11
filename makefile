@@ -58,6 +58,7 @@ endif
 
 CSTD ?= c17
 CFLAGS  += --std=$(CSTD)
+CFLAGS  += -D_DEFAULT_SOURCE
 CFLAGS  += -Iinclude -I.
 CFLAGS  += -Wall -Wextra -pedantic #-Werror
 #CFLAGS  += -fstack-protector-all
@@ -81,7 +82,6 @@ B-TS := bin/$(TYPE)/dpa-testsuite$(bin-ext)
 
 BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%$(bin-ext),$(filter src/main/%.c,$(SOURCES)))
 TESTS := $(patsubst test/%.c,test//%,$(filter test/%.c,$(SOURCES)))
-TESTS += test//bo-conv-test
 
 export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 

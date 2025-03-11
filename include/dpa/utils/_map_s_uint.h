@@ -1,6 +1,6 @@
 #define DPA__U_MAP_STR_IS_UINT
 
-#define DPA__U_SM_PREFIX DPA_U_CONCAT_E(dpa_u_map_, DPA_U_BO_UNIQUE_UINT_COMPATIBLE)
+#define DPA__U_SM_PREFIX dpa_u_map_u64
 
 typedef struct dpa_u_map_string dpa_u_map_string_t;
 typedef struct dpa_u_map_string_it_safe dpa_u_map_string_it_safe_t;

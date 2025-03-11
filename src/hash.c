@@ -34,7 +34,3 @@ dpa_u_init void dpa_u_init_seed(void){
   init_done = true;
   dpa_u_getrandom(dpa_u_seed, sizeof(dpa_u_seed));
 }
-
-dpa_u_reproducible dpa__u_api dpa_u_hash_t dpa__u_cp_bo_inline__get_hash(const dpa_u_bo_inline_t*const bo){
-  return dpa_u_bo_hash(bo);
-}
