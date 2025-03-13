@@ -13,13 +13,8 @@
 #define DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_KEY_TYPE
 #endif
 
-#ifdef DPA__U_SM_BO
-#define DPA__U_SM_KEY_ENTRY_HASH(X) (X).hash[0]
-#define DPA__U_SM_ENTRY_HASH_TYPE size_t
-#else
 #define DPA__U_SM_KEY_ENTRY_HASH(X) (X)
 #define DPA__U_SM_ENTRY_HASH_TYPE DPA__U_SM_KEY_ENTRY_TYPE
-#endif
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 #define DPA__U_SM_LIST_OR_BITMAP_SIZE_THRESHOLD DPA__U_SM_LIST_OR_BITMAP_SIZE_THRESHOLD_SET(DPA__U_SM_KEY_TYPE)
@@ -65,7 +60,4 @@
 #endif
 #ifdef DPA__U_SM_MICRO_SET
 #undef DPA__U_SM_MICRO_SET
-#endif
-#ifdef DPA__U_SM_BO
-#undef DPA__U_SM_BO
 #endif

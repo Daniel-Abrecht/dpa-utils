@@ -1,5 +1,6 @@
 #include <dpa/utils/bo.h>
 
+extern dpa_u_a_bo_unique_t dpa_u_bo_unique_from_uint(const uint64_t x);
 extern dpa_u_bo_ro_t dpa__u_bo_to_bo_ro_h(dpa_u_bo_t bo);
 extern dpa_u_bo_t dpa__u_bo_ro_to_p_bo_h(dpa_u_bo_ro_t bo);
 extern dpa_u_bo_t dpa_u__inline_to_bo_h(const char*restrict const c);

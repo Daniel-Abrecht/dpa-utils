@@ -98,23 +98,8 @@ static struct lookup_result LOOKUP(
   const DPA__U_SM_ENTRY_HASH_TYPE I = (DPA__U_SM_ENTRY_HASH_TYPE)1<<shift;
   DPA__U_SM_ENTRY_HASH_TYPE i = DPA__U_SM_KEY_ENTRY_HASH(key)+I;
   DPA__U_SM_ENTRY_HASH_TYPE psl_a, psl_b;
-  for(psl_a=I; psl_a < (psl_b=i-DPA__U_SM_KEY_ENTRY_HASH(that->key_list[i>>shift])); psl_a+=I,i+=I)
-#ifdef DPA__U_SM_BO
-    false_match:
-#endif
-    ;
-#ifdef DPA__U_SM_BO
-  if(psl_b == psl_a){
-    const int cmp = memcmp(&key, &that->key_list[i>>shift], sizeof(key));
-    if(!cmp)
-      return (struct lookup_result){i>>shift, true};
-    if(cmp > 0)
-      goto false_match;
-  }
-  return (struct lookup_result){i>>shift, false};
-#else
+  for(psl_a=I; psl_a < (psl_b=i-DPA__U_SM_KEY_ENTRY_HASH(that->key_list[i>>shift])); psl_a+=I,i+=I);
   return (struct lookup_result){i>>shift, psl_b == psl_a};
-#endif
 }
 #endif
 

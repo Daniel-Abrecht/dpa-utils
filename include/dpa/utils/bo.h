@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <stdalign.h>
 #include <string.h>
+#include <assert.h>
 
 #include <endian.h>
 #ifndef BYTE_ORDER
@@ -26,6 +27,7 @@
 typedef struct dpa_u__boptr {
   alignas(uint64_t) char c[8];
 } dpa_u__boptr_t;
+static_assert(sizeof(dpa_u__boptr_t) == sizeof(uint64_t));
 
 typedef struct dpa_u_bo {
   size_t size;
@@ -63,6 +65,14 @@ typedef struct dpa_u_a_bo_any_ro { dpa_u__boptr_t p; } dpa_u_a_bo_any_ro_t;
 typedef struct dpa_u_a_bo_gc     { dpa_u__boptr_t p; } dpa_u_a_bo_gc_t;
 typedef struct dpa_u_a_bo_gc_ro  { dpa_u__boptr_t p; } dpa_u_a_bo_gc_ro_t;
 typedef struct dpa_u_a_bo_hashed { dpa_u__boptr_t p; } dpa_u_a_bo_hashed_t;
+
+static_assert(sizeof(dpa_u_a_bo_inline_t) == sizeof(uint64_t));
+static_assert(sizeof(dpa_u_a_bo_unique_t) == sizeof(uint64_t));
+static_assert(sizeof(dpa_u_a_bo_any_t) == sizeof(uint64_t));
+static_assert(sizeof(dpa_u_a_bo_any_ro_t) == sizeof(uint64_t));
+static_assert(sizeof(dpa_u_a_bo_gc_t) == sizeof(uint64_t));
+static_assert(sizeof(dpa_u_a_bo_gc_ro_t) == sizeof(uint64_t));
+static_assert(sizeof(dpa_u_a_bo_hashed_t) == sizeof(uint64_t));
 
 #define DPA_U_CONCAT(A, B) A ## B
 #define DPA_U_CONCAT_EVAL(A, B) DPA_U_CONCAT(A, B)
@@ -269,5 +279,18 @@ dpa__u_api const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type);
 
 dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo);
 #define dpa_u_bo_intern(X) dpa__u_bo_intern_h(dpa_u_to_bo_any_ro((X)));
+
+#define dpa_u_a_bo_unique_to_uint(X) (*(uint64_t*)(X).p.c)
+//#define dpa_u_bo_unique_from_uint(X) (*(dpa_u_a_bo_unique_t*)(const uint64_t[]){(X)})
+
+dpa__u_api inline dpa_u_a_bo_unique_t dpa_u_bo_unique_from_uint(const uint64_t x){
+  dpa_u_a_bo_unique_t bo;
+  memcpy(bo.p.c, &x, 8);
+  return bo;
+}
+
+#define dpa_u_bo_compare(A, B) 0
+
+#define dpa_u_bo_put(X) (void)(X)
 
 #endif

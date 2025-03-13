@@ -117,7 +117,6 @@ DPA_U_TEST_MAIN
 #undef DPA_U_TESTCASE_SUFFIX
 #define DPA_U_TESTCASE_SUFFIX DPA_U_CONCAT_E(DPA__U_SM_PREFIX, __LINE__)
 
-#ifndef DPA__U_SM_BO
 bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
@@ -148,14 +147,6 @@ bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
   }
 #pragma GCC diagnostic pop
 }
-#else
-bool GET_RAND_ENTRY(dpa_u_bo_unique_t*const ret, size_t i){
-  if(i >= ustr_count)
-    return false;
-  *ret = ustr[i];
-  return true;
-}
-#endif
 
 DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
   DPA__U_SM_TYPE container = {0};

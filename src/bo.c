@@ -1,4 +1,5 @@
 #include <dpa/utils/bo.h>
+#include <dpa/utils/refcount.h>
 
 static const char*const dpa_u_bo_type[32] = {
   "inline",
@@ -39,4 +40,14 @@ dpa__u_api const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type){
   if(type >= 0x20)
     return "INVALID";
   return dpa_u_bo_type[type>>3];
+}
+
+dpa__u_api void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable* bo){
+  (void)bo;
+  // TODO
+}
+
+dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
+  (void)bo;
+  // TODO
 }
