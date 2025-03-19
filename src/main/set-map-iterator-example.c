@@ -39,6 +39,8 @@ int main(void){
       printf(" n:%u n:eof\n", dpa_u_set_it_get_key(&myset, &it));
       assert(dpa_u_set_it_next(&myset, &it) == false); // EOF
     }
+
+    dpa_u_set_clear(&myset);
   }
 
   {
@@ -76,6 +78,8 @@ int main(void){
       printf(" n:%c n:eof\n", dpa_u_set_it_get_key(&myset, &it));
       assert(dpa_u_set_it_next(&myset, &it) == false); // EOF
     }
+
+    dpa_u_set_clear(&myset);
   }
 
   puts("\n# safe iterators\n");
@@ -124,6 +128,8 @@ int main(void){
     for(dpa_u_set_u_it_safe_t it={0}; dpa_u_set_it_next(&myset, &it); )
       printf(" %u", dpa_u_set_it_get_key(&it));
     puts("");
+
+    dpa_u_set_clear(&myset);
   }
 
   {
@@ -171,5 +177,6 @@ int main(void){
       printf(" %c", dpa_u_set_it_get_key(&it));
     puts("");
 
+    dpa_u_set_clear(&myset);
   }
 }

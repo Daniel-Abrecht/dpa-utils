@@ -48,6 +48,11 @@ enum dpa__u_sm_mode {
   DPA__U_SM_BITMAP = DPA__U_SM_FINAL,
 };
 
+struct dpa__u_sm_lookup_result {
+  size_t index;
+  bool found;
+};
+
 #endif
 
 #define DPA__U_SM_NO_BITSET

@@ -443,6 +443,19 @@ typedef unsigned dpa_u_bitmap_entry_t;
 #define DPA__U_ISS_NONE
 #endif
 
+typedef struct dpa_u_any_value {
+  union {
+    uintptr_t uptr;
+    uint64_t u64;
+    void* ptr;
+  };
+} dpa_u_any_value_t;
+
+typedef struct dpa_u_optional {
+  dpa_u_any_value_t value;
+  bool present;
+} dpa_u_optional_t;
+
 typedef struct dpa_u_optional_pointer {
   void* value;
   bool present;
