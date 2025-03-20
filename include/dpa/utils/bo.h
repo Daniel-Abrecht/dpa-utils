@@ -214,7 +214,11 @@ DPA_U__CHECK_GENERIC(dpa_u_to_bo_any_ro)
 dpa__u_api inline uint64_t dpa_u__bo_get_hash(dpa_u__boptr_t boptr){
   if(dpa_u_bo_is_type(boptr, DPA_U_BO_HASHED))
     return DPA_U__BO_UNTAG(dpa_u__bo_hashed_t*, boptr)->hash;
-  return 0;
+  // TODO
+  uint64_t h = 0;
+  dpa_u_bo_t* s = DPA_U__BO_UNTAG(dpa_u_bo_t*, boptr);
+  memcpy(&h, s->data, s->size > 8 ? 8 : s->size);
+  return h;
 }
 DPA_U__CHECK_GENERIC(dpa_u_bo_get_hash)
 
@@ -267,8 +271,8 @@ DPA_U__CHECK_GENERIC(dpa_u__to_bo)
     dpa_u_bo_t                                    : DPA_U_BO_SIMPLE, \
     dpa_u_bo_ro_t                                 : DPA_U_BO_SIMPLE, \
     \
-    dpa_u_p_bo_t*                          : DPA_U_BO_SIMPLE, \
-    const dpa_u_p_bo_t*                    : DPA_U_BO_SIMPLE, \
+    dpa_u_p_bo_t*                                 : DPA_U_BO_SIMPLE, \
+    const dpa_u_p_bo_t*                           : DPA_U_BO_SIMPLE, \
     const dpa_u_p_bo_hashed_t*                    : DPA_U_BO_SIMPLE|DPA_U_BO_HASHED, \
     const dpa_u_p_bo_unique_refcounted_t*         : DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE, \
     const dpa_u_p_bo_unique_immortal_t*           : DPA_U_BO_SIMPLE|DPA_U_BO_IMMORTAL|DPA_U_BO_UNIQUE, \

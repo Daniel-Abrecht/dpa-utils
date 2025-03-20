@@ -1,6 +1,7 @@
 #include <dpa/utils/bo.h>
 #include <dpa/utils/mem.h>
 #include <dpa/utils/map.h>
+#include <dpa/utils/threads.h>
 #include <dpa/utils/refcount.h>
 
 static const char*const dpa_u_bo_type[32] = {
@@ -39,9 +40,14 @@ static const char*const dpa_u_bo_type[32] = {
 };
 
 static dpa_u_map_u64_t unique_string_map;
+static mtx_t unique_string_map_lock;
+
+static dpa_u_init void init(void){
+  mtx_init(&unique_string_map_lock, mtx_plain);
+}
 
 dpa__u_api const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type){
-  if(type >= 0x20)
+  if(type>=0x100 || type<0)
     return "INVALID";
   return dpa_u_bo_type[type>>3];
 }
@@ -74,12 +80,16 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
     dpa_u_bo_ref(res);
     return res;
   }
-  if(dpa__u_map_u64_maybe_grow(&unique_string_map) == -1){
-    goto error;
-  }
   const uint64_t hash = dpa_u_bo_get_hash(bo);
   const size_t size = dpa_u_bo_get_size(bo);
   const void* data = dpa_u_bo_get_data(bo);
+
+  mtx_lock(&unique_string_map_lock);
+
+  if(dpa__u_map_u64_maybe_grow(&unique_string_map) == -1){
+    fprintf(stderr, "dpa__u_bo_intern_h failed: failed to increase size of hash map of all unique strings\n");
+    goto error;
+  }
   const int shift = sizeof(uint64_t)*CHAR_BIT - unique_string_map.lbsize;
   // After hashing the key, the resulting value will have a few of it's least significant bits set to 0
   // The u64 map is sorted by the hash value. We use this here to store up to 2**16 entries for the same hash.
@@ -92,7 +102,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
   const struct dpa__u_sm_lookup_result result = dpa__u_map_u64_lookup_sub(&unique_string_map, truncated_hash, unique_string_map.lbsize);
   uint64_t next, last=truncated_hash-1, unused_i=-1, unused_e;
   if(!result.found){
-    unused_i = result.index;
+    unused_i = result.index<<shift;
     unused_e = truncated_hash;
   }
   const uint64_t I = (uint64_t)1 << shift;
@@ -112,6 +122,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
     const dpa_u_bo_ro_t v = dpa_u_to_bo_ro(entry);
     if( v.size == size && ( v.data == data || !memcmp(data, v.data, size) )){
       dpa_u_bo_ref(entry);
+      mtx_unlock(&unique_string_map_lock);
       return entry;
     }
     if(last+1 != next){
@@ -121,8 +132,10 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
     last = next;
     i += I;
   }
-  if(unused_i == (uint64_t)-1)
+  if(unused_i == (uint64_t)-1){
+    fprintf(stderr, "dpa__u_bo_intern_h failed: bucket full, there can only be up to 65535 entries per bucket\n");
     goto error;
+  }
   struct bo_unique_entry_hashed* eh = malloc(sizeof(*eh));
   if(!dpa_u_bo_is_type(bo, DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL)){
     char* d = malloc(size);
@@ -142,8 +155,12 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
     unused_i >> shift,
     unique_string_map.lbsize
   );
+  // printf("%016lX %016lX %016lX %lX %lX\n", truncated_hash, unused_e, unique_string_map.value_list[unused_i>>shift].u64, unique_string_map.count, unused_i >> shift);
   unique_string_map.count++;
+
+  mtx_unlock(&unique_string_map_lock);
   return ret;
 error:
+  mtx_unlock(&unique_string_map_lock);
   return (dpa_u_a_bo_unique_t){0};
 }
