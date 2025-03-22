@@ -1,5 +1,5 @@
-#ifndef DPA__U_BO_H
-#define DPA__U_BO_H
+#ifndef DPA_U_BO_H
+#define DPA_U_BO_H
 
 #include <dpa/utils/common.h>
 
@@ -74,14 +74,9 @@ static_assert(sizeof(dpa_u_a_bo_gc_t) == sizeof(uint64_t));
 static_assert(sizeof(dpa_u_a_bo_gc_ro_t) == sizeof(uint64_t));
 static_assert(sizeof(dpa_u_a_bo_hashed_t) == sizeof(uint64_t));
 
-#define DPA_U_CONCAT(A, B) A ## B
-#define DPA_U_CONCAT_EVAL(A, B) DPA_U_CONCAT(A, B)
-#define DPA__G(T, V) _Generic((V), T: (V), default: (T){0})
-#define DPA__GS(T, V) T: DPA__G(T, (V))
-
 typedef struct dpa_u__noop* dpa_u__noop_t;
 #define DPA_U__CHECK_GENERIC(X) static inline \
-  void DPA_U_CONCAT_EVAL(dpa_u__sc__, __LINE__)(void){ (void)(X((dpa_u__noop_t)0)); /* A simple sanity check for the generic macros. */ }
+  void DPA_U_CONCAT_E(dpa_u__sc__, __LINE__)(void){ (void)(X((dpa_u__noop_t)0)); /* A simple sanity check for the generic macros. */ }
 
 enum dpa_u_bo_type_flags {
   DPA_U_BO_IMMORTAL   = 0x80,
@@ -131,6 +126,7 @@ dpa__u_api inline dpa_u_bo_ro_t dpa__u_bo_to_bo_ro_h(dpa_u_bo_t bo){
     .data = bo.data,
   };
 }
+#define dpa_u_to_bo_ro(X) dpa__u_bo_to_bo_ro_h(dpa_u__to_bo(X))
 
 #define dpa_u_to_bo_any(X) _Generic((X), \
     dpa_u_bo_t                                    : (dpa_u_a_bo_any_t   ){DPA_U__BO_TAG(dpa__u_bo_to_p_bo(DPA__G(dpa_u_bo_t, (X))), DPA_U_BO_SIMPLE)}, \
@@ -194,6 +190,10 @@ DPA_U__CHECK_GENERIC(dpa_u_to_bo_any)
   )
 DPA_U__CHECK_GENERIC(dpa_u_to_bo_any_ro)
 
+/**
+ * This is not a cryptographc hash function.
+ * THis is meant for things like a hash map.
+ */
 #define dpa_u_bo_get_hash(X) _Generic((X), \
     const dpa_u_p_bo_hashed_t*: ((dpa_u__bo_hashed_t*)DPA__G(const dpa_u_p_bo_hashed_t*, (X)))->hash, \
     const dpa_u_p_bo_hashed_immortal_t*: ((dpa_u__bo_hashed_t*)DPA__G(const dpa_u_p_bo_hashed_immortal_t*, (X)))->hash, \
@@ -214,11 +214,10 @@ DPA_U__CHECK_GENERIC(dpa_u_to_bo_any_ro)
 dpa__u_api inline uint64_t dpa_u__bo_get_hash(dpa_u__boptr_t boptr){
   if(dpa_u_bo_is_type(boptr, DPA_U_BO_HASHED))
     return DPA_U__BO_UNTAG(dpa_u__bo_hashed_t*, boptr)->hash;
-  // TODO
-  uint64_t h = 0;
-  dpa_u_bo_t* s = DPA_U__BO_UNTAG(dpa_u_bo_t*, boptr);
-  memcpy(&h, s->data, s->size > 8 ? 8 : s->size);
-  return h;
+  inline
+  uint64_t dpa_u_hash_64_FNV_1a_append_p(dpa_u_bo_ro_t bo, uint_fast64_t hash);
+  const uint64_t basis = *(uint64_t*)dpa_u_seed;
+  return dpa_u_hash_64_FNV_1a_append_p(dpa__u_bo_to_bo_ro_h(*DPA_U__BO_UNTAG(dpa_u_bo_t*, boptr)), basis);
 }
 DPA_U__CHECK_GENERIC(dpa_u_bo_get_hash)
 
@@ -261,8 +260,6 @@ dpa__u_api inline dpa_u_bo_t dpa_u__inline_to_bo_h(const char*restrict const c){
   return (const dpa_u_bo_t){ .size=c[0]&7, .data=(char*)c+1 };
 }
 DPA_U__CHECK_GENERIC(dpa_u__to_bo)
-
-#define dpa_u_to_bo_ro(X) dpa__u_bo_to_bo_ro_h(dpa_u__to_bo(X))
 
 #define dpa_u_bo_get_size(X) (dpa_u__to_bo((X)).size)
 #define dpa_u_bo_get_data(X) (dpa_u__to_bo((X)).data)
