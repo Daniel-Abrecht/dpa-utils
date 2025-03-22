@@ -3,9 +3,10 @@
 #include <dpa/utils/map.h>
 #include <dpa/utils/threads.h>
 #include <dpa/utils/refcount.h>
+#include <errno.h>
 
 static const char*const dpa_u_bo_type[32] = {
-  "inline",
+  "ERROR|inline",
   "simple",
   "INVALID<inline|hashed>",
   "hashed|simple",
@@ -38,6 +39,149 @@ static const char*const dpa_u_bo_type[32] = {
   "INVALID<inline|unique|refcounted|hashed|immortal>",
   "unique|refcounted|hashed|simple|immortal",
 };
+
+static const dpa_u_a_bo_unique_t bo_error[] = {
+  [E2BIG] = {{"\0E2BIG"}},
+  [EACCES] = {{"\0EACCES"}},
+  [EADDRINUSE] = {{"\0EADDRIN"}},
+  [EADDRNOTAVAIL] = {{"\0EADDRNO"}},
+  [EADV] = {{"\0EADV"}},
+  [EAFNOSUPPORT] = {{"\0EAFNOSU"}},
+  [EAGAIN] = {{"\0EAGAIN"}},
+  [EALREADY] = {{"\0EALREAD"}},
+  [EBADE] = {{"\0EBADE"}},
+  [EBADF] = {{"\0EBADF"}},
+  [EBADFD] = {{"\0EBADFD"}},
+  [EBADMSG] = {{"\0EBADMSG"}},
+  [EBADR] = {{"\0EBADR"}},
+  [EBADRQC] = {{"\0EBADRQC"}},
+  [EBADSLT] = {{"\0EBADSLT"}},
+  [EBFONT] = {{"\0EBFONT"}},
+  [EBUSY] = {{"\0EBUSY"}},
+  [ECANCELED] = {{"\0ECANCEL"}},
+  [ECHILD] = {{"\0ECHILD"}},
+  [ECHRNG] = {{"\0ECHRNG"}},
+  [ECOMM] = {{"\0ECOMM"}},
+  [ECONNABORTED] = {{"\0ECONNAB"}},
+  [ECONNREFUSED] = {{"\0ECREFUS"}},
+  [ECONNRESET] = {{"\0ECRESET"}},
+  [EDEADLK] = {{"\0EDEADLK"}},
+  [EDEADLOCK] = {{"\0EDEADLO"}},
+  [EDESTADDRREQ] = {{"\0EDESTAD"}},
+  [EDOM] = {{"\0EDOM"}},
+  [EDOTDOT] = {{"\0EDOTDOT"}},
+  [EDQUOT] = {{"\0EDQUOT"}},
+  [EEXIST] = {{"\0EEXIST"}},
+  [EFAULT] = {{"\0EFAULT"}},
+  [EFBIG] = {{"\0EFBIG"}},
+  [EHOSTDOWN] = {{"\0EHOSTDO"}},
+  [EHOSTUNREACH] = {{"\0EHOSTUN"}},
+  [EHWPOISON] = {{"\0EHWPOIS"}},
+  [EIDRM] = {{"\0EIDRM"}},
+  [EILSEQ] = {{"\0EILSEQ"}},
+  [EINPROGRESS] = {{"\0EINPROG"}},
+  [EINTR] = {{"\0EINTR"}},
+  [EINVAL] = {{"\0EINVAL"}},
+  [EIO] = {{"\0EIO"}},
+  [EISCONN] = {{"\0EISCONN"}},
+  [EISDIR] = {{"\0EISDIR"}},
+  [EISNAM] = {{"\0EISNAM"}},
+  [EKEYEXPIRED] = {{"\0EKEYEXP"}},
+  [EKEYREJECTED] = {{"\0EKEYREJ"}},
+  [EKEYREVOKED] = {{"\0EKEYREV"}},
+  [EL2HLT] = {{"\0EL2HLT"}},
+  [EL2NSYNC] = {{"\0EL2NSYN"}},
+  [EL3HLT] = {{"\0EL3HLT"}},
+  [EL3RST] = {{"\0EL3RST"}},
+  [ELIBACC] = {{"\0ELIBACC"}},
+  [ELIBBAD] = {{"\0ELIBBAD"}},
+  [ELIBEXEC] = {{"\0ELIBEXE"}},
+  [ELIBMAX] = {{"\0ELIBMAX"}},
+  [ELIBSCN] = {{"\0ELIBSCN"}},
+  [ELNRNG] = {{"\0ELNRNG"}},
+  [ELOOP] = {{"\0ELOOP"}},
+  [EMEDIUMTYPE] = {{"\0EMEDIUM"}},
+  [EMFILE] = {{"\0EMFILE"}},
+  [EMLINK] = {{"\0EMLINK"}},
+  [EMSGSIZE] = {{"\0EMSGSIZ"}},
+  [EMULTIHOP] = {{"\0EMULTIH"}},
+  [ENAMETOOLONG] = {{"\0ENAMETO"}},
+  [ENAVAIL] = {{"\0ENAVAIL"}},
+  [ENETDOWN] = {{"\0ENETDOW"}},
+  [ENETRESET] = {{"\0ENETRES"}},
+  [ENETUNREACH] = {{"\0ENETUNR"}},
+  [ENFILE] = {{"\0ENFILE"}},
+  [ENOANO] = {{"\0ENOANO"}},
+  [ENOBUFS] = {{"\0ENOBUFS"}},
+  [ENOCSI] = {{"\0ENOCSI"}},
+  [ENODATA] = {{"\0ENODATA"}},
+  [ENODEV] = {{"\0ENODEV"}},
+  [ENOENT] = {{"\0ENOENT"}},
+  [ENOEXEC] = {{"\0ENOEXEC"}},
+  [ENOKEY] = {{"\0ENOKEY"}},
+  [ENOLCK] = {{"\0ENOLCK"}},
+  [ENOLINK] = {{"\0ENOLINK"}},
+  [ENOMEDIUM] = {{"\0ENOMEDI"}},
+  [ENOMEM] = {{"\0ENOMEM"}},
+  [ENOMSG] = {{"\0ENOMSG"}},
+  [ENONET] = {{"\0ENONET"}},
+  [ENOPKG] = {{"\0ENOPKG"}},
+  [ENOPROTOOPT] = {{"\0ENOPROT"}},
+  [ENOSPC] = {{"\0ENOSPC"}},
+  [ENOSR] = {{"\0ENOSR"}},
+  [ENOSTR] = {{"\0ENOSTR"}},
+  [ENOSYS] = {{"\0ENOSYS"}},
+  [ENOTBLK] = {{"\0ENOTBLK"}},
+  [ENOTCONN] = {{"\0ENOTCON"}},
+  [ENOTDIR] = {{"\0ENOTDIR"}},
+  [ENOTEMPTY] = {{"\0ENOTEMP"}},
+  [ENOTNAM] = {{"\0ENOTNAM"}},
+  [ENOTRECOVERABLE] = {{"\0ENOTREC"}},
+  [ENOTSOCK] = {{"\0ENOTSOC"}},
+  [ENOTSUP] = {{"\0ENOTSUP"}},
+  [ENOTTY] = {{"\0ENOTTY"}},
+  [ENOTUNIQ] = {{"\0ENOTUNI"}},
+  [ENXIO] = {{"\0ENXIO"}},
+  [EOPNOTSUPP] = {{"\0EOPNOTS"}},
+  [EOVERFLOW] = {{"\0EOVERFL"}},
+  [EOWNERDEAD] = {{"\0EOWNERD"}},
+  [EPERM] = {{"\0EPERM"}},
+  [EPFNOSUPPORT] = {{"\0EPFNOSU"}},
+  [EPIPE] = {{"\0EPIPE"}},
+  [EPROTO] = {{"\0EPROTO"}},
+  [EPROTONOSUPPORT] = {{"\0EPROTON"}},
+  [EPROTOTYPE] = {{"\0EPROTOT"}},
+  [ERANGE] = {{"\0ERANGE"}},
+  [EREMCHG] = {{"\0EREMCHG"}},
+  [EREMOTE] = {{"\0EREMOTE"}},
+  [EREMOTEIO] = {{"\0EREMIO"}},
+  [ERESTART] = {{"\0ERESTAR"}},
+  [ERFKILL] = {{"\0ERFKILL"}},
+  [EROFS] = {{"\0EROFS"}},
+  [ESHUTDOWN] = {{"\0ESHUTDO"}},
+  [ESOCKTNOSUPPORT] = {{"\0ESOCKTN"}},
+  [ESPIPE] = {{"\0ESPIPE"}},
+  [ESRCH] = {{"\0ESRCH"}},
+  [ESRMNT] = {{"\0ESRMNT"}},
+  [ESTALE] = {{"\0ESTALE"}},
+  [ESTRPIPE] = {{"\0ESTRPIP"}},
+  [ETIME] = {{"\0ETIME"}},
+  [ETIMEDOUT] = {{"\0ETIMEDO"}},
+  [ETOOMANYREFS] = {{"\0ETOOMAN"}},
+  [ETXTBSY] = {{"\0ETXTBSY"}},
+  [EUCLEAN] = {{"\0EUCLEAN"}},
+  [EUNATCH] = {{"\0EUNATCH"}},
+  [EUSERS] = {{"\0EUSERS"}},
+  [EWOULDBLOCK] = {{"\0EWOULDB"}},
+  [EXDEV] = {{"\0EXDEV"}},
+  [EXFULL] = {{"\0EXFULL"}},
+};
+
+dpa__u_api dpa_u_a_bo_unique_t dpa_u_bo_error(int err){
+  if(err < 0 || err >= sizeof(bo_error)/sizeof(*bo_error))
+    return (dpa_u_a_bo_unique_t){{"\0ERROR"}};
+  return bo_error[err];
+}
 
 static dpa_u_map_u64_t unique_string_map;
 static mtx_t unique_string_map_lock;
@@ -83,11 +227,13 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
   const uint64_t hash = dpa_u_bo_get_hash(bo);
   const size_t size = dpa_u_bo_get_size(bo);
   const void* data = dpa_u_bo_get_data(bo);
+  int error;
 
   mtx_lock(&unique_string_map_lock);
 
   if(dpa__u_map_u64_maybe_grow(&unique_string_map) == -1){
     fprintf(stderr, "dpa__u_bo_intern_h failed: failed to increase size of hash map of all unique strings\n");
+    error = errno;
     goto error;
   }
   const int shift = sizeof(uint64_t)*CHAR_BIT - unique_string_map.lbsize;
@@ -134,6 +280,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
   }
   if(unused_i == (uint64_t)-1){
     fprintf(stderr, "dpa__u_bo_intern_h failed: bucket full, there can only be up to 65535 entries per bucket\n");
+    error = errno;
     goto error;
   }
   struct bo_unique_entry_hashed* eh = malloc(sizeof(*eh));
@@ -162,5 +309,5 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
   return ret;
 error:
   mtx_unlock(&unique_string_map_lock);
-  return (dpa_u_a_bo_unique_t){0};
+  return dpa_u_bo_error(error);
 }

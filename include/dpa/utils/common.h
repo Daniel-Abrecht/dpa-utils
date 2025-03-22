@@ -463,4 +463,15 @@ typedef struct dpa_u_optional_pointer {
 
 dpa__u_api_var extern alignas(256) char dpa_u_seed[256];
 
+
+// Some opaque type for internal use
+typedef struct dpa__u_0 dpa__u_0_t;
+typedef struct dpa__u_1 dpa__u_1_t;
+typedef struct dpa__u_2 dpa__u_2_t;
+typedef struct dpa__u_3 dpa__u_3_t;
+typedef struct dpa__u_4 dpa__u_4_t;
+typedef struct dpa__u_5 dpa__u_5_t;
+typedef struct dpa__u_6 dpa__u_6_t;
+typedef struct dpa__u_7 dpa__u_7_t;
+
 #endif

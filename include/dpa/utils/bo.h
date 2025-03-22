@@ -110,6 +110,21 @@ enum dpa_u_bo_type_flags {
 #define DPA_U__BO_TAG(X,T)   (*(const dpa_u__boptr_t*)(const uintptr_t[]){DPA_U_TAG((X),(T))})
 #define DPA_U__BO_UNTAG(T,X) ((T)DPA_U_UNTAG(*(uint64_t*)((X).c)))
 
+/* I use these two types to simplify some generics. Thy do not really exist. */
+struct dpa__u_a_bo;
+struct dpa__u_ptr;
+
+#define dpa__u_bo_helper(X) _Generic((X), \
+    dpa_u_a_bo_inline_t: (X).p, \
+    dpa_u_a_bo_unique_t: (X).p, \
+    dpa_u_a_bo_any_t: (X).p, \
+    dpa_u_a_bo_any_ro_t: (X).p, \
+    dpa_u_a_bo_gc_t: (X).p, \
+    dpa_u_a_bo_gc_ro_t: (X).p, \
+    dpa_u_a_bo_hashed_t: (X).p, \
+    default: (X) \
+  )
+
 #define dpa__u_bo_to_p_bo(X) (&(struct{dpa_u_bo_t x;}){(X)}.x)
 #define dpa__u_bo_ro_to_p_bo(X) (&(struct{dpa_u_bo_t x;}){dpa__u_bo_ro_to_p_bo_h(X)}.x)
 
@@ -309,7 +324,29 @@ dpa__u_api inline dpa_u_a_bo_unique_t dpa_u_bo_unique_from_uint(const uint64_t x
   return bo;
 }
 
-#define dpa_u_bo_compare(A, B) 0
+#define dpa_u_bo_compare(A, B) _Generic((A), \
+    dpa_u_a_bo_inline_t: _Generic((B), \
+        dpa_u_a_bo_inline_t: dpa__u_bo_compare_h1, \
+        dpa_u_a_bo_unique_t: dpa__u_bo_compare_h1, \
+        default: dpa__u_bo_compare_h2 \
+      ), \
+    dpa_u_a_bo_unique_t: _Generic((B), \
+        dpa_u_a_bo_inline_t: dpa__u_bo_compare_h1, \
+        dpa_u_a_bo_unique_t: dpa__u_bo_compare_h1, \
+        default: dpa__u_bo_compare_h2 \
+      ), \
+    default: dpa__u_bo_compare_h2 \
+  )(dpa_u_to_bo_any_ro((A)), dpa_u_to_bo_any_ro((B)))
+
+dpa__u_api inline int dpa__u_bo_compare_h1(dpa_u_a_bo_any_ro_t a, dpa_u_a_bo_any_ro_t b){
+  return memcmp(&a,&b,sizeof(a));
+}
+
+dpa__u_api inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_ro_t a, dpa_u_a_bo_any_ro_t b){
+  if(a.p.c[0] & b.p.c[0] & DPA_U_BO_UNIQUE)
+    return memcmp(&a,&b,sizeof(a));
+  return 0; // TODO
+}
 
 #define dpa_u_bo_ref(X) (void)(X)
 #define dpa_u_bo_put(X) (void)(X)
