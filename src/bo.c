@@ -66,7 +66,9 @@ static const dpa_u_a_bo_unique_t bo_error[] = {
   [ECONNREFUSED] = {{"\0ECREFUS"}},
   [ECONNRESET] = {{"\0ECRESET"}},
   [EDEADLK] = {{"\0EDEADLK"}},
+#if EDEADLK != EDEADLOCK
   [EDEADLOCK] = {{"\0EDEADLO"}},
+#endif
   [EDESTADDRREQ] = {{"\0EDESTAD"}},
   [EDOM] = {{"\0EDOM"}},
   [EDOTDOT] = {{"\0EDOTDOT"}},
@@ -142,7 +144,9 @@ static const dpa_u_a_bo_unique_t bo_error[] = {
   [ENOTTY] = {{"\0ENOTTY"}},
   [ENOTUNIQ] = {{"\0ENOTUNI"}},
   [ENXIO] = {{"\0ENXIO"}},
+#if ENOTSUP != EOPNOTSUPP
   [EOPNOTSUPP] = {{"\0EOPNOTS"}},
+#endif
   [EOVERFLOW] = {{"\0EOVERFL"}},
   [EOWNERDEAD] = {{"\0EOWNERD"}},
   [EPERM] = {{"\0EPERM"}},
@@ -172,13 +176,15 @@ static const dpa_u_a_bo_unique_t bo_error[] = {
   [EUCLEAN] = {{"\0EUCLEAN"}},
   [EUNATCH] = {{"\0EUNATCH"}},
   [EUSERS] = {{"\0EUSERS"}},
+#if EWOULDBLOCK != EAGAIN
   [EWOULDBLOCK] = {{"\0EWOULDB"}},
+#endif
   [EXDEV] = {{"\0EXDEV"}},
   [EXFULL] = {{"\0EXFULL"}},
 };
 
 dpa__u_api dpa_u_a_bo_unique_t dpa_u_bo_error(int err){
-  if(err < 0 || err >= sizeof(bo_error)/sizeof(*bo_error))
+  if(err < 0 || err >= (int)(sizeof(bo_error)/sizeof(*bo_error)))
     return (dpa_u_a_bo_unique_t){{"\0ERROR"}};
   return bo_error[err];
 }

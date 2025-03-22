@@ -43,7 +43,7 @@ int main(void){
     dpa_u_puts(my_bo);
     my_puts(my_bo);
     dpa_u_a_bo_unique_t my_bo2 = dpa_u_bo_intern(((dpa_u_bo_ro_t){
-      S("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
+      S("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua")
     }));
     printf("dpa_u_bo_compare: %d\n", dpa_u_bo_compare(my_bo, my_bo2));
     dpa_u_bo_put(my_bo);

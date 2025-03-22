@@ -345,7 +345,13 @@ dpa__u_api inline int dpa__u_bo_compare_h1(dpa_u_a_bo_any_ro_t a, dpa_u_a_bo_any
 dpa__u_api inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_ro_t a, dpa_u_a_bo_any_ro_t b){
   if(a.p.c[0] & b.p.c[0] & DPA_U_BO_UNIQUE)
     return memcmp(&a,&b,sizeof(a));
-  return 0; // TODO
+  const dpa_u_bo_ro_t sa = dpa_u_to_bo_ro(a);
+  const dpa_u_bo_ro_t sb = dpa_u_to_bo_ro(b);
+  const int r = (sa.size > sb.size) - (sa.size < sb.size);
+  if(r) return r;
+  if(sa.data == sb.data)
+    return 0;
+  return memcmp(sa.data, sb.data, sa.size);
 }
 
 #define dpa_u_bo_ref(X) (void)(X)
