@@ -189,6 +189,13 @@ dpa__u_api dpa_u_a_bo_unique_t dpa_u_bo_error(int err){
   return bo_error[err];
 }
 
+dpa__u_api int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo){
+  for(unsigned i=0; i<sizeof(bo_error)/sizeof(*bo_error); i++)
+    if(!memcmp(&bo, &bo_error[i], 8))
+      return i;
+  return -1;
+}
+
 static dpa_u_map_u64_t unique_string_map;
 static mtx_t unique_string_map_lock;
 

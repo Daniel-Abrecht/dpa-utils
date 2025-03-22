@@ -354,6 +354,9 @@ dpa__u_api inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_ro_t a, dpa_u_a_bo_any
   return memcmp(sa.data, sb.data, sa.size);
 }
 
+dpa__u_api dpa_u_a_bo_unique_t dpa_u_bo_error(int err);
+dpa__u_api int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo);
+
 #define dpa_u_bo_ref(X) (void)(X)
 #define dpa_u_bo_put(X) (void)(X)
 
