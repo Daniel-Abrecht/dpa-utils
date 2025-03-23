@@ -182,11 +182,10 @@ dpa__u_api inline uint64_t dpa_u__bo_get_hash(dpa_u__boptr_t boptr){
 DPA_U__CHECK_GENERIC(dpa_u_bo_get_hash)
 
 #define dpa_u__to_bo(X) _Generic((X), \
-    dpa_u_bo_t                                    : *(const dpa_u_bo_t*)dpa__u_bo_to_p_bo(DPA__G(dpa_u_bo_t, (X))), \
-    dpa_u_bo_ro_t                                 : *(const dpa_u_bo_t*)dpa__u_bo_ro_to_p_bo(DPA__G(dpa_u_bo_ro_t, (X))), \
-    \
-    dpa_u_p_bo_t*                          : *(const dpa_u_bo_t*)DPA__G(dpa_u_p_bo_t*, (X)), \
-    const dpa_u_p_bo_t*                    : *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X)), \
+    dpa_u_bo_t         : *(const dpa_u_bo_t*)dpa__u_bo_to_p_bo(DPA__G(dpa_u_bo_t, (X))), \
+    dpa_u_bo_ro_t      : *(const dpa_u_bo_t*)dpa__u_bo_ro_to_p_bo(DPA__G(dpa_u_bo_ro_t, (X))), \
+    dpa_u_p_bo_t*      : *(const dpa_u_bo_t*)DPA__G(dpa_u_p_bo_t*, (X)), \
+    const dpa_u_p_bo_t*: *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X)), \
     \
     struct dpa__u_a_bo_unique: dpa_u__to_bo_h((const dpa_u__boptr_t*)DPA__G(struct dpa__u_a_bo_unique, (X)).p.c), \
     struct dpa__u_a_bo_any   : dpa_u__to_bo_h((const dpa_u__boptr_t*)DPA__G(struct dpa__u_a_bo_any, (X)).p.c), \
@@ -212,11 +211,10 @@ DPA_U__CHECK_GENERIC(dpa_u__to_bo)
 #define dpa_u_bo_get_data(X) (dpa_u__to_bo((X)).data)
 
 #define dpa_u_bo_get_type(X) _Generic((X), \
-    dpa_u_bo_t                                    : DPA_U_BO_SIMPLE, \
-    dpa_u_bo_ro_t                                 : DPA_U_BO_SIMPLE, \
-    \
-    dpa_u_p_bo_t*                                 : DPA_U_BO_SIMPLE, \
-    const dpa_u_p_bo_t*                           : DPA_U_BO_SIMPLE, \
+    dpa_u_bo_t         : DPA_U_BO_SIMPLE, \
+    dpa_u_bo_ro_t      : DPA_U_BO_SIMPLE, \
+    dpa_u_p_bo_t*      : DPA_U_BO_SIMPLE, \
+    const dpa_u_p_bo_t*: DPA_U_BO_SIMPLE, \
     \
     struct dpa__u_a_bo_unique: DPA__G(struct dpa__u_a_bo_unique, (X)).p.c[0], \
     struct dpa__u_a_bo_any   : DPA__G(struct dpa__u_a_bo_any, (X)).p.c[0], \
@@ -270,9 +268,20 @@ dpa__u_api inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_ro_t a, dpa_u_a_bo_any
 dpa__u_api dpa_u_a_bo_unique_t dpa_u_bo_error(int err);
 dpa__u_api int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo);
 
-dpa__u_api inline int dpa_u_bo_is_error(dpa_u_a_bo_unique_t bo){
-  return bo.p.c[0] <= 7;
-}
+#define dpa_u_bo_is_error(X) _Generic((X), \
+    dpa_u_p_bo_t*: !DPA__G(dpa_u_p_bo_t*, (X)), \
+    const dpa_u_p_bo_t*: !DPA__G(const dpa_u_p_bo_t*, (X)), \
+    \
+    struct dpa__u_a_bo_unique: DPA__G(struct dpa__u_a_bo_unique, (X)).p.c[0] > 7, \
+    struct dpa__u_a_bo_any   : DPA__G(struct dpa__u_a_bo_any, (X)).p.c[0] > 7, \
+    struct dpa__u_a_bo_any_ro: DPA__G(struct dpa__u_a_bo_any_ro, (X)).p.c[0] > 7, \
+    struct dpa__u_a_bo_gc    : DPA__G(struct dpa__u_a_bo_gc, (X)).p.c[0] > 7, \
+    struct dpa__u_a_bo_gc_ro : DPA__G(struct dpa__u_a_bo_gc_ro, (X)).p.c[0] > 7, \
+    struct dpa__u_a_bo_hashed: DPA__G(struct dpa__u_a_bo_hashed, (X)).p.c[0] > 7, \
+    \
+    dpa_u__noop_t: 1 \
+  )
+DPA_U__CHECK_GENERIC(dpa_u_bo_get_type)
 
 #define dpa_u_bo_ref(X) (void)(X)
 #define dpa_u_bo_put(X) (void)(X)
