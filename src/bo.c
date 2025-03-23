@@ -209,26 +209,15 @@ dpa__u_api const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type){
   return dpa_u_bo_type[type>>3];
 }
 
-struct bo_unique_entry_simple {
-  dpa_u_refcount_freeable_t refcount;
-  dpa_u_bo_t bo;
-};
-
-struct bo_unique_entry_hashed {
-  dpa_u_refcount_freeable_t refcount;
-  struct dpa_u__bo_hashed bo;
-};
-static_assert(offsetof(struct bo_unique_entry_hashed, bo.bo) == offsetof(struct bo_unique_entry_simple, bo), "Unexpected offset");
-
 dpa__u_api void dpa__u_bo_unique_destroy(const dpa_u_refcount_freeable_t* rc){
   const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
-  struct bo_unique_entry_simple* bo = (struct bo_unique_entry_simple*)rc;
+  dpa_u_bo_t* bo = (dpa_u_bo_t*)(rc+1);
   if(type == DPA_U_REFCOUNT_BO_UNIQUE){
-    free(bo->bo.data);
+    free(bo->data);
   }else{
-    dpa_u_bo_put(dpa_u_container_of((char(*)[])bo->bo.data, struct dpa_u_refcount_freeable_data, data)->refcount);
+    dpa_u_bo_put(dpa_u_container_of((char(*)[])bo->data, struct dpa_u_refcount_freeable_data, data)->refcount);
   }
-  free(bo);
+  free((void*)rc);
 }
 
 dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
@@ -301,18 +290,38 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
     error = errno;
     goto error;
   }
-  struct bo_unique_entry_hashed* eh = malloc(sizeof(*eh));
+  int entry_size = sizeof(dpa_u_bo_t);
+  int type = DPA_U_BO_UNIQUE | DPA_U_BO_SIMPLE;
+  if(entry_size > 64){
+    type |= DPA_U_BO_HASHED;
+    entry_size = sizeof(dpa__u_bo_hashed_t);
+  }
+  if(dpa_u_bo_is_type(bo, DPA_U_BO_IMMORTAL)){
+    type |= DPA_U_BO_IMMORTAL;
+  }else{
+    type |= DPA_U_BO_REFCOUNTED;
+    entry_size += sizeof(dpa_u_refcount_t);
+  }
+  void* eh = malloc(entry_size);
   if(!dpa_u_bo_is_type(bo, DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL)){
     char* d = malloc(size);
     memcpy(d, data, size);
     data = d;
   }
-  *eh = (struct bo_unique_entry_hashed){
-    .bo.bo.size = size,
-    .bo.bo.data = (char*)data,
-    .bo.hash = hash,
+  if(type & DPA_U_BO_REFCOUNTED){
+    dpa_u_refcount_freeable_t* rc = eh;
+    rc->value = dpa_u_bo_is_type(bo, DPA_U_BO_REFCOUNTED)
+                 ? DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE_EXTREF) + 1
+                 : DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE) + 1;
+    eh = rc+1;
+  }
+  *(dpa_u_bo_t*)eh = (dpa_u_bo_t){
+    .size = size,
+    .data = (char*)data,
   };
-  dpa_u_a_bo_unique_t ret = { DPA_U__BO_TAG(&eh->bo, DPA_U_BO_UNIQUE|DPA_U_BO_HASHED|DPA_U_BO_SIMPLE) };
+  if(type & DPA_U_BO_HASHED)
+    ((dpa__u_bo_hashed_t*)eh)->hash = hash;
+  dpa_u_a_bo_unique_t ret = { DPA_U__BO_TAG(eh, type) };
   dpa__u_map_u64_insert_sub(
     &unique_string_map,
     unused_e,

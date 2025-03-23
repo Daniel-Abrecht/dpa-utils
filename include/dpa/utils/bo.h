@@ -41,10 +41,10 @@ typedef struct dpa_u_bo_ro {
   const char* data;
 } dpa_u_bo_ro_t;
 
-typedef struct dpa_u__bo_hashed {
+typedef struct dpa__u_bo_hashed {
   dpa_u_bo_t bo;
   uint64_t hash;
-} dpa_u__bo_hashed_t;
+} dpa__u_bo_hashed_t;
 
 typedef struct dpa_u_p_bo dpa_u_p_bo_t;
 
@@ -176,7 +176,7 @@ dpa__u_api inline uint64_t dpa_u__bo_hash(dpa_u_bo_ro_t bo){
 
 dpa__u_api inline uint64_t dpa_u__bo_get_hash(dpa_u__boptr_t boptr){
   if(dpa_u_bo_is_type(boptr, DPA_U_BO_HASHED))
-    return DPA_U__BO_UNTAG(dpa_u__bo_hashed_t*, boptr)->hash;
+    return DPA_U__BO_UNTAG(dpa__u_bo_hashed_t*, boptr)->hash;
   return dpa_u__bo_hash(dpa__u_bo_to_bo_ro_h(*DPA_U__BO_UNTAG(dpa_u_bo_t*, boptr)));
 }
 DPA_U__CHECK_GENERIC(dpa_u_bo_get_hash)
@@ -281,7 +281,7 @@ dpa__u_api int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo);
     \
     dpa_u__noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_bo_get_type)
+DPA_U__CHECK_GENERIC(dpa_u_bo_is_error)
 
 #define dpa_u_bo_ref(X) (void)(X)
 #define dpa_u_bo_put(X) (void)(X)
