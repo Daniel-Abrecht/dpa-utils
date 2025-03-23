@@ -19,7 +19,7 @@
 #define DPA_U_UNTAG(X) ((void*)(uintptr_t)((X)>>8))
 #elif BYTE_ORDER == BIG_ENDIAN
 #define DPA_U_TAG(X, T) (((uint64_t)(uintptr_t)(X)) | ((T)<<56))
-#define DPA_U_UNTAG(X) ((void*)(uintptr_t)((X)& 0x00FFFFFFFFFFFFFFu))
+#define DPA_U_UNTAG(X) ((void*)(uintptr_t)((X) & 0x00FFFFFFFFFFFFFFu))
 #else
 #error "Unknown endianess"
 #endif
@@ -116,7 +116,6 @@ dpa__u_api inline dpa_u_bo_ro_t dpa__u_bo_to_bo_ro_h(dpa_u_bo_t bo){
 #define dpa_u_to_bo_any(X) _Generic((X), \
     dpa_u_bo_t         : (dpa_u_a_bo_any_t   ){DPA_U__BO_TAG(dpa__u_bo_to_p_bo(DPA__G(dpa_u_bo_t, (X))), DPA_U_BO_SIMPLE)}, \
     dpa_u_bo_ro_t      : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(dpa__u_bo_ro_to_p_bo(DPA__G(dpa_u_bo_ro_t, (X))), DPA_U_BO_SIMPLE)}, \
-    \
     dpa_u_p_bo_t*      : (dpa_u_a_bo_any_t   ){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
     const dpa_u_p_bo_t*: (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
     \
@@ -134,7 +133,6 @@ DPA_U__CHECK_GENERIC(dpa_u_to_bo_any)
 #define dpa_u_to_bo_any_ro(X) _Generic((X), \
     dpa_u_bo_t         : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(dpa__u_bo_to_p_bo(DPA__G(dpa_u_bo_t, (X))), DPA_U_BO_SIMPLE)}, \
     dpa_u_bo_ro_t      : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(dpa__u_bo_ro_to_p_bo(DPA__G(dpa_u_bo_ro_t, (X))), DPA_U_BO_SIMPLE)}, \
-    \
     dpa_u_p_bo_t*      : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
     const dpa_u_p_bo_t*: (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
     \
@@ -154,22 +152,32 @@ DPA_U__CHECK_GENERIC(dpa_u_to_bo_any_ro)
  * THis is meant for things like a hash map.
  */
 #define dpa_u_bo_get_hash(X) _Generic((X), \
+    dpa_u_bo_t         : dpa_u__bo_hash(dpa__u_bo_to_bo_ro_h(DPA__G(dpa_u_bo_t, (X)))), \
+    dpa_u_bo_ro_t      : dpa_u__bo_hash(DPA__G(dpa_u_bo_ro_t, (X))), \
+    dpa_u_p_bo_t*      : dpa_u__bo_hash(dpa__u_bo_to_bo_ro_h(*(dpa_u_bo_t*)DPA__G(dpa_u_p_bo_t*, (X)))), \
+    const dpa_u_p_bo_t*: dpa_u__bo_hash(dpa__u_bo_to_bo_ro_h(*(dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X)))), \
+    \
     struct dpa__u_a_bo_unique: dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_unique, (X)).p), \
     struct dpa__u_a_bo_any   : dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_any, (X)).p), \
     struct dpa__u_a_bo_any_ro: dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_any_ro, (X)).p), \
+    struct dpa__u_a_bo_gc    : dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_gc, (X)).p), \
     struct dpa__u_a_bo_gc_ro : dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_gc_ro, (X)).p), \
     struct dpa__u_a_bo_hashed: dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_hashed, (X)).p), \
     \
     dpa_u__noop_t: 1 \
   )
 
-dpa__u_api inline uint64_t dpa_u__bo_get_hash(dpa_u__boptr_t boptr){
-  if(dpa_u_bo_is_type(boptr, DPA_U_BO_HASHED))
-    return DPA_U__BO_UNTAG(dpa_u__bo_hashed_t*, boptr)->hash;
+dpa__u_api inline uint64_t dpa_u__bo_hash(dpa_u_bo_ro_t bo){
   inline
   uint64_t dpa_u_hash_64_FNV_1a_append_p(dpa_u_bo_ro_t bo, uint_fast64_t hash);
   const uint64_t basis = *(uint64_t*)dpa_u_seed;
-  return dpa_u_hash_64_FNV_1a_append_p(dpa__u_bo_to_bo_ro_h(*DPA_U__BO_UNTAG(dpa_u_bo_t*, boptr)), basis);
+  return dpa_u_hash_64_FNV_1a_append_p(bo, basis);
+}
+
+dpa__u_api inline uint64_t dpa_u__bo_get_hash(dpa_u__boptr_t boptr){
+  if(dpa_u_bo_is_type(boptr, DPA_U_BO_HASHED))
+    return DPA_U__BO_UNTAG(dpa_u__bo_hashed_t*, boptr)->hash;
+  return dpa_u__bo_hash(dpa__u_bo_to_bo_ro_h(*DPA_U__BO_UNTAG(dpa_u_bo_t*, boptr)));
 }
 DPA_U__CHECK_GENERIC(dpa_u_bo_get_hash)
 
