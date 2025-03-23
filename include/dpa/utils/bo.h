@@ -47,18 +47,7 @@ typedef struct dpa_u__bo_hashed {
 } dpa_u__bo_hashed_t;
 
 typedef struct dpa_u_p_bo dpa_u_p_bo_t;
-typedef const struct dpa_u_p_bo_hashed dpa_u_p_bo_hashed_t;
-typedef const struct dpa_u_p_bo_unique_refcounted dpa_u_p_bo_unique_refcounted_t;
-typedef const struct dpa_u_p_bo_unique_immortal dpa_u_p_bo_unique_immortal_t;
-typedef const struct dpa_u_p_bo_unique_refcounted_immortal dpa_u_p_bo_unique_refcounted_immortal_t;
-typedef struct dpa_u_p_bo_immortal dpa_u_p_bo_immortal_t;
-typedef struct dpa_u_p_bo_refcounted dpa_u_p_bo_refcounted_t;
-typedef struct dpa_u_p_bo_refcounted_immortal dpa_u_p_bo_refcounted_immortal_t;
-typedef const struct dpa_u_p_bo_hashed_immortal dpa_u_p_bo_hashed_immortal_t;
-typedef const struct dpa_u_p_bo_hashed_refcounted dpa_u_p_bo_hashed_refcounted_t;
-typedef const struct dpa_u_p_bo_hashed_refcounted_immortal dpa_u_p_bo_hashed_refcounted_immortal_t;
 
-typedef struct dpa_u_a_bo_inline { dpa_u__boptr_t p; } dpa_u_a_bo_inline_t;
 typedef struct dpa_u_a_bo_unique { dpa_u__boptr_t p; } dpa_u_a_bo_unique_t;
 typedef struct dpa_u_a_bo_any    { dpa_u__boptr_t p; } dpa_u_a_bo_any_t;
 typedef struct dpa_u_a_bo_any_ro { dpa_u__boptr_t p; } dpa_u_a_bo_any_ro_t;
@@ -66,7 +55,6 @@ typedef struct dpa_u_a_bo_gc     { dpa_u__boptr_t p; } dpa_u_a_bo_gc_t;
 typedef struct dpa_u_a_bo_gc_ro  { dpa_u__boptr_t p; } dpa_u_a_bo_gc_ro_t;
 typedef struct dpa_u_a_bo_hashed { dpa_u__boptr_t p; } dpa_u_a_bo_hashed_t;
 
-static_assert(sizeof(dpa_u_a_bo_inline_t) == sizeof(uint64_t));
 static_assert(sizeof(dpa_u_a_bo_unique_t) == sizeof(uint64_t));
 static_assert(sizeof(dpa_u_a_bo_any_t) == sizeof(uint64_t));
 static_assert(sizeof(dpa_u_a_bo_any_ro_t) == sizeof(uint64_t));
@@ -96,9 +84,6 @@ enum dpa_u_bo_type_flags {
     dpa_u_p_bo_t*             : DPA_U_BO_SIMPLE & (N), \
     const dpa_u_p_bo_t*       : DPA_U_BO_SIMPLE & (N), \
     \
-    const dpa_u_p_bo_hashed_t*: DPA_U_BO_HASHED & (N), \
-    \
-    dpa_u_a_bo_inline_t       : (DPA__G(dpa_u_a_bo_inline_t, (X)).p.c[0] & (N)), \
     dpa_u_a_bo_unique_t       : (DPA__G(dpa_u_a_bo_unique_t, (X)).p.c[0] & (N)), \
     dpa_u_a_bo_any_t          : (DPA__G(dpa_u_a_bo_any_t,    (X)).p.c[0] & (N)), \
     dpa_u_a_bo_any_ro_t       : (DPA__G(dpa_u_a_bo_any_ro_t, (X)).p.c[0] & (N)), \
@@ -109,21 +94,6 @@ enum dpa_u_bo_type_flags {
 
 #define DPA_U__BO_TAG(X,T)   (*(const dpa_u__boptr_t*)(const uintptr_t[]){DPA_U_TAG((X),(T))})
 #define DPA_U__BO_UNTAG(T,X) ((T)DPA_U_UNTAG(*(uint64_t*)((X).c)))
-
-/* I use these two types to simplify some generics. Thy do not really exist. */
-struct dpa__u_a_bo;
-struct dpa__u_ptr;
-
-#define dpa__u_bo_helper(X) _Generic((X), \
-    dpa_u_a_bo_inline_t: (X).p, \
-    dpa_u_a_bo_unique_t: (X).p, \
-    dpa_u_a_bo_any_t: (X).p, \
-    dpa_u_a_bo_any_ro_t: (X).p, \
-    dpa_u_a_bo_gc_t: (X).p, \
-    dpa_u_a_bo_gc_ro_t: (X).p, \
-    dpa_u_a_bo_hashed_t: (X).p, \
-    default: (X) \
-  )
 
 #define dpa__u_bo_to_p_bo(X) (&(struct{dpa_u_bo_t x;}){(X)}.x)
 #define dpa__u_bo_ro_to_p_bo(X) (&(struct{dpa_u_bo_t x;}){dpa__u_bo_ro_to_p_bo_h(X)}.x)
@@ -144,25 +114,12 @@ dpa__u_api inline dpa_u_bo_ro_t dpa__u_bo_to_bo_ro_h(dpa_u_bo_t bo){
 #define dpa_u_to_bo_ro(X) dpa__u_bo_to_bo_ro_h(dpa_u__to_bo(X))
 
 #define dpa_u_to_bo_any(X) _Generic((X), \
-    dpa_u_bo_t                                    : (dpa_u_a_bo_any_t   ){DPA_U__BO_TAG(dpa__u_bo_to_p_bo(DPA__G(dpa_u_bo_t, (X))), DPA_U_BO_SIMPLE)}, \
-    dpa_u_bo_ro_t                                 : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(dpa__u_bo_ro_to_p_bo(DPA__G(dpa_u_bo_ro_t, (X))), DPA_U_BO_SIMPLE)}, \
+    dpa_u_bo_t         : (dpa_u_a_bo_any_t   ){DPA_U__BO_TAG(dpa__u_bo_to_p_bo(DPA__G(dpa_u_bo_t, (X))), DPA_U_BO_SIMPLE)}, \
+    dpa_u_bo_ro_t      : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(dpa__u_bo_ro_to_p_bo(DPA__G(dpa_u_bo_ro_t, (X))), DPA_U_BO_SIMPLE)}, \
     \
-    dpa_u_p_bo_t*                                 : (dpa_u_a_bo_any_t   ){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
-    const dpa_u_p_bo_t*                           : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
-    const dpa_u_p_bo_hashed_t*                    : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED)}, \
-    const dpa_u_p_bo_unique_refcounted_t*         : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_unique_refcounted_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE)}, \
-    const dpa_u_p_bo_unique_immortal_t*           : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_unique_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_IMMORTAL|DPA_U_BO_UNIQUE)}, \
-    const dpa_u_p_bo_unique_refcounted_immortal_t*: (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_unique_refcounted_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL|DPA_U_BO_UNIQUE)}, \
-    dpa_u_p_bo_immortal_t*                        : (dpa_u_a_bo_any_t   ){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_IMMORTAL)}, \
-    const dpa_u_p_bo_immortal_t*                  : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_IMMORTAL)}, \
-    dpa_u_p_bo_refcounted_t*                      : (dpa_u_a_bo_any_t   ){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_refcounted_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED)}, \
-    const dpa_u_p_bo_refcounted_t*                : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_refcounted_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED)}, \
-    dpa_u_p_bo_refcounted_immortal_t*             : (dpa_u_a_bo_any_t   ){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_refcounted_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL)}, \
-    const dpa_u_p_bo_refcounted_immortal_t*       : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_refcounted_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL)}, \
-    const dpa_u_p_bo_hashed_immortal_t*           : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_hashed_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_IMMORTAL)}, \
-    const dpa_u_p_bo_hashed_refcounted_immortal_t*: (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_hashed_refcounted_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_IMMORTAL|DPA_U_BO_REFCOUNTED)}, \
+    dpa_u_p_bo_t*      : (dpa_u_a_bo_any_t   ){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
+    const dpa_u_p_bo_t*: (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
     \
-    dpa_u_a_bo_inline_t: (dpa_u_a_bo_any_ro_t){DPA__G(dpa_u_a_bo_inline_t, (X)).p}, \
     dpa_u_a_bo_unique_t: (dpa_u_a_bo_any_ro_t){DPA__G(dpa_u_a_bo_unique_t, (X)).p}, \
     dpa_u_a_bo_any_t   : (dpa_u_a_bo_any_t   ){DPA__G(dpa_u_a_bo_any_t, (X)).p}, \
     dpa_u_a_bo_any_ro_t: (dpa_u_a_bo_any_ro_t){DPA__G(dpa_u_a_bo_any_ro_t, (X)).p}, \
@@ -175,25 +132,12 @@ dpa__u_api inline dpa_u_bo_ro_t dpa__u_bo_to_bo_ro_h(dpa_u_bo_t bo){
 DPA_U__CHECK_GENERIC(dpa_u_to_bo_any)
 
 #define dpa_u_to_bo_any_ro(X) _Generic((X), \
-    dpa_u_bo_t                                    : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(dpa__u_bo_to_p_bo(DPA__G(dpa_u_bo_t, (X))), DPA_U_BO_SIMPLE)}, \
-    dpa_u_bo_ro_t                                 : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(dpa__u_bo_ro_to_p_bo(DPA__G(dpa_u_bo_ro_t, (X))), DPA_U_BO_SIMPLE)}, \
+    dpa_u_bo_t         : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(dpa__u_bo_to_p_bo(DPA__G(dpa_u_bo_t, (X))), DPA_U_BO_SIMPLE)}, \
+    dpa_u_bo_ro_t      : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(dpa__u_bo_ro_to_p_bo(DPA__G(dpa_u_bo_ro_t, (X))), DPA_U_BO_SIMPLE)}, \
     \
-    dpa_u_p_bo_t*                                 : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
-    const dpa_u_p_bo_t*                           : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
-    const dpa_u_p_bo_hashed_t*                    : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED)}, \
-    const dpa_u_p_bo_unique_refcounted_t*         : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_unique_refcounted_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE)}, \
-    const dpa_u_p_bo_unique_immortal_t*           : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_unique_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_IMMORTAL|DPA_U_BO_UNIQUE)}, \
-    const dpa_u_p_bo_unique_refcounted_immortal_t*: (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_unique_refcounted_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL|DPA_U_BO_UNIQUE)}, \
-    dpa_u_p_bo_immortal_t*                        : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_IMMORTAL)}, \
-    const dpa_u_p_bo_immortal_t*                  : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_IMMORTAL)}, \
-    dpa_u_p_bo_refcounted_t*                      : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_refcounted_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED)}, \
-    const dpa_u_p_bo_refcounted_t*                : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_refcounted_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED)}, \
-    dpa_u_p_bo_refcounted_immortal_t*             : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_refcounted_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL)}, \
-    const dpa_u_p_bo_refcounted_immortal_t*       : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_refcounted_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL)}, \
-    const dpa_u_p_bo_hashed_immortal_t*           : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_hashed_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_IMMORTAL)}, \
-    const dpa_u_p_bo_hashed_refcounted_immortal_t*: (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_hashed_refcounted_immortal_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_IMMORTAL|DPA_U_BO_REFCOUNTED)}, \
+    dpa_u_p_bo_t*      : (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
+    const dpa_u_p_bo_t*: (dpa_u_a_bo_any_ro_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
     \
-    dpa_u_a_bo_inline_t: (dpa_u_a_bo_any_ro_t){DPA__G(dpa_u_a_bo_inline_t, (X)).p}, \
     dpa_u_a_bo_unique_t: (dpa_u_a_bo_any_ro_t){DPA__G(dpa_u_a_bo_unique_t, (X)).p}, \
     dpa_u_a_bo_any_t   : (dpa_u_a_bo_any_ro_t){DPA__G(dpa_u_a_bo_any_t, (X)).p}, \
     dpa_u_a_bo_any_ro_t: (dpa_u_a_bo_any_ro_t){DPA__G(dpa_u_a_bo_any_ro_t, (X)).p}, \
@@ -210,13 +154,6 @@ DPA_U__CHECK_GENERIC(dpa_u_to_bo_any_ro)
  * THis is meant for things like a hash map.
  */
 #define dpa_u_bo_get_hash(X) _Generic((X), \
-    const dpa_u_p_bo_hashed_t*: ((dpa_u__bo_hashed_t*)DPA__G(const dpa_u_p_bo_hashed_t*, (X)))->hash, \
-    const dpa_u_p_bo_hashed_immortal_t*: ((dpa_u__bo_hashed_t*)DPA__G(const dpa_u_p_bo_hashed_immortal_t*, (X)))->hash, \
-    const dpa_u_p_bo_hashed_refcounted_immortal_t*: ((dpa_u__bo_hashed_t*)DPA__G(const dpa_u_p_bo_hashed_refcounted_immortal_t*, (X)))->hash, \
-    const dpa_u_p_bo_unique_refcounted_t*: ((dpa_u__bo_hashed_t*)DPA__G(const dpa_u_p_bo_unique_refcounted_t*, (X)))->hash, \
-    const dpa_u_p_bo_unique_immortal_t*: ((dpa_u__bo_hashed_t*)DPA__G(const dpa_u_p_bo_unique_immortal_t*, (X)))->hash, \
-    const dpa_u_p_bo_unique_refcounted_immortal_t*: ((dpa_u__bo_hashed_t*)DPA__G(const dpa_u_p_bo_unique_refcounted_immortal_t*, (X)))->hash, \
-    \
     dpa_u_a_bo_unique_t: dpa_u__bo_get_hash(DPA__G(dpa_u_a_bo_unique_t, (X)).p), \
     dpa_u_a_bo_any_t   : dpa_u__bo_get_hash(DPA__G(dpa_u_a_bo_any_t, (X)).p), \
     dpa_u_a_bo_any_ro_t: dpa_u__bo_get_hash(DPA__G(dpa_u_a_bo_any_ro_t, (X)).p), \
@@ -242,20 +179,7 @@ DPA_U__CHECK_GENERIC(dpa_u_bo_get_hash)
     \
     dpa_u_p_bo_t*                          : *(const dpa_u_bo_t*)DPA__G(dpa_u_p_bo_t*, (X)), \
     const dpa_u_p_bo_t*                    : *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X)), \
-    const dpa_u_p_bo_hashed_t*                    : *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_hashed_t*, (X)), \
-    const dpa_u_p_bo_unique_refcounted_t*         : *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_unique_refcounted_t*, (X)), \
-    const dpa_u_p_bo_unique_immortal_t*           : *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_unique_immortal_t*, (X)), \
-    const dpa_u_p_bo_unique_refcounted_immortal_t*: *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_unique_refcounted_immortal_t*, (X)), \
-    dpa_u_p_bo_immortal_t*                        : *(const dpa_u_bo_t*)DPA__G(dpa_u_p_bo_immortal_t*, (X)), \
-    const dpa_u_p_bo_immortal_t*                  : *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_immortal_t*, (X)), \
-    dpa_u_p_bo_refcounted_t*                      : *(const dpa_u_bo_t*)DPA__G(dpa_u_p_bo_refcounted_t*, (X)), \
-    const dpa_u_p_bo_refcounted_t*                : *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_refcounted_t*, (X)), \
-    dpa_u_p_bo_refcounted_immortal_t*             : *(const dpa_u_bo_t*)DPA__G(dpa_u_p_bo_refcounted_immortal_t*, (X)), \
-    const dpa_u_p_bo_refcounted_immortal_t*       : *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_refcounted_immortal_t*, (X)), \
-    const dpa_u_p_bo_hashed_immortal_t*           : *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_hashed_immortal_t*, (X)), \
-    const dpa_u_p_bo_hashed_refcounted_immortal_t*: *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_hashed_refcounted_immortal_t*, (X)), \
     \
-    dpa_u_a_bo_inline_t: dpa_u__inline_to_bo_h(DPA__G(dpa_u_a_bo_inline_t, (X)).p.c), \
     dpa_u_a_bo_unique_t: dpa_u__to_bo_h((const dpa_u__boptr_t*)DPA__G(dpa_u_a_bo_unique_t, (X)).p.c), \
     dpa_u_a_bo_any_t   : dpa_u__to_bo_h((const dpa_u__boptr_t*)DPA__G(dpa_u_a_bo_any_t, (X)).p.c), \
     dpa_u_a_bo_any_ro_t: dpa_u__to_bo_h((const dpa_u__boptr_t*)DPA__G(dpa_u_a_bo_any_ro_t, (X)).p.c), \
@@ -285,20 +209,7 @@ DPA_U__CHECK_GENERIC(dpa_u__to_bo)
     \
     dpa_u_p_bo_t*                                 : DPA_U_BO_SIMPLE, \
     const dpa_u_p_bo_t*                           : DPA_U_BO_SIMPLE, \
-    const dpa_u_p_bo_hashed_t*                    : DPA_U_BO_SIMPLE|DPA_U_BO_HASHED, \
-    const dpa_u_p_bo_unique_refcounted_t*         : DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE, \
-    const dpa_u_p_bo_unique_immortal_t*           : DPA_U_BO_SIMPLE|DPA_U_BO_IMMORTAL|DPA_U_BO_UNIQUE, \
-    const dpa_u_p_bo_unique_refcounted_immortal_t*: DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL|DPA_U_BO_UNIQUE, \
-    dpa_u_p_bo_immortal_t*                        : DPA_U_BO_SIMPLE|DPA_U_BO_IMMORTAL, \
-    const dpa_u_p_bo_immortal_t*                  : DPA_U_BO_SIMPLE|DPA_U_BO_IMMORTAL, \
-    dpa_u_p_bo_refcounted_t*                      : DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED, \
-    const dpa_u_p_bo_refcounted_t*                : DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED, \
-    dpa_u_p_bo_refcounted_immortal_t*             : DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL, \
-    const dpa_u_p_bo_refcounted_immortal_t*       : DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL, \
-    const dpa_u_p_bo_hashed_immortal_t*           : DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_IMMORTAL, \
-    const dpa_u_p_bo_hashed_refcounted_immortal_t*: DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_IMMORTAL|DPA_U_BO_REFCOUNTED, \
     \
-    dpa_u_a_bo_inline_t: DPA__G(dpa_u_a_bo_inline_t, (X)).p.c[0], \
     dpa_u_a_bo_unique_t: DPA__G(dpa_u_a_bo_unique_t, (X)).p.c[0], \
     dpa_u_a_bo_any_t   : DPA__G(dpa_u_a_bo_any_t, (X)).p.c[0], \
     dpa_u_a_bo_any_ro_t: DPA__G(dpa_u_a_bo_any_ro_t, (X)).p.c[0], \
@@ -325,13 +236,7 @@ dpa__u_api inline dpa_u_a_bo_unique_t dpa_u_bo_unique_from_uint(const uint64_t x
 }
 
 #define dpa_u_bo_compare(A, B) _Generic((A), \
-    dpa_u_a_bo_inline_t: _Generic((B), \
-        dpa_u_a_bo_inline_t: dpa__u_bo_compare_h1, \
-        dpa_u_a_bo_unique_t: dpa__u_bo_compare_h1, \
-        default: dpa__u_bo_compare_h2 \
-      ), \
     dpa_u_a_bo_unique_t: _Generic((B), \
-        dpa_u_a_bo_inline_t: dpa__u_bo_compare_h1, \
         dpa_u_a_bo_unique_t: dpa__u_bo_compare_h1, \
         default: dpa__u_bo_compare_h2 \
       ), \
