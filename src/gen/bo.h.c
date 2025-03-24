@@ -9,3 +9,7 @@ extern int dpa__u_bo_compare_h1(dpa_u_a_bo_any_ro_t a, dpa_u_a_bo_any_ro_t b);
 extern int dpa__u_bo_compare_h2(dpa_u_a_bo_any_ro_t a, dpa_u_a_bo_any_ro_t b);
 extern uint64_t dpa_u__bo_get_hash(dpa_u__boptr_t boptr);
 extern uint64_t dpa_u__bo_hash(dpa_u_bo_ro_t bo);
+extern void dpa_u_bo_put_h(dpa_u_a_bo_any_ro_t bo);
+extern void dpa_u_bo_put_h1(dpa_u_a_bo_unique_t bo);
+extern void dpa_u_bo_ref_h(dpa_u_a_bo_any_ro_t bo);
+extern void dpa_u_bo_ref_h1(dpa_u_a_bo_unique_t bo);

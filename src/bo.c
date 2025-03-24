@@ -215,13 +215,14 @@ dpa__u_api void dpa__u_bo_unique_destroy(const dpa_u_refcount_freeable_t* rc){
   if(type == DPA_U_REFCOUNT_BO_UNIQUE){
     free(bo->data);
   }else{
-    dpa_u_bo_put(dpa_u_container_of((char(*)[])bo->data, struct dpa_u_refcount_freeable_data, data)->refcount);
+    dpa_u_refcount_put(dpa_u_container_of((char(*)[])bo->data, struct dpa_u_refcount_freeable_data, data)->refcount);
   }
   free((void*)rc);
+  // TODO: remove from map
 }
 
 dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
-  if(dpa_u_bo_is_type(bo, DPA_U_BO_UNIQUE)){
+  if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE)){
     dpa_u_a_bo_unique_t res = {bo.p};
     dpa_u_bo_ref(res);
     return res;
@@ -296,21 +297,21 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
     type |= DPA_U_BO_HASHED;
     entry_size = sizeof(dpa__u_bo_hashed_t);
   }
-  if(dpa_u_bo_is_type(bo, DPA_U_BO_IMMORTAL)){
+  if(dpa_u_bo_is_any_type(bo, DPA_U_BO_IMMORTAL)){
     type |= DPA_U_BO_IMMORTAL;
   }else{
     type |= DPA_U_BO_REFCOUNTED;
     entry_size += sizeof(dpa_u_refcount_t);
   }
   void* eh = malloc(entry_size);
-  if(!dpa_u_bo_is_type(bo, DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL)){
+  if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL)){
     char* d = malloc(size);
     memcpy(d, data, size);
     data = d;
   }
   if(type & DPA_U_BO_REFCOUNTED){
-    dpa_u_refcount_freeable_t* rc = eh;
-    rc->value = dpa_u_bo_is_type(bo, DPA_U_BO_REFCOUNTED)
+    struct dpa__u_refcount_bo_unique* rc = eh;
+    rc->value = dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED)
                  ? DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE_EXTREF) + 1
                  : DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE) + 1;
     eh = rc+1;
