@@ -210,15 +210,32 @@ dpa__u_api const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type){
 }
 
 dpa__u_api void dpa__u_bo_unique_destroy(const dpa_u_refcount_freeable_t* rc){
-  const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
-  dpa_u_bo_t* bo = (dpa_u_bo_t*)(rc+1);
-  if(type == DPA_U_REFCOUNT_BO_UNIQUE){
-    free(bo->data);
-  }else{
-    dpa_u_refcount_put(dpa_u_container_of((char(*)[])bo->data, struct dpa_u_refcount_freeable_data, data)->refcount);
+  mtx_lock(&unique_string_map_lock);
+  static bool b;
+  if(!b){
+    dpa_u_map_dump_hashmap_key_hashes(&unique_string_map);
+    b = true;
   }
+  if(!dpa_u_refcount_is_zero(rc))
+    goto end;
+  const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
+  const dpa_u_bo_t*const bo = (dpa_u_bo_t*)(rc+1);
+  if(0){
+    const uint64_t truncated_hash = ((bo->size > 64) ? ((dpa__u_bo_hashed_t*)bo)->hash : dpa_u_bo_get_hash(*bo)) & ~0xFFFF;
+    const struct dpa__u_sm_lookup_result result = dpa__u_map_u64_lookup_sub(&unique_string_map, truncated_hash, unique_string_map.lbsize);
+    const int shift = sizeof(uint64_t)*CHAR_BIT - unique_string_map.lbsize;
+    const uint64_t I = (uint64_t)1 << shift;
+    uint64_t i = (uint64_t)result.index << shift;
+    for(; (DPA_U_UNTAG(unique_string_map.value_list[i>>shift].u64) != bo); i += I);
+    i >>= shift;
+    // printf("%ld\n", (result.index-i));
+    dpa__u_map_u64_remove_index_sub(&unique_string_map, i);
+  }
+  if(type == DPA_U_REFCOUNT_BO_UNIQUE_EXTREF)
+    dpa_u_refcount_put(dpa_u_container_of((char(*)[])bo->data, struct dpa_u_refcount_freeable_data, data)->refcount);
   free((void*)rc);
-  // TODO: remove from map
+end:
+  mtx_unlock(&unique_string_map_lock);
 }
 
 dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
@@ -293,7 +310,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
   }
   int entry_size = sizeof(dpa_u_bo_t);
   int type = DPA_U_BO_UNIQUE | DPA_U_BO_SIMPLE;
-  if(entry_size > 64){
+  if(size > 64){
     type |= DPA_U_BO_HASHED;
     entry_size = sizeof(dpa__u_bo_hashed_t);
   }
@@ -303,9 +320,11 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
     type |= DPA_U_BO_REFCOUNTED;
     entry_size += sizeof(dpa_u_refcount_t);
   }
+  if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL))
+    entry_size += size;
   void* eh = malloc(entry_size);
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL)){
-    char* d = malloc(size);
+    char* d = (char*)eh + entry_size - size;
     memcpy(d, data, size);
     data = d;
   }

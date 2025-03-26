@@ -48,12 +48,10 @@ dpa__u_api long dpa_u_total_resize_time;
 
 ////////////////////////////////////////////////////////////
 
-#define DPA__U_STR_AS_UINT_IMPL <dpa/utils/nop>
 #define DPA__U_SM_TEMPLATE <src/set-and-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_SET
 #include <dpa/utils/_set-and-map.generator>
 
-#define DPA__U_STR_AS_UINT_IMPL <dpa/utils/nop>
 #define DPA__U_SM_TEMPLATE <src/set-and-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_MAP
 #include <dpa/utils/_set-and-map.generator>
@@ -898,6 +896,16 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _remove_list)(DPA__U_SM_TYPE*r
   if(that->lbsize-lbsize >= 2)
     SHRINK(that);
   return true;
+}
+
+dpa__u_api void DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _remove_index_sub)(DPA__U_SM_TYPE*restrict that, size_t index){
+  REMOVE(that, index, that->lbsize);
+  const size_t count = --that->count;
+  if(dpa_u_unlikely(!count))
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(that);
+  const int lbsize = count_to_lbsize(count);
+  if(that->lbsize-lbsize >= 2)
+    SHRINK(that);
 }
 #endif
 

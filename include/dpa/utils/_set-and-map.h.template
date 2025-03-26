@@ -745,4 +745,9 @@ dpa__u_api void DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _insert_sub)(
   const size_t lbsize
 );
 
+/**
+ * Used internally, for bo_unique implementation.
+ */
+dpa__u_api void DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _remove_index_sub)(DPA__U_SM_TYPE*restrict that, size_t index);
+
 //////////////////////////////////////////////
