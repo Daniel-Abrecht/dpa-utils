@@ -193,6 +193,10 @@ DPA_U__CHECK_GENERIC(dpa_u_to_bo_any_ro)
   )
 
 dpa__u_api inline uint64_t dpa_u__bo_hash(dpa_u_bo_ro_t bo){
+  // The commented out hash function is bad, but that makes it useful for testing.
+  // uint64_t hash = 0;
+  // memcpy(&hash, bo.data, bo.size > 8 ? 8 : bo.size);
+  // return hash;
   inline
   uint64_t dpa_u_hash_64_FNV_1a_append_p(dpa_u_bo_ro_t bo, uint_fast64_t hash);
   const uint64_t basis = *(uint64_t*)dpa_u_seed;

@@ -211,26 +211,20 @@ dpa__u_api const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type){
 
 dpa__u_api void dpa__u_bo_unique_destroy(const dpa_u_refcount_freeable_t* rc){
   mtx_lock(&unique_string_map_lock);
-  static bool b;
-  if(!b){
-    dpa_u_map_dump_hashmap_key_hashes(&unique_string_map);
-    b = true;
-  }
   if(!dpa_u_refcount_is_zero(rc))
     goto end;
   const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
   const dpa_u_bo_t*const bo = (dpa_u_bo_t*)(rc+1);
-  if(0){
-    const uint64_t truncated_hash = ((bo->size > 64) ? ((dpa__u_bo_hashed_t*)bo)->hash : dpa_u_bo_get_hash(*bo)) & ~0xFFFF;
-    const struct dpa__u_sm_lookup_result result = dpa__u_map_u64_lookup_sub(&unique_string_map, truncated_hash, unique_string_map.lbsize);
-    const int shift = sizeof(uint64_t)*CHAR_BIT - unique_string_map.lbsize;
-    const uint64_t I = (uint64_t)1 << shift;
-    uint64_t i = (uint64_t)result.index << shift;
-    for(; (DPA_U_UNTAG(unique_string_map.value_list[i>>shift].u64) != bo); i += I);
-    i >>= shift;
-    // printf("%ld\n", (result.index-i));
-    dpa__u_map_u64_remove_index_sub(&unique_string_map, i);
-  }
+  const uint64_t hash = (bo->size > 64) ? ((dpa__u_bo_hashed_t*)bo)->hash : dpa_u_bo_get_hash(*bo);
+  const uint64_t truncated_hash = dpa__u_map_u64_hash_sub(hash) & ~0xFFFF;
+  const struct dpa__u_sm_lookup_result result = dpa__u_map_u64_lookup_sub(&unique_string_map, truncated_hash, unique_string_map.lbsize);
+  const int shift = sizeof(uint64_t)*CHAR_BIT - unique_string_map.lbsize;
+  const uint64_t I = (uint64_t)1 << shift;
+  uint64_t i = (uint64_t)result.index << shift;
+  for(; unique_string_map.key_list[i>>shift] == i || DPA_U_UNTAG(unique_string_map.value_list[i>>shift].u64) != bo; i += I);
+  i >>= shift;
+  // printf("%lX %lX %lX\n", i, result.index, (i-result.index));
+  dpa__u_map_u64_remove_index_sub(&unique_string_map, i);
   if(type == DPA_U_REFCOUNT_BO_UNIQUE_EXTREF)
     dpa_u_refcount_put(dpa_u_container_of((char(*)[])bo->data, struct dpa_u_refcount_freeable_data, data)->refcount);
   free((void*)rc);
@@ -266,10 +260,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
   // The u64 map is sorted by the hash value. We use this here to store up to 2**16 entries for the same hash.
   // This is a giant hack, if the map implementation ever changes, this may break.
   // However, the map implementation is part of this very same library, so this should be fine.
-  const uint64_t truncated_hash = (dpa__u_map_u64_hash_sub(hash) &  ~0xFFFF);
-  // dpa_u_map_u64_it_safe_t it = {
-  //   .entry = truncated_hash
-  // };
+  const uint64_t truncated_hash = dpa__u_map_u64_hash_sub(hash) & ~0xFFFF;
   const struct dpa__u_sm_lookup_result result = dpa__u_map_u64_lookup_sub(&unique_string_map, truncated_hash, unique_string_map.lbsize);
   uint64_t next, last=truncated_hash-1, unused_i=-1, unused_e;
   if(!result.found){
