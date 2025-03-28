@@ -28,7 +28,7 @@
 typedef struct dpa_u__boptr {
   alignas(uint64_t) char c[8];
 } dpa_u__boptr_t;
-static_assert(sizeof(dpa_u__boptr_t) == sizeof(uint64_t));
+static_assert(sizeof(dpa_u__boptr_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u__boptr");
 
 typedef struct dpa_u_bo {
   size_t size;
@@ -56,12 +56,12 @@ typedef struct dpa__u_a_bo_gc     { dpa_u__boptr_t p; } dpa_u_a_bo_gc_t;
 typedef struct dpa__u_a_bo_gc_ro  { dpa_u__boptr_t p; } dpa_u_a_bo_gc_ro_t;
 typedef struct dpa__u_a_bo_hashed { dpa_u__boptr_t p; } dpa_u_a_bo_hashed_t;
 
-static_assert(sizeof(dpa_u_a_bo_unique_t) == sizeof(uint64_t));
-static_assert(sizeof(dpa_u_a_bo_any_t) == sizeof(uint64_t));
-static_assert(sizeof(dpa_u_a_bo_any_ro_t) == sizeof(uint64_t));
-static_assert(sizeof(dpa_u_a_bo_gc_t) == sizeof(uint64_t));
-static_assert(sizeof(dpa_u_a_bo_gc_ro_t) == sizeof(uint64_t));
-static_assert(sizeof(dpa_u_a_bo_hashed_t) == sizeof(uint64_t));
+static_assert(sizeof(dpa_u_a_bo_unique_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
+static_assert(sizeof(dpa_u_a_bo_any_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
+static_assert(sizeof(dpa_u_a_bo_any_ro_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
+static_assert(sizeof(dpa_u_a_bo_gc_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
+static_assert(sizeof(dpa_u_a_bo_gc_ro_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
+static_assert(sizeof(dpa_u_a_bo_hashed_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
 
 typedef struct dpa_u__noop* dpa_u__noop_t;
 #define DPA_U__CHECK_GENERIC(X) static inline \
