@@ -6,15 +6,15 @@
 
 #include <stdio.h>
 
-dpa__u_api inline size_t dpa_u_fwrite_p(dpa_u_bo_simple_ro_t bo, FILE* io){
-  return fwrite(dpa_u_bo_data(bo), 1, dpa_u_bo_get_size(bo), io);
+dpa__u_api inline size_t dpa_u_fwrite_p(dpa_u_bo_ro_t bo, FILE* io){
+  return fwrite(dpa_u_bo_get_data(bo), 1, dpa_u_bo_get_size(bo), io);
 }
-#define dpa_u_fwrite(bo, io) dpa_u_fwrite_p(dpa_u_t_bo_simple_ro((bo)), (io))
+#define dpa_u_fwrite(bo, io) dpa_u_fwrite_p(dpa_u_to_bo_ro((bo)), (io))
 #define dpa_u_fputs(bo, io) dpa_u_fwrite((bo),(io))
-dpa__u_api inline int dpa_u_puts_p(dpa_u_bo_simple_ro_t bo){
-  fwrite(dpa_u_bo_data(bo), 1, dpa_u_bo_get_size(bo), stdout);
+dpa__u_api inline int dpa_u_puts_p(dpa_u_bo_ro_t bo){
+  fwrite(dpa_u_bo_get_data(bo), 1, dpa_u_bo_get_size(bo), stdout);
   return puts("");
 }
-#define dpa_u_puts(bo) dpa_u_puts_p(dpa_u_t_bo_simple_ro((bo)))
+#define dpa_u_puts(bo) dpa_u_puts_p(dpa_u_to_bo_ro((bo)))
 
 #endif

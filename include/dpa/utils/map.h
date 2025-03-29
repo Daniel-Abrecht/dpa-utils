@@ -1,7 +1,9 @@
 #ifndef DPA_U_MAP_H
 #define DPA_U_MAP_H
 
-#define DPA__U_STR_AS_UINT_IMPL <dpa/utils/_map_s_uint.h>
+#include <dpa/utils/common.h>
+
+#define DPA__U_STR_AS_UINT_IMPL <dpa/utils/_map_string.h>
 #define DPA__U_SM_TEMPLATE <dpa/utils/_set-and-map.h.template>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_MAP
 #include <dpa/utils/_set-and-map.generator>
@@ -133,6 +135,6 @@
 #define dpa_u_map_clear(THAT) DPA_U__MAP_GENERIC_WRAPPER(clear, (THAT))((THAT))
 #define dpa_u_map_count(THAT) DPA_U__MAP_GENERIC_WRAPPER(count, (THAT))((THAT))
 #define dpa_u_map_copy(DST,SRC) DPA_U__MAP_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
-#define dpa_u_map_hashmap_key_hashes(THAT) DPA_U__MAP_GENERIC_WRAPPER(hashmap_key_hashes, (THAT))((THAT))
+#define dpa_u_map_dump_hashmap_key_hashes(THAT) DPA_U__MAP_GENERIC_WRAPPER(dump_hashmap_key_hashes, (THAT))((THAT))
 
 #endif

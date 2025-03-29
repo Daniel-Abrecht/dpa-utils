@@ -15,11 +15,7 @@
 #endif
 
 #ifdef DPA_U_NO_THREADS
-#ifdef _MSC_VER
-#pragma message ("DANGER: C atomic or threads support missing, library will not be threadsafe!")
-#else
 #warning "DANGER: C atomic or threads support missing, library will not be threadsafe!"
-#endif
 #endif
 
 ///////////////////////////////////////
@@ -58,12 +54,6 @@
 #endif
 #if DPA__U__has_c_attribute_opt(constructor,gnu::constructor)
 #define dpa_u_init dpa_u_attribute(constructor,gnu::constructor)
-#endif
-
-#ifndef dpa__u_gcc_struct
-#if defined(_MSC_VER) && !defined(DPA_U_BO_NOT_PACKED)
-#define DPA_U_BO_NOT_PACKED
-#endif
 #endif
 
 #ifdef _MSC_VER
@@ -108,25 +98,10 @@
 #endif
 #ifndef dpa__u_packed
 #define dpa__u_packed dpa__u_gcc_struct
-#ifndef DPA_U_BO_NOT_PACKED
-#define DPA_U_BO_NOT_PACKED
-#endif
 #endif
 #ifndef dpa_u_init
 #define dpa_u_init
-#ifdef _MSC_VER
-#pragma message ("WARNING: No attribute for initializer functions available. Some things may not work correctly!")
-#else
 #warning "WARNING: No attribute for initializer functions available. Some things may not work correctly!"
-#endif
-#endif
-
-#ifdef _MSC_VER
-// MSVC just doesn't define max_align_t...
-// We need it internally, so we define an internal type dpa__u_max_align_t as a workaround
-typedef long dpa__u_max_align_t;
-#else
-typedef max_align_t dpa__u_max_align_t;
 #endif
 
 #ifdef DPA__U_BUILD_LIB
@@ -442,6 +417,19 @@ typedef unsigned dpa_u_bitmap_entry_t;
 #else
 #define DPA__U_ISS_NONE
 #endif
+
+typedef struct dpa_u_any_value {
+  union {
+    uintptr_t uptr;
+    uint64_t u64;
+    void* ptr;
+  };
+} dpa_u_any_value_t;
+
+typedef struct dpa_u_optional {
+  dpa_u_any_value_t value;
+  bool present;
+} dpa_u_optional_t;
 
 typedef struct dpa_u_optional_pointer {
   void* value;

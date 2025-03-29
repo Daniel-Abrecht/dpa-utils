@@ -1,11 +1,13 @@
 #ifndef DPA_U_SET_H
 #define DPA_U_SET_H
 
+#include <dpa/utils/common.h>
 
-#define DPA__U_STR_AS_UINT_IMPL <dpa/utils/_set_s_uint.h>
+#define DPA__U_STR_AS_UINT_IMPL <dpa/utils/_set_string.h>
 #define DPA__U_SM_TEMPLATE <dpa/utils/_set-and-map.h.template>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_SET
 #include <dpa/utils/_set-and-map.generator>
+
 
 #define DPA_U__SET_GENERIC_WRAPPER_G(F, X) \
   dpa_u_generic((X), \
@@ -125,6 +127,6 @@
 #define dpa_u_set_clear(THAT) DPA_U__SET_GENERIC_WRAPPER(clear, (THAT))((THAT))
 #define dpa_u_set_count(THAT) DPA_U__SET_GENERIC_WRAPPER(count, (THAT))((THAT))
 #define dpa_u_set_copy(DST,SRC) DPA_U__SET_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
-#define dpa_u_set_hashmap_key_hashes(THAT) DPA_U__SET_GENERIC_WRAPPER(hashmap_key_hashes, (THAT))((THAT))
+#define dpa_u_set_dump_hashmap_key_hashes(THAT) DPA_U__SET_GENERIC_WRAPPER(dump_hashmap_key_hashes, (THAT))((THAT))
 
 #endif

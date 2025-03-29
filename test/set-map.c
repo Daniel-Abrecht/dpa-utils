@@ -28,7 +28,7 @@ dpa_uint256_t ul256[0x10000];
 dpa_u_giant_unsigned_int_t ul256[0x10000]; // May not actually be 256 big, but is the biggest we've got
 #endif
 size_t ul256_count;
-dpa_u_bo_unique_t ustr[0x10000]; size_t ustr_count;
+dpa_u_a_bo_unique_t ustr[0x10000]; size_t ustr_count;
 
 static int hex2bin_digit(const unsigned char x){
   if(x >= '0' && x <= '9'){
@@ -62,12 +62,11 @@ static void hex2bin(void*const res, size_t n, const unsigned char* x){
   }
 }
 
-static void to_ustring(dpa_u_bo_unique_t*const ret, size_t n, const unsigned char* x){
+static void to_ustring(dpa_u_a_bo_unique_t*const ret, size_t n, const unsigned char* x){
   (void)n;
-  dpa_u_bo_simple_ro_t bo = {
-    .type = DPA_U_BO_SIMPLE,
+  dpa_u_bo_ro_t bo = {
     .size = strlen((const char*)x),
-    .data = x,
+    .data = (char*)x,
   };
   if(bo.size && ((char*)bo.data)[bo.size-1] == '\n')
     bo.size -= 1;
@@ -117,7 +116,6 @@ DPA_U_TEST_MAIN
 #undef DPA_U_TESTCASE_SUFFIX
 #define DPA_U_TESTCASE_SUFFIX DPA_U_CONCAT_E(DPA__U_SM_PREFIX, __LINE__)
 
-#ifndef DPA__U_SM_BO
 bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
@@ -148,14 +146,6 @@ bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
   }
 #pragma GCC diagnostic pop
 }
-#else
-bool GET_RAND_ENTRY(dpa_u_bo_unique_t*const ret, size_t i){
-  if(i >= ustr_count)
-    return false;
-  *ret = ustr[i];
-  return true;
-}
-#endif
 
 DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
   DPA__U_SM_TYPE container = {0};
@@ -180,7 +170,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
       int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-      int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (void*)j);
+      int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (dpa_u_any_value_t){.u64=j});
 #endif
       if(result < 0){
         fprintf(stderr, "Error 1: Failed to add entry %zu\n", j);
@@ -202,13 +192,13 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
         }
       }
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-      const dpa_u_optional_pointer_t v = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key);
+      const dpa_u_optional_t v = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key);
       if(!v.present){
         fprintf(stderr, "Error 4: failed to get entry %zu, but check if it exists did succeed\n", j);
         goto error;
       }
-      if((uintptr_t)v.value != j){
-        fprintf(stderr, "Error 5: value retrieved from entry %zu is wrong: %zu\n", j, (uintptr_t)v.value);
+      if(v.value.u64 != j){
+        fprintf(stderr, "Error 5: value retrieved from entry %zu is wrong: %zu\n", j, v.value.u64);
         goto error;
       }
 #endif
@@ -222,13 +212,13 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
         goto error;
       }
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-      const dpa_u_optional_pointer_t v = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key);
+      const dpa_u_optional_t v = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key);
       if(!v.present){
         fprintf(stderr, "Error 7: failed to get entry %zu, but check if it exists did succeed\n", j);
         goto error;
       }
-      if((uintptr_t)v.value != j){
-        fprintf(stderr, "Error 8: value retrieved from entry %zu is wrong: %zu\n", j, (uintptr_t)v.value);
+      if(v.value.u64 != j){
+        fprintf(stderr, "Error 8: value retrieved from entry %zu is wrong: %zu\n", j, v.value.u64);
         goto error;
       }
 #endif
@@ -272,7 +262,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add twice")){
   #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
     int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
   #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (void*)j);
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (dpa_u_any_value_t){.u64=j});
   #endif
     if(result < 0){
       fprintf(stderr, "Error 2: Failed to add entry %zu\n", i);
@@ -310,7 +300,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add twice")){
   #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
     int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
   #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (void*)(i+j));
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (dpa_u_any_value_t){.u64=i+j});
   #endif
     if(result < 0){
       fprintf(stderr, "Error 6: Failed to add entry %zu\n", i);
@@ -339,13 +329,13 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add twice")){
       return false;
     }
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    const dpa_u_optional_pointer_t v = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key);
+    const dpa_u_optional_t v = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key);
     if(!v.present){
       fprintf(stderr, "Error 10: failed to get entry %zu, but check if it exists did succeed\n", i);
       goto error;
     }
-    if((uintptr_t)v.value != i+j){
-      fprintf(stderr, "Error 11: value retrieved from entry %zu is wrong: %zu\n", i, (uintptr_t)v.value);
+    if(v.value.u64 != i+j){
+      fprintf(stderr, "Error 11: value retrieved from entry %zu is wrong: %zu\n", i, v.value.u64);
       goto error;
     }
 #endif
@@ -377,7 +367,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "exchange value")){
         goto error;
       }
     }
-    void* p = (void*)j;
+    dpa_u_any_value_t p = (dpa_u_any_value_t){.u64=j};
     int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(&container, key, &p);
     if(result < 0){
       fprintf(stderr, "Error 2: Failed to add entry %zu\n", i);
@@ -391,7 +381,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "exchange value")){
       fprintf(stderr, "Error 4: Prevously added entry %zu not found\n", i);
       goto error;
     }
-    if(p != (void*)j){
+    if(p.u64 != j){
       fprintf(stderr, "Error 5: return parameter was modified\n");
       goto error;
     }
@@ -416,7 +406,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "exchange value")){
         goto error;
       }
     }
-    void* p = (void*)(i+j);
+    dpa_u_any_value_t p = {.u64=i+j};
     int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(&container, key, &p);
     if(result < 0){
       fprintf(stderr, "Error 7: Failed to add entry %zu\n", i);
@@ -430,7 +420,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "exchange value")){
       fprintf(stderr, "Error 9: Prevously added entry %zu not found\n", i);
       goto error;
     }
-    if(p != (void*)i){
+    if(p.u64 != i){
       fprintf(stderr, "Error 10: wrong value was returned\n");
       goto error;
     }
@@ -448,13 +438,13 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "exchange value")){
       fprintf(stderr, "Error 11: not enough test entries\n");
       return false;
     }
-    const dpa_u_optional_pointer_t v = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key);
+    const dpa_u_optional_t v = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(&container, key);
     if(!v.present){
       fprintf(stderr, "Error 12: failed to get entry %zu, but check if it exists did succeed\n", i);
       goto error;
     }
-    if((uintptr_t)v.value != i+j){
-      fprintf(stderr, "Error 13: value retrieved from entry %zu is wrong: %zu\n", i, (uintptr_t)v.value);
+    if(v.value.u64 != i+j){
+      fprintf(stderr, "Error 13: value retrieved from entry %zu is wrong: %zu\n", i, v.value.u64);
       goto error;
     }
   }
@@ -484,7 +474,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "remove")){
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
     int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, key);
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (void*)i);
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (dpa_u_any_value_t){.u64=i});
 #endif
     if(result < 0){
       fprintf(stderr, "Error 1: Failed to add entry %zu\n", i);
@@ -554,7 +544,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "get and remove")){
         goto error;
       }
     }
-    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (void*)i);
+    int result = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, key, (dpa_u_any_value_t){.u64=i});
     if(result < 0){
       fprintf(stderr, "Error 1: Failed to add entry %zu\n", i);
       goto error;
@@ -580,13 +570,13 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "get and remove")){
       goto error;
     }
     {
-      const dpa_u_optional_pointer_t v = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(&container, key);
+      const dpa_u_optional_t v = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(&container, key);
       if(!v.present){
         fprintf(stderr, "Error 3: failed to get entry %zu, but check if it exists did succeed\n", i);
         goto error;
       }
-      if((uintptr_t)v.value != i){
-        fprintf(stderr, "Error 4: value retrieved from entry %zu is wrong: %zu\n", i, (uintptr_t)v.value);
+      if(v.value.u64 != i){
+        fprintf(stderr, "Error 4: value retrieved from entry %zu is wrong: %zu\n", i, v.value.u64);
         goto error;
       }
     }

@@ -36,29 +36,21 @@ struct DPA__U_SM_PREFIX {
     dpa_u_bitmap_entry_t*restrict bitmask;
   };
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  void**restrict value_list;
+  dpa_u_any_value_t*restrict value_list;
 #endif
 };
 #endif
 
-
-
-#ifndef DPA__U_SM_BO
 dpa__u_api dpa_u_unsequenced dpa__u_really_inline inline
 DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE x){
 #if defined(__GNUC__) || defined(__llvm__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"
-#elif defined(_MSC_VER)
-#pragma warning( push )
-#pragma warning( disable : 4293 )
 #endif
   // The xor doesn't make things more random, but it will change the order of entries between program runs. This will help avoid DOS attacks.
   return ((DPA__U_SM_KEY_ENTRY_TYPE)x ^ *(DPA__U_SM_KEY_ENTRY_TYPE*)dpa_u_seed) * dpa__u_choose_prime(DPA__U_SM_KEY_ENTRY_TYPE);
 #if defined(__GNUC__) || defined(__llvm__)
 #pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
-#pragma warning( pop )
 #endif
 }
 
@@ -67,49 +59,12 @@ DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE x){
 #if defined(__GNUC__) || defined(__llvm__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshift-count-overflow"
-#elif defined(_MSC_VER)
-#pragma warning( push )
-#pragma warning( disable : 4293 )
 #endif
   return (DPA__U_SM_KEY_TYPE)((x * dpa__u_choose_prime_inverse(DPA__U_SM_KEY_ENTRY_TYPE)) ^ *(DPA__U_SM_KEY_ENTRY_TYPE*)dpa_u_seed);
 #if defined(__GNUC__) || defined(__llvm__)
 #pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
-#pragma warning( pop )
 #endif
 }
-#else
-dpa__u_api dpa_u_unsequenced inline
-DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE n){
-  DPA__U_SM_KEY_ENTRY_TYPE e;
-  memcpy(e.hash, n.all.all, sizeof(n));
-  for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; )
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
-    e.hash[i] = fh ^= dpa__u_set_z_hash_sub(e.hash[i]);
-#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    e.hash[i] = fh ^= dpa__u_map_z_hash_sub(e.hash[i]);
-#endif
-  return e;
-}
-
-dpa__u_api dpa_u_unsequenced inline
-DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e){
-  for(size_t i=sizeof(e.hash)/sizeof(*e.hash),fh=0; i--; ){
-    size_t hash = e.hash[i];
-#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
-    e.hash[i] = dpa__u_set_z_unhash_sub(hash ^ fh);
-#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-    e.hash[i] = dpa__u_map_z_unhash_sub(hash ^ fh);
-#endif
-    fh = hash;
-  }
-  DPA__U_SM_KEY_TYPE r;
-  memcpy(r.all.all, e.hash, sizeof(r));
-  return r;
-}
-#endif
-
-
 
 /**
  * This iterator is resilient to changes to the container, and is even usable on different containers.
@@ -188,11 +143,11 @@ bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_TYPE* that,
  * \returns True if the next entry was found, false otherwise.
  */
 #ifdef DPA__U_SM_NO_BITSET
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret);
 #else
-dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
+dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret);
 dpa__u_api inline
-bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret){
+bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   switch(that->mode){
     case DPA__U_SM_EMPTY: memset(it, 0, sizeof(*it)); return false;
@@ -270,10 +225,10 @@ dpa__u_api inline bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA
  * \returns True if the next entry was found, false otherwise.
  */
 #ifdef DPA__U_SM_NO_BITSET
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret);
 #else
-dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
-dpa__u_api inline bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret){
+dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret);
+dpa__u_api inline bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   switch(that->mode){
     case DPA__U_SM_EMPTY: memset(it, 0, sizeof(*it)); return false;
@@ -451,7 +406,7 @@ DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_key)(const DPA_
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 dpa__u_api dpa_u_reproducible inline
-void* DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_value)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it){
+dpa_u_any_value_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_value)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it){
   return that->value_list[it->index-1];
 }
 #endif
@@ -467,14 +422,14 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_add)(DPA__U_SM_TYPE*res
 dpa__u_api inline
 int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_first)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_first)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value);
 /**
  * Sets an entry in the map.
  * \returns 1 if an existing entry was overwritten, 0 if not, -1 on error.
  */
-dpa__u_api inline int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value){
+dpa__u_api inline int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value){
 #endif
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   switch(that->mode){
@@ -516,15 +471,15 @@ dpa__u_api inline int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE*rest
 }
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict* value);
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict* value);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t* value);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t* value);
 /**
  * Sets an entry in the map and returns the existing one if one exists.
  * If there was none, the variable will remain unchanged.
  * \returns 1 if an existing entry was overwritten, 0 if not, -1 on error.
  */
 dpa__u_api inline
-int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict*const value){
+int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t*const value){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   switch(that->mode){
     case DPA__U_SM_EMPTY:
@@ -552,14 +507,14 @@ int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE*restrict that, DP
 #endif
 }
 
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value);
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value);
 /**
  * Sets an entry in the map if it wasn't set already.
  * \returns 1 if an existing entry was existed, 0 if not, -1 on error.
  */
 dpa__u_api inline
-int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value){
+int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   switch(that->mode){
     case DPA__U_SM_EMPTY:
@@ -571,7 +526,7 @@ int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set_if_unset)(DPA__U_SM_TYPE*restrict that
       return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_if_unset)(that, key, value);
 #ifndef DPA__U_SM_NO_BITSET
     case DPA__U_SM_BITMAP:
-      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_exchange)(that, key, value);
+      return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set_if_unset)(that, key, value);
 #endif
   }
   dpa_u_unreachable("set/map: %s"," invalid state");
@@ -653,20 +608,20 @@ dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(DPA__U_SM_TYPE* that);
  * Returns the entry.
  */
 #ifdef DPA__U_SM_NO_BITSET
-dpa_u_reproducible dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa_u_reproducible dpa__u_api dpa_u_optional_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
 #else
-dpa_u_reproducible dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa_u_reproducible dpa__u_api dpa_u_optional_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
 dpa_u_reproducible dpa__u_api inline
-dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+dpa_u_optional_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   switch(that->mode){
-    case DPA__U_SM_EMPTY: return (dpa_u_optional_pointer_t){0};
+    case DPA__U_SM_EMPTY: return (dpa_u_optional_t){0};
     case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_get)(that, key);
     case DPA__U_SM_BITMAP: {
       const DPA__U_SM_ENTRY_HASH_TYPE hash = DPA__U_SM_HASH(key);
       if(!(that->bitmask[DPA__U_SM_BITMAP_OFFSET(hash)] & DPA__U_SM_BITMAP_BIT(hash)))
-        return (dpa_u_optional_pointer_t){0};
-      return (dpa_u_optional_pointer_t){
+        return (dpa_u_optional_t){0};
+      return (dpa_u_optional_t){
         .value = that->value_list[hash],
         .present = true
       };
@@ -675,8 +630,8 @@ dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_
   dpa_u_unreachable("set/map: %s"," invalid state");
 #else
   if(!that->bitmask[DPA__U_SM_BITMAP_OFFSET(key)] & DPA__U_SM_BITMAP_BIT(key))
-    return (dpa_u_optional_pointer_t){0};
-  return (dpa_u_optional_pointer_t){
+    return (dpa_u_optional_t){0};
+  return (dpa_u_optional_t){
     .value = that->value_list[key],
     .present = true
   };
@@ -689,17 +644,17 @@ dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_
  */
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #ifdef DPA__U_SM_NO_BITSET
-dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api dpa_u_optional_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
 #else
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_list)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
-dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_bitmap)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api dpa_u_optional_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_list)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api dpa_u_optional_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_bitmap)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
 #endif
 dpa__u_api inline
-dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+dpa_u_optional_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   switch(that->mode){
-    case DPA__U_SM_EMPTY: return (dpa_u_optional_pointer_t){0};
+    case DPA__U_SM_EMPTY: return (dpa_u_optional_t){0};
     case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_list)(that, key);
     case DPA__U_SM_BITMAP: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_bitmap)(that, key);
   }
@@ -709,8 +664,8 @@ dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__
   const dpa_u_bitmap_entry_t m = DPA__U_SM_BITMAP_BIT(key);
   const bool r = *b & m;
   *b &= ~m;
-  if(!r) return (dpa_u_optional_pointer_t){0};
-  return (dpa_u_optional_pointer_t){
+  if(!r) return (dpa_u_optional_t){0};
+  return (dpa_u_optional_t){
     .value = that->value_list[key],
     .present = true,
   };
@@ -754,5 +709,35 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _copy)(DPA__U_SM_TYPE*restrict 
  * For debugging purposes only
  */
 dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__U_SM_TYPE* that);
+
+/**
+ * Used internally, for bo_unique implementation.
+ */
+dpa__u_api struct dpa__u_sm_lookup_result DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _lookup_sub)(
+  const DPA__U_SM_TYPE*restrict const that,
+  const DPA__U_SM_KEY_ENTRY_TYPE key,
+  const size_t lbsize
+);
+
+/**
+ * Used internally, for bo_unique implementation.
+ */
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _maybe_grow)(DPA__U_SM_TYPE*restrict that);
+
+/**
+ * Used internally, for bo_unique implementation.
+ */
+dpa__u_api void DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _insert_sub)(
+  DPA__U_SM_TYPE*restrict const that,
+  DPA__U_SM_KEY_ENTRY_TYPE key,
+  DPA__U_SM_IF_MAP(dpa_u_any_value_t value,)
+  size_t index,
+  const size_t lbsize
+);
+
+/**
+ * Used internally, for bo_unique implementation.
+ */
+dpa__u_api void DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _remove_index_sub)(DPA__U_SM_TYPE*restrict that, size_t index);
 
 //////////////////////////////////////////////

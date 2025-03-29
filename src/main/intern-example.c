@@ -1,33 +1,11 @@
-#define _DEFAULT_SOURCE
 #include <dpa/utils/bo.h>
 #include <dpa/utils/io.h>
 #include <dpa/utils/hash.h>
 #include <inttypes.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <errno.h>
-
-static void print_hashmap_stats(void){
-  const dpa_u_bo_unique_hashmap_stats_t stats = dpa_u_bo_unique_hashmap_stats();
-  printf(
-    "\n"
-    "count: %zu\n"
-    "collisions: %zu\n"
-    "statistically expected collisions: %llu\n"
-    "unavoidable collisions: %llu\n"
-    "empty: %zu\n"
-    "buckets: %zu\n"
-    "load_factor: %.2lf%%\n"
-    "\n",
-    stats.entry_count,
-    stats.collision_count,
-    (long long unsigned)(stats.entry_count - stats.total_buckets * (1. - powf((1.-1./stats.total_buckets), stats.entry_count))),
-    DPA_U_MAX(0,(long long)stats.entry_count-(long long)stats.total_buckets),
-    stats.empty_count,
-    stats.total_buckets,
-    stats.load_factor * 100
-  );
-}
 
 int main(int argc, char* argv[]){
   bool echo = false;
@@ -54,11 +32,10 @@ int main(int argc, char* argv[]){
   if(!f) dpa_u_abort("fopen failed (%d): %s", errno, strerror(errno));
   size_t count = 0;
   size_t list_size = 1;
-  dpa_u_bo_unique_t* list = malloc(sizeof(*list));
+  dpa_u_a_bo_unique_t* list = malloc(sizeof(*list));
   char buf[256] = {0};
   while(fgets(buf, sizeof(buf), f)){
-    struct dpa_u_bo_simple bo = {
-      .type = DPA_U_BO_SIMPLE,
+    dpa_u_bo_t bo = {
       .size = strlen(buf),
       .data = buf,
     };
@@ -66,7 +43,7 @@ int main(int argc, char* argv[]){
       bo.size -= 1;
     if(!bo.size) continue;
     if(count+1 == list_size){
-      void *tmp = realloc(list, sizeof(dpa_u_bo_unique_t)*list_size*2);
+      void *tmp = realloc(list, sizeof(dpa_u_a_bo_unique_t)*list_size*2);
       if(!tmp)
         dpa_u_abort("realloc failed (%d): %s\n", errno, strerror(errno));
       list = tmp;
@@ -77,18 +54,14 @@ int main(int argc, char* argv[]){
   if(echo){
     puts("words: ");
     for(size_t i=0; i<count; i++)
-      printf(" - %.*s\n", (int)dpa_u_bo_get_size(list[i]), (const char*)dpa_u_bo_data(list[i]));
+      printf(" - %.*s\n", (int)dpa_u_bo_get_size(list[i]), (const char*)dpa_u_bo_get_data(list[i]));
     puts("");
   }
   printf("word count: %zu\n", count);
   if(!nocleanup){
-    print_hashmap_stats();
-    dpa_u_bo_unique_verify();
     for(size_t i=0; i<count; i++)
       dpa_u_bo_put(list[i]);
     free(list);
-    print_hashmap_stats();
-    dpa_u_bo_unique_verify();
     fclose(f);
   }
 }

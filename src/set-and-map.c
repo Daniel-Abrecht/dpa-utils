@@ -27,11 +27,8 @@
 #include <dpa/utils/map.h>
 #include <dpa/utils/math.h>
 #include <time.h>
-
-struct lookup_result {
-  size_t index;
-  bool found;
-};
+#include <stdlib.h>
+#include <assert.h>
 
 static int count_to_lbsize(size_t n){
   n += n / DPA__U_SM_SET_OVERSIZE_INVERSE_FACTOR;
@@ -41,7 +38,7 @@ static int count_to_lbsize(size_t n){
 dpa__u_api long dpa_u_total_resize_time;
 
 #define LOOKUP DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _lookup_sub)
-#define INSERT DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _insert_sub)
+#define INSERT DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _insert_sub2)
 #define REMOVE DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _remove_sub)
 #define GROW DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _grow_sub)
 #define SHRINK DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _shrink_sub)
@@ -51,12 +48,10 @@ dpa__u_api long dpa_u_total_resize_time;
 
 ////////////////////////////////////////////////////////////
 
-#define DPA__U_STR_AS_UINT_IMPL <dpa/utils/nop>
 #define DPA__U_SM_TEMPLATE <src/set-and-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_SET
 #include <dpa/utils/_set-and-map.generator>
 
-#define DPA__U_STR_AS_UINT_IMPL <dpa/utils/nop>
 #define DPA__U_SM_TEMPLATE <src/set-and-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_MAP
 #include <dpa/utils/_set-and-map.generator>
@@ -74,20 +69,34 @@ dpa__u_api long dpa_u_total_resize_time;
 #define BITMAP_KEY key
 #endif
 
- extern DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE n);
- extern DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e);
- extern DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_get_key)(const DPA__U_SM_TYPE_IT_S*const it);
- extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
- extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
- extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
- extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret);
- extern DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_key)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it);
- extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
- extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
- extern void* DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_value)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it);
+// Some of these ma or may not be inline. They need an extern definition in at least one compilation unit
+
+dpa__u_api extern DPA__U_SM_KEY_ENTRY_TYPE DPA__U_SM_HASH(const DPA__U_SM_KEY_TYPE n);
+dpa__u_api extern DPA__U_SM_KEY_TYPE DPA__U_SM_UNHASH(DPA__U_SM_KEY_ENTRY_TYPE e);
+dpa__u_api extern DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_get_key)(const DPA__U_SM_TYPE_IT_S*const it);
+dpa__u_api extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+dpa__u_api extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret);
+dpa__u_api extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it);
+dpa__u_api extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret);
+dpa__u_api extern DPA__U_SM_KEY_TYPE DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_key)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it);
+dpa__u_api extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
+dpa__u_api extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_F* it);
+dpa__u_api extern dpa_u_any_value_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_value)(const DPA__U_SM_TYPE* that, const DPA__U_SM_TYPE_IT_F*const it);
+
+dpa__u_api extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value);
+dpa__u_api extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t*const value);
+dpa__u_api extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value);
+dpa__u_api extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa_u_reproducible dpa__u_api extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _has)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa_u_reproducible dpa__u_api extern dpa_u_optional_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api extern dpa_u_optional_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa_u_reproducible dpa__u_api extern size_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _count)(const DPA__U_SM_TYPE* that);
+dpa__u_api extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _copy)(DPA__U_SM_TYPE*restrict dst, const DPA__U_SM_TYPE*restrict src);
+
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-static struct lookup_result LOOKUP(
+struct dpa__u_sm_lookup_result LOOKUP(
   const DPA__U_SM_TYPE*restrict const that,
   const DPA__U_SM_KEY_ENTRY_TYPE key,
   const size_t lbsize
@@ -96,23 +105,8 @@ static struct lookup_result LOOKUP(
   const DPA__U_SM_ENTRY_HASH_TYPE I = (DPA__U_SM_ENTRY_HASH_TYPE)1<<shift;
   DPA__U_SM_ENTRY_HASH_TYPE i = DPA__U_SM_KEY_ENTRY_HASH(key)+I;
   DPA__U_SM_ENTRY_HASH_TYPE psl_a, psl_b;
-  for(psl_a=I; psl_a < (psl_b=i-DPA__U_SM_KEY_ENTRY_HASH(that->key_list[i>>shift])); psl_a+=I,i+=I)
-#ifdef DPA__U_SM_BO
-    false_match:
-#endif
-    ;
-#ifdef DPA__U_SM_BO
-  if(psl_b == psl_a){
-    const int cmp = memcmp(&key, &that->key_list[i>>shift], sizeof(key));
-    if(!cmp)
-      return (struct lookup_result){i>>shift, true};
-    if(cmp > 0)
-      goto false_match;
-  }
-  return (struct lookup_result){i>>shift, false};
-#else
-  return (struct lookup_result){i>>shift, psl_b == psl_a};
-#endif
+  for(psl_a=I; psl_a < (psl_b=i-DPA__U_SM_KEY_ENTRY_HASH(that->key_list[i>>shift])); psl_a+=I,i+=I);
+  return (struct dpa__u_sm_lookup_result){i>>shift, psl_b == psl_a};
 }
 #endif
 
@@ -121,7 +115,7 @@ static struct lookup_result LOOKUP(
 dpa__u_really_inline static inline void INSERT(
   DPA__U_SM_TYPE*restrict const that,
   DPA__U_SM_KEY_ENTRY_TYPE key,
-  DPA__U_SM_IF_MAP(void* value,)
+  DPA__U_SM_IF_MAP(dpa_u_any_value_t value,)
   size_t index,
   const size_t lbsize
 ){
@@ -133,7 +127,7 @@ dpa__u_really_inline static inline void INSERT(
     const DPA__U_SM_KEY_ENTRY_TYPE ekey = that->key_list[j];
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
     {
-      void* v = that->value_list[j];
+      dpa_u_any_value_t v = that->value_list[j];
       that->value_list[j] = value;
       value = v;
     }
@@ -143,6 +137,16 @@ dpa__u_really_inline static inline void INSERT(
       return;
     key = ekey;
   }
+}
+
+dpa__u_api void DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _insert_sub)(
+  DPA__U_SM_TYPE*restrict const that,
+  DPA__U_SM_KEY_ENTRY_TYPE key,
+  DPA__U_SM_IF_MAP(dpa_u_any_value_t value,)
+  size_t index,
+  const size_t lbsize
+){
+  INSERT(that, key, DPA__U_SM_IF_MAP(value,) index, lbsize);
 }
 #endif
 
@@ -182,7 +186,7 @@ static bool ALLOCATE_HMS(
   DPA__U_SM_KEY_ENTRY_TYPE*const key_list = malloc((((size_t)1)<<lbsize)*sizeof(*key_list));
   if(!key_list) return false;
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  void**const value_list = malloc((((size_t)1)<<lbsize)*sizeof(*value_list));
+  dpa_u_any_value_t*const value_list = malloc((((size_t)1)<<lbsize)*sizeof(*value_list));
   if(!value_list){
     free(key_list);
     return false;
@@ -215,8 +219,8 @@ static void GROW(
   DPA__U_SM_KEY_ENTRY_TYPE*restrict const old_key_list = old->key_list;
   DPA__U_SM_KEY_ENTRY_TYPE*restrict const new_key_list = new->key_list;
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  void**restrict const old_value_list = old->value_list;
-  void**restrict const new_value_list = new->value_list;
+  dpa_u_any_value_t*restrict const old_value_list = old->value_list;
+  dpa_u_any_value_t*restrict const new_value_list = new->value_list;
 #endif
   const size_t olbsize = old->lbsize;
   const size_t lbsize = new->lbsize;
@@ -283,7 +287,7 @@ static void GROW(
   DPA__U_SM_KEY_ENTRY_TYPE*restrict const new_key_list = new->key_list;
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
   void**restrict const old_value_list = old->value_list;
-  void**restrict const new_value_list = new->value_list;
+  dpa_u_any_value_t*restrict const new_value_list = new->value_list;
 #endif
   const size_t olbsize = old->lbsize;
   const size_t lbsize = new->lbsize;
@@ -333,7 +337,7 @@ static bool CONVERT_TO_BITFIELD(DPA__U_SM_TYPE*restrict const that){
     return false;
   }
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  void**const restrict value_list = malloc((((size_t)1)<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT))*sizeof(*that->value_list));
+  dpa_u_any_value_t*const restrict value_list = malloc((((size_t)1)<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT))*sizeof(*that->value_list));
   if(!value_list){
     free(bitmask);
     return false;
@@ -486,7 +490,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next)(const DPA__U_SM
   const bool valid = index < (size_t)1 << that->lbsize;
   if(!valid || memcmp(&current, &that->key_list[index], sizeof(current))){
     const bool init = index == (size_t)-1;
-    const struct lookup_result result = LOOKUP(that, current, that->lbsize);
+    const struct dpa__u_sm_lookup_result result = LOOKUP(that, current, that->lbsize);
     // Note: "current != next" is for the case current == 0 && index == 0, in other words, for the first entry, if it is 0, and in the set, we do need to return it.
     index = result.index;
     if(result.found || init)
@@ -515,18 +519,18 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next)(const DPA__U_SM
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #ifdef DPA__U_SM_NO_BITSET
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret){
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret){
   if(dpa_u_unlikely(!that->mode))
     return false;
 #else
-dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret){
+dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret){
 #endif
   size_t index = it->index-1;
   const DPA__U_SM_KEY_ENTRY_TYPE current = it->entry;
   const bool valid = index < (size_t)1 << that->lbsize;
   if(!valid || memcmp(&current, &that->key_list[index], sizeof(current))){
     const bool init = index == (size_t)-1;
-    const struct lookup_result result = LOOKUP(that, current, that->lbsize);
+    const struct dpa__u_sm_lookup_result result = LOOKUP(that, current, that->lbsize);
     // Note: "current != next" is for the case current == 0 && index == 0, in other words, for the first entry, if it is 0, and in the set, we do need to return it.
     index = result.index;
     if(result.found || init)
@@ -592,11 +596,11 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #ifdef DPA__U_SM_NO_BITSET
-dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret){
+dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret){
   if(dpa_u_unlikely(!that->mode))
     return false;
 #else
-dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, void** ret){
+dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret){
 #endif
   size_t index = it->index-1;
   DPA__U_SM_KEY_ENTRY_TYPE current = it->entry;
@@ -643,9 +647,9 @@ dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(DPA__U_SM_TYPE* that){
 }
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict*const value);
+extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t*const value);
 
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict* value){
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t* value){
   const int lbsize = count_to_lbsize(that->count);
   if(dpa_u_unlikely(lbsize > that->lbsize)){
 #ifndef DPA__U_SM_NO_BITSET
@@ -665,9 +669,9 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_exchange)(DPA__U_SM_TYPE*
     *that = new;
   }
   const DPA__U_SM_KEY_ENTRY_TYPE entry = DPA__U_SM_HASH(key);
-  struct lookup_result result = LOOKUP(that, entry, lbsize);
+  struct dpa__u_sm_lookup_result result = LOOKUP(that, entry, lbsize);
   if(result.found){
-    void*const v = *value;
+    const dpa_u_any_value_t v = *value;
     *value = that->value_list[result.index];
     that->value_list[result.index] = v;
     return true;
@@ -678,14 +682,14 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_exchange)(DPA__U_SM_TYPE*
 }
 
 #ifndef DPA__U_SM_NO_BITSET
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict* value){
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_exchange)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t* value){
   const DPA__U_SM_ENTRY_HASH_TYPE hash = DPA__U_SM_HASH(key);
   dpa_u_bitmap_entry_t*restrict const b = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(hash)];
   const dpa_u_bitmap_entry_t m = DPA__U_SM_BITMAP_BIT(hash);
   const bool r = *b & m;
   *b |= m;
   if(r){
-    void*const v = *value;
+    const dpa_u_any_value_t v = *value;
     *value = that->value_list[hash];
     that->value_list[hash] = v;
     return true;
@@ -695,9 +699,9 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_exchange)(DPA__U_SM_TYP
 }
 #endif
 
-extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
+extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value);
 
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value){
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value){
   const int lbsize = count_to_lbsize(that->count);
   if(dpa_u_unlikely(lbsize > that->lbsize)){
 #ifndef DPA__U_SM_NO_BITSET
@@ -717,17 +721,16 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_if_unset)(DPA__U_SM_T
     *that = new;
   }
   const DPA__U_SM_KEY_ENTRY_TYPE entry = DPA__U_SM_HASH(key);
-  struct lookup_result result = LOOKUP(that, entry, lbsize);
+  struct dpa__u_sm_lookup_result result = LOOKUP(that, entry, lbsize);
   if(result.found)
     return true;
-  that->value_list[result.index] = value;
   INSERT(that, entry, DPA__U_SM_IF_MAP(value,) result.index, lbsize);
   that->count++;
   return false;
 }
 
 #ifndef DPA__U_SM_NO_BITSET
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value){
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set_if_unset)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value){
   const DPA__U_SM_ENTRY_HASH_TYPE hash = DPA__U_SM_HASH(key);
   dpa_u_bitmap_entry_t*restrict const b = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(hash)];
   const dpa_u_bitmap_entry_t m = DPA__U_SM_BITMAP_BIT(hash);
@@ -745,14 +748,14 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set_if_unset)(DPA__U_SM
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value);
+extern int DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value);
 #endif
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_add_first)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_first)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value){
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_first)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value){
 #endif
   const int lbsize = count_to_lbsize(1);
   if(!ALLOCATE_HMS(that, lbsize, true))
@@ -771,10 +774,33 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set_first)(DPA__U_SM_TYPE
 #endif
 
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+#ifdef DPA__U_SM_NO_BITSET
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _maybe_grow)(DPA__U_SM_TYPE*restrict that){
+  const int lbsize = count_to_lbsize(that->count);
+  if(dpa_u_unlikely(lbsize > that->lbsize)){
+    DPA__U_SM_TYPE new;
+    if(!ALLOCATE_HMS(&new, lbsize, !that->lbsize))
+      return -1;
+    new.count = that->count;
+    if(that->lbsize){
+      GROW(that, &new);
+      free(that->key_list);
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      free(that->value_list);
+  #endif
+    }
+    *that = new;
+  }
+  return 0;
+}
+#endif
+#endif
+
+#if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_add)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value){
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value){
 #endif
   const int lbsize = count_to_lbsize(that->count);
   if(dpa_u_unlikely(lbsize > that->lbsize)){
@@ -801,7 +827,7 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set)(DPA__U_SM_TYPE*restr
     *that = new;
   }
   const DPA__U_SM_KEY_ENTRY_TYPE entry = DPA__U_SM_HASH(key);
-  struct lookup_result result = LOOKUP(that, entry, lbsize);
+  struct dpa__u_sm_lookup_result result = LOOKUP(that, entry, lbsize);
   if(result.found){
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
     that->value_list[result.index] = value;
@@ -819,7 +845,7 @@ dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_set)(DPA__U_SM_TYPE*restr
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
 dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_add)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, void*restrict value){
+dpa__u_api int DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _bitmap_set)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key, dpa_u_any_value_t value){
 #endif
   const DPA__U_SM_ENTRY_HASH_TYPE hash = DPA__U_SM_HASH(key);
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
@@ -859,7 +885,7 @@ extern bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _remove)(DPA__U_SM_TYPE*restrict th
 dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _remove_list)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #endif
   const DPA__U_SM_KEY_ENTRY_TYPE entry = DPA__U_SM_HASH(key);
-  struct lookup_result result = LOOKUP(that, entry, that->lbsize);
+  struct dpa__u_sm_lookup_result result = LOOKUP(that, entry, that->lbsize);
   if(!result.found)
     return false;
   REMOVE(that, result.index, that->lbsize);
@@ -870,6 +896,16 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _remove_list)(DPA__U_SM_TYPE*r
   if(that->lbsize-lbsize >= 2)
     SHRINK(that);
   return true;
+}
+
+dpa__u_api void DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _remove_index_sub)(DPA__U_SM_TYPE*restrict that, size_t index){
+  REMOVE(that, index, that->lbsize);
+  const size_t count = --that->count;
+  if(dpa_u_unlikely(!count))
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(that);
+  const int lbsize = count_to_lbsize(count);
+  if(that->lbsize-lbsize >= 2)
+    SHRINK(that);
 }
 #endif
 
@@ -893,20 +929,20 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_has)(const DPA__U_SM_TYP
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 
 #ifndef DPA__U_SM_NO_BITSET
-extern dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+extern dpa_u_optional_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
 #endif
 
 #ifdef DPA__U_SM_NO_BITSET
-dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+dpa__u_api dpa_u_optional_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
   if(!that->count)
-    return (dpa_u_optional_pointer_t){0};
+    return (dpa_u_optional_t){0};
 #else
-dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+dpa__u_api dpa_u_optional_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_get)(const DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #endif
-  const struct lookup_result result = LOOKUP(that, DPA__U_SM_HASH(key), that->lbsize);
+  const struct dpa__u_sm_lookup_result result = LOOKUP(that, DPA__U_SM_HASH(key), that->lbsize);
   if(!result.found)
-    return (dpa_u_optional_pointer_t){0};
-  return (dpa_u_optional_pointer_t){
+    return (dpa_u_optional_t){0};
+  return (dpa_u_optional_t){
     .value = that->value_list[result.index],
     .present = true
   };
@@ -918,15 +954,15 @@ dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _list_get)
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #ifndef DPA__U_SM_NO_BITSET
-dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_bitmap)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+dpa__u_api dpa_u_optional_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_bitmap)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
   const DPA__U_SM_KEY_ENTRY_TYPE entry = DPA__U_SM_HASH(key);
   dpa_u_bitmap_entry_t*restrict const m = &that->bitmask[DPA__U_SM_BITMAP_OFFSET(entry)];
   const dpa_u_bitmap_entry_t s = DPA__U_SM_BITMAP_BIT(entry);
   bool r = *m & s;
   *m &= ~s;
   if(!r)
-    return (dpa_u_optional_pointer_t){0};
-  const dpa_u_optional_pointer_t result = {
+    return (dpa_u_optional_t){0};
+  const dpa_u_optional_t result = {
     .value = that->value_list[entry],
     .present = true,
   };
@@ -937,18 +973,18 @@ dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_r
 #endif
 
 #ifdef DPA__U_SM_NO_BITSET
-dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+dpa__u_api dpa_u_optional_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
   if(!that->count)
-    return (dpa_u_optional_pointer_t){0};
+    return (dpa_u_optional_t){0};
 #else
-extern dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
-dpa__u_api dpa_u_optional_pointer_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_list)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
+extern dpa_u_optional_t DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _get_and_remove)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key);
+dpa__u_api dpa_u_optional_t DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _get_and_remove_list)(DPA__U_SM_TYPE*restrict that, DPA__U_SM_KEY_TYPE key){
 #endif
   const DPA__U_SM_KEY_ENTRY_TYPE entry = DPA__U_SM_HASH(key);
-  struct lookup_result result = LOOKUP(that, entry, that->lbsize);
+  struct dpa__u_sm_lookup_result result = LOOKUP(that, entry, that->lbsize);
   if(!result.found)
-    return (dpa_u_optional_pointer_t){0};
-  const dpa_u_optional_pointer_t ret = {
+    return (dpa_u_optional_t){0};
+  const dpa_u_optional_t ret = {
     .value = that->value_list[result.index],
     .present = true,
   };
@@ -975,7 +1011,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _copy)(DPA__U_SM_TYPE*restrict 
   }
   const size_t lbsize = src->lbsize;
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-  void**const value_list = malloc((((size_t)1)<<lbsize)*sizeof(*value_list));
+  dpa_u_any_value_t*const value_list = malloc((((size_t)1)<<lbsize)*sizeof(*value_list));
   if(!value_list)
     goto error;
 #endif

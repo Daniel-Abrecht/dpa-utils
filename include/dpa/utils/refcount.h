@@ -27,12 +27,13 @@ void funlockfile(FILE *filehandle);
   X((DPA_U_REFCOUNT_STATIC))    /* This refcount will never hit 0, it only exists for compatibility. */ \
   X((DPA_U_REFCOUNT_FREEABLE))  /* This refcount is at the start of an allocated object and can be freed using free() */ \
   X((DPA_U_REFCOUNT_CALLBACK))  /* When this refcount hits 0, it'll call a callback. */ \
-  X((DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP)) /* Refcount of dpa_u_bo_unique. Because this is an essential internal type, we can special case it here to safe a bit of memory. */
+  X((DPA_U_REFCOUNT_BO_UNIQUE)) /* Refcount of an entry of a dpa_u_a_bo_unique. Because this is an essential internal type, we can special case it here to safe a bit of memory. */ \
+  X((DPA_U_REFCOUNT_BO_UNIQUE_EXTREF)) /* Refcount of an entry of a dpa_u_a_bo_unique. Because this is an essential internal type, we can special case it here to safe a bit of memory. */
 
 /**
  * Any refcount can be static.
  * A refcount either is freeable or not.
- * If it is freeable, it may have a callback, or be of type DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP, or neither, in which case it'll be freed with free().
+ * If it is freeable, it may have a callback, or be of type DPA_U_REFCOUNT_BO_UNIQUE, or neither, in which case it'll be freed with free().
  */
 DPA_U_ENUM(dpa_u_refcount_type)
 
@@ -98,7 +99,6 @@ static_assert(offsetof(struct dpa_u_refcount_callback, freeable) == 0, "Unexpect
 #define dpa_u_refcount_i_static       {.value=DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_STATIC)}
 #define dpa_u_refcount_i_freeable(N)  {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_FREEABLE)}}
 #define dpa_u_refcount_i_callback(N)  {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_CALLBACK)}}
-#define dpa_u_refcount_i_bo_unique(N) {{(N)+DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP)}}
 
 dpa__u_api_var extern struct dpa_u_refcount dpa_u_refcount_v_static;
 dpa__u_api_var extern struct dpa_u_refcount_freeable dpa_u_refcount_static_v_freeable;
@@ -176,7 +176,7 @@ dpa__u_really_inline dpa__u_api inline bool dpa_u_refcount_decrement_p(const str
 }
 
 dpa__u_api inline void dpa__u_refcount_destroy(struct dpa_u_refcount_freeable*const rc){
-  void dpa__u_bo_unique_hashmap_destroy(const struct dpa_u_refcount_freeable*);
+  void dpa__u_bo_unique_destroy(const struct dpa_u_refcount_freeable*);
   const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
 #if defined(__GNUC__) && !defined(__llvm__)
 // GCC will get confused about which branchs are reachable and warn. All we can do about it is disable the warning.
@@ -188,7 +188,8 @@ dpa__u_api inline void dpa__u_refcount_destroy(struct dpa_u_refcount_freeable*co
     case DPA_U_REFCOUNT_STATIC: return;
     case DPA_U_REFCOUNT_FREEABLE: free(rc); return;
     case DPA_U_REFCOUNT_CALLBACK: ((struct dpa_u_refcount_callback*)rc)->free((struct dpa_u_refcount_callback*)rc); return;
-    case DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP: dpa__u_bo_unique_hashmap_destroy(rc); return;
+    case DPA_U_REFCOUNT_BO_UNIQUE_EXTREF:
+    case DPA_U_REFCOUNT_BO_UNIQUE: dpa__u_bo_unique_destroy(rc); return;
   }
 #if defined(__GNUC__) && !defined(__llvm__)
 #pragma GCC diagnostic pop
@@ -368,7 +369,8 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline bool dpa_u_refcount_ha
     const struct dpa__u_refcount_bo_unique*: true \
   )
 dpa_u_reproducible dpa__u_really_inline dpa__u_api inline bool dpa_u_refcount_is_bo_unique_p(const struct dpa_u_refcount*const rc){
-  return dpa_u_refcount_get_type(rc) == DPA_U_REFCOUNT_BO_UNIQUE_HASHMAP;
+  const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(rc);
+  return type == DPA_U_REFCOUNT_BO_UNIQUE || type == DPA_U_REFCOUNT_BO_UNIQUE_EXTREF;
 }
 
 #ifdef DPA_U_REFCOUNT_DEBUG

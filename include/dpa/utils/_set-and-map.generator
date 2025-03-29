@@ -48,6 +48,11 @@ enum dpa__u_sm_mode {
   DPA__U_SM_BITMAP = DPA__U_SM_FINAL,
 };
 
+struct dpa__u_sm_lookup_result {
+  size_t index;
+  bool found;
+};
+
 #endif
 
 #define DPA__U_SM_NO_BITSET
@@ -151,17 +156,8 @@ enum dpa__u_sm_mode {
 #include <dpa/utils/_set-and-map.common.h>
 #endif
 
-#if defined(DPA_U_SM_STR_AS_UINT) && defined(DPA__U_STR_AS_UINT_IMPL) && defined(DPA_U_BO_UNIQUE_UINT_COMPATIBLE)
-#include DPA__U_STR_AS_UINT_IMPL
-#else
-#define DPA__U_SM_BO
-#define DPA__U_SM_NO_BITSET
-#define DPA__U_SM_KEY_TYPE dpa_u_bo_unique_t
-#define DPA__U_SM_KEY_TYPE_U dpa__u_bo_unique_reversible_hash_t
-#define DPA__U_SM_NAME string
-#include <dpa/utils/_set-and-map.common.h>
-#endif
 #ifdef DPA__U_STR_AS_UINT_IMPL
+#include DPA__U_STR_AS_UINT_IMPL
 #undef DPA__U_STR_AS_UINT_IMPL
 #endif
 
