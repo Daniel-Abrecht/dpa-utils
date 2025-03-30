@@ -211,8 +211,13 @@ dpa__u_api const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type){
 
 dpa__u_api void dpa__u_bo_unique_destroy(const dpa_u_refcount_freeable_t* rc){
   mtx_lock(&unique_string_map_lock);
-  if(!dpa_u_refcount_is_zero(rc))
-    goto end;
+  if(!dpa_u_refcount_is_zero(rc)){
+    // This only happens if the entry was picked from the set before it was removed. In that case, it was incremented.
+    // That reference is taken by dpa__u_bo_intern_h on behalf of this function, under the unique_string_map_lock lock.
+    // We drop it again.
+    if(dpa_u_refcount_decrement(&rc->refcount))
+      goto end; // This is not the last reference anymore.
+  }
   const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
   const dpa_u_bo_t*const bo = (dpa_u_bo_t*)(rc+1);
   const uint64_t hash = (bo->size > 64) ? ((dpa__u_bo_hashed_t*)bo)->hash : dpa_u_bo_get_hash(*bo);
@@ -232,7 +237,7 @@ end:
   mtx_unlock(&unique_string_map_lock);
 }
 
-dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
+dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE)){
     dpa_u_a_bo_unique_t res = {bo.p};
     dpa_u_bo_ref(res);
@@ -283,7 +288,13 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_ro_t bo){
     const dpa_u_a_bo_unique_t entry = dpa_u_bo_unique_from_uint(unique_string_map.value_list[i>>shift].u64);
     const dpa_u_bo_ro_t v = dpa_u_to_bo_ro(entry);
     if( v.size == size && ( v.data == data || !memcmp(data, v.data, size) )){
-      dpa_u_bo_ref(entry);
+      dpa_u_refcount_freeable_t* rc = dpa_u_bo_get_refcount(entry);
+      if(dpa_u_refcount_is_zero(rc)){
+        // This entry was due for removal. We increment the refcount one more on behalf of the dpa__u_bo_unique_destroy
+        // callback, which is going to run later. This ensures the refcount doesn't hit 0 before that happens again.
+        dpa_u_refcount_ref(rc);
+      }
+      dpa_u_refcount_ref(rc);
       mtx_unlock(&unique_string_map_lock);
       return entry;
     }
