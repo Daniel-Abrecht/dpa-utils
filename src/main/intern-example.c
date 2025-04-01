@@ -35,7 +35,7 @@ int main(int argc, char* argv[]){
   dpa_u_a_bo_unique_t* list = malloc(sizeof(*list));
   char buf[256] = {0};
   while(fgets(buf, sizeof(buf), f)){
-    dpa_u_bo_t bo = {
+    dpa_u_bo_ro_t bo = {
       .size = strlen(buf),
       .data = buf,
     };
