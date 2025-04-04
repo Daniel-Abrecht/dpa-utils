@@ -113,9 +113,9 @@ dpa__u_api inline dpa_u_bo_ro_t dpa__u_bo_to_bo_ro_h(dpa_u_bo_t bo){
   };
 }
 #define dpa_u_to_bo_ro(X) _Generic((X), \
-    dpa_u_bo_t         : *(const dpa_u_bo_ro_t*)dpa__u_bo_to_p_bo_ro(DPA__G(dpa_u_bo_t, (X))), \
+    dpa_u_bo_t         : dpa__u_bo_to_bo_ro_h(DPA__G(dpa_u_bo_t, (X))), \
     dpa_u_bo_ro_t      : DPA__G(dpa_u_bo_ro_t, (X)), \
-    dpa_u_p_bo_t*      : *(const dpa_u_bo_ro_t*)DPA__G(dpa_u_p_bo_t*, (X)) /* TODO */, \
+    dpa_u_p_bo_t*      : dpa__u_bo_to_bo_ro_h(*(dpa_u_bo_t*)DPA__G(dpa_u_p_bo_t*, (X))), \
     const dpa_u_p_bo_t*: *(const dpa_u_bo_ro_t*)DPA__G(const dpa_u_p_bo_t*, (X)), \
     \
     struct dpa__u_a_bo_unique: dpa_u_to_bo_ro_h((const dpa_u__boptr_t*)DPA__G(struct dpa__u_a_bo_unique, (X)).p.value), \
@@ -213,7 +213,7 @@ DPA_U__CHECK_GENERIC(dpa_u_bo_get_type)
 dpa__u_api const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type);
 
 dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo);
-#define dpa_u_bo_intern(X) dpa__u_bo_intern_h(dpa_u_to_bo_any((X)));
+#define dpa_u_bo_intern(X) dpa__u_bo_intern_h(dpa_u_to_bo_any((X)))
 
 #define dpa_u_a_bo_unique_to_uint(X) _Generic((X), dpa_u_a_bo_unique_t: (X).p.value[0])
 #define dpa_u_bo_unique_from_uint(X) ((dpa_u_a_bo_unique_t){.p.value[0]=(X)})
@@ -249,10 +249,10 @@ dpa__u_api int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo);
     dpa_u_p_bo_t*: !DPA__G(dpa_u_p_bo_t*, (X)), \
     const dpa_u_p_bo_t*: !DPA__G(const dpa_u_p_bo_t*, (X)), \
     \
-    struct dpa__u_a_bo_unique: DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_unique, (X)).p.value[0]) > 7, \
-    struct dpa__u_a_bo_hashed: DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_hashed, (X)).p.value[0]) > 7, \
-    struct dpa__u_a_bo_any   : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_any,    (X)).p.value[0]) > 7, \
-    struct dpa__u_a_bo_gc    : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_gc,     (X)).p.value[0]) > 7, \
+    struct dpa__u_a_bo_unique: DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_unique, (X)).p.value[0]) < 8, \
+    struct dpa__u_a_bo_hashed: DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_hashed, (X)).p.value[0]) < 8, \
+    struct dpa__u_a_bo_any   : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_any,    (X)).p.value[0]) < 8, \
+    struct dpa__u_a_bo_gc    : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_gc,     (X)).p.value[0]) < 8, \
     \
     dpa_u__noop_t: 1 \
   )
@@ -339,7 +339,7 @@ DPA_U__CHECK_GENERIC(dpa_u_bo_put)
   )
 DPA_U__CHECK_GENERIC(dpa_u_bo_get_refcount)
 
-#define DPA__U_INLINE_STRING(...) DPA__U_INLINE_STRING_2(__VA_ARGS__,0,0,0,0,0,0,0,7,6,5,4,3,2,1)
+#define DPA__U_INLINE_STRING(...) DPA__U_INLINE_STRING_2(__VA_ARGS__ +0,0,0,0,0,0,0,0,7,6,5,4,3,2,1)
 
 #if BYTE_ORDER == LITTLE_ENDIAN
 #define DPA__U_INLINE_STRING_2(x1,x2,x3,x4,x5,x6,x7,_1,_2,_3,_4,_5,_6,_7,n,...) \

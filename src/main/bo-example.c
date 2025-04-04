@@ -1,6 +1,7 @@
 #include <dpa/utils/bo.h>
 #include <dpa/utils/io.h>
 #include <stdio.h>
+#include <errno.h>
 
 /**
  * This example shows how any bo can be automatically converted and passed
@@ -48,5 +49,15 @@ int main(void){
     printf("dpa_u_bo_compare: %d\n", dpa_u_bo_compare(my_bo, my_bo2));
     dpa_u_bo_put(my_bo);
     dpa_u_bo_put(my_bo2);
+  }
+  {
+    printf(
+      "Creating a dpa_u_a_bo_unique_t instance with an error value: %.7s %.7s %.7s %.7s %s\n",
+      dpa_u_bo_get_data(dpa_u_bo_error(EINVAL)),
+      dpa_u_bo_get_data(dpa_u_bo_error(123456)),
+      dpa_u_bo_get_data(dpa_u_bo_error(1234568)),
+      dpa_u_bo_get_data(dpa_u_bo_intern(dpa_u_bo_error(EPERM))),
+      dpa_u_bo_is_error(dpa_u_bo_error(EINVAL)) ? "true" : "false"
+    );
   }
 }

@@ -242,6 +242,8 @@ end:
 }
 
 dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
+  if(dpa_u_bo_is_error(bo))
+    return bo_error[EINVAL];
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE)){
     dpa_u_a_bo_unique_t res = {bo.p};
     dpa_u_bo_ref(res);
