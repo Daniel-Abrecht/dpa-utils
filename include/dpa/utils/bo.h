@@ -157,7 +157,7 @@ DPA_U__CHECK_GENERIC(dpa_u_to_bo_any)
     dpa_u_bo_t         : dpa_u__bo_hash(dpa__u_bo_to_bo_ro_h(DPA__G(dpa_u_bo_t, (X)))), \
     dpa_u_bo_ro_t      : dpa_u__bo_hash(DPA__G(dpa_u_bo_ro_t, (X))), \
     dpa_u_p_bo_t*      : dpa_u__bo_hash(dpa__u_bo_to_bo_ro_h(*(dpa_u_bo_t*)DPA__G(dpa_u_p_bo_t*, (X)))), \
-    const dpa_u_p_bo_t*: dpa_u__bo_hash(dpa__u_bo_to_bo_ro_h(*(dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X)))), \
+    const dpa_u_p_bo_t*: dpa_u__bo_hash(*(dpa_u_bo_ro_t*)DPA__G(const dpa_u_p_bo_t*, (X))), \
     \
     struct dpa__u_a_bo_unique: dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_unique, (X)).p), \
     struct dpa__u_a_bo_hashed: dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_hashed, (X)).p), \
