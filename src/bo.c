@@ -22,22 +22,22 @@ static const char*const dpa_u_bo_type[32] = {
   "unique|refcounted|simple",
   "INVALID<inline|unique|refcounted|hashed>",
   "unique|refcounted|hashed|simple",
-  "INVALID<inline|immortal>",
-  "simple|immortal",
-  "INVALID<inline|hashed|immortal>",
-  "hashed|simple|immortal",
-  "INVALID<inline|refcounted|immortal>",
-  "refcounted|simple|immortal",
-  "INVALID<inline|refcounted|hashed|immortal>",
-  "refcounted|hashed|simple|immortal",
-  "INVALID<inline|unique|immortal>",
-  "unique|simple|immortal",
-  "INVALID<inline|unique|hashed|immortal>",
-  "unique|hashed|simple|immortal",
-  "INVALID<inline|unique|refcounted|immortal>",
-  "unique|refcounted|simple|immortal",
-  "INVALID<inline|unique|refcounted|hashed|immortal>",
-  "unique|refcounted|hashed|simple|immortal",
+  "INVALID<inline|static>",
+  "simple|static",
+  "INVALID<inline|hashed|static>",
+  "hashed|simple|static",
+  "INVALID<inline|refcounted|static>",
+  "refcounted|simple|static",
+  "INVALID<inline|refcounted|hashed|static>",
+  "refcounted|hashed|simple|static",
+  "INVALID<inline|unique|static>",
+  "unique|simple|static",
+  "INVALID<inline|unique|hashed|static>",
+  "unique|hashed|simple|static",
+  "INVALID<inline|unique|refcounted|static>",
+  "unique|refcounted|simple|static",
+  "INVALID<inline|unique|refcounted|hashed|static>",
+  "unique|refcounted|hashed|simple|static",
 };
 
 static const dpa_u_a_bo_unique_t bo_error[] = {
@@ -322,16 +322,16 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
     type |= DPA_U_BO_HASHED;
     entry_size = sizeof(dpa_u_bo_hashed_t);
   }
-  if(dpa_u_bo_is_any_type(bo, DPA_U_BO_IMMORTAL)){
-    type |= DPA_U_BO_IMMORTAL;
+  if(dpa_u_bo_is_any_type(bo, DPA_U_BO_STATIC)){
+    type |= DPA_U_BO_STATIC;
   }else{
     type |= DPA_U_BO_REFCOUNTED;
     entry_size += sizeof(dpa_u_refcount_t);
   }
-  if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL))
+  if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC))
     entry_size += size;
   void* eh = malloc(entry_size);
-  if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED|DPA_U_BO_IMMORTAL)){
+  if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)){
     char* d = (char*)eh + entry_size - size;
     memcpy(d, data, size);
     data = d;

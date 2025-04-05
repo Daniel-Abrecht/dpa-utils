@@ -40,14 +40,14 @@ typedef struct dpa_u_bo_hashed {
 typedef struct dpa_u_p_bo dpa_u_p_bo_t;
 
 typedef struct dpa__u_a_bo_unique { dpa_u__boptr_t p; } dpa_u_a_bo_unique_t;
-typedef struct dpa__u_a_bo_any { dpa_u__boptr_t p; } dpa_u_a_bo_any_t;
-typedef struct dpa__u_a_bo_gc  { dpa_u__boptr_t p; } dpa_u_a_bo_gc_t;
 typedef struct dpa__u_a_bo_hashed { dpa_u__boptr_t p; } dpa_u_a_bo_hashed_t;
+typedef struct dpa__u_a_bo_any    { dpa_u__boptr_t p; } dpa_u_a_bo_any_t;
+typedef struct dpa__u_a_bo_gc     { dpa_u__boptr_t p; } dpa_u_a_bo_gc_t;
 
 static_assert(sizeof(dpa_u_a_bo_unique_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
-static_assert(sizeof(dpa_u_a_bo_any_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
-static_assert(sizeof(dpa_u_a_bo_gc_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
 static_assert(sizeof(dpa_u_a_bo_hashed_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
+static_assert(sizeof(dpa_u_a_bo_any_t)    == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
+static_assert(sizeof(dpa_u_a_bo_gc_t)     == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
 
 typedef struct dpa_u__noop* dpa_u__noop_t;
 #define DPA_U__CHECK_GENERIC(X) static inline \
@@ -56,9 +56,9 @@ typedef struct dpa_u__noop* dpa_u__noop_t;
   void DPA_U_CONCAT_E(dpa_u__sc__, __LINE__)(void){ (void)(X((dpa_u__noop_t)0, __VA_ARGS__)); /* A simple sanity check for the generic macros. */ }
 
 enum dpa_u_bo_type_flags {
-  DPA_U_BO_IMMORTAL   = 0x80,
-  DPA_U_BO_UNIQUE     = 0x40,
-  DPA_U_BO_REFCOUNTED = 0x20,
+  DPA_U_BO_STATIC     = 0x80,
+  DPA_U_BO_REFCOUNTED = 0x40,
+  DPA_U_BO_UNIQUE     = 0x20,
   DPA_U_BO_HASHED     = 0x10,
   DPA_U_BO_SIMPLE     = 0x08,
 };
@@ -147,6 +147,33 @@ DPA_U__CHECK_GENERIC(dpa_u_to_bo_ro)
     dpa_u__noop_t: 1 \
   )
 DPA_U__CHECK_GENERIC(dpa_u_to_bo_any)
+
+#define dpa_u_to_bo_i_any(X) _Generic((X), \
+    dpa_u_bo_t         : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(dpa__u_bo_to_p_bo_ro(DPA__G(dpa_u_bo_t, (X))), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_ro_t      : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(dpa_u_bo_ro_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_p_bo_t*      : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(dpa__u_bo_to_p_bo_ro(*(dpa_u_bo_t*)DPA__G(dpa_u_p_bo_t*, (X))), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    const dpa_u_p_bo_t*: (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    \
+    dpa_u__noop_t: 1 \
+  )
+DPA_U__CHECK_GENERIC(dpa_u_to_bo_i_any)
+
+dpa__u_api inline dpa_u__boptr_t dpa_u__to_bo_r_any__from_p_bo_ro(const dpa_u_bo_ro_t* bo){
+  uint64_t tag = DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED;
+  if(dpa_u_refcount_is_static(dpa_u_container_of((char(*)[])bo->data, struct dpa_u_refcount_freeable_data, data)->refcount))
+    tag |= DPA_U_BO_STATIC;
+  return DPA_U__BO_TAG(bo, tag);
+}
+
+#define dpa_u_to_bo_r_any(X) _Generic((X), \
+    dpa_u_bo_t         : (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo_ro(dpa__u_bo_to_p_bo_ro(DPA__G(dpa_u_bo_t, (X))))}, \
+    dpa_u_bo_ro_t      : (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo_ro((const dpa_u_bo_ro_t*)DPA__G(dpa_u_bo_ro_t, (X))._c)}, \
+    dpa_u_p_bo_t*      : (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo_ro(dpa__u_bo_to_p_bo_ro(*(dpa_u_bo_t*)DPA__G(dpa_u_p_bo_t*, (X))))}, \
+    const dpa_u_p_bo_t*: (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo_ro((const dpa_u_bo_ro_t*)DPA__G(const dpa_u_p_bo_t*, (X)))}, \
+    \
+    dpa_u__noop_t: 1 \
+  )
+DPA_U__CHECK_GENERIC(dpa_u_to_bo_r_any)
 
 /**
  * This is not a cryptographc hash function.
@@ -294,7 +321,7 @@ dpa__u_api inline void dpa_u_bo_put_h1(dpa_u_a_bo_unique_t bo){
 
 dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(dpa_u_a_bo_any_t bo){
   dpa_u_bo_t* pbo = DPA_U__BO_UNTAG(dpa_u_bo_t*, bo.p);
-  if(dpa_u_bo_is_any_type(bo, DPA_U_BO_IMMORTAL))
+  if(dpa_u_bo_is_any_type(bo, DPA_U_BO_STATIC))
     return &dpa_u_refcount_static_v_freeable;
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE))
     return ((dpa_u_refcount_freeable_t*)pbo) - 1;

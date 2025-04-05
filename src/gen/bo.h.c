@@ -1,5 +1,6 @@
 #include <dpa/utils/bo.h>
 
+extern dpa_u__boptr_t dpa_u__to_bo_r_any__from_p_bo_ro(const dpa_u_bo_ro_t* bo);
 extern dpa_u_bo_ro_t dpa__u_bo_to_bo_ro_h(dpa_u_bo_t bo);
 extern dpa_u_bo_ro_t dpa_u_to_bo_ro_h(const dpa_u__boptr_t*restrict const boptr);
 extern dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(dpa_u_a_bo_any_t bo);
