@@ -64,7 +64,7 @@ static void hex2bin(void*const res, size_t n, const unsigned char* x){
 
 static void to_ustring(dpa_u_a_bo_unique_t*const ret, size_t n, const unsigned char* x){
   (void)n;
-  dpa_u_bo_ro_t bo = {
+  dpa_u_bo_t bo = {
     .size = strlen((const char*)x),
     .data = (char*)x,
   };
