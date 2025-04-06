@@ -292,7 +292,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
     }
     // An entry with matching hash found
     const dpa_u_a_bo_unique_t entry = dpa_u_bo_unique_from_uint(unique_string_map.value_list[i>>shift].u64);
-    const dpa_u_bo_t v = dpa_u_to_bo_ro(entry);
+    const dpa_u_bo_t v = dpa_u_to_bo(entry);
     if( v.size == size && ( v.data == data || !memcmp(data, v.data, size) )){
       dpa_u_refcount_freeable_t* rc = dpa_u_bo_get_refcount(entry);
       if(dpa_u_refcount_is_zero(rc)){

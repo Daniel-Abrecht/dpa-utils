@@ -14,7 +14,7 @@ static inline size_t my_puts_p(dpa_u_bo_t bo){
   fwrite(dpa_u_bo_get_data(bo), dpa_u_bo_get_size(bo), 1, stdout);
   return puts("");
 }
-#define my_puts(bo) my_puts_p(dpa_u_to_bo_ro((bo)))
+#define my_puts(bo) my_puts_p(dpa_u_to_bo((bo)))
 
 #define S(X) sizeof(X)-1, (X)
 

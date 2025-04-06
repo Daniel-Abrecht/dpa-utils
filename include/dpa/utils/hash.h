@@ -26,12 +26,12 @@ dpa__u_api inline uint64_t dpa_u_hash_64_FNV_1a_append_p(dpa_u_bo_t bo, uint_fas
     hash = (hash ^ data[i]) * DPA_U_FNV_64_PRIME;
   return hash;
 }
-#define dpa_u_hash_64_FNV_1a_append(bo, old_hash) dpa_u_hash_64_FNV_1a_append_p(dpa_u_to_bo_ro((bo)), (old_hash))
+#define dpa_u_hash_64_FNV_1a_append(bo, old_hash) dpa_u_hash_64_FNV_1a_append_p(dpa_u_to_bo((bo)), (old_hash))
 
 dpa__u_api inline uint64_t dpa_u_hash_64_FNV_1a_p(dpa_u_bo_t bo){
   return dpa_u_hash_64_FNV_1a_append(bo, DPA_U_FNV_64_OFFSET_BASIS);
 }
-#define dpa_u_hash_64_FNV_1a(bo) dpa_u_hash_64_FNV_1a_p(dpa_u_to_bo_ro((bo)))
+#define dpa_u_hash_64_FNV_1a(bo) dpa_u_hash_64_FNV_1a_p(dpa_u_to_bo((bo)))
 
 dpa__u_api inline uint32_t dpa_u_hash_32_FNV_1a_append_p(dpa_u_bo_t bo, uint_fast32_t hash){
   const uint8_t* data = (uint8_t*)dpa_u_bo_get_data(bo);
@@ -39,12 +39,12 @@ dpa__u_api inline uint32_t dpa_u_hash_32_FNV_1a_append_p(dpa_u_bo_t bo, uint_fas
     hash = (hash ^ data[i]) * DPA_U_FNV_32_PRIME;
   return hash;
 }
-#define dpa_u_hash_32_FNV_1a_append(bo, old_hash) dpa_u_hash_32_FNV_1a_append_p(dpa_u_to_bo_ro((bo)), (old_hash))
+#define dpa_u_hash_32_FNV_1a_append(bo, old_hash) dpa_u_hash_32_FNV_1a_append_p(dpa_u_to_bo((bo)), (old_hash))
 
 dpa__u_api inline uint32_t dpa_u_hash_32_FNV_1a_p(dpa_u_bo_t bo){
   return dpa_u_hash_32_FNV_1a_append(bo, DPA_U_FNV_32_OFFSET_BASIS);
 }
-#define dpa_u_hash_32_FNV_1a(bo) dpa_u_hash_32_FNV_1a_p(dpa_u_to_bo_ro((bo)))
+#define dpa_u_hash_32_FNV_1a(bo) dpa_u_hash_32_FNV_1a_p(dpa_u_to_bo((bo)))
 
 
 dpa__u_api inline uint16_t dpa_u_hash_16_append_p(dpa_u_bo_t bo, uint_fast32_t hash){
@@ -55,12 +55,12 @@ dpa__u_api inline uint16_t dpa_u_hash_16_append_p(dpa_u_bo_t bo, uint_fast32_t h
   }
   return hash & 0xFFFF;
 }
-#define dpa_u_hash_16_append(bo, old_hash) dpa_u_hash_16_append_p(dpa_u_to_bo_ro((bo)), (old_hash))
+#define dpa_u_hash_16_append(bo, old_hash) dpa_u_hash_16_append_p(dpa_u_to_bo((bo)), (old_hash))
 
 dpa__u_api inline uint16_t dpa_u_hash_16_p(dpa_u_bo_t bo){
   return dpa_u_hash_16_append(bo, DPA_U_FNV_32_OFFSET_BASIS);
 }
-#define dpa_u_hash_16(bo) dpa_u_hash_16_p(dpa_u_to_bo_ro((bo)))
+#define dpa_u_hash_16(bo) dpa_u_hash_16_p(dpa_u_to_bo((bo)))
 
 dpa__u_api void dpa_u_getrandom(void* buf, size_t buflen);
 dpa__u_api void dpa_u_init_seed(void);
