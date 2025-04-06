@@ -22,7 +22,7 @@ typedef struct dpa_u_bo_rw {
   char* data;
 } dpa_u_bo_rw_t;
 
-typedef struct dpadpa_u_bo_hashed_t_u_bo {
+typedef struct dpa_u_bo {
   union {
     struct {
       size_t size;
