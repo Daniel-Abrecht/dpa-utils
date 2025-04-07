@@ -98,13 +98,38 @@ DPA_U_TEST_MAIN
 
 ///////////////////////////////////////////
 
-#define DPA__U_SM_TEMPLATE <test/set-map.c>
 #define DPA__U_SM_KIND DPA__U_SM_KIND_SET
-#include <dpa/utils/_set-and-map.generator>
+
+#define DPA__U_STRING_SETMAP
+#define DPA__U_SM_KEY_TYPE dpa_u_a_bo_unique_t
+#define DPA__U_SM_PREFIX dpa_u_set_string
+#define DPA__U_SM_TYPE dpa_u_set_string_t
+#include "set-map.c"
+#undef DPA__U_SM_KEY_TYPE
+#undef DPA__U_SM_PREFIX
+#undef DPA__U_SM_TYPE
+#undef DPA__U_STRING_SETMAP
 
 #define DPA__U_SM_TEMPLATE <test/set-map.c>
-#define DPA__U_SM_KIND DPA__U_SM_KIND_MAP
 #include <dpa/utils/_set-and-map.generator>
+
+
+#define DPA__U_SM_KIND DPA__U_SM_KIND_MAP
+
+#define DPA__U_STRING_SETMAP
+#define DPA__U_SM_KEY_TYPE dpa_u_a_bo_unique_t
+#define DPA__U_SM_PREFIX dpa_u_map_string
+#define DPA__U_SM_TYPE dpa_u_map_string_t
+#include "set-map.c"
+#undef DPA__U_SM_KEY_TYPE
+#undef DPA__U_SM_PREFIX
+#undef DPA__U_SM_TYPE
+#undef DPA__U_STRING_SETMAP
+
+#define DPA__U_SM_TEMPLATE <test/set-map.c>
+#include <dpa/utils/_set-and-map.generator>
+
+// #include "set-map.c"
 
 ///////////////////////////////////////////
 
@@ -117,6 +142,11 @@ DPA_U_TEST_MAIN
 #define DPA_U_TESTCASE_SUFFIX DPA_U_CONCAT_E(DPA__U_SM_PREFIX, __LINE__)
 
 bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
+#ifdef DPA__U_STRING_SETMAP
+  if(i >= ustr_count) return false;
+  *ret = ustr[i];
+  return true;
+#else
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
   if(sizeof(DPA__U_SM_KEY_TYPE) >= 32){
@@ -145,6 +175,8 @@ bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
     return true;
   }
 #pragma GCC diagnostic pop
+#endif
+  return false;
 }
 
 DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
