@@ -1,5 +1,4 @@
-#include <dpa/utils/set.h>
-#ifdef DPA__U_SET_STR_IS_UINT
+#include <dpa/utils/set-string.h>
 
 extern bool dpa_u_set_string_copy(dpa_u_set_string_t*restrict dst, const dpa_u_set_string_t*restrict src);
 extern bool dpa_u_set_string_has(const dpa_u_set_string_t*restrict that, dpa_u_a_bo_unique_t key);
@@ -14,5 +13,3 @@ extern int dpa_u_set_string_add(dpa_u_set_string_t*restrict that, dpa_u_a_bo_uni
 extern size_t dpa_u_set_string_count(const dpa_u_set_string_t* that);
 extern void dpa_u_set_string_clear(dpa_u_set_string_t* that);
 extern void dpa_u_set_string_dump_hashmap_key_hashes(dpa_u_set_string_t* that);
-
-#endif

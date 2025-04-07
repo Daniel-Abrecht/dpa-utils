@@ -156,10 +156,5 @@ struct dpa__u_sm_lookup_result {
 #include <dpa/utils/_set-and-map.common.h>
 #endif
 
-#ifdef DPA__U_STR_AS_UINT_IMPL
-#include DPA__U_STR_AS_UINT_IMPL
-#undef DPA__U_STR_AS_UINT_IMPL
-#endif
-
 #undef DPA__U_SM_TEMPLATE
 #undef DPA__U_SM_KIND
