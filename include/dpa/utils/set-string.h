@@ -1,5 +1,5 @@
-#ifndef DPA_U_MAP_STRING_H
-#define DPA_U_MAP_STRING_H
+#ifndef DPA_U_SET_STRING_H
+#define DPA_U_SET_STRING_H
 
 #include <dpa/utils/set-int.h>
 

@@ -129,8 +129,6 @@ DPA_U_TEST_MAIN
 #define DPA__U_SM_TEMPLATE <test/set-map.c>
 #include <dpa/utils/_set-and-map.generator>
 
-// #include "set-map.c"
-
 ///////////////////////////////////////////
 
 #else
