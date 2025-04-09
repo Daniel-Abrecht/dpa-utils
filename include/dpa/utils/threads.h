@@ -108,12 +108,12 @@ dpa__u_api inline int thrd_join(thrd_t thread, int* res){
   return thrd_success;
 }
 
-dpa__u_api_var extern pthread_mutexattr_t dpa_u__attr_recursive;
+dpa__u_api_var extern pthread_mutexattr_t dpa__u_attr_recursive;
 
 dpa__u_api inline int mtx_init(mtx_t* mutex, int type){
   pthread_mutexattr_t* attr = 0;
   if(type & mtx_recursive)
-    attr = &dpa_u__attr_recursive;
+    attr = &dpa__u_attr_recursive;
   return pthread_mutex_init(&mutex->v, attr) ? thrd_error : thrd_success;
 }
 

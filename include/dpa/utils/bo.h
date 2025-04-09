@@ -12,10 +12,10 @@
 #include <string.h>
 #include <assert.h>
 
-typedef struct dpa_u__boptr {
+typedef struct dpa__u_boptr {
   uint64_t value[1];
-} dpa_u__boptr_t;
-static_assert(sizeof(dpa_u__boptr_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u__boptr");
+} dpa__u_boptr_t;
+static_assert(sizeof(dpa__u_boptr_t) == sizeof(uint64_t), "Unexpected padding in struct dpa__u_boptr");
 
 typedef struct dpa_u_bo_rw {
   size_t size;
@@ -39,19 +39,19 @@ typedef struct dpa_u_bo_hashed {
 
 typedef struct dpa_u_p_bo dpa_u_p_bo_t;
 
-typedef struct dpa__u_a_bo_unique { dpa_u__boptr_t p; } dpa_u_a_bo_unique_t;
-typedef struct dpa__u_a_bo_any    { dpa_u__boptr_t p; } dpa_u_a_bo_any_t;
-typedef struct dpa__u_a_bo_gc     { dpa_u__boptr_t p; } dpa_u_a_bo_gc_t;
+typedef struct dpa__u_a_bo_unique { dpa__u_boptr_t p; } dpa_u_a_bo_unique_t;
+typedef struct dpa__u_a_bo_any    { dpa__u_boptr_t p; } dpa_u_a_bo_any_t;
+typedef struct dpa__u_a_bo_gc     { dpa__u_boptr_t p; } dpa_u_a_bo_gc_t;
 
 static_assert(sizeof(dpa_u_a_bo_unique_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
 static_assert(sizeof(dpa_u_a_bo_any_t)    == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
 static_assert(sizeof(dpa_u_a_bo_gc_t)     == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
 
-typedef struct dpa_u__noop* dpa_u__noop_t;
-#define DPA_U__CHECK_GENERIC(X) static inline \
-  void DPA_U_CONCAT_E(dpa_u__sc__, __LINE__)(void){ (void)(X((dpa_u__noop_t)0)); /* A simple sanity check for the generic macros. */ }
-#define DPA_U__CHECK_GENERIC_2(X, ...) static inline \
-  void DPA_U_CONCAT_E(dpa_u__sc__, __LINE__)(void){ (void)(X((dpa_u__noop_t)0, __VA_ARGS__)); /* A simple sanity check for the generic macros. */ }
+typedef struct dpa__u_noop* dpa__u_noop_t;
+#define DPA__U_CHECK_GENERIC(X) static inline \
+  void DPA_U_CONCAT_E(dpa__u_sc__, __LINE__)(void){ (void)(X((dpa__u_noop_t)0)); /* A simple sanity check for the generic macros. */ }
+#define DPA__U_CHECK_GENERIC_2(X, ...) static inline \
+  void DPA_U_CONCAT_E(dpa__u_sc__, __LINE__)(void){ (void)(X((dpa__u_noop_t)0, __VA_ARGS__)); /* A simple sanity check for the generic macros. */ }
 
 enum dpa_u_bo_type_flags {
   DPA_U_BO_STATIC     = 0x80,
@@ -62,9 +62,9 @@ enum dpa_u_bo_type_flags {
 };
 
 #define dpa_u_bo_get_type(X) _Generic((X), \
-    dpa_u__boptr_t       : DPA_U_GET_TAG(DPA__G(dpa_u__boptr_t,       (X)).value[0]), \
-    dpa_u__boptr_t*      : DPA_U_GET_TAG(DPA__G(dpa_u__boptr_t*,      (X))->value[0]), \
-    const dpa_u__boptr_t*: DPA_U_GET_TAG(DPA__G(const dpa_u__boptr_t*,(X))->value[0]), \
+    dpa__u_boptr_t       : DPA_U_GET_TAG(DPA__G(dpa__u_boptr_t,       (X)).value[0]), \
+    dpa__u_boptr_t*      : DPA_U_GET_TAG(DPA__G(dpa__u_boptr_t*,      (X))->value[0]), \
+    const dpa__u_boptr_t*: DPA_U_GET_TAG(DPA__G(const dpa__u_boptr_t*,(X))->value[0]), \
     \
     dpa_u_bo_rw_t      : DPA_U_BO_SIMPLE, \
     dpa_u_bo_t         : DPA_U_BO_SIMPLE, \
@@ -78,15 +78,15 @@ enum dpa_u_bo_type_flags {
     struct dpa__u_a_bo_any   : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_any,    (X)).p.value[0]), \
     struct dpa__u_a_bo_gc    : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_gc,     (X)).p.value[0]), \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_bo_get_type)
+DPA__U_CHECK_GENERIC(dpa_u_bo_get_type)
 
 #define dpa_u_bo_is_any_type(X, N) (!!(dpa_u_bo_get_type((X)) & (N)))
 #define dpa_u_bo_is_every_type(X, N) (dpa_u_bo_get_type((X)) & (N) == (N))
 
-#define DPA_U__BO_TAG(X,T)   ((const dpa_u__boptr_t){DPA_U_TAG((X),(T))})
-#define DPA_U__BO_UNTAG(T,X) ((T)DPA_U_UNTAG((X).value[0]))
+#define DPA__U_BO_TAG(X,T)   ((const dpa__u_boptr_t){DPA_U_TAG((X),(T))})
+#define DPA__U_BO_UNTAG(T,X) ((T)DPA_U_UNTAG((X).value[0]))
 
 #define dpa__u_bo_rw_to_p_bo(X) (&(struct{dpa_u_bo_t x;}){dpa__u_bo_rw_to_bo_h(X)}.x)
 
@@ -105,102 +105,102 @@ dpa__u_api inline dpa_u_bo_t dpa__u_bo_rw_to_bo_h(dpa_u_bo_rw_t bo){
     dpa_u_p_bo_t*      : dpa__u_bo_rw_to_bo_h(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))), \
     const dpa_u_p_bo_t*: *(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X)), \
     \
-    struct dpa__u_a_bo_unique: dpa_u__to_bo_h((const dpa_u__boptr_t*)DPA__G(struct dpa__u_a_bo_unique, (X)).p.value), \
-    struct dpa__u_a_bo_any   : dpa_u__to_bo_h((const dpa_u__boptr_t*)DPA__G(struct dpa__u_a_bo_any,    (X)).p.value), \
-    struct dpa__u_a_bo_gc    : dpa_u__to_bo_h((const dpa_u__boptr_t*)DPA__G(struct dpa__u_a_bo_gc,     (X)).p.value), \
+    struct dpa__u_a_bo_unique: dpa__u_to_bo_h((const dpa__u_boptr_t*)DPA__G(struct dpa__u_a_bo_unique, (X)).p.value), \
+    struct dpa__u_a_bo_any   : dpa__u_to_bo_h((const dpa__u_boptr_t*)DPA__G(struct dpa__u_a_bo_any,    (X)).p.value), \
+    struct dpa__u_a_bo_gc    : dpa__u_to_bo_h((const dpa__u_boptr_t*)DPA__G(struct dpa__u_a_bo_gc,     (X)).p.value), \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
 
-dpa__u_api inline dpa_u_bo_t dpa_u__to_bo_h(const dpa_u__boptr_t*restrict const boptr){
+dpa__u_api inline dpa_u_bo_t dpa__u_to_bo_h(const dpa__u_boptr_t*restrict const boptr){
   if(dpa_u_bo_is_any_type(*boptr, DPA_U_BO_SIMPLE))
-    return *DPA_U__BO_UNTAG(dpa_u_bo_t*, *boptr);
+    return *DPA__U_BO_UNTAG(dpa_u_bo_t*, *boptr);
   return (const dpa_u_bo_t){ .size=DPA_U_GET_TAG(boptr->value[0])&7, .data=((char*)boptr->value)+1 };
 }
-DPA_U__CHECK_GENERIC(dpa_u_to_bo)
+DPA__U_CHECK_GENERIC(dpa_u_to_bo)
 
 #define dpa_u_to_bo_any(X) _Generic((X), \
-    dpa_u_bo_rw_t      : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(dpa__u_bo_rw_to_p_bo(DPA__G(dpa_u_bo_rw_t, (X))), DPA_U_BO_SIMPLE)}, \
-    dpa_u_bo_t         : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE)}, \
-    dpa_u_bo_hashed_t  : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(dpa_u_bo_hashed_t, (X)).bo._c, DPA_U_BO_SIMPLE)}, \
-    dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE)}, \
-    const dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(const dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE)}, \
-    dpa_u_p_bo_t*      : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(dpa__u_bo_rw_to_p_bo(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))), DPA_U_BO_SIMPLE)}, \
-    const dpa_u_p_bo_t*: (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
+    dpa_u_bo_rw_t      : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(dpa__u_bo_rw_to_p_bo(DPA__G(dpa_u_bo_rw_t, (X))), DPA_U_BO_SIMPLE)}, \
+    dpa_u_bo_t         : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE)}, \
+    dpa_u_bo_hashed_t  : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_hashed_t, (X)).bo._c, DPA_U_BO_SIMPLE)}, \
+    dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE)}, \
+    const dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(const dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE)}, \
+    dpa_u_p_bo_t*      : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(dpa__u_bo_rw_to_p_bo(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))), DPA_U_BO_SIMPLE)}, \
+    const dpa_u_p_bo_t*: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE)}, \
     \
     struct dpa__u_a_bo_unique: (dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_unique, (X)).p}, \
     struct dpa__u_a_bo_any   : (dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_any,    (X)).p}, \
     struct dpa__u_a_bo_gc    : (dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_gc,     (X)).p}, \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_to_bo_any)
+DPA__U_CHECK_GENERIC(dpa_u_to_bo_any)
 
 #define dpa_u_to_bo_i_any(X) _Generic((X), \
-    dpa_u_bo_rw_t      : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(dpa__u_bo_rw_to_p_bo(DPA__G(dpa_u_bo_rw_t, (X))), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    dpa_u_bo_t         : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    dpa_u_bo_hashed_t  : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(dpa_u_bo_hashed_t, (X)).bo._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    const dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(const dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    dpa_u_p_bo_t*      : (dpa_u_a_bo_any_t){DPA_U__BO_TAG(dpa__u_bo_rw_to_p_bo(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    const dpa_u_p_bo_t*: (dpa_u_a_bo_any_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_rw_t      : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(dpa__u_bo_rw_to_p_bo(DPA__G(dpa_u_bo_rw_t, (X))), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_t         : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_hashed_t  : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_hashed_t, (X)).bo._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    const dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(const dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_p_bo_t*      : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(dpa__u_bo_rw_to_p_bo(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    const dpa_u_p_bo_t*: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_to_bo_i_any)
+DPA__U_CHECK_GENERIC(dpa_u_to_bo_i_any)
 
-dpa__u_api inline dpa_u__boptr_t dpa_u__to_bo_r_any__from_p_bo(const dpa_u_bo_t* bo){
+dpa__u_api inline dpa__u_boptr_t dpa__u_to_bo_r_any__from_p_bo(const dpa_u_bo_t* bo){
   uint64_t tag = DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED;
   if(dpa_u_refcount_is_static(dpa_u_container_of((char(*)[])bo->data, struct dpa_u_refcount_freeable_data, data)->refcount))
     tag |= DPA_U_BO_STATIC;
-  return DPA_U__BO_TAG(bo, tag);
+  return DPA__U_BO_TAG(bo, tag);
 }
 
-dpa__u_api inline dpa_u__boptr_t dpa_u__to_bo_r_any__from_p_bo_hashed(const dpa_u_bo_hashed_t* hbo){
+dpa__u_api inline dpa__u_boptr_t dpa__u_to_bo_r_any__from_p_bo_hashed(const dpa_u_bo_hashed_t* hbo){
   uint64_t tag = DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED;
   if(dpa_u_refcount_is_static(dpa_u_container_of((char(*)[])hbo->bo.data, struct dpa_u_refcount_freeable_data, data)->refcount))
     tag |= DPA_U_BO_STATIC;
-  return DPA_U__BO_TAG(hbo, tag);
+  return DPA__U_BO_TAG(hbo, tag);
 }
 
 #define dpa_u_to_bo_r_any(X) _Generic((X), \
-    dpa_u_bo_rw_t      : (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo(dpa__u_bo_rw_to_p_bo(DPA__G(dpa_u_bo_rw_t, (X))))}, \
-    dpa_u_bo_t         : (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo((const dpa_u_bo_t*)DPA__G(dpa_u_bo_t, (X))._c)}, \
-    dpa_u_bo_hashed_t  : (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo_hashed((const dpa_u_bo_hashed_t*)DPA__G(dpa_u_bo_hashed_t, (X)).bo._c)}, \
-    dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo_hashed(DPA__G(dpa_u_bo_hashed_t*, (X)))}, \
-    const dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo_hashed(DPA__G(const dpa_u_bo_hashed_t*, (X)))}, \
-    dpa_u_p_bo_t*      : (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo(dpa__u_bo_rw_to_p_bo(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))))}, \
-    const dpa_u_p_bo_t*: (dpa_u_a_bo_any_t){dpa_u__to_bo_r_any__from_p_bo((const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X)))}, \
+    dpa_u_bo_rw_t      : (dpa_u_a_bo_any_t){dpa__u_to_bo_r_any__from_p_bo(dpa__u_bo_rw_to_p_bo(DPA__G(dpa_u_bo_rw_t, (X))))}, \
+    dpa_u_bo_t         : (dpa_u_a_bo_any_t){dpa__u_to_bo_r_any__from_p_bo((const dpa_u_bo_t*)DPA__G(dpa_u_bo_t, (X))._c)}, \
+    dpa_u_bo_hashed_t  : (dpa_u_a_bo_any_t){dpa__u_to_bo_r_any__from_p_bo_hashed((const dpa_u_bo_hashed_t*)DPA__G(dpa_u_bo_hashed_t, (X)).bo._c)}, \
+    dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){dpa__u_to_bo_r_any__from_p_bo_hashed(DPA__G(dpa_u_bo_hashed_t*, (X)))}, \
+    const dpa_u_bo_hashed_t* : (dpa_u_a_bo_any_t){dpa__u_to_bo_r_any__from_p_bo_hashed(DPA__G(const dpa_u_bo_hashed_t*, (X)))}, \
+    dpa_u_p_bo_t*      : (dpa_u_a_bo_any_t){dpa__u_to_bo_r_any__from_p_bo(dpa__u_bo_rw_to_p_bo(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))))}, \
+    const dpa_u_p_bo_t*: (dpa_u_a_bo_any_t){dpa__u_to_bo_r_any__from_p_bo((const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X)))}, \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_to_bo_r_any)
+DPA__U_CHECK_GENERIC(dpa_u_to_bo_r_any)
 
 #define dpa_u_to_bo_i_gc(X) _Generic((X), \
-    dpa_u_bo_rw_t      : (dpa_u_a_bo_gc_t){DPA_U__BO_TAG(dpa__u_bo_rw_to_p_bo(DPA__G(dpa_u_bo_rw_t, (X))), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    dpa_u_bo_t         : (dpa_u_a_bo_gc_t){DPA_U__BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    dpa_u_bo_hashed_t  : (dpa_u_a_bo_gc_t){DPA_U__BO_TAG(DPA__G(dpa_u_bo_hashed_t, (X)).bo._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    dpa_u_bo_hashed_t* : (dpa_u_a_bo_gc_t){DPA_U__BO_TAG(DPA__G(dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    const dpa_u_bo_hashed_t* : (dpa_u_a_bo_gc_t){DPA_U__BO_TAG(DPA__G(const dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    dpa_u_p_bo_t*      : (dpa_u_a_bo_gc_t){DPA_U__BO_TAG(dpa__u_bo_rw_to_p_bo(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
-    const dpa_u_p_bo_t*: (dpa_u_a_bo_gc_t){DPA_U__BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_rw_t      : (dpa_u_a_bo_gc_t){DPA__U_BO_TAG(dpa__u_bo_rw_to_p_bo(DPA__G(dpa_u_bo_rw_t, (X))), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_t         : (dpa_u_a_bo_gc_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_hashed_t  : (dpa_u_a_bo_gc_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_hashed_t, (X)).bo._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_hashed_t* : (dpa_u_a_bo_gc_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    const dpa_u_bo_hashed_t* : (dpa_u_a_bo_gc_t){DPA__U_BO_TAG(DPA__G(const dpa_u_bo_hashed_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_p_bo_t*      : (dpa_u_a_bo_gc_t){DPA__U_BO_TAG(dpa__u_bo_rw_to_p_bo(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    const dpa_u_p_bo_t*: (dpa_u_a_bo_gc_t){DPA__U_BO_TAG(DPA__G(const dpa_u_p_bo_t*, (X)), DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_to_bo_i_gc)
+DPA__U_CHECK_GENERIC(dpa_u_to_bo_i_gc)
 
 #define dpa_u_to_bo_r_gc(X) _Generic((X), \
-    dpa_u_bo_rw_t      : (dpa_u_a_bo_gc_t){dpa_u__to_bo_r_any__from_p_bo(dpa__u_bo_rw_to_p_bo(DPA__G(dpa_u_bo_rw_t, (X))))}, \
-    dpa_u_bo_t         : (dpa_u_a_bo_gc_t){dpa_u__to_bo_r_any__from_p_bo((const dpa_u_bo_t*)DPA__G(dpa_u_bo_t, (X))._c)}, \
-    dpa_u_bo_hashed_t  : (dpa_u_a_bo_gc_t){dpa_u__to_bo_r_any__from_p_bo_hashed((const dpa_u_bo_hashed_t*)DPA__G(dpa_u_bo_hashed_t, (X)).bo._c)}, \
-    dpa_u_bo_hashed_t* : (dpa_u_a_bo_gc_t){dpa_u__to_bo_r_any__from_p_bo_hashed(DPA__G(dpa_u_bo_hashed_t*, (X)))}, \
-    const dpa_u_bo_hashed_t* : (dpa_u_a_bo_gc_t){dpa_u__to_bo_r_any__from_p_bo_hashed(DPA__G(const dpa_u_bo_hashed_t*, (X)))}, \
-    dpa_u_p_bo_t*      : (dpa_u_a_bo_gc_t){dpa_u__to_bo_r_any__from_p_bo(dpa__u_bo_rw_to_p_bo(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))))}, \
-    const dpa_u_p_bo_t*: (dpa_u_a_bo_gc_t){dpa_u__to_bo_r_any__from_p_bo((const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X)))}, \
+    dpa_u_bo_rw_t      : (dpa_u_a_bo_gc_t){dpa__u_to_bo_r_any__from_p_bo(dpa__u_bo_rw_to_p_bo(DPA__G(dpa_u_bo_rw_t, (X))))}, \
+    dpa_u_bo_t         : (dpa_u_a_bo_gc_t){dpa__u_to_bo_r_any__from_p_bo((const dpa_u_bo_t*)DPA__G(dpa_u_bo_t, (X))._c)}, \
+    dpa_u_bo_hashed_t  : (dpa_u_a_bo_gc_t){dpa__u_to_bo_r_any__from_p_bo_hashed((const dpa_u_bo_hashed_t*)DPA__G(dpa_u_bo_hashed_t, (X)).bo._c)}, \
+    dpa_u_bo_hashed_t* : (dpa_u_a_bo_gc_t){dpa__u_to_bo_r_any__from_p_bo_hashed(DPA__G(dpa_u_bo_hashed_t*, (X)))}, \
+    const dpa_u_bo_hashed_t* : (dpa_u_a_bo_gc_t){dpa__u_to_bo_r_any__from_p_bo_hashed(DPA__G(const dpa_u_bo_hashed_t*, (X)))}, \
+    dpa_u_p_bo_t*      : (dpa_u_a_bo_gc_t){dpa__u_to_bo_r_any__from_p_bo(dpa__u_bo_rw_to_p_bo(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))))}, \
+    const dpa_u_p_bo_t*: (dpa_u_a_bo_gc_t){dpa__u_to_bo_r_any__from_p_bo((const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X)))}, \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_to_bo_r_gc)
+DPA__U_CHECK_GENERIC(dpa_u_to_bo_r_gc)
 
 /**
  * This is not a cryptographc hash function.
@@ -208,22 +208,22 @@ DPA_U__CHECK_GENERIC(dpa_u_to_bo_r_gc)
  * Also, this is randomized un program startup.
  */
 #define dpa_u_bo_get_hash(X) _Generic((X), \
-    dpa_u_bo_rw_t      : dpa_u__bo_hash(dpa__u_bo_rw_to_bo_h(DPA__G(dpa_u_bo_rw_t, (X)))), \
-    dpa_u_bo_t         : dpa_u__bo_hash(DPA__G(dpa_u_bo_t, (X))), \
+    dpa_u_bo_rw_t      : dpa__u_bo_hash(dpa__u_bo_rw_to_bo_h(DPA__G(dpa_u_bo_rw_t, (X)))), \
+    dpa_u_bo_t         : dpa__u_bo_hash(DPA__G(dpa_u_bo_t, (X))), \
     dpa_u_bo_hashed_t  : DPA__G(dpa_u_bo_hashed_t, (X)).hash, \
     dpa_u_bo_hashed_t* : DPA__G(dpa_u_bo_hashed_t*, (X))->hash, \
     const dpa_u_bo_hashed_t* : DPA__G(const dpa_u_bo_hashed_t*, (X))->hash, \
-    dpa_u_p_bo_t*      : dpa_u__bo_hash(dpa__u_bo_rw_to_bo_h(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X)))), \
-    const dpa_u_p_bo_t*: dpa_u__bo_hash(*(dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X))), \
+    dpa_u_p_bo_t*      : dpa__u_bo_hash(dpa__u_bo_rw_to_bo_h(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X)))), \
+    const dpa_u_p_bo_t*: dpa__u_bo_hash(*(dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X))), \
     \
-    struct dpa__u_a_bo_unique: dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_unique, (X)).p), \
-    struct dpa__u_a_bo_any   : dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_any,    (X)).p), \
-    struct dpa__u_a_bo_gc    : dpa_u__bo_get_hash(DPA__G(struct dpa__u_a_bo_gc,     (X)).p), \
+    struct dpa__u_a_bo_unique: dpa__u_bo_get_hash(DPA__G(struct dpa__u_a_bo_unique, (X)).p), \
+    struct dpa__u_a_bo_any   : dpa__u_bo_get_hash(DPA__G(struct dpa__u_a_bo_any,    (X)).p), \
+    struct dpa__u_a_bo_gc    : dpa__u_bo_get_hash(DPA__G(struct dpa__u_a_bo_gc,     (X)).p), \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
 
-dpa__u_api inline uint64_t dpa_u__bo_hash(dpa_u_bo_t bo){
+dpa__u_api inline uint64_t dpa__u_bo_hash(dpa_u_bo_t bo){
   // The commented out hash function is bad, but that makes it useful for testing.
   // uint64_t hash = 0;
   // memcpy(&hash, bo.data, bo.size > 8 ? 8 : bo.size);
@@ -241,12 +241,12 @@ dpa__u_api inline uint64_t dpa_u__bo_hash(dpa_u_bo_t bo){
   return dpa_u_hash_64_FNV_1a_append_p(bo, basis);
 }
 
-dpa__u_api inline uint64_t dpa_u__bo_get_hash(dpa_u__boptr_t boptr){
+dpa__u_api inline uint64_t dpa__u_bo_get_hash(dpa__u_boptr_t boptr){
   if(dpa_u_bo_is_any_type(boptr, DPA_U_BO_HASHED))
-    return DPA_U__BO_UNTAG(dpa_u_bo_hashed_t*, boptr)->hash;
-  return dpa_u__bo_hash(*DPA_U__BO_UNTAG(dpa_u_bo_t*, boptr));
+    return DPA__U_BO_UNTAG(dpa_u_bo_hashed_t*, boptr)->hash;
+  return dpa__u_bo_hash(*DPA__U_BO_UNTAG(dpa_u_bo_t*, boptr));
 }
-DPA_U__CHECK_GENERIC(dpa_u_bo_get_hash)
+DPA__U_CHECK_GENERIC(dpa_u_bo_get_hash)
 
 #define dpa_u_to_bo_hashed(X) _Generic((X), \
     dpa_u_bo_rw_t      : dpa__u_bo_rw_to_bo_hashed_h(DPA__G(dpa_u_bo_rw_t, (X))), \
@@ -257,20 +257,20 @@ DPA_U__CHECK_GENERIC(dpa_u_bo_get_hash)
     dpa_u_p_bo_t*      : dpa__u_bo_rw_to_bo_hashed_h(*(dpa_u_bo_rw_t*)DPA__G(dpa_u_p_bo_t*, (X))), \
     const dpa_u_p_bo_t*: dpa__u_bo_to_bo_hashed_h(*(const dpa_u_bo_t*)DPA__G(const dpa_u_p_bo_t*, (X))), \
     \
-    struct dpa__u_a_bo_unique: dpa_u__a_to_bo_hashed_h((const dpa_u__boptr_t*)DPA__G(struct dpa__u_a_bo_unique, (X)).p.value), \
-    struct dpa__u_a_bo_any   : dpa_u__a_to_bo_hashed_h((const dpa_u__boptr_t*)DPA__G(struct dpa__u_a_bo_any,    (X)).p.value), \
-    struct dpa__u_a_bo_gc    : dpa_u__a_to_bo_hashed_h((const dpa_u__boptr_t*)DPA__G(struct dpa__u_a_bo_gc,     (X)).p.value), \
+    struct dpa__u_a_bo_unique: dpa__u_a_to_bo_hashed_h((const dpa__u_boptr_t*)DPA__G(struct dpa__u_a_bo_unique, (X)).p.value), \
+    struct dpa__u_a_bo_any   : dpa__u_a_to_bo_hashed_h((const dpa__u_boptr_t*)DPA__G(struct dpa__u_a_bo_any,    (X)).p.value), \
+    struct dpa__u_a_bo_gc    : dpa__u_a_to_bo_hashed_h((const dpa__u_boptr_t*)DPA__G(struct dpa__u_a_bo_gc,     (X)).p.value), \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
 
-dpa__u_api inline dpa_u_bo_hashed_t dpa_u__a_to_bo_hashed_h(const dpa_u__boptr_t*restrict const boptr){
+dpa__u_api inline dpa_u_bo_hashed_t dpa__u_a_to_bo_hashed_h(const dpa__u_boptr_t*restrict const boptr){
   if(dpa_u_bo_is_any_type(*boptr, DPA_U_BO_HASHED))
-    return *DPA_U__BO_UNTAG(dpa_u_bo_hashed_t*, *boptr);
-  const dpa_u_bo_t bo = dpa_u__to_bo_h(boptr);
+    return *DPA__U_BO_UNTAG(dpa_u_bo_hashed_t*, *boptr);
+  const dpa_u_bo_t bo = dpa__u_to_bo_h(boptr);
   return (const dpa_u_bo_hashed_t){
     .bo = bo,
-    .hash = dpa_u__bo_hash(bo),
+    .hash = dpa__u_bo_hash(bo),
   };
 }
 
@@ -281,17 +281,17 @@ dpa__u_api inline dpa_u_bo_hashed_t dpa__u_bo_rw_to_bo_hashed_h(const dpa_u_bo_r
   };
   return (const dpa_u_bo_hashed_t){
     .bo = bo,
-    .hash = dpa_u__bo_hash(bo),
+    .hash = dpa__u_bo_hash(bo),
   };
 }
 
 dpa__u_api inline dpa_u_bo_hashed_t dpa__u_bo_to_bo_hashed_h(const dpa_u_bo_t bo){
   return (const dpa_u_bo_hashed_t){
     .bo = bo,
-    .hash = dpa_u__bo_hash(bo),
+    .hash = dpa__u_bo_hash(bo),
   };
 }
-DPA_U__CHECK_GENERIC(dpa_u_to_bo_hashed)
+DPA__U_CHECK_GENERIC(dpa_u_to_bo_hashed)
 
 #define dpa_u_bo_get_size(X) (dpa_u_to_bo((X)).size)
 #define dpa_u_bo_get_data(X) (dpa_u_to_bo((X)).data)
@@ -339,14 +339,14 @@ dpa__u_api int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo);
     struct dpa__u_a_bo_any   : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_any,    (X)).p.value[0]) < 8, \
     struct dpa__u_a_bo_gc    : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_gc,     (X)).p.value[0]) < 8, \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_bo_is_error)
+DPA__U_CHECK_GENERIC(dpa_u_bo_is_error)
 
-dpa__u_api inline void dpa_u_bo_ref_h(dpa_u_a_bo_any_t bo){
+dpa__u_api inline void dpa__u_bo_ref_h(dpa_u_a_bo_any_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
     return;
-  dpa_u_bo_rw_t* pbo = DPA_U__BO_UNTAG(dpa_u_bo_rw_t*, bo.p);
+  dpa_u_bo_rw_t* pbo = DPA__U_BO_UNTAG(dpa_u_bo_rw_t*, bo.p);
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE)){
     dpa_u_refcount_ref(((dpa_u_refcount_freeable_t*)pbo)-1);
   }else{
@@ -354,16 +354,16 @@ dpa__u_api inline void dpa_u_bo_ref_h(dpa_u_a_bo_any_t bo){
   }
 }
 
-dpa__u_api inline void dpa_u_bo_ref_h1(dpa_u_a_bo_unique_t bo){
+dpa__u_api inline void dpa__u_bo_ref_h1(dpa_u_a_bo_unique_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
     return;
-  dpa_u_refcount_ref(((dpa_u_refcount_freeable_t*)DPA_U__BO_UNTAG(dpa_u_bo_rw_t*, bo.p))-1);
+  dpa_u_refcount_ref(((dpa_u_refcount_freeable_t*)DPA__U_BO_UNTAG(dpa_u_bo_rw_t*, bo.p))-1);
 }
 
-dpa__u_api inline void dpa_u_bo_put_h(dpa_u_a_bo_any_t bo){
+dpa__u_api inline void dpa__u_bo_put_h(dpa_u_a_bo_any_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
     return;
-  dpa_u_bo_rw_t* pbo = DPA_U__BO_UNTAG(dpa_u_bo_rw_t*, bo.p);
+  dpa_u_bo_rw_t* pbo = DPA__U_BO_UNTAG(dpa_u_bo_rw_t*, bo.p);
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE)){
     dpa_u_refcount_put(((dpa_u_refcount_freeable_t*)pbo)-1);
   }else{
@@ -371,14 +371,14 @@ dpa__u_api inline void dpa_u_bo_put_h(dpa_u_a_bo_any_t bo){
   }
 }
 
-dpa__u_api inline void dpa_u_bo_put_h1(dpa_u_a_bo_unique_t bo){
+dpa__u_api inline void dpa__u_bo_put_h1(dpa_u_a_bo_unique_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
     return;
-  dpa_u_refcount_put(((dpa_u_refcount_freeable_t*)DPA_U__BO_UNTAG(dpa_u_bo_rw_t*, bo.p))-1);
+  dpa_u_refcount_put(((dpa_u_refcount_freeable_t*)DPA__U_BO_UNTAG(dpa_u_bo_rw_t*, bo.p))-1);
 }
 
 dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(dpa_u_a_bo_any_t bo){
-  dpa_u_bo_rw_t* pbo = DPA_U__BO_UNTAG(dpa_u_bo_rw_t*, bo.p);
+  dpa_u_bo_rw_t* pbo = DPA__U_BO_UNTAG(dpa_u_bo_rw_t*, bo.p);
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_STATIC))
     return &dpa_u_refcount_static_v_freeable;
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE))
@@ -391,35 +391,35 @@ dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(dpa_u_a_bo_
 dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h1(dpa_u_a_bo_unique_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
     return &dpa_u_refcount_static_v_freeable;
-  return ((dpa_u_refcount_freeable_t*)DPA_U__BO_UNTAG(dpa_u_bo_rw_t*, bo.p)) - 1;
+  return ((dpa_u_refcount_freeable_t*)DPA__U_BO_UNTAG(dpa_u_bo_rw_t*, bo.p)) - 1;
 }
 
 #define dpa_u_bo_ref(X) _Generic((X), \
-    struct dpa__u_a_bo_unique: dpa_u_bo_ref_h1(DPA__G(struct dpa__u_a_bo_unique, (X))), \
-    struct dpa__u_a_bo_any   : dpa_u_bo_ref_h(DPA__G(struct dpa__u_a_bo_any, (X))), \
-    struct dpa__u_a_bo_gc    : dpa_u_bo_ref_h((dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_gc, (X)).p}), \
+    struct dpa__u_a_bo_unique: dpa__u_bo_ref_h1(DPA__G(struct dpa__u_a_bo_unique, (X))), \
+    struct dpa__u_a_bo_any   : dpa__u_bo_ref_h(DPA__G(struct dpa__u_a_bo_any, (X))), \
+    struct dpa__u_a_bo_gc    : dpa__u_bo_ref_h((dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_gc, (X)).p}), \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_bo_ref)
+DPA__U_CHECK_GENERIC(dpa_u_bo_ref)
 
 #define dpa_u_bo_put(X) _Generic((X), \
-    struct dpa__u_a_bo_unique: dpa_u_bo_put_h1(DPA__G(struct dpa__u_a_bo_unique, (X))), \
-    struct dpa__u_a_bo_any   : dpa_u_bo_put_h(DPA__G(struct dpa__u_a_bo_any, (X))), \
-    struct dpa__u_a_bo_gc    : dpa_u_bo_put_h((dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_gc, (X)).p}), \
+    struct dpa__u_a_bo_unique: dpa__u_bo_put_h1(DPA__G(struct dpa__u_a_bo_unique, (X))), \
+    struct dpa__u_a_bo_any   : dpa__u_bo_put_h(DPA__G(struct dpa__u_a_bo_any, (X))), \
+    struct dpa__u_a_bo_gc    : dpa__u_bo_put_h((dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_gc, (X)).p}), \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_bo_put)
+DPA__U_CHECK_GENERIC(dpa_u_bo_put)
 
 #define dpa_u_bo_get_refcount(X) _Generic((X), \
     struct dpa__u_a_bo_unique: dpa_u_bo_get_refcount_h1(DPA__G(struct dpa__u_a_bo_unique, (X))), \
     struct dpa__u_a_bo_any   : dpa_u_bo_get_refcount_h(DPA__G(struct dpa__u_a_bo_any, (X))), \
     struct dpa__u_a_bo_gc    : dpa_u_bo_get_refcount_h((dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_gc, (X)).p}), \
     \
-    dpa_u__noop_t: 1 \
+    dpa__u_noop_t: 1 \
   )
-DPA_U__CHECK_GENERIC(dpa_u_bo_get_refcount)
+DPA__U_CHECK_GENERIC(dpa_u_bo_get_refcount)
 
 #define DPA__U_INLINE_STRING(...) DPA__U_INLINE_STRING_2(__VA_ARGS__ +0,0,0,0,0,0,0,0,7,6,5,4,3,2,1)
 

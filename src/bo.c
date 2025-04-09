@@ -349,7 +349,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
   };
   if(type & DPA_U_BO_HASHED)
     ((dpa_u_bo_hashed_t*)eh)->hash = hash;
-  dpa_u_a_bo_unique_t ret = { DPA_U__BO_TAG(eh, type) };
+  dpa_u_a_bo_unique_t ret = { DPA__U_BO_TAG(eh, type) };
   dpa__u_map_u64_insert_sub(
     &unique_string_map,
     unused_e,

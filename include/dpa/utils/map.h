@@ -5,7 +5,7 @@
 #include <dpa/utils/map-string.h>
 
 
-#define DPA_U__MAP_GENERIC_WRAPPER_G(F, X) \
+#define DPA__U_MAP_GENERIC_WRAPPER_G(F, X) \
   dpa_u_generic((X), \
           dpa_u_map_pointer_t*: dpa_u_map_pointer_ ## F, \
     const dpa_u_map_pointer_t*: dpa_u_map_pointer_ ## F, \
@@ -39,7 +39,7 @@
     const dpa_u_map_string_t*: dpa_u_map_string_ ## F \
   )
 
-#define DPA_U__MAP_GENERIC_WRAPPER_IT_G(F, X) \
+#define DPA__U_MAP_GENERIC_WRAPPER_IT_G(F, X) \
   dpa_u_generic((X), \
           dpa_u_map_pointer_it_safe_t*: dpa_u_map_pointer_it_safe_ ## F, \
     const dpa_u_map_pointer_it_safe_t*: dpa_u_map_pointer_it_safe_ ## F, \
@@ -104,10 +104,10 @@
     const dpa_u_map_string_it_fast_t*: dpa_u_map_string_it_fast_ ## F \
   )
 
-#define DPA_U__MAP_GENERIC_WRAPPER(F, X) dpa_u_assert_selection(DPA_U__MAP_GENERIC_WRAPPER_G(F, X))
-#define DPA_U__MAP_GENERIC_WRAPPER_IT(F, X) dpa_u_assert_selection(DPA_U__MAP_GENERIC_WRAPPER_IT_G(F, X))
+#define DPA__U_MAP_GENERIC_WRAPPER(F, X) dpa_u_assert_selection(DPA__U_MAP_GENERIC_WRAPPER_G(F, X))
+#define DPA__U_MAP_GENERIC_WRAPPER_IT(F, X) dpa_u_assert_selection(DPA__U_MAP_GENERIC_WRAPPER_IT_G(F, X))
 
-#define DPA_U__MAP_VALUE_GENERIC(VAL) _Generic((VAL), \
+#define DPA__U_MAP_VALUE_GENERIC(VAL) _Generic((VAL), \
     dpa_u_any_value_t : (VAL), \
     char              : (dpa_u_any_value_t){.u64=DPA__G(char, (VAL))}, \
     signed char       : (dpa_u_any_value_t){.u64=DPA__G(signed char, (VAL))}, \
@@ -123,30 +123,30 @@
     default: (dpa_u_any_value_t){.ptr=(void*)(VAL)} \
   )
 
-#define dpa_u_map_it_next(THAT, IT) DPA_U__MAP_GENERIC_WRAPPER_IT(next, (IT))((THAT), (IT))
-#define dpa_u_map_it_prev(THAT, IT) DPA_U__MAP_GENERIC_WRAPPER_IT(prev, (IT))((THAT), (IT))
+#define dpa_u_map_it_next(THAT, IT) DPA__U_MAP_GENERIC_WRAPPER_IT(next, (IT))((THAT), (IT))
+#define dpa_u_map_it_prev(THAT, IT) DPA__U_MAP_GENERIC_WRAPPER_IT(prev, (IT))((THAT), (IT))
 
-#define dpa_u_map_it_next_value(THAT, IT, RVAL) DPA_U__MAP_GENERIC_WRAPPER(it_safe_next_value, (THAT))((THAT), (IT), (RVAL))
-#define dpa_u_map_it_prev_value(THAT, IT, RVAL) DPA_U__MAP_GENERIC_WRAPPER(it_safe_prev_value, (THAT))((THAT), (IT), (RVAL))
+#define dpa_u_map_it_next_value(THAT, IT, RVAL) DPA__U_MAP_GENERIC_WRAPPER(it_safe_next_value, (THAT))((THAT), (IT), (RVAL))
+#define dpa_u_map_it_prev_value(THAT, IT, RVAL) DPA__U_MAP_GENERIC_WRAPPER(it_safe_prev_value, (THAT))((THAT), (IT), (RVAL))
 
 #define DPA__U_LAST_ARG__H2_S1(A, B) A
 #define DPA__U_LAST_ARG__H2_S2(A, B) B
 #define DPA__U_LAST_ARG__H2_S(A, B, N, ...) DPA__U_LAST_ARG__H2_S ## N(A,B)
 #define DPA__U_LAST_ARG__H2(...) DPA__U_LAST_ARG__H2_S(__VA_ARGS__,2,1,0)
 
-#define dpa_u_map_it_get_key(...) DPA_U__MAP_GENERIC_WRAPPER_IT(get_key, DPA__U_LAST_ARG__H2(__VA_ARGS__))(__VA_ARGS__)
-#define dpa_u_map_it_get_value(THAT, IT) DPA_U__MAP_GENERIC_WRAPPER(it_fast_value, (THAT))((THAT), (IT))
+#define dpa_u_map_it_get_key(...) DPA__U_MAP_GENERIC_WRAPPER_IT(get_key, DPA__U_LAST_ARG__H2(__VA_ARGS__))(__VA_ARGS__)
+#define dpa_u_map_it_get_value(THAT, IT) DPA__U_MAP_GENERIC_WRAPPER(it_fast_value, (THAT))((THAT), (IT))
 
-#define dpa_u_map_set(THAT, KEY, VAL) DPA_U__MAP_GENERIC_WRAPPER(set, (THAT))((THAT), (KEY), DPA_U__MAP_VALUE_GENERIC(VAL))
-#define dpa_u_map_exchange(THAT, KEY, VAL) DPA_U__MAP_GENERIC_WRAPPER(exchange, (THAT))((THAT), (KEY), DPA_U__MAP_VALUE_GENERIC(VAL))
-#define dpa_u_map_set_if_unset(THAT, KEY, VAL) DPA_U__MAP_GENERIC_WRAPPER(set_if_unset, (THAT))((THAT), (KEY), DPA_U__MAP_VALUE_GENERIC(VAL))
-#define dpa_u_map_remove(THAT, KEY) DPA_U__MAP_GENERIC_WRAPPER(remove, (THAT))((THAT), (KEY))
-#define dpa_u_map_has(THAT, KEY) DPA_U__MAP_GENERIC_WRAPPER(has, (THAT))((THAT), (KEY))
-#define dpa_u_map_get(THAT, KEY) DPA_U__MAP_GENERIC_WRAPPER(get, (THAT))((THAT), (KEY))
-#define dpa_u_map_get_and_remove(THAT, KEY) DPA_U__MAP_GENERIC_WRAPPER(get_and_remove, (THAT))((THAT), (KEY))
-#define dpa_u_map_clear(THAT) DPA_U__MAP_GENERIC_WRAPPER(clear, (THAT))((THAT))
-#define dpa_u_map_count(THAT) DPA_U__MAP_GENERIC_WRAPPER(count, (THAT))((THAT))
-#define dpa_u_map_copy(DST,SRC) DPA_U__MAP_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
-#define dpa_u_map_dump_hashmap_key_hashes(THAT) DPA_U__MAP_GENERIC_WRAPPER(dump_hashmap_key_hashes, (THAT))((THAT))
+#define dpa_u_map_set(THAT, KEY, VAL) DPA__U_MAP_GENERIC_WRAPPER(set, (THAT))((THAT), (KEY), DPA__U_MAP_VALUE_GENERIC(VAL))
+#define dpa_u_map_exchange(THAT, KEY, VAL) DPA__U_MAP_GENERIC_WRAPPER(exchange, (THAT))((THAT), (KEY), DPA__U_MAP_VALUE_GENERIC(VAL))
+#define dpa_u_map_set_if_unset(THAT, KEY, VAL) DPA__U_MAP_GENERIC_WRAPPER(set_if_unset, (THAT))((THAT), (KEY), DPA__U_MAP_VALUE_GENERIC(VAL))
+#define dpa_u_map_remove(THAT, KEY) DPA__U_MAP_GENERIC_WRAPPER(remove, (THAT))((THAT), (KEY))
+#define dpa_u_map_has(THAT, KEY) DPA__U_MAP_GENERIC_WRAPPER(has, (THAT))((THAT), (KEY))
+#define dpa_u_map_get(THAT, KEY) DPA__U_MAP_GENERIC_WRAPPER(get, (THAT))((THAT), (KEY))
+#define dpa_u_map_get_and_remove(THAT, KEY) DPA__U_MAP_GENERIC_WRAPPER(get_and_remove, (THAT))((THAT), (KEY))
+#define dpa_u_map_clear(THAT) DPA__U_MAP_GENERIC_WRAPPER(clear, (THAT))((THAT))
+#define dpa_u_map_count(THAT) DPA__U_MAP_GENERIC_WRAPPER(count, (THAT))((THAT))
+#define dpa_u_map_copy(DST,SRC) DPA__U_MAP_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
+#define dpa_u_map_dump_hashmap_key_hashes(THAT) DPA__U_MAP_GENERIC_WRAPPER(dump_hashmap_key_hashes, (THAT))((THAT))
 
 #endif

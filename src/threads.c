@@ -1,7 +1,7 @@
 #include <dpa/utils/threads.h>
 #ifdef DPA__U_THREADS_POLYFILL
 
-dpa__u_api pthread_mutexattr_t dpa_u__attr_recursive;
+dpa__u_api pthread_mutexattr_t dpa__u_attr_recursive;
 
 extern int thrd_create(thrd_t* thread, thrd_start_t func, void* arg);
 extern int thrd_equal(thrd_t a, thrd_t b);
@@ -30,8 +30,8 @@ extern int tss_set(tss_t key, void* val);
 extern void tss_delete(tss_t key);
 
 static dpa_u_init void init(void){
-  pthread_mutexattr_init(&dpa_u__attr_recursive);
-  pthread_mutexattr_settype(&dpa_u__attr_recursive, PTHREAD_MUTEX_RECURSIVE);
+  pthread_mutexattr_init(&dpa__u_attr_recursive);
+  pthread_mutexattr_settype(&dpa__u_attr_recursive, PTHREAD_MUTEX_RECURSIVE);
 }
 
 dpa__u_api void* dpa__u_thrd_create_wrapper(void* p){
