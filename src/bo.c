@@ -353,7 +353,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
   dpa__u_map_u64_insert_sub(
     &unique_string_map,
     unused_e,
-    (dpa_u_any_value_t){.u64=dpa_u_a_bo_unique_to_uint(ret)},
+    (dpa_u_any_value_t){.u64=dpa_u_bo_unique_to_uint(ret)},
     unused_i >> shift,
     unique_string_map.lbsize
   );

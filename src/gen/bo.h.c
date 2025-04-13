@@ -1,7 +1,5 @@
 #include <dpa/utils/bo.h>
 
-extern dpa__u_boptr_t dpa__u_to_bo_r_any__from_p_bo(const dpa_u_bo_t* bo);
-extern dpa__u_boptr_t dpa__u_to_bo_r_any__from_p_bo_hashed(const dpa_u_bo_hashed_t* hbo);
 extern dpa_u_bo_hashed_t dpa__u_a_to_bo_hashed_h(const dpa__u_boptr_t*restrict const boptr);
 extern dpa_u_bo_hashed_t dpa__u_bo_rw_to_bo_hashed_h(const dpa_u_bo_rw_t borw);
 extern dpa_u_bo_hashed_t dpa__u_bo_to_bo_hashed_h(const dpa_u_bo_t bo);

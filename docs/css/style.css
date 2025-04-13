@@ -43,9 +43,14 @@ var, .var {
   font-weight: bold;
 }
 
-table, section, section > :is(h1,h2,h3,h4,h5,h6), .nocolumn, code {
+table, section, section > :is(h1,h2,h3,h4,h5,h6), .nocolumn, code, figure {
   break-inside: avoid-column;
   column-span: all;
+}
+
+figure {
+  margin-left: 0;
+  margin-right: 0;
 }
 
 :is(h1,h2,h3,h4,h5,h6) > a[href] {
@@ -161,7 +166,11 @@ a.var {
   text-decoration: none;
 }
 
-table.first-right > * > tr > :first-child {
+table > thead > :first-child:last-child {
+  text-align: center;
+}
+
+table.first-right > * > tr > :first-child:not(:last-child) {
   text-align: right;
 }
 
@@ -169,11 +178,11 @@ table.border > * > tr > :is(td,th) {
   border: 1px solid #808080;
 }
 
-table.striped > * > tr:nth-child(odd) > :is(td,th) {
+table.striped > tbody > tr:nth-child(odd) > :is(td,th) {
   background-color: #7777;
 }
 
-table.striped > * > tr:nth-child(even) > :is(td,th) {
+table.striped > tbody > tr:nth-child(even) > :is(td,th) {
   background-color: #7774;
 }
 
