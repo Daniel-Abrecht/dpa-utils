@@ -97,6 +97,14 @@
         </table>
       </section>
       <section class="nocolumn">
+        <h4><a class="var" id="dpa_u_bo_rw_t" href="#dpa_u_bo_rw_t">dpa_u_bo_rw_t</a></h4>
+        <table class="pad first-right striped">
+          <tr><th>Type</th><th>Name</th><th>Description</th></tr>
+          <tr><td><nobr>size_t</td><td>size</td><td>The size of the BO.</td></tr>
+          <tr><td><nobr>char*</td><td>data</td><td>A pointer to the data</td></tr>
+        </table>
+      </section>
+      <section class="nocolumn">
         <h4><a class="var" id="dpa_u_bo_hashed_t" href="#dpa_u_bo_hashed_t">dpa_u_bo_hashed_t</a></h4>
         <table class="pad first-right striped">
           <tr><th>Type</th><th>Name</th><th>Description</th></tr>
@@ -138,9 +146,17 @@
     </section>
     <section>
       <h3 id="dpa_u_bo_ref"><a class="var" href="#dpa_u_bo_ref">dpa_u_bo&shy;_ref</a></h1>
+      If it is a unique BO, only the unique BOs refcount is incremented.
+      Otherwise the datas refcount is incremented. If there is no refcount, nothing happens.
+      This function is thread safe.
     </section>
     <section>
       <h3 id="dpa_u_bo_put"><a class="var" href="#dpa_u_bo_put">dpa_u_bo&shy;_put</a></h1>
+      If it is a unique BO, only the unique BOs refcount is decremented.
+      Otherwise the datas refcount is decremented.
+      If the refcount hits 0, the data is freed. If it is a unique BO, the unique BO is removed from the set of unique BOs,
+      and the refcount of the data is decremented if there is one, and freed once nothing references it anymore.
+      This function is thread safe.
     </section>
     <section>
       <h3 id="dpa_u_bo_is_error"><a class="var" href="#dpa_u_bo_is_error">dpa_u_bo&shy;_is_error</a></h1>
@@ -174,6 +190,11 @@
       </section>
       <section>
         <h4 id="dpa_u_bo_intern"><a class="var" href="#dpa_u_bo_intern">dpa_u_bo&shy;_intern</a></h1>
+        Interns a BO. Returns a unique BO. If the data is refcounted, it may not copy it, but just increment the
+        refcount instead. When passing a refcounted BO to this function, make sure it's data is immutable.
+        To force the data to be copied, use the <a class="var" href="#dpa_u_bo_untag_refcounted">
+        dpa_u_bo&shy;_untag&shy;_refcounted</a> function.
+        This function is thread safe.
       </section>
       <section>
         <h4 id="dpa_u_to_bo"><a class="var" href="#dpa_u_to_bo_any">dpa_u_to_bo</a></h1>
@@ -189,6 +210,9 @@
       </section>
       <section>
         <h4 id="dpa_u_bo_unique_from_uint"><a class="var" href="#dpa_u_bo_unique_from_uint">dpa_u_bo_&shy;unique_from_uint</a></h1>
+      </section>
+      <section>
+        <h4 id="dpa_u_bo_untag_refcounted"><a class="var" href="#dpa_u_bo_untag_refcounted">dpa_u_bo_untag_refcounted</a></h1>
       </section>
     </section>
     <section>
