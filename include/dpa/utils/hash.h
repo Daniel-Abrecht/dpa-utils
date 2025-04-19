@@ -6,8 +6,6 @@
 #include <stdint.h>
 #include <string.h>
 
-typedef uint64_t dpa_u_hash_t;
-
 #define DPA_U_FNV_64_PRIME        UINT64_C(0x100000001B3)      ///< This is the FNV Prime used for 64 bit hashs by the FNV algorithm
 #define DPA_U_FNV_64_OFFSET_BASIS UINT64_C(0xCBF29CE484222325) ///< This is the initial hash value used when calculating the 64 bit FNV hash
 

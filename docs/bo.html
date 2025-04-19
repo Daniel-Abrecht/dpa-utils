@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <link rel="stylesheet" type="text/css" href="css/style.css" />
   <title>DAP-Utils - Buffer Object (BO)</title>
@@ -88,28 +88,20 @@
     </section>
     <section>
       <h3 id="dpa_u_bo_"><a href="#dpa_u_bo_">BO Types - <var>dpa_u_bo_*</var></a></h2>
+      <p>
+        Currently, only the simple <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> type is implemented.
+        There are internal types for hashed and refcounted BOs, but there are no plans to expose them as of now.
+        This is because there is no way to define a hashed refcounted bo in such a way that a pointer to it can be
+        converted to both, a hashed bo and a refcounted bo, without type-punning, which would be UB.<br/>
+        There are tagged pointers for hashed and refcounted BOs, and functions for creating them in the current block
+        scope, as well as functions for getting the refcount and the hash.
+      </p>
       <section class="nocolumn">
-        <h4><a class="var" id="dpa_u_bo_t" href="#dpa_u_bo_t">dpa_u_bo_t</a></h4>
+        <h4 id="dpa_u_bo_t"><a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a></h4>
         <table class="pad first-right striped">
           <tr><th>Type</th><th>Name</th><th>Description</th></tr>
           <tr><td><nobr>size_t</td><td>size</td><td>The size of the BO.</td></tr>
           <tr><td><nobr>const char*</td><td>data</td><td>A pointer to the data</td></tr>
-        </table>
-      </section>
-      <section class="nocolumn">
-        <h4><a class="var" id="dpa_u_bo_rw_t" href="#dpa_u_bo_rw_t">dpa_u_bo_rw_t</a></h4>
-        <table class="pad first-right striped">
-          <tr><th>Type</th><th>Name</th><th>Description</th></tr>
-          <tr><td><nobr>size_t</td><td>size</td><td>The size of the BO.</td></tr>
-          <tr><td><nobr>char*</td><td>data</td><td>A pointer to the data</td></tr>
-        </table>
-      </section>
-      <section class="nocolumn">
-        <h4><a class="var" id="dpa_u_bo_hashed_t" href="#dpa_u_bo_hashed_t">dpa_u_bo_hashed_t</a></h4>
-        <table class="pad first-right striped">
-          <tr><th>Type</th><th>Name</th><th>Description</th></tr>
-          <tr><td><a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a></td><td>bo</td><td>See <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a></td></tr>
-          <tr><td><nobr><var tabindex="0" name="dpa_u_hash_t">dpa_u_hash_t</var></td><td>hash</td><td>From this field and the data, the hash can be derived in O(1)</td></tr>
         </table>
       </section>
     </section>
@@ -197,7 +189,7 @@
         This function is thread safe.
       </section>
       <section>
-        <h4 id="dpa_u_to_bo"><a class="var" href="#dpa_u_to_bo_any">dpa_u_to_bo</a></h1>
+        <h4 id="dpa_u_to_bo"><a class="var" href="#dpa_u_to_bo">dpa_u_to_bo</a></h1>
       </section>
       <section>
         <h4 id="dpa_u_to_bo_hashed"><a class="var" href="#dpa_u_to_bo_hashed">dpa_u_to_bo&shy;_hashed</a></h1>

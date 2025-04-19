@@ -10,6 +10,7 @@
   --line-height: 1.2;
   --section-level: 0;
   line-height: var(line-height);
+  hyphens: auto;
 }
 :link { color: #0000EE; }
 :visited { color: #551A8B; }
@@ -58,12 +59,19 @@ figure {
   text-decoration: none;
 }
 
-section:not(.nocolumn) {
-  text-align: justify;
-  column-width: 20em;
-  orphans: 10;
-  widows: 3;
-  hyphens: auto;
+@supports (orphans: 10) {
+  section:not(.nocolumn) {
+    text-align: justify;
+    column-width: 20em;
+    orphans: 10;
+    widows: 3;
+  }
+}
+
+@supports not (orphans: 10) {
+  section {
+    max-width: 75em;
+  }
 }
 
 section {
