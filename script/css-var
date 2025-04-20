@@ -32,6 +32,10 @@ find-matches-graph(){
 }
 
 (
+cat <<EOF
+/* This file was generated using script/css-var */
+
+EOF
 
 for selector in "${vars[@]}"
 do

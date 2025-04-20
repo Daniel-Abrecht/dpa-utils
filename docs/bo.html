@@ -14,14 +14,14 @@
         <figcaption>The following tagged poiter types exist:</figcaption>
         <table class="first-right striped pad">
           <tbody>
-            <tr>
-              <th><var id="dpa_u_a_bo_any_t">dpa_u_a_bo_any_t</var></th>
+            <tr id="dpa_u_a_bo_any_t">
+              <th><a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo_any_t</a></th>
               <td>The BO can refer to any kind of data, and can have any valid tag</td>
-            </tr><tr>
-              <th><var id="dpa_u_a_bo_gc_t">dpa_u_a_bo_gc_t</var></th>
+            </tr><tr id="dpa_u_a_bo_gc_t">
+              <th><a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo_gc_t</a></th>
               <td>The BO can contain unique, refcounted and static data</td>
-            </tr><tr>
-              <th><var id="dpa_u_a_bo_unique_t">dpa_u_a_bo_unique_t</var></th>
+            </tr><tr id="dpa_u_a_bo_unique_t">
+              <th><a class="var" href="#dpa_u_a_bo_unique_t">dpa_u_a_bo_unique_t</a></th>
               <td>This tagged BO pointer has an unique value. Data smaller than 8 bytes will be inlined. Unused bytes will be 0.</td>
             </tr>
           </tbody>
@@ -37,35 +37,32 @@
             <th colspan="2">enum dpa_u_bo_type_flags</th>
           </thead>
           <tbody>
-            <tr>
-              <th><var id="DPA_U_BO_SIMPLE">DPA_U_BO_SIMPLE</var></th>
+            <tr id="DPA_U_BO_SIMPLE">
+              <th><a class="var" href="#DPA_U_BO_SIMPLE">DPA_U_BO_SIMPLE</a></th>
               <td>
                 If this tag is set, the pointer points to a dpa_u_bo_t object.
                 Except for inlined data, this is always the case.
               </td>
-            </tr><tr>
-              <th><var id="DPA_U_BO_STATIC">DPA_U_BO_STATIC</var></th>
+            </tr><tr id="DPA_U_BO_STATIC">
+              <th><a class="var" href="#DPA_U_BO_STATIC">DPA_U_BO_STATIC</a></th>
               <td>The data has static lifetime. The data will never be freed.</td>
-            </tr><tr>
-              <th><var id="DPA_U_BO_REFCOUNTED">DPA_U_BO_REFCOUNTED</var></th>
+            </tr><tr id="DPA_U_BO_REFCOUNTED">
+              <th><a class="var" href="#DPA_U_BO_REFCOUNTED">DPA_U_BO_REFCOUNTED</a></th>
               <td>
-                The data has a reference count. This is either a <a class="var" href="#dpa_u_bo_refcounted_t">
-                dpa_u_bo&shy;_refcounted_t</a> or a <a class="var" href="#dpa_u_bo_refcounted_hashed_t">
-                dpa_u_bo&shy;_refcounted&shy;_hashed_t</a> type.<br/>
-                This is never an inline BO.
+                The data has a reference count. This is never an inline BO.
               </td>
-            </tr><tr>
-              <th><var id="DPA_U_BO_UNIQUE">DPA_U_BO_UNIQUE</var></th>
+            </tr><tr id="DPA_U_BO_UNIQUE">
+              <th><a class="var" href="#DPA_U_BO_UNIQUE">DPA_U_BO_UNIQUE</a></th>
               <td>
                 The data of this BO is unique. The BO itself is refcounted. The BO and it's data are immutable, they
                 will not change.<br/>
                 The data may or may not have it's own refcount, and it may or may not store it's hash, and this may
                 change depending on the data and between implementations.
               </td>
-            </tr><tr>
-              <th><var id="DPA_U_BO_HASHED">DPA_U_BO_HASHED</var></th>
+            </tr><tr id="DPA_U_BO_HASHED">
+              <th><a class="var" href="#DPA_U_BO_HASHED">DPA_U_BO_HASHED</a></th>
               <td>
-                The BO is of type <a class="var" href="#dpa_u_bo_hashed_t">dpa_u_bo_&shy;hashed_t</a>. It is pre-hashed.
+                The BO is pre-hashed.
               </td>
             </tr>
           </tbody>
@@ -120,6 +117,12 @@
       it is not known if the BO has a sufficient lifetime, a new BO Object needs to be allocated. The functions
       <a class="var" href="#dpa_u_bo_copy_maybe">dpa_u_bo&shy;_copy_&shy;maybe</a> and
       <a class="var" href="#dpa_u_bo_copy_bo_maybe">dpa_u_bo&shy;_copy&shy;_bo&shy;_maybe</a> exist to help with that.
+    </p><p>
+      As a convention, functions will assume that the BOs tagged pointers point to, and their data, are immutable.
+      They may store them under that assumption. However, this doesn't always have to be the case. If the BO or it's
+      data is not immutable, it may be necessarey to copy it in that case. The function
+      <a class="var" href="#dpa_u_bo_needs_copy">dpa_u_bo_needs_copy</a> can be used to force a BO to be copied later
+      if necessary.
     </p>
   </section>
   <section>
@@ -169,33 +172,70 @@
     <section>
       <h3 id="conversion_functions"><a href="#conversion_functions">Conversion Functions</a></h2>
       <section>
-        <h4 id="dpa_u_to_bo_any"><a class="var" href="#dpa_u_to_bo_any">dpa_u_to_bo_any</a></h1>
-      </section>
-      <section>
-        <h4 id="dpa_u_to_bo_any_static"><a class="var" href="#dpa_u_to_bo_any_static">dpa_u_to_bo_any_static</a></h1>
-      </section>
-      <section>
-        <h4 id="dpa_u_to_bo_gc"><a class="var" href="#dpa_u_to_bo_gc">dpa_u_to_bo_gc</a></h1>
-      </section>
-      <section>
-        <h4 id="dpa_u_to_bo_gc_static"><a class="var" href="#dpa_u_to_bo_gc_static">dpa_u_to_bo_gc_static</a></h1>
-      </section>
-      <section>
         <h4 id="dpa_u_bo_intern"><a class="var" href="#dpa_u_bo_intern">dpa_u_bo&shy;_intern</a></h1>
-        Interns a BO. Returns a unique BO. If the data is refcounted, it may not copy it, but just increment the
-        refcount instead. When passing a refcounted BO to this function, make sure it's data is immutable.
-        To force the data to be copied, use the <a class="var" href="#dpa_u_bo_untag_refcounted">
-        dpa_u_bo&shy;_untag&shy;_refcounted</a> function.
-        This function is thread safe.
+        <p>
+          Interns a BO. Returns a unique BO. If the data is refcounted or static, it may not copy it, but just increment
+          the refcount instead. When passing a refcounted BO to this function, make sure it's data is immutable.
+          To force the data to be copied, use the <a class="var" href="#dpa_u_bo_untag_gc"> dpa_u_bo&shy;_untag&shy;_gc
+          </a> function.
+          This function is thread safe.
+        </p>
       </section>
       <section>
         <h4 id="dpa_u_to_bo"><a class="var" href="#dpa_u_to_bo">dpa_u_to_bo</a></h1>
+        <p>
+          Returns an lvalue reference to the BO.
+        </p>
       </section>
       <section>
-        <h4 id="dpa_u_to_bo_hashed"><a class="var" href="#dpa_u_to_bo_hashed">dpa_u_to_bo&shy;_hashed</a></h1>
+        <h4 id="dpa_u_to_bo_any"><a class="var" href="#dpa_u_to_bo_any">dpa_u_to_bo_any</a></h1>
+        <p>
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo_any_t</a> to the specified BO.
+        </p>
       </section>
       <section>
-        <h4 id="dpa_u_to_bo_refcounted"><a class="var" href="#dpa_u_to_bo_refcounted">dpa_u_to_bo&shy;_refcounted</a></h1>
+        <h4 id="dpa_u_to_bo_any_static"><a class="var" href="#dpa_u_to_bo_any_static">dpa_u_to_bo_any_static</a></h1>
+        <p>
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo_any_t</a> to the specified BO.
+          It is tagged as a static BO.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_to_bo_gc"><a class="var" href="#dpa_u_to_bo_gc">dpa_u_to_bo_gc</a></h1>
+        <p>
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo_gc_t</a> to the specified BO.
+          If the conversion isn't allowed at runtime, an error object will be returned.
+          The BO to be converted must be refcounted, static, inline, unique, or a combination of those things.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_to_bo_gc_static"><a class="var" href="#dpa_u_to_bo_gc_static">dpa_u_to_bo_gc_static</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo_gc_t</a> to the specified BO.
+          It is tagged as a static BO.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_any_with_refcount"><a class="var" href="#dpa_u_make_bo_any_with_refcount">dpa_u_make_bo_any_with_refcount</a></h1>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_any_with_hash"><a class="var" href="#dpa_u_make_bo_any_with_hash">dpa_u_make_bo_any_with_hash</a></h1>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_any_static_with_hash"><a class="var" href="#dpa_u_make_bo_any_static_with_hash">dpa_u_make_bo_any_static_with_hash</a></h1>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_any_with_refcount_hash"><a class="var" href="#dpa_u_make_bo_any_with_refcount_hash">dpa_u_make_bo_any_with_refcount_hash</a></h1>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_gc_with_refcount"><a class="var" href="#dpa_u_make_bo_gc_with_refcount">dpa_u_make_bo_gc_with_refcount</a></h1>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_gc_static_with_hash"><a class="var" href="#dpa_u_make_bo_gc_static_with_hash">dpa_u_make_bo_gc_static_with_hash</a></h1>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_gc_with_refcount_hash"><a class="var" href="#dpa_u_make_bo_gc_with_refcount_hash">dpa_u_make_bo_gc_with_refcount_hash</a></h1>
       </section>
       <section>
         <h4 id="dpa_u_bo_unique_to_uint"><a class="var" href="#dpa_u_bo_unique_to_uint">dpa_u_bo_&shy;unique_to_uint</a></h1>
@@ -203,8 +243,19 @@
       <section>
         <h4 id="dpa_u_bo_unique_from_uint"><a class="var" href="#dpa_u_bo_unique_from_uint">dpa_u_bo_&shy;unique_from_uint</a></h1>
       </section>
+    </section>
+    <section>
+      <h3 id="tagging_functions"><a href="#tagging_functions">Pointer tagging functions</a></h2>
       <section>
-        <h4 id="dpa_u_bo_untag_refcounted"><a class="var" href="#dpa_u_bo_untag_refcounted">dpa_u_bo_untag_refcounted</a></h1>
+        <h4 id="dpa_u_bo_needs_copy"><a class="var" href="#dpa_u_bo_needs_copy">dpa_u_bo_needs_copy</a></h1>
+        <p>
+          In case of a <a class="var" href="#dpa_u_a_bo_unique_t">dpa_u_a_bo_unique_t</a>, this does nothing, the same
+          pointer is returned.
+          Otherwise, it removes refcounted and static BO pointer tags, and returns a
+          <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo_any_t</a> tag.
+          This is useful if the BO may change later, but the function it is passed to may store it but shouldn't be
+          affected by the changes to the BO. Removing these tags forces the BO to be copied in that case if necessary.
+        </p>
       </section>
     </section>
     <section>
