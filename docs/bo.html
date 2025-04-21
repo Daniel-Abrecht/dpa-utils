@@ -167,7 +167,27 @@
       Takes an error object. If it corrensponds to a known errno value, that value is returned. Otherwiese, -1 is returned.
     </section>
     <section>
+      <h3 id="dpa_u_bo_equal"><a class="var" href="#dpa_u_bo_equal">dpa_u_bo&shy;_equal</a></h1>
+      <p>
+        Returns true if the BOs have the same size &amp; data, false otherwise.
+      </p>
+    </section>
+    <section>
       <h3 id="dpa_u_bo_compare"><a class="var" href="#dpa_u_bo_compare">dpa_u_bo&shy;_compare</a></h1>
+      <p>
+        Returns 0 if the BOs have the same size &amp; data. Returns a positive or negative value otherwise.
+        If both BOs are unique BOs, only the pointers are compared. Otherwise, the size and data is compared.
+        This function can be used for sorting BOs, so long as unique and non-unique BOs are not mixed.
+        If there are unique and non-unique BOs, use <a class="var" href="#dpa_u_bo_compare_data">dpa_u_bo&shy;_compare&shy;_data</a>
+        instead.
+      </p>
+    </section>
+    <section>
+      <h3 id="dpa_u_bo_compare_data"><a class="var" href="#dpa_u_bo_compare_data">dpa_u_bo&shy;_compare_data</a></h1>
+      <p>
+        Returns 0 if the BOs have the same size &amp; data. Returns a positive or negative value otherwise. Can be used
+        for sorting. It first compares the size, then the data using memcmp, that is the order qa sort is going to have.
+      </p>
     </section>
     <section>
       <h3 id="conversion_functions"><a href="#conversion_functions">Conversion Functions</a></h2>
@@ -190,20 +210,20 @@
       <section>
         <h4 id="dpa_u_to_bo_any"><a class="var" href="#dpa_u_to_bo_any">dpa_u_to_bo_any</a></h1>
         <p>
-          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo_any_t</a> to the specified BO.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t</a> to the specified BO.
         </p>
       </section>
       <section>
         <h4 id="dpa_u_to_bo_any_static"><a class="var" href="#dpa_u_to_bo_any_static">dpa_u_to_bo_any_static</a></h1>
         <p>
-          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo_any_t</a> to the specified BO.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t</a> to the specified BO.
           It is tagged as a static BO.
         </p>
       </section>
       <section>
         <h4 id="dpa_u_to_bo_gc"><a class="var" href="#dpa_u_to_bo_gc">dpa_u_to_bo_gc</a></h1>
         <p>
-          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo_gc_t</a> to the specified BO.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t</a> to the specified BO.
           If the conversion isn't allowed at runtime, an error object will be returned.
           The BO to be converted must be refcounted, static, inline, unique, or a combination of those things.
         </p>
@@ -212,21 +232,53 @@
         <h4 id="dpa_u_to_bo_gc_static"><a class="var" href="#dpa_u_to_bo_gc_static">dpa_u_to_bo_gc_static</a></h1>
         <p>
           Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>.
-          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo_gc_t</a> to the specified BO.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t</a> to the specified BO.
           It is tagged as a static BO.
         </p>
       </section>
       <section>
         <h4 id="dpa_u_make_bo_any_with_refcount"><a class="var" href="#dpa_u_make_bo_any_with_refcount">dpa_u_make_bo_any_with_refcount</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          Creates a new BO object in the current block scope with a pointer to a refcount. If the refcount
+          is static, it may be omited, and the BO pointer is tagged as static instead.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
       </section>
       <section>
         <h4 id="dpa_u_make_bo_any_with_hash"><a class="var" href="#dpa_u_make_bo_any_with_hash">dpa_u_make_bo_any_with_hash</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a uint64_t containing the hash.
+          The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
+          dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Creates a new BO object in the current block scope with a hash.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
       </section>
       <section>
         <h4 id="dpa_u_make_bo_any_static_with_hash"><a class="var" href="#dpa_u_make_bo_any_static_with_hash">dpa_u_make_bo_any_static_with_hash</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a uint64_t containing the hash.
+          The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
+          dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Creates a new BO object in the current block scope with a hash.
+          The tagged BO pointer has the static flag set.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
       </section>
       <section>
         <h4 id="dpa_u_make_bo_any_with_refcount_hash"><a class="var" href="#dpa_u_make_bo_any_with_refcount_hash">dpa_u_make_bo_any_with_refcount_hash</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a> and a
+          uint64_t containing the hash.
+          The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
+          dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Creates a new BO object in the current block scope with a pointer to a refcount and a hash. If the refcount
+          is static, it may be omited, and the BO pointer is tagged as static instead.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
       </section>
       <section>
         <h4 id="dpa_u_make_bo_gc_with_refcount"><a class="var" href="#dpa_u_make_bo_gc_with_refcount">dpa_u_make_bo_gc_with_refcount</a></h1>
@@ -238,10 +290,10 @@
         <h4 id="dpa_u_make_bo_gc_with_refcount_hash"><a class="var" href="#dpa_u_make_bo_gc_with_refcount_hash">dpa_u_make_bo_gc_with_refcount_hash</a></h1>
       </section>
       <section>
-        <h4 id="dpa_u_bo_unique_to_uint"><a class="var" href="#dpa_u_bo_unique_to_uint">dpa_u_bo_&shy;unique_to_uint</a></h1>
+        <h4 id="dpa_u_bo_unique_to_uint"><a class="var" href="#dpa_u_bo_unique_to_uint">dpa_u_bo&shy;_unique_to_uint</a></h1>
       </section>
       <section>
-        <h4 id="dpa_u_bo_unique_from_uint"><a class="var" href="#dpa_u_bo_unique_from_uint">dpa_u_bo_&shy;unique_from_uint</a></h1>
+        <h4 id="dpa_u_bo_unique_from_uint"><a class="var" href="#dpa_u_bo_unique_from_uint">dpa_u_bo&shy;_unique_from_uint</a></h1>
       </section>
     </section>
     <section>
@@ -252,7 +304,7 @@
           In case of a <a class="var" href="#dpa_u_a_bo_unique_t">dpa_u_a_bo_unique_t</a>, this does nothing, the same
           pointer is returned.
           Otherwise, it removes refcounted and static BO pointer tags, and returns a
-          <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo_any_t</a> tag.
+          <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t</a> tag.
           This is useful if the BO may change later, but the function it is passed to may store it but shouldn't be
           affected by the changes to the BO. Removing these tags forces the BO to be copied in that case if necessary.
         </p>
@@ -262,15 +314,29 @@
       <h3 id="member_functions"><a href="#member_functions">Member access Functions</a></h2>
       <section>
         <h4 id="dpa_u_bo_get_data"><a class="var" href="#dpa_u_bo_get_data">dpa_u_bo_get_data</a></h1>
+        <p>
+          Returns a pointer to the BOs data.
+        </p>
       </section>
       <section>
         <h4 id="dpa_u_bo_get_size"><a class="var" href="#dpa_u_bo_get_size">dpa_u_bo_get_size</a></h1>
+        <p>
+          Get the size of the BO.
+        </p>
       </section>
       <section>
         <h4 id="dpa_u_bo_get_hash"><a class="var" href="#dpa_u_bo_get_hash">dpa_u_bo_get_hash</a></h1>
+        <p>
+          Get the hash of the BO. If the BO doesn't have a hash pre-calculated, it calculates the hash.
+        </p>
       </section>
       <section>
         <h4 id="dpa_u_bo_get_refcount"><a class="var" href="#dpa_u_bo_get_refcount">dpa_u_bo_get_refcount</a></h1>
+        <p>
+          Returns a pointer to a <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          If it is a unique BO, this is the refcount of the BO object. Otherwise, it is only the refcount of the data.
+          Returns 0 if there is no refcount, including if there is a unique BO.
+        </p>
       </section>
     </section>
   </section>
