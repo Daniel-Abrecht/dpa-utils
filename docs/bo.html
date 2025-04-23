@@ -135,45 +135,66 @@
     <h2 id="functions"><a href="#functions">Functions</a></h2>
     <section>
       <h3 id="dpa_u_bo_copy_maybe"><a class="var" href="#dpa_u_bo_copy_maybe">dpa_u_bo&shy;_copy&shy;_maybe</a></h1>
-      If the BO is a unique BO, this function just increments the BOs refcount.
-      Otherwise a new BO object is allocated.
-      The refcount of the data of a refcounted BO is also incremented, in addition to a new BO object being allocated.
-      If a BO is neither unique, nor refcounted, nor static, the data is also copied.
+      <p>
+        If the BO is a unique BO, this function just increments the BOs refcount.
+        Otherwise a new BO object is allocated.
+        The refcount of the data of a refcounted BO is also incremented, in addition to a new BO object being allocated.
+        If a BO is neither unique, nor refcounted, nor static, the data is also copied.
+      </p>
     </section>
     <section>
       <h3 id="dpa_u_bo_copy_bo_maybe"><a class="var" href="#dpa_u_bo_copy_bo_maybe">dpa_u_bo&shy;_copy&shy;_bo&shy;_maybe</a></h1>
-      Unlike <a class="var" href="#dpa_u_bo_copy_maybe">dpa_u_bo&shy;_copy&shy;_maybe</a>, this function does not copy the BOs
-      data. Everything else is the same. Only use this function if the data is known to have a sufficient lifetime.
+      <p>
+        Unlike <a class="var" href="#dpa_u_bo_copy_maybe">dpa_u_bo&shy;_copy&shy;_maybe</a>, this function does not copy the BOs
+        data. Everything else is the same. Only use this function if the data is known to have a sufficient lifetime.
+      </p>
     </section>
     <section>
       <h3 id="dpa_u_bo_ref"><a class="var" href="#dpa_u_bo_ref">dpa_u_bo&shy;_ref</a></h1>
-      If it is a unique BO, only the unique BOs refcount is incremented.
-      Otherwise the datas refcount is incremented. If there is no refcount, nothing happens.
-      This function is thread safe.
+      <p>
+        If it is a unique BO, only the unique BOs refcount is incremented.
+        Otherwise the datas refcount is incremented. If there is no refcount, nothing happens.
+        This function is thread safe.
+      </p>
     </section>
     <section>
       <h3 id="dpa_u_bo_put"><a class="var" href="#dpa_u_bo_put">dpa_u_bo&shy;_put</a></h1>
-      If it is a unique BO, only the unique BOs refcount is decremented.
-      Otherwise the datas refcount is decremented.
-      If the refcount hits 0, the data is freed. If it is a unique BO, the unique BO is removed from the set of unique BOs,
-      and the refcount of the data is decremented if there is one, and freed once nothing references it anymore.
-      This function is thread safe.
+      <p>
+        If it is a unique BO, only the unique BOs refcount is decremented.
+        Otherwise the datas refcount is decremented.
+        If the refcount hits 0, the data is freed. If it is a unique BO, the unique BO is removed from the set of unique BOs,
+        and the refcount of the data is decremented if there is one, and freed once nothing references it anymore.
+        This function is thread safe.
+      </p>
     </section>
     <section>
       <h3 id="dpa_u_bo_is_error"><a class="var" href="#dpa_u_bo_is_error">dpa_u_bo&shy;_is_error</a></h1>
-      Takes a tagged BO pointer. If it is an error object, returns true. Otherwise, it returns false.
+      <p>
+        Takes a tagged BO pointer. If it is an error object, returns true. Otherwise, it returns false.
+      </p>
     </section>
     <section>
       <h3 id="dpa_u_bo_error"><a class="var" href="#dpa_u_bo_error">dpa_u_bo&shy;_error</a></h1>
-      Takes an errno value, returns a <a class="var" href="#dpa_u_a_bo_unique_t">dpa_u_a_bo&shy;_unique_t</a>.
-      The BO object will not be a unique bo, though, but an error object.
+      <p>
+        Takes an errno value, returns a <a class="var" href="#dpa_u_a_bo_unique_t">dpa_u_a_bo&shy;_unique_t</a>.
+        The BO object will not be a unique bo, though, but an error object.
+      </p>
     </section>
     <section>
       <h3 id="dpa_u_bo_error_to_errno"><a class="var" href="#dpa_u_bo_error_to_errno">dpa_u_bo&shy;_error&shy;_to_errno</a></h1>
-      Takes an error object. If it corrensponds to a known errno value, that value is returned. Otherwiese, -1 is returned.
+      <p>
+        Takes an error object. If it corrensponds to a known errno value, that value is returned. Otherwiese, -1 is returned.
+      </p>
     </section>
     <section>
-      <h3 id="dpa_u_bo_equal"><a class="var" href="#dpa_u_bo_equal">dpa_u_bo&shy;_equal</a></h1>
+      <h3 id="dpa_u_bo_is_same"><a class="var" href="#dpa_u_bo_is_same">dpa_u_bo&shy;_is&shy;_same</a></h1>
+      <p>
+        Returns true if the BOs are the same object. If it's a tagged pointer, the pointer without the tags are compared.
+        If it's a BO object, it is referenced and the resulting pointer is compared.
+      </p>
+    </section>
+    <section>
+      <h3 id="dpa_u_bo_is_equal"><a class="var" href="#dpa_u_bo_is_equal">dpa_u_bo&shy;_is&shy;_equal</a></h1>
       <p>
         Returns true if the BOs have the same size &amp; data, false otherwise.
       </p>
@@ -317,6 +338,91 @@
           dpa_u_bo&shy;_get&shy;_hash</a> function.
           Creates a new BO object in the current block scope with a pointer to a refcount and a hash. If the refcount
           is static, the BO pointer is tagged as static.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_any_with_refcount"><a class="var" href="#dpa_u_alloc_bo_any_with_refcount">dpa_u_alloc_bo_any_with_refcount</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          Allocates a new BO with a pointer to a refcount. If the refcount
+          is static, the BO pointer is tagged as static.
+          This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_any_with_hash"><a class="var" href="#dpa_u_alloc_bo_any_with_hash">dpa_u_alloc_bo_any_with_hash</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a uint64_t containing the hash.
+          The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
+          dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Allocates a new BO with a hash.
+          This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_any_static_with_hash"><a class="var" href="#dpa_u_alloc_bo_any_static_with_hash">dpa_u_alloc_bo_any_static_with_hash</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a uint64_t containing the hash.
+          The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
+          dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Allocates a new BO with a hash.
+          This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          The tagged BO pointer has the static flag set.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_any_with_refcount_hash"><a class="var" href="#dpa_u_alloc_bo_any_with_refcount_hash">dpa_u_alloc_bo_any_with_refcount_hash</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a> and a
+          uint64_t containing the hash.
+          The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
+          dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Allocates a new BO with a pointer to a refcount and a hash. If the refcount
+          is static, the BO pointer is tagged as static.
+          This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_gc_with_refcount"><a class="var" href="#dpa_u_alloc_bo_gc_with_refcount">dpa_u_alloc_bo_gc_with_refcount</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          Allocates a new BO with a pointer to a refcount. If the refcount
+          is static, the BO pointer is tagged as static.
+          This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_gc_static_with_hash"><a class="var" href="#dpa_u_alloc_bo_gc_static_with_hash">dpa_u_alloc_bo_gc_static_with_hash</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a uint64_t containing the hash.
+          The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
+          dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Allocates a new BO with a hash.
+          This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          The tagged BO pointer has the static flag set.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_gc_with_refcount_hash"><a class="var" href="#dpa_u_alloc_bo_gc_with_refcount_hash">dpa_u_alloc_bo_gc_with_refcount_hash</a></h1>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a> and a
+          uint64_t containing the hash.
+          The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
+          dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Allocates a new BO with a pointer to a refcount and a hash. If the refcount
+          is static, the BO pointer is tagged as static.
+          This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
           Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
         </p>
       </section>

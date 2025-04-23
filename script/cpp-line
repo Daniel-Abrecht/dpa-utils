@@ -3,11 +3,11 @@
 cd "$(dirname "$0")/.."
 
 (
-  find include/dpa/ -iname '*.h' -exec cat {} \;
+  find include/dpa/utils/ -iname '*.h' -not -iname '_*' -exec cat {} \;
   echo .
   printf "%s\n" "$1"
-) | sed 's|#include *<dpa/.*||g' \
+) | sed 's|#include *<dpa/utils/.*||g' \
   | sed 's/\\$/\x01\\/' \
-  | cpp -x c -std=c17 -Wall -Wextra -pedantic - \
+  | cpp -x c -CC -P -std=c17 -Wall -Wextra -pedantic -D_DEFAULT_SOURCE - \
   | tail -n 1 \
   | sed 's/\x01/\n/g'
