@@ -204,7 +204,7 @@ do-test//%: test/% $(B-TS)
 	$<
 
 test//%: $(B-TS) FORCE
-	PATH="bin/$(TYPE)/:scripts/:$$PATH" $(B-TS) $* $(MAKE) "do-test//$*"
+	PATH="bin/$(TYPE)/:script/:$$PATH" $(B-TS) $* $(MAKE) "do-test//$*"
 
 test: $(B-TS)
 	$(B-TS) utils $(MAKE) -k $(TESTS)
@@ -286,6 +286,6 @@ shell:
 	if [ -z "$$SHELL" ]; then SHELL="$$(getent passwd $$(id -u) | cut -d : -f 7)"; fi; \
 	if [ -z "$$SHELL" ]; then SHELL="/bin/sh"; fi; \
 	PROMPT_COMMAND='if [ -z "$$PS_SET" ]; then PS_SET=1; PS1="(dpa-utils) $$PS1"; fi' \
-	PATH="$$PWD/bin/$(TYPE)/:$$PWD/scripts/:$$PATH" \
+	PATH="$$PWD/bin/$(TYPE)/:$$PWD/script/:$$PATH" \
 	MANPATH="$$PWD/build/docs/api/man/:$$(man -w)" \
 	  $(SHELL_CMD)

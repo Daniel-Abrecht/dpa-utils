@@ -1,0 +1,52 @@
+#!/bin/bash
+
+implemented="$(
+  ctags -R --output-format=json include/ |
+    jq -r 'select(.scopeKind == null) | .name' |
+    grep dpa_u_ | grep -v '_[pgs]$' | sort -u
+)"
+
+# Remove things like struct types which have a typedef, only keep the typedef, we add a _t to those.
+implemented="$(comm -23 <(echo "$implemented") <(sed -n 's/_t$//p' <<<"$implemented" | sort -u))"
+implemented_count="$(echo "$implemented" | wc -l)"
+
+# echo "$implemented"
+
+documented="$( (
+  grep -roh '<var [^>]*name="[^"]*' docs/ | grep -o '[^"]*$'
+  grep -roh '<a [^>]*href="[^"#]*#[^"]*' docs/ | grep 'class="var"' | grep -o '[^#]*$'
+) | sort -u )"
+documented_count="$(echo "$documented" | wc -l)"
+
+all="$(
+  (
+    echo "$implemented"
+    echo "$documented"
+  ) | sort -u
+)"
+total="$(echo "$all" | wc -l)"
+
+iandd="$(comm -12 <(echo "$implemented") <(echo "$documented"))"
+iandd_count="$(echo "$iandd" | wc -l)"
+
+unimplemented="$(comm -13 <(echo "$implemented") <(echo "$documented"))"
+unimplemented_count="$(echo "$unimplemented" | wc -l)"
+undocumented="$(comm -23 <(echo "$implemented") <(echo "$documented"))"
+undocumented_count="$(echo "$undocumented" | wc -l)"
+
+echo "total: $total"
+echo "implemented and documented: $iandd_count ($((iandd_count * 100 / total))%)"
+echo "unimplemented: $unimplemented_count ($((unimplemented_count * 100 / total))%)"
+echo "undocumented: $undocumented_count ($((undocumented_count * 100 / total))%)"
+echo "implemented: $implemented_count ($((implemented_count * 100 / total))%)"
+echo "documented: $documented_count ($((documented_count * 100 / total))%)"
+
+echo
+echo "# Unimplemented"
+echo
+echo "$unimplemented"
+
+echo
+echo "# Undocumented"
+echo
+echo "$undocumented"

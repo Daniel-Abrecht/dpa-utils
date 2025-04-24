@@ -60,6 +60,11 @@ enum dpa_u_bo_type_flags {
   DPA_U_BO_HASHED     = 0x10,
   DPA_U_BO_SIMPLE     = 0x08,
 };
+#define DPA_U_BO_STATIC DPA_U_BO_STATIC
+#define DPA_U_BO_REFCOUNTED DPA_U_BO_REFCOUNTED
+#define DPA_U_BO_UNIQUE DPA_U_BO_UNIQUE
+#define DPA_U_BO_HASHED DPA_U_BO_HASHED
+#define DPA_U_BO_SIMPLE DPA_U_BO_SIMPLE
 
 #define dpa_u_bo_get_type(X) _Generic((X), \
     dpa__u_boptr_t       : DPA_U_GET_TAG(DPA__G(dpa__u_boptr_t,       (X)).value[0]), \
