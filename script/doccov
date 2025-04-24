@@ -3,7 +3,7 @@
 implemented="$(
   ctags -R --output-format=json include/ |
     jq -r 'select(.scopeKind == null) | .name' |
-    grep dpa_u_ | grep -v '_[pgs]$' | sort -u
+    grep -i dpa_u_ | grep -iv '_[pgs]$' | sort -u
 )"
 
 # Remove things like struct types which have a typedef, only keep the typedef, we add a _t to those.
@@ -15,7 +15,7 @@ implemented_count="$(echo "$implemented" | wc -l)"
 documented="$( (
   grep -roh '<var [^>]*name="[^"]*' docs/ | grep -o '[^"]*$'
   grep -roh '<a [^>]*href="[^"#]*#[^"]*' docs/ | grep 'class="var"' | grep -o '[^#]*$'
-) | sort -u )"
+) | grep -v '_$' | sort -u )"
 documented_count="$(echo "$documented" | wc -l)"
 
 all="$(
