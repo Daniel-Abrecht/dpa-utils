@@ -145,8 +145,9 @@
     <section>
       <h3 id="dpa_u_bo_copy_bo_maybe"><a class="var" href="#dpa_u_bo_copy_bo_maybe">dpa_u_bo&shy;_copy&shy;_bo&shy;_maybe</a></h1>
       <p>
-        Unlike <a class="var" href="#dpa_u_bo_copy_maybe">dpa_u_bo&shy;_copy&shy;_maybe</a>, this function does not copy the BOs
-        data. Everything else is the same. Only use this function if the data is known to have a sufficient lifetime.
+        Unlike <a class="var" href="#dpa_u_bo_copy_maybe">dpa_u_bo&shy;_copy&shy;_maybe</a>, this function does not copy
+        the BOs data, nor increment it's refcount. Everything else is the same. Only use this function if the data is
+        known to have a sufficient lifetime.
       </p>
     </section>
     <section>
@@ -165,6 +166,13 @@
         If the refcount hits 0, the data is freed. If it is a unique BO, the unique BO is removed from the set of unique BOs,
         and the refcount of the data is decremented if there is one, and freed once nothing references it anymore.
         This function is thread safe.
+      </p>
+    </section>
+    <section>
+      <h3 id="dpa_u_bo_free"><a class="var" href="#dpa_u_bo_free">dpa_u_bo&shy;_free</a></h1>
+      <p>
+        This takes a tagged pointer and frees the BO it points to. It does not free the data the BO points to.
+        If it is a unique bo, it does nothing.
       </p>
     </section>
     <section>

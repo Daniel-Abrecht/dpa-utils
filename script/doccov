@@ -1,7 +1,7 @@
 #!/bin/bash
 
 implemented="$(
-  ctags -R --output-format=json include/ |
+  ctags --c-kinds=+pxd -R --output-format=json include/ |
     jq -r 'select(.scopeKind == null) | .name' |
     grep -i dpa_u_ | grep -iv '_[pgs]$' | sort -u
 )"
@@ -13,8 +13,8 @@ implemented_count="$(echo "$implemented" | wc -l)"
 # echo "$implemented"
 
 documented="$( (
-  grep -roh '<var [^>]*name="[^"]*' docs/ | grep -o '[^"]*$'
-  grep -roh '<a [^>]*href="[^"#]*#[^"]*' docs/ | grep 'class="var"' | grep -o '[^#]*$'
+  grep -rohi ' id="dpa_u_[^"]*' docs/ | grep -o '[^"]*$'
+#   grep -rohi '<a [^>]*href="[^"#]*#[^"]*' docs/ | grep 'class="var"' | grep -o '[^#]*$'
 ) | grep -v '_$' | sort -u )"
 documented_count="$(echo "$documented" | wc -l)"
 

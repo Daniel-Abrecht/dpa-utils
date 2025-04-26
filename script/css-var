@@ -1,8 +1,8 @@
 #!/bin/bash
 
 vars=( $( (
-  grep -roh '<var [^>]*name="[^"]*' docs/ | grep -o '[^"]*$'
-  grep -roh '<a [^>]*href="[^"#]*#[^"]*' docs/ | grep 'class="var"' | grep -o '[^#]*$'
+  grep -rohi ' id="dpa_u_[^"]*' docs/ | grep -o '[^"]*$'
+  grep -rohi '<a [^>]*href="[^"#]*#[^"]*' docs/ | grep 'class="var"' | grep -o '[^#]*$'
 ) | sort -u ) )
 
 related=()
