@@ -223,8 +223,8 @@ dpa__u_api void dpa__u_bo_unique_destroy(const dpa_u_refcount_freeable_t* rc){
       goto end; // This is not the last reference anymore.
   }
   const enum dpa_u_refcount_type type = dpa_u_refcount_get_type(&rc->refcount);
-  const dpa_u_bo_rw_t*const bo = (dpa_u_bo_rw_t*)(rc+1);
-  const uint64_t hash = (bo->size > 64) ? ((dpa_u_bo_hashed_t*)bo)->hash : dpa_u_bo_get_hash(*bo);
+  const dpa_u_bo_t*const bo = (dpa_u_bo_t*)(rc+1);
+  const uint64_t hash = (bo->size > 64) ? ((dpa__u_bo_hashed_t*)bo)->hash : dpa_u_bo_get_hash(*bo);
   const uint64_t truncated_hash = dpa__u_map_u64_hash_sub(hash) & ~0xFFFF;
   const struct dpa__u_sm_lookup_result result = dpa__u_map_u64_lookup_sub(&unique_string_map, truncated_hash, unique_string_map.lbsize);
   const int shift = sizeof(uint64_t)*CHAR_BIT - unique_string_map.lbsize;
@@ -317,11 +317,11 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
     error = errno;
     goto error;
   }
-  int entry_size = sizeof(dpa_u_bo_rw_t);
+  int entry_size = sizeof(dpa_u_bo_t);
   int type = DPA_U_BO_UNIQUE | DPA_U_BO_SIMPLE;
   if(size > 64){
     type |= DPA_U_BO_HASHED;
-    entry_size = sizeof(dpa_u_bo_hashed_t);
+    entry_size = sizeof(dpa__u_bo_hashed_t);
   }
   if(bo_type & DPA_U_BO_STATIC){
     type |= DPA_U_BO_STATIC;
@@ -346,12 +346,12 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
               : DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE) + 1;
     eh = rc+1;
   }
-  *(dpa_u_bo_rw_t*)eh = (dpa_u_bo_rw_t){
+  *(dpa_u_bo_t*)eh = (dpa_u_bo_t){
     .size = size,
     .data = (char*)data,
   };
   if(type & DPA_U_BO_HASHED)
-    ((dpa_u_bo_hashed_t*)eh)->hash = hash;
+    ((dpa__u_bo_hashed_t*)eh)->hash = hash;
   dpa_u_a_bo_unique_t ret = { DPA__U_BO_TAG(eh, type) };
   dpa__u_map_u64_insert_sub(
     &unique_string_map,
