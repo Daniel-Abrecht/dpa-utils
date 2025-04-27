@@ -140,11 +140,13 @@ typedef struct { int x; } dpa_u_invalid_selection_t;
 
 #ifdef dpa_u_typeof
 #define dpa_u_container_of(ptr, type, member) \
-  ((type*)( (ptr) ? (char*)((dpa_u_typeof(((type*)0)->member)*){(ptr)}) - offsetof(type, member) : 0 ))
+  ((type*)((char*)((dpa_u_typeof(((type*)0)->member)*){(ptr)}) - offsetof(type, member)))
 #else
 #define dpa_u_container_of(ptr, type, member) \
-  ((type*)( (ptr) ? (char*)(ptr) - offsetof(type, member) : 0 ))
+  ((type*)((char*)(ptr) - offsetof(type, member)))
 #endif
+#define dpa_u_container_of_0(ptr, type, member) \
+  ((ptr)?dpa_u_container_of(ptr, type, member):0)
 
 #ifdef __has_builtin
 #define DPA__U__has_builtin(X) __has_builtin(X)

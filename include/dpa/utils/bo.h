@@ -27,10 +27,20 @@ typedef struct dpa_u_bo {
   };
 } dpa_u_bo_t;
 
+typedef struct dpa__u_bo_refcounted {
+  dpa_u_refcount_freeable_t* refcount;
+  dpa_u_bo_t bo;
+} dpa__u_bo_refcounted_t;
+
 typedef struct dpa__u_bo_hashed {
   dpa_u_bo_t bo;
   uint64_t hash;
 } dpa__u_bo_hashed_t;
+
+typedef struct dpa__u_bo_refcounted_hashed {
+  dpa__u_bo_refcounted_t rbo;
+  uint64_t hash;
+} dpa__u_bo_refcounted_hashed_t;
 
 typedef struct dpa__u_a_bo_unique { dpa__u_boptr_t p; } dpa_u_a_bo_unique_t;
 typedef struct dpa__u_a_bo_any    { dpa__u_boptr_t p; } dpa_u_a_bo_any_t;
@@ -155,10 +165,13 @@ dpa__u_api inline uint64_t dpa__u_bo_hash(dpa_u_bo_t bo){
   return dpa_u_hash_64_FNV_1a_append_p(bo, basis);
 }
 
-dpa__u_api inline uint64_t dpa__u_bo_get_hash(dpa__u_boptr_t boptr){
-  if(dpa_u_bo_is_any_type(boptr, DPA_U_BO_HASHED))
-    return DPA__U_BO_UNTAG(dpa__u_bo_hashed_t*, boptr)->hash;
-  return dpa__u_bo_hash(*DPA__U_BO_UNTAG(dpa_u_bo_t*, boptr));
+dpa__u_api inline uint64_t dpa__u_bo_get_hash(const dpa__u_boptr_t boptr){
+  if(dpa_u_bo_is_any_type(boptr, DPA_U_BO_HASHED)){
+    return dpa_u_bo_is_any_type(boptr, DPA_U_BO_REFCOUNTED)
+      ? dpa_u_container_of(DPA__U_BO_UNTAG(dpa_u_bo_t*, boptr), dpa__u_bo_refcounted_hashed_t, rbo.bo)->hash
+      : DPA__U_BO_UNTAG(dpa__u_bo_hashed_t*, boptr)->hash;
+  }
+  return dpa__u_bo_hash(dpa__u_to_bo_h(&boptr));
 }
 DPA__U_CHECK_GENERIC(dpa_u_bo_get_hash)
 
@@ -248,7 +261,7 @@ dpa__u_api inline void dpa__u_bo_ref_h(const dpa__u_boptr_t bo){
   }
 }
 
-dpa__u_api inline void dpa__u_bo_ref_h1(dpa_u_a_bo_unique_t bo){
+dpa__u_api inline void dpa__u_bo_ref_h1(const dpa_u_a_bo_unique_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
     return;
   dpa_u_refcount_ref(((dpa_u_refcount_freeable_t*)DPA__U_BO_UNTAG(dpa_u_bo_t*, bo.p))-1);
@@ -265,13 +278,13 @@ dpa__u_api inline void dpa__u_bo_put_h(const dpa__u_boptr_t bo){
   }
 }
 
-dpa__u_api inline void dpa__u_bo_put_h1(dpa_u_a_bo_unique_t bo){
+dpa__u_api inline void dpa__u_bo_put_h1(const dpa_u_a_bo_unique_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
     return;
   dpa_u_refcount_put(((dpa_u_refcount_freeable_t*)DPA__U_BO_UNTAG(dpa_u_bo_t*, bo.p))-1);
 }
 
-dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(dpa__u_boptr_t bo){
+dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(const dpa__u_boptr_t bo){
   dpa_u_bo_t* pbo = DPA__U_BO_UNTAG(dpa_u_bo_t*, bo);
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
     return &dpa_u_refcount_static_v_freeable;
@@ -280,7 +293,7 @@ dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(dpa__u_bopt
   return &dpa_u_container_of((char(*)[])pbo->data, dpa_u_refcount_freeable_data_t, data)->refcount;
 }
 
-dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h1(dpa_u_a_bo_unique_t bo){
+dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h1(const dpa_u_a_bo_unique_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_SIMPLE))
     return 0;
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
@@ -316,8 +329,9 @@ DPA__U_CHECK_GENERIC(dpa_u_bo_put)
 DPA__U_CHECK_GENERIC(dpa_u_bo_get_refcount)
 
 dpa__u_api inline void dpa__u_bo_free_h(const dpa__u_boptr_t bo){
-  if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE))
-    return;
+  if( dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE)
+   ||!dpa_u_bo_is_every_type(bo, DPA_U_BO_SIMPLE)
+  ) return;
   dpa_u_bo_t* pbo = DPA__U_BO_UNTAG(dpa_u_bo_t*, bo);
   free(pbo);
 }

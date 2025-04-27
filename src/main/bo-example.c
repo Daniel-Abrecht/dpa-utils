@@ -31,7 +31,16 @@ int main(void){
     dpa_u_a_bo_unique_t my_bo = dpa_u_bo_intern(((dpa_u_bo_t){
       S("Meow")
     }));
-    printf("Type: %s\n", dpa_u_bo_type_to_string(dpa_u_bo_get_type(my_bo))); // Probably DPA_U_BO_INLINE
+    printf("Type: %s\n", dpa_u_bo_type_to_string(dpa_u_bo_get_type(my_bo))); // Probably inline|unique
+    dpa_u_puts(my_bo);
+    my_puts(my_bo);
+    dpa_u_bo_put(my_bo);
+  }
+  {
+    dpa_u_a_bo_unique_t my_bo = dpa_u_bo_intern(((dpa_u_bo_t){
+      S("Hello World!")
+    }));
+    printf("Type: %s\n", dpa_u_bo_type_to_string(dpa_u_bo_get_type(my_bo))); // Probably unique|refcounted|simple
     dpa_u_puts(my_bo);
     my_puts(my_bo);
     dpa_u_bo_put(my_bo);
@@ -40,7 +49,7 @@ int main(void){
     dpa_u_a_bo_unique_t my_bo = dpa_u_bo_intern(((dpa_u_bo_t){
       S("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
     }));
-    printf("Type: %s\n", dpa_u_bo_type_to_string(dpa_u_bo_get_type(my_bo))); // Probably DPA_U_BO_UNIQUE_HASHMAP
+    printf("Type: %s\n", dpa_u_bo_type_to_string(dpa_u_bo_get_type(my_bo))); // Probably unique|refcounted|simple|hashed
     dpa_u_puts(my_bo);
     my_puts(my_bo);
     dpa_u_a_bo_unique_t my_bo2 = dpa_u_bo_intern(((dpa_u_bo_t){
