@@ -257,7 +257,7 @@ dpa__u_api inline void dpa__u_bo_ref_h(const dpa__u_boptr_t bo){
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE)){
     dpa_u_refcount_ref(((dpa_u_refcount_freeable_t*)pbo)-1);
   }else{
-    dpa_u_refcount_ref(((dpa_u_refcount_freeable_t*)(pbo->data))-1);
+    dpa_u_refcount_ref(dpa_u_container_of(pbo, dpa__u_bo_refcounted_t, bo)->refcount);
   }
 }
 
@@ -274,7 +274,7 @@ dpa__u_api inline void dpa__u_bo_put_h(const dpa__u_boptr_t bo){
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE)){
     dpa_u_refcount_put(((dpa_u_refcount_freeable_t*)pbo)-1);
   }else{
-    dpa_u_refcount_put(((dpa_u_refcount_freeable_t*)(pbo->data))-1);
+    dpa_u_refcount_put(dpa_u_container_of(pbo, dpa__u_bo_refcounted_t, bo)->refcount);
   }
 }
 
@@ -290,7 +290,7 @@ dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(const dpa__
     return &dpa_u_refcount_static_v_freeable;
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE))
     return ((dpa_u_refcount_freeable_t*)pbo) - 1;
-  return &dpa_u_container_of((char(*)[])pbo->data, dpa_u_refcount_freeable_data_t, data)->refcount;
+  return dpa_u_container_of(pbo, dpa__u_bo_refcounted_t, bo)->refcount;
 }
 
 dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h1(const dpa_u_a_bo_unique_t bo){

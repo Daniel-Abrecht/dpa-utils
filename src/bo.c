@@ -235,7 +235,7 @@ dpa__u_api void dpa__u_bo_unique_destroy(const dpa_u_refcount_freeable_t* rc){
   // printf("%lX %lX %lX\n", i, result.index, (i-result.index));
   dpa__u_map_u64_remove_index_sub(&unique_string_map, i);
   if(type == DPA_U_REFCOUNT_BO_UNIQUE_EXTREF)
-    dpa_u_refcount_put(dpa_u_container_of((char(*)[])bo->data, struct dpa_u_refcount_freeable_data, data)->refcount);
+    dpa_u_refcount_put(((dpa_u_refcount_freeable_t**)bo)[-1]);
   free((void*)rc);
 end:
   mtx_unlock(&unique_string_map_lock);
@@ -319,39 +319,47 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
   }
   int entry_size = sizeof(dpa_u_bo_t);
   int type = DPA_U_BO_UNIQUE | DPA_U_BO_SIMPLE;
+  bool has_extref = false;
   if(size > 64){
     type |= DPA_U_BO_HASHED;
     entry_size = sizeof(dpa__u_bo_hashed_t);
+    has_extref = bo_type & DPA_U_BO_REFCOUNTED; // If the BO is small, it may not be worth storing the refcount.
   }
+  if(has_extref)
+    entry_size += sizeof(dpa_u_refcount_freeable_t*);
   if(bo_type & DPA_U_BO_STATIC){
     type |= DPA_U_BO_STATIC;
   }else{
     type |= DPA_U_BO_REFCOUNTED;
     entry_size += sizeof(dpa_u_refcount_t);
   }
-  if(!(bo_type & (DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)))
+  const bool data_inlined = !(bo_type & DPA_U_BO_STATIC) && !has_extref;
+  if(data_inlined)
     entry_size += size;
-  void* eh = malloc(entry_size);
-  if(!(bo_type & (DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC))){
-    char* d = (char*)eh + entry_size - size;
+  void*restrict eh = malloc(entry_size);
+  if(data_inlined){
+    char*restrict d = (char*)eh + entry_size - size;
     memcpy(d, data, size);
     data = d;
-  }else if(bo_type & DPA_U_BO_REFCOUNTED){
-    dpa_u_bo_ref(bo); // TODO
+  }else if(has_extref){
+    dpa_u_refcount_freeable_t* extref = dpa_u_container_of(DPA__U_BO_UNTAG(dpa_u_bo_t*, bo.p), dpa__u_bo_refcounted_t, bo)->refcount;
+    dpa_u_refcount_increment(extref);
+    *((dpa_u_refcount_freeable_t**)eh) = extref;
+    eh = ((dpa_u_refcount_freeable_t**)eh)+1;
   }
   if(type & DPA_U_BO_REFCOUNTED){
-    struct dpa__u_refcount_bo_unique* rc = eh;
+    struct dpa__u_refcount_bo_unique*const rc = eh;
     rc->value = bo_type & DPA_U_BO_REFCOUNTED
               ? DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE_EXTREF) + 1
               : DPA_U_REFCOUNT_INIT(DPA_U_REFCOUNT_BO_UNIQUE) + 1;
     eh = rc+1;
   }
-  *(dpa_u_bo_t*)eh = (dpa_u_bo_t){
+  *(dpa_u_bo_t*restrict)eh = (dpa_u_bo_t){
     .size = size,
     .data = (char*)data,
   };
   if(type & DPA_U_BO_HASHED)
-    ((dpa__u_bo_hashed_t*)eh)->hash = hash;
+    ((dpa__u_bo_hashed_t*restrict)eh)->hash = hash;
   dpa_u_a_bo_unique_t ret = { DPA__U_BO_TAG(eh, type) };
   dpa__u_map_u64_insert_sub(
     &unique_string_map,
