@@ -492,7 +492,8 @@
         <p>
           Returns a pointer to a <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
           If it is a unique BO, this is the refcount of the BO object. Otherwise, it is only the refcount of the data.
-          Returns 0 if there is no refcount, including if there is a unique BO.
+          If there is no refcount, it returns <a class="var" href="refcount.html#dpa_u_refcount_v_static">dpa_u&shy;_refcount&shy;_v&shy;_static</a>,
+          which is a global refcount which will never reach 0.
         </p>
       </section>
     </section>
