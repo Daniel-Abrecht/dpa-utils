@@ -239,7 +239,9 @@
       <section>
         <h4 id="dpa_u_to_bo"><a class="var" href="#dpa_u_to_bo">dpa_u_to_bo</a></h1>
         <p>
-          Returns an lvalue reference to the BO.
+          Returns an a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>.
+          This may be an rvalue. Note, the other conversion functions can take an rvalue, but beware of objects with
+          temporary storage duration when converting them to tagged pointers, thus referencing the rvalue.
         </p>
       </section>
       <section>

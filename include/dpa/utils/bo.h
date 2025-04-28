@@ -12,6 +12,19 @@
 #include <string.h>
 #include <assert.h>
 
+
+#define DPA__U_INLINE_STRING(...) DPA__U_INLINE_STRING_2(__VA_ARGS__ +0,0,0,0,0,0,0,0,7,6,5,4,3,2,1)
+
+#if BYTE_ORDER == LITTLE_ENDIAN
+#define DPA__U_INLINE_STRING_2(x1,x2,x3,x4,x5,x6,x7,_1,_2,_3,_4,_5,_6,_7,n,...) \
+  ((uint64_t)(n )      | ((uint64_t)(x1)<< 8) | ((uint64_t)(x2)<<16) | ((uint64_t)(x3)<<24) | \
+  ((uint64_t)(x4)<<32) | ((uint64_t)(x5)<<40) | ((uint64_t)(x6)<<48) | ((uint64_t)(x7)<<56) )
+#elif BYTE_ORDER == BIG_ENDIAN
+#define DPA__U_INLINE_STRING_2(x1,x2,x3,x4,x5,x6,x7,_1,_2,_3,_4,_5,_6,_7,n,...) \
+  ((uint64_t)(n )>>56  | ((uint64_t)(x1)>>48) | ((uint64_t)(x2)>>40) | ((uint64_t)(x3)>>32) | \
+  ((uint64_t)(x4)>>24) | ((uint64_t)(x5)<<40) | ((uint64_t)(x6)<<48) | ((uint64_t)(x7)<<56) )
+#endif
+
 typedef struct dpa__u_boptr {
   uint64_t value[1];
 } dpa__u_boptr_t;
@@ -74,7 +87,7 @@ enum dpa_u_bo_type_flags {
     dpa__u_boptr_t*      : DPA_U_GET_TAG(DPA__G(dpa__u_boptr_t*,      (X))->value[0]), \
     const dpa__u_boptr_t*: DPA_U_GET_TAG(DPA__G(const dpa__u_boptr_t*,(X))->value[0]), \
     \
-    dpa_u_bo_t         : DPA_U_BO_SIMPLE, \
+    dpa_u_bo_t: DPA_U_BO_SIMPLE, \
     \
     struct dpa__u_a_bo_unique: DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_unique, (X)).p.value[0]), \
     struct dpa__u_a_bo_any   : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_any,    (X)).p.value[0]), \
@@ -91,7 +104,7 @@ DPA__U_CHECK_GENERIC(dpa_u_bo_get_type)
 #define DPA__U_BO_UNTAG(T,X) ((T)DPA_U_UNTAG((X).value[0]))
 
 #define dpa_u_to_bo(X) _Generic((X), \
-    dpa_u_bo_t         : DPA__G(dpa_u_bo_t, (X)), \
+    dpa_u_bo_t: DPA__G(dpa_u_bo_t, (X)), \
     \
     struct dpa__u_a_bo_unique: dpa__u_to_bo_h((const dpa__u_boptr_t*)DPA__G(struct dpa__u_a_bo_unique, (X)).p.value), \
     struct dpa__u_a_bo_any   : dpa__u_to_bo_h((const dpa__u_boptr_t*)DPA__G(struct dpa__u_a_bo_any,    (X)).p.value), \
@@ -100,7 +113,7 @@ DPA__U_CHECK_GENERIC(dpa_u_bo_get_type)
     dpa__u_noop_t: 1 \
   )
 
-dpa__u_api inline dpa_u_bo_t dpa__u_to_bo_h(const dpa__u_boptr_t*restrict const boptr){
+dpa__u_api dpa_u_reproducible inline dpa_u_bo_t dpa__u_to_bo_h(const dpa__u_boptr_t*restrict const boptr){
   if(dpa_u_bo_is_any_type(*boptr, DPA_U_BO_SIMPLE))
     return *DPA__U_BO_UNTAG(dpa_u_bo_t*, *boptr);
   return (const dpa_u_bo_t){ .size=DPA_U_GET_TAG(boptr->value[0])&7, .data=((char*)boptr->value)+1 };
@@ -108,7 +121,7 @@ dpa__u_api inline dpa_u_bo_t dpa__u_to_bo_h(const dpa__u_boptr_t*restrict const 
 DPA__U_CHECK_GENERIC(dpa_u_to_bo)
 
 #define dpa_u_to_bo_any(X) _Generic((X), \
-    dpa_u_bo_t         : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE)}, \
+    dpa_u_bo_t: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE)}, \
     \
     struct dpa__u_a_bo_unique: (dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_unique, (X)).p}, \
     struct dpa__u_a_bo_any   : (dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_any,    (X)).p}, \
@@ -119,14 +132,30 @@ DPA__U_CHECK_GENERIC(dpa_u_to_bo)
 DPA__U_CHECK_GENERIC(dpa_u_to_bo_any)
 
 #define dpa_u_to_bo_any_static(X) _Generic((X), \
-    dpa_u_bo_t         : (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_t: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
     \
     dpa__u_noop_t: 1 \
   )
 DPA__U_CHECK_GENERIC(dpa_u_to_bo_any_static)
 
+dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_gc_h(dpa__u_boptr_t p){
+  if( dpa_u_bo_is_any_type(p, DPA_U_BO_UNIQUE|DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)
+   ||!dpa_u_bo_is_any_type(p, DPA_U_BO_SIMPLE)
+  ) return p;
+  return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+}
+
+#define dpa_u_to_bo_gc(X) _Generic((X), \
+    struct dpa__u_a_bo_unique: (dpa_u_a_bo_gc_t){DPA__G(struct dpa__u_a_bo_unique, (X)).p}, \
+    struct dpa__u_a_bo_gc    : (dpa_u_a_bo_gc_t){DPA__G(struct dpa__u_a_bo_gc,     (X)).p}, \
+    struct dpa__u_a_bo_any   : (dpa_u_a_bo_gc_t){dpa__u_to_bo_gc_h(DPA__G(struct dpa__u_a_bo_any,(X)).p)}, \
+    \
+    dpa__u_noop_t: 1 \
+  )
+DPA__U_CHECK_GENERIC(dpa_u_to_bo_gc)
+
 #define dpa_u_to_bo_gc_static(X) _Generic((X), \
-    dpa_u_bo_t         : (dpa_u_a_bo_gc_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
+    dpa_u_bo_t: (dpa_u_a_bo_gc_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)}, \
     \
     dpa__u_noop_t: 1 \
   )
@@ -138,7 +167,7 @@ DPA__U_CHECK_GENERIC(dpa_u_to_bo_gc_static)
  * Also, this is randomized un program startup.
  */
 #define dpa_u_bo_get_hash(X) _Generic((X), \
-    dpa_u_bo_t         : dpa__u_bo_hash(DPA__G(dpa_u_bo_t, (X))), \
+    dpa_u_bo_t: dpa__u_bo_hash(DPA__G(dpa_u_bo_t, (X))), \
     \
     struct dpa__u_a_bo_unique: dpa__u_bo_get_hash(DPA__G(struct dpa__u_a_bo_unique, (X)).p), \
     struct dpa__u_a_bo_any   : dpa__u_bo_get_hash(DPA__G(struct dpa__u_a_bo_any,    (X)).p), \
@@ -147,7 +176,7 @@ DPA__U_CHECK_GENERIC(dpa_u_to_bo_gc_static)
     dpa__u_noop_t: 1 \
   )
 
-dpa__u_api inline uint64_t dpa__u_bo_hash(dpa_u_bo_t bo){
+dpa__u_api dpa_u_reproducible inline uint64_t dpa__u_bo_hash(dpa_u_bo_t bo){
   // The commented out hash function is bad, but that makes it useful for testing.
   // uint64_t hash = 0;
   // memcpy(&hash, bo.data, bo.size > 8 ? 8 : bo.size);
@@ -165,7 +194,7 @@ dpa__u_api inline uint64_t dpa__u_bo_hash(dpa_u_bo_t bo){
   return dpa_u_hash_64_FNV_1a_append_p(bo, basis);
 }
 
-dpa__u_api inline uint64_t dpa__u_bo_get_hash(const dpa__u_boptr_t boptr){
+dpa__u_api dpa_u_reproducible inline uint64_t dpa__u_bo_get_hash(const dpa__u_boptr_t boptr){
   if(dpa_u_bo_is_any_type(boptr, DPA_U_BO_HASHED)){
     return dpa_u_bo_is_any_type(boptr, DPA_U_BO_REFCOUNTED)
       ? dpa_u_container_of(DPA__U_BO_UNTAG(dpa_u_bo_t*, boptr), dpa__u_bo_refcounted_hashed_t, rbo.bo)->hash
@@ -185,7 +214,7 @@ DPA__U_CHECK_GENERIC(dpa_u_bo_get_hash)
     dpa__u_noop_t: 1 \
   )
 
-dpa__u_api inline dpa__u_bo_hashed_t dpa__u_a_to_bo_hashed_h(const dpa__u_boptr_t*restrict const boptr){
+dpa__u_api dpa_u_reproducible inline dpa__u_bo_hashed_t dpa__u_a_to_bo_hashed_h(const dpa__u_boptr_t*restrict const boptr){
   if(dpa_u_bo_is_any_type(*boptr, DPA_U_BO_HASHED))
     return *DPA__U_BO_UNTAG(dpa__u_bo_hashed_t*, *boptr);
   const dpa_u_bo_t bo = dpa__u_to_bo_h(boptr);
@@ -195,7 +224,7 @@ dpa__u_api inline dpa__u_bo_hashed_t dpa__u_a_to_bo_hashed_h(const dpa__u_boptr_
   };
 }
 
-dpa__u_api inline dpa__u_bo_hashed_t dpa__u_bo_to_bo_hashed_h(const dpa_u_bo_t bo){
+dpa__u_api dpa_u_reproducible inline dpa__u_bo_hashed_t dpa__u_bo_to_bo_hashed_h(const dpa_u_bo_t bo){
   return (const dpa__u_bo_hashed_t){
     .bo = bo,
     .hash = dpa__u_bo_hash(bo),
@@ -206,7 +235,7 @@ DPA__U_CHECK_GENERIC(dpa_u_to_bo_hashed)
 #define dpa_u_bo_get_size(X) (dpa_u_to_bo((X)).size)
 #define dpa_u_bo_get_data(X) (dpa_u_to_bo((X)).data)
 
-dpa__u_api const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type);
+dpa__u_api dpa_u_unsequenced const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type);
 
 dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo);
 #define dpa_u_bo_intern(X) dpa__u_bo_intern_h(dpa_u_to_bo_any((X)))
@@ -222,11 +251,11 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo);
     default: dpa__u_bo_compare_h2 \
   )(dpa_u_to_bo_any((A)), dpa_u_to_bo_any((B)))
 
-dpa__u_api inline int dpa__u_bo_compare_h1(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
+dpa__u_api dpa_u_unsequenced inline int dpa__u_bo_compare_h1(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
   return memcmp(&a,&b,sizeof(a));
 }
 
-dpa__u_api inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
+dpa__u_api dpa_u_reproducible inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
   if(a.p.value[0] & b.p.value[0] & DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE))
     return memcmp(&a,&b,sizeof(a));
   const dpa_u_bo_t sa = dpa_u_to_bo(a);
@@ -238,8 +267,8 @@ dpa__u_api inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t 
   return memcmp(sa.data, sb.data, sa.size);
 }
 
-dpa__u_api dpa_u_a_bo_unique_t dpa_u_bo_error(int err);
-dpa__u_api int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo);
+dpa__u_api dpa_u_unsequenced dpa_u_a_bo_unique_t dpa_u_bo_error(int err);
+dpa__u_api dpa_u_unsequenced int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo);
 
 #define dpa_u_bo_is_error(X) _Generic((X), \
     struct dpa__u_a_bo_unique: DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_unique, (X)).p.value[0]) < 8, \
@@ -284,7 +313,7 @@ dpa__u_api inline void dpa__u_bo_put_h1(const dpa_u_a_bo_unique_t bo){
   dpa_u_refcount_put(((dpa_u_refcount_freeable_t*)DPA__U_BO_UNTAG(dpa_u_bo_t*, bo.p))-1);
 }
 
-dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(const dpa__u_boptr_t bo){
+dpa__u_api dpa_u_reproducible inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(const dpa__u_boptr_t bo){
   dpa_u_bo_t* pbo = DPA__U_BO_UNTAG(dpa_u_bo_t*, bo);
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
     return &dpa_u_refcount_static_v_freeable;
@@ -293,7 +322,7 @@ dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h(const dpa__
   return dpa_u_container_of(pbo, dpa__u_bo_refcounted_t, bo)->refcount;
 }
 
-dpa__u_api inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h1(const dpa_u_a_bo_unique_t bo){
+dpa__u_api dpa_u_unsequenced inline dpa_u_refcount_freeable_t* dpa_u_bo_get_refcount_h1(const dpa_u_a_bo_unique_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_SIMPLE))
     return 0;
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
@@ -344,18 +373,5 @@ dpa__u_api inline void dpa__u_bo_free_h(const dpa__u_boptr_t bo){
     dpa__u_noop_t: 1 \
   )
 DPA__U_CHECK_GENERIC(dpa_u_bo_put)
-
-
-#define DPA__U_INLINE_STRING(...) DPA__U_INLINE_STRING_2(__VA_ARGS__ +0,0,0,0,0,0,0,0,7,6,5,4,3,2,1)
-
-#if BYTE_ORDER == LITTLE_ENDIAN
-#define DPA__U_INLINE_STRING_2(x1,x2,x3,x4,x5,x6,x7,_1,_2,_3,_4,_5,_6,_7,n,...) \
-  ((uint64_t)(n )      | ((uint64_t)(x1)<< 8) | ((uint64_t)(x2)<<16) | ((uint64_t)(x3)<<24) | \
-  ((uint64_t)(x4)<<32) | ((uint64_t)(x5)<<40) | ((uint64_t)(x6)<<48) | ((uint64_t)(x7)<<56) )
-#elif BYTE_ORDER == BIG_ENDIAN
-#define DPA__U_INLINE_STRING_2(x1,x2,x3,x4,x5,x6,x7,_1,_2,_3,_4,_5,_6,_7,n,...) \
-  ((uint64_t)(n )>>56  | ((uint64_t)(x1)>>48) | ((uint64_t)(x2)>>40) | ((uint64_t)(x3)>>32) | \
-  ((uint64_t)(x4)>>24) | ((uint64_t)(x5)<<40) | ((uint64_t)(x6)<<48) | ((uint64_t)(x7)<<56) )
-#endif
 
 #endif
