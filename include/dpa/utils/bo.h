@@ -87,7 +87,9 @@ enum dpa_u_bo_type_flags {
     dpa__u_boptr_t*      : DPA_U_GET_TAG(DPA__G(dpa__u_boptr_t*,      (X))->value[0]), \
     const dpa__u_boptr_t*: DPA_U_GET_TAG(DPA__G(const dpa__u_boptr_t*,(X))->value[0]), \
     \
-    dpa_u_bo_t: DPA_U_BO_SIMPLE, \
+    struct dpa_u_bo: DPA_U_BO_SIMPLE, \
+    struct dpa_u_bo*: DPA_U_BO_SIMPLE, \
+    const struct dpa_u_bo*: DPA_U_BO_SIMPLE, \
     \
     struct dpa__u_a_bo_unique: DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_unique, (X)).p.value[0]), \
     struct dpa__u_a_bo_any   : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_any,    (X)).p.value[0]), \
@@ -366,6 +368,9 @@ dpa__u_api inline void dpa__u_bo_free_h(const dpa__u_boptr_t bo){
 }
 
 #define dpa_u_bo_free(X) _Generic((X), \
+    struct dpa_u_bo*: free(DPA__G(struct dpa_u_bo*, (X))) \
+    const struct dpa_u_bo*: free((void*)DPA__G(const struct dpa_u_bo*, (X))) \
+    \
     struct dpa__u_a_bo_unique: (void)0, \
     struct dpa__u_a_bo_any   : dpa__u_bo_free_h(DPA__G(struct dpa__u_a_bo_any, (X)).p), \
     struct dpa__u_a_bo_gc    : dpa__u_bo_free_h(DPA__G(struct dpa__u_a_bo_gc,  (X)).p), \
@@ -373,5 +378,24 @@ dpa__u_api inline void dpa__u_bo_free_h(const dpa__u_boptr_t bo){
     dpa__u_noop_t: 1 \
   )
 DPA__U_CHECK_GENERIC(dpa_u_bo_put)
+
+dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa_u_bo_needs_copy_h(const dpa__u_boptr_t bo){
+  if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE))
+    return bo;
+  return (dpa__u_boptr_t){bo.value[0] & ~DPA_U_MOVE_TAG(DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)};
+}
+
+#define dpa_u_bo_needs_copy(X) _Generic((X), \
+    struct dpa_u_bo: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(struct dpa_u_bo, (X))._c, DPA_U_BO_SIMPLE)}, \
+    struct dpa_u_bo*: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(struct dpa_u_bo*, (X)), DPA_U_BO_SIMPLE)}, \
+    const struct dpa_u_bo*: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(const struct dpa_u_bo*, (X)), DPA_U_BO_SIMPLE)}, \
+    \
+    struct dpa__u_a_bo_unique: (dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_unique, (X)).p}, \
+    struct dpa__u_a_bo_any   : (dpa_u_a_bo_any_t){dpa_u_bo_needs_copy_h(DPA__G(struct dpa__u_a_bo_any,    (X)).p)}, \
+    struct dpa__u_a_bo_gc    : (dpa_u_a_bo_any_t){dpa_u_bo_needs_copy_h(DPA__G(struct dpa__u_a_bo_gc,     (X)).p)}, \
+    \
+    dpa__u_noop_t: 1 \
+  )
+DPA__U_CHECK_GENERIC(dpa_u_bo_needs_copy)
 
 #endif
