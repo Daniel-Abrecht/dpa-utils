@@ -82,6 +82,15 @@ enum dpa_u_bo_type_flags {
 #define DPA_U_BO_HASHED DPA_U_BO_HASHED
 #define DPA_U_BO_SIMPLE DPA_U_BO_SIMPLE
 
+#define dpa_u_bo_is_error(X) _Generic((X), \
+    struct dpa__u_a_bo_unique: DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_unique, (X)).p.value[0]) < 8, \
+    struct dpa__u_a_bo_any   : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_any,    (X)).p.value[0]) < 8, \
+    struct dpa__u_a_bo_gc    : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_gc,     (X)).p.value[0]) < 8, \
+    \
+    dpa__u_noop_t: 1 \
+  )
+DPA__U_CHECK_GENERIC(dpa_u_bo_is_error)
+
 #define dpa_u_bo_get_type(X) _Generic((X), \
     dpa__u_boptr_t       : DPA_U_GET_TAG(DPA__G(dpa__u_boptr_t,       (X)).value[0]), \
     dpa__u_boptr_t*      : DPA_U_GET_TAG(DPA__G(dpa__u_boptr_t*,      (X))->value[0]), \
@@ -258,7 +267,21 @@ dpa__u_api dpa_u_unsequenced inline int dpa__u_bo_compare_h1(dpa_u_a_bo_any_t a,
 }
 
 dpa__u_api dpa_u_reproducible inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
-  if(a.p.value[0] & b.p.value[0] & DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE))
+  if(a.p.value[0] & b.p.value[0] & DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE)
+   || dpa_u_bo_is_error(a) || dpa_u_bo_is_error(b)
+  ) return memcmp(&a,&b,sizeof(a));
+  const dpa_u_bo_t sa = dpa_u_to_bo(a);
+  const dpa_u_bo_t sb = dpa_u_to_bo(b);
+  const int r = (sa.size > sb.size) - (sa.size < sb.size);
+  if(r) return r;
+  if(sa.data == sb.data)
+    return 0;
+  return memcmp(sa.data, sb.data, sa.size);
+}
+
+#define dpa_u_bo_compare_data(A, B) dpa_u_bo_compare_data_p(dpa_u_to_bo_any((A)), dpa_u_to_bo_any((B)))
+dpa__u_api dpa_u_reproducible inline int dpa_u_bo_compare_data_p(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
+  if(!(a.p.value[0] & b.p.value[0] & DPA_U_MOVE_TAG(DPA_U_BO_SIMPLE)))
     return memcmp(&a,&b,sizeof(a));
   const dpa_u_bo_t sa = dpa_u_to_bo(a);
   const dpa_u_bo_t sb = dpa_u_to_bo(b);
@@ -269,17 +292,39 @@ dpa__u_api dpa_u_reproducible inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_t a
   return memcmp(sa.data, sb.data, sa.size);
 }
 
+#define dpa_u_bo_is_same(A, B) dpa_u_bo_is_same_p(dpa_u_to_bo_any((A)), dpa_u_to_bo_any((B)))
+dpa__u_api dpa_u_reproducible inline int dpa_u_bo_is_same_p(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
+  return (a.p.value[0] & DPA_U_MOVE_TAG(DPA_U_BO_STATIC|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED))
+      == (b.p.value[0] & DPA_U_MOVE_TAG(DPA_U_BO_STATIC|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED));
+}
+
+#define dpa_u_bo_is_equal(A, B) _Generic((A), \
+    struct dpa__u_a_bo_unique: _Generic((B), \
+        struct dpa__u_a_bo_unique: dpa__u_bo_is_equal_h1, \
+        default: dpa__u_bo_is_equal_h2 \
+      ), \
+    default: dpa__u_bo_is_equal_h2 \
+  )(dpa_u_to_bo_any((A)), dpa_u_to_bo_any((B)))
+
+dpa__u_api dpa_u_unsequenced inline int dpa__u_bo_is_equal_h1(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
+  return a.p.value[0] == b.p.value[0];
+}
+
+dpa__u_api dpa_u_reproducible inline int dpa__u_bo_is_equal_h2(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
+  if(a.p.value[0] & b.p.value[0] & DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE)
+   || dpa_u_bo_is_error(a) || dpa_u_bo_is_error(b)
+  ) return a.p.value[0] == b.p.value[0];
+  const dpa_u_bo_t sa = dpa_u_to_bo(a);
+  const dpa_u_bo_t sb = dpa_u_to_bo(b);
+  if(sa.size != sb.size)
+    return false;
+  if(sa.data == sb.data)
+    return true;
+  return !memcmp(sa.data, sb.data, sa.size);
+}
+
 dpa__u_api dpa_u_unsequenced dpa_u_a_bo_unique_t dpa_u_bo_error(int err);
 dpa__u_api dpa_u_unsequenced int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo);
-
-#define dpa_u_bo_is_error(X) _Generic((X), \
-    struct dpa__u_a_bo_unique: DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_unique, (X)).p.value[0]) < 8, \
-    struct dpa__u_a_bo_any   : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_any,    (X)).p.value[0]) < 8, \
-    struct dpa__u_a_bo_gc    : DPA_U_GET_TAG(DPA__G(struct dpa__u_a_bo_gc,     (X)).p.value[0]) < 8, \
-    \
-    dpa__u_noop_t: 1 \
-  )
-DPA__U_CHECK_GENERIC(dpa_u_bo_is_error)
 
 dpa__u_api inline void dpa__u_bo_ref_h(const dpa__u_boptr_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))

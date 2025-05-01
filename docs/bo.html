@@ -205,6 +205,7 @@
       <h3 id="dpa_u_bo_is_equal"><a class="var" href="#dpa_u_bo_is_equal">dpa_u_bo&shy;_is&shy;_equal</a></h1>
       <p>
         Returns true if the BOs have the same size &amp; data, false otherwise.
+        Error BOs are never considered equal to other BOs.
       </p>
     </section>
     <section>
@@ -215,13 +216,15 @@
         This function can be used for sorting BOs, so long as unique and non-unique BOs are not mixed.
         If there are unique and non-unique BOs, use <a class="var" href="#dpa_u_bo_compare_data">dpa_u_bo&shy;_compare&shy;_data</a>
         instead.
+        Error BOs are never considered equal to other BOs.
       </p>
     </section>
     <section>
       <h3 id="dpa_u_bo_compare_data"><a class="var" href="#dpa_u_bo_compare_data">dpa_u_bo&shy;_compare_data</a></h1>
       <p>
         Returns 0 if the BOs have the same size &amp; data. Returns a positive or negative value otherwise. Can be used
-        for sorting. It first compares the size, then the data using memcmp, that is the order qa sort is going to have.
+        for sorting. It first compares the size, then the data using memcmp, that is the order a sort is going to have.
+        Error BOs are never considered equal to other BOs.
       </p>
     </section>
     <section>
