@@ -9,6 +9,7 @@ implemented="$(
 # Remove things like struct types which have a typedef, only keep the typedef, we add a _t to those.
 implemented="$(comm -23 <(echo "$implemented") <(sed -n 's/_t$//p' <<<"$implemented" | sort -u))"
 implemented_count="$(echo "$implemented" | wc -l)"
+implemented_count="$((implemented_count - 1))"
 
 # echo "$implemented"
 
@@ -17,6 +18,7 @@ documented="$( (
 #   grep -rohi '<a [^>]*href="[^"#]*#[^"]*' docs/ | grep 'class="var"' | grep -o '[^#]*$'
 ) | grep -v '_$' | sort -u )"
 documented_count="$(echo "$documented" | wc -l)"
+documented_count="$((documented_count - 1))"
 
 all="$(
   (
@@ -25,14 +27,18 @@ all="$(
   ) | sort -u
 )"
 total="$(echo "$all" | wc -l)"
+total="$((total - 1))"
 
 iandd="$(comm -12 <(echo "$implemented") <(echo "$documented"))"
 iandd_count="$(echo "$iandd" | wc -l)"
+iandd_count="$((iandd_count - 1))"
 
 unimplemented="$(comm -13 <(echo "$implemented") <(echo "$documented"))"
 unimplemented_count="$(echo "$unimplemented" | wc -l)"
+unimplemented_count="$((unimplemented_count - 1))"
 undocumented="$(comm -23 <(echo "$implemented") <(echo "$documented"))"
 undocumented_count="$(echo "$undocumented" | wc -l)"
+undocumented_count="$((undocumented_count - 1))"
 
 echo "total: $total"
 echo "implemented and documented: $iandd_count ($((iandd_count * 100 / total))%)"
