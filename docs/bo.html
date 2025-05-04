@@ -6,6 +6,12 @@
 </head>
 <body id="top"><section>
   <h1><a href="#top">DAP-Utils - Buffer Object (BO)</a></h1>
+  <p>#include &lt;dpa/utils/bo.h&gt;</p>
+  <p>
+    This header provides types and functions related to buffer objects and tagged buffer object pointers.
+    The intent is to make memory management easier, minimize copying of data if not necessary,
+    and providing a means to create identifiers that are unique and can be compared in O(1).
+  </p>
   <section>
     <h2 id="types"><a href="#types">Types</a></h2>
     <section>
@@ -23,6 +29,18 @@
             </tr><tr id="dpa_u_a_bo_unique_t">
               <th><a class="var" href="#dpa_u_a_bo_unique_t">dpa_u_a_bo_unique_t</a></th>
               <td>This tagged BO pointer has an unique value. Data smaller than 8 bytes will be inlined. Unused bytes will be 0.</td>
+            </tr><tr id="dpa_u_a_bo_refcounted_t">
+              <th><a class="var" href="#dpa_u_a_bo_refcounted_t">dpa_u_a_bo_refcounted_t</a></th>
+              <td>
+                This BO has a refcount. But it can not be a unique bo, because a unique bo may be an inline bo, and an
+                inline bo has no refcount.
+              </td>
+            </tr><tr id="dpa_u_a_bo_hashed_t">
+              <th><a class="var" href="#dpa_u_a_bo_hashed_t">dpa_u_a_bo_hashed_t</a></th>
+              <td>
+                This BO is pre-hashed. This usually isn't all that useful, consider using
+                <a class="var" href="#dpa_u_a_bo_unique_t">dpa_u_a_bo&shy;_unique_t</a> instead.
+              </td>
             </tr>
           </tbody>
         </table>
@@ -34,7 +52,9 @@
         </figcaption>
         <table class="first-right striped pad">
           <thead>
-            <th colspan="2">enum dpa_u_bo_type_flags</th>
+            <th colspan="2" id="dpa_u_bo_type_flags">
+              <a class="var" href="#dpa_u_bo_type_flags">enum dpa_u_bo_type_flags</a>
+            </th>
           </thead>
           <tbody>
             <tr id="DPA_U_BO_SIMPLE">
@@ -133,6 +153,27 @@
   </section>
   <section>
     <h2 id="functions"><a href="#functions">Functions</a></h2>
+    <section>
+      <h3 id="dpa_u_bo_is_any_type"><a class="var" href="#dpa_u_bo_is_any_type">dpa_u_bo&shy;_is&shy;_any&shy;_type</a></h1>
+      <p>
+        Takes a tagged BO pointer and tags from <a class="var" href="#dpa_u_bo_type_flags">dpa_u_bo_type_flags</a>.
+        The tags should be ORed. Returns true if the tagged pointer has any of the flags.
+      </p>
+    </section>
+    <section>
+      <h3 id="dpa_u_bo_is_every_type"><a class="var" href="#dpa_u_bo_is_every_type">dpa_u_bo&shy;_is&shy;_every&shy;_type</a></h1>
+      <p>
+        Takes a tagged BO pointer and tags from <a class="var" href="#dpa_u_bo_type_flags">dpa_u_bo&shy;_type&shy;_flags</a>.
+        The tags should be ORed. Returns true if the tagged pointer has all of the flags.
+      </p>
+    </section>
+    <section>
+      <h3 id="dpa_u_bo_get_type"><a class="var" href="dpa_u_bo_get_type">dpa_u_bo&shy;_get&shy;_type</a></h1>
+      <p>
+        Takes a tagged BO pointer and tags from <a class="var" href="#dpa_u_bo_type_flags">dpa_u_bo&shy;_type&shy;_flags</a>.
+        The tags should be ORed. Returns true if the tagged pointer has all of the flags.
+      </p>
+    </section>
     <section>
       <h3 id="dpa_u_bo_copy_maybe"><a class="var" href="#dpa_u_bo_copy_maybe">dpa_u_bo&shy;_copy&shy;_maybe</a></h1>
       <p>

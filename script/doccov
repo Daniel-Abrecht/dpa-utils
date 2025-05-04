@@ -3,15 +3,19 @@
 implemented="$(
   ctags --c-kinds=+pxd -R --output-format=json include/ |
     jq -r 'select(.scopeKind == null) | .name' |
-    grep -i dpa_u_ | grep -iv '_[pgs]$' | sort -u
+    grep -i dpa_u_ | grep -iv '_[pgsh]$' | sort -u
+)"
+
+implemented_file="$(
+  ctags --c-kinds=+pxd -R --output-format=json include/ |
+    jq -r 'select(.scopeKind == null) | .path[8:] + "\t" + .name' |
+    sort -u
 )"
 
 # Remove things like struct types which have a typedef, only keep the typedef, we add a _t to those.
 implemented="$(comm -23 <(echo "$implemented") <(sed -n 's/_t$//p' <<<"$implemented" | sort -u))"
 implemented_count="$(echo "$implemented" | wc -l)"
 implemented_count="$((implemented_count - 1))"
-
-# echo "$implemented"
 
 documented="$( (
   grep -rohi ' id="dpa_u_[^"]*' docs/ | grep -o '[^"]*$'
@@ -54,5 +58,17 @@ echo "$unimplemented"
 
 echo
 echo "# Undocumented"
-echo
-echo "$undocumented"
+lastfile=""
+while IFS=$'\t' read -r file symbol
+do
+  if ! grep -qxF "$symbol" <<<"$undocumented"
+    then continue
+  fi
+  if [ "$lastfile" != "$file" ]
+  then
+    lastfile="$file"
+    echo
+    echo "<$file>"
+  fi
+  echo "$symbol"
+done <<<"$implemented_file"
