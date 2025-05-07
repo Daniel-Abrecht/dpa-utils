@@ -414,7 +414,14 @@
           Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
         </p>
       </section>
-      <!-- TODO: dpa_u_make_bo_gc -->
+      <section>
+        <h4 id="dpa_u_make_bo_gc"><a class="var" href="#dpa_u_make_bo_gc">dpa_u_make_bo_gc</a></h4>
+        <p>
+          Takes a tagged BO pointer. Creates a new BO object in the current block scope.
+          If the conversion isn't allowed at runtime, an error object will be returned.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
       <section>
         <h4 id="dpa_u_make_bo_gc_with_refcount"><a class="var" href="#dpa_u_make_bo_gc_with_refcount">dpa_u_make_bo_gc_with_refcount</a></h4>
         <p>
@@ -441,7 +448,7 @@
         <p>
           Takes a BO object or a tagged BO pointer. The bo will be hashed, unless it already is hashed.
           Creates a new BO object in the current block scope with a hash.
-          The tagged BO pointer has the static flag set.
+          If the conversion isn't allowed at runtime, an error object will be returned.
           Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
         </p>
       </section>
@@ -451,6 +458,7 @@
           Takes a BO object. The bo will be hashed.
           Creates a new BO object in the current block scope with a hash.
           The tagged BO pointer has the static flag set.
+          If the conversion isn't allowed at runtime, an error object will be returned.
           Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
         </p>
       </section>
@@ -462,6 +470,17 @@
           uint64_t containing the hash.
           The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
           dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Creates a new BO object in the current block scope with a pointer to a refcount and a hash. If the refcount
+          is static, the BO pointer is tagged as static.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_gc_with_refcount_do_hash"><a class="var" href="#dpa_u_make_bo_gc_with_refcount_do_hash">dpa_u_make_bo_gc_with_refcount_do_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          The bo will be hashed.
           Creates a new BO object in the current block scope with a pointer to a refcount and a hash. If the refcount
           is static, the BO pointer is tagged as static.
           Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
@@ -485,6 +504,17 @@
           uint64_t containing the hash.
           The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
           dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Creates a new BO object in the current block scope with a pointer to a refcount and a hash. If the refcount
+          is static, the BO pointer is tagged as static.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_refcounted_do_hash"><a class="var" href="#dpa_u_make_bo_refcounted_do_hash">dpa_u_make_bo_refcounted_do_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          The bo will be hashed.
           Creates a new BO object in the current block scope with a pointer to a refcount and a hash. If the refcount
           is static, the BO pointer is tagged as static.
           Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
@@ -517,6 +547,36 @@
           Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
           <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a> and a
           uint64_t containing the hash.
+          The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
+          dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Creates a new BO object in the current block scope with a pointer to a refcount and a hash. If the refcount
+          is static, the BO pointer is tagged as static.
+          Returns a <a class="var" href="#dpa_u_a_bo_hashed_t">dpa_u_a_bo&shy;_hashed_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_hashed_do_hash"><a class="var" href="#dpa_u_make_bo_hashed_do_hash">dpa_u_make_bo_hashed_do_hash</a></h4>
+        <p>
+          Takes a BO object or a tagged BO pointer. The bo will be hashed, unless it already is hashed.
+          Creates a new BO object in the current block scope with a hash.
+          Returns a <a class="var" href="#dpa_u_a_bo_hashed_t">dpa_u_a_bo&shy;_hashed_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_hashed_static_do_hash"><a class="var" href="#dpa_u_make_bo_hashed_static_do_hash">dpa_u_make_bo_hashed_static_do_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>. The bo will be hashed.
+          Creates a new BO object in the current block scope with a hash.
+          The tagged BO pointer has the static flag set.
+          Returns a <a class="var" href="#dpa_u_a_bo_hashed_t">dpa_u_a_bo&shy;_hashed_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_make_bo_hashed_with_refcount_do_hash"><a class="var" href="#dpa_u_make_bo_hashed_with_refcount_do_hash">dpa_u_make_bo_hashed_with_refcount_do_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          The bo will be hashed.
           The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
           dpa_u_bo&shy;_get&shy;_hash</a> function.
           Creates a new BO object in the current block scope with a pointer to a refcount and a hash. If the refcount
@@ -559,6 +619,14 @@
         </p>
       </section>
       <section>
+        <h4 id="dpa_u_alloc_bo_any_do_hash"><a class="var" href="#dpa_u_make_bo_any_do_hash">dpa_u_make_bo_any_do_hash</a></h4>
+        <p>
+          Takes a BO object or a tagged BO pointer. Allocates a new BO.
+          The bo will be hashed, unless it already is hashed.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
+      </section>
+      <section>
         <h4 id="dpa_u_alloc_bo_any_with_refcount_hash"><a class="var" href="#dpa_u_alloc_bo_any_with_refcount_hash">dpa_u_alloc_bo_any_with_refcount_hash</a></h4>
         <p>
           Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
@@ -569,6 +637,36 @@
           Allocates a new BO with a pointer to a refcount and a hash. If the refcount
           is static, the BO pointer is tagged as static.
           This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_any_with_refcount_do_hash"><a class="var" href="#dpa_u_alloc_bo_any_with_refcount_hash">dpa_u_alloc_bo_any_with_refcount_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          The bo will be hashed.
+          Allocates a new BO with a pointer to a refcount and a hash. If the refcount
+          is static, the BO pointer is tagged as static.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_gc"><a class="var" href="#dpa_u_alloc_bo_gc">dpa_u_alloc_bo_gc</a></h4>
+        <p>
+          Takes a tagged BO pointer. Allocates a new BO.
+          If the conversion isn't allowed at runtime, an error object will be returned.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_any_with_refcount_do_hash"><a class="var" href="#dpa_u_alloc_bo_any_with_refcount_hash">dpa_u_alloc_bo_any_with_refcount_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          The bo will be hashed.
+          Allocates a new BO with a pointer to a refcount and a hash. If the refcount is static, the BO pointer
+          is tagged as static.
           Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
         </p>
       </section>
@@ -596,6 +694,24 @@
         </p>
       </section>
       <section>
+        <h4 id="dpa_u_alloc_bo_gc_do_hash"><a class="var" href="#dpa_u_alloc_bo_gc_do_hash">dpa_u_alloc_bo_gc_do_hash</a></h4>
+        <p>
+          Takes a BO object or a tagged BO pointer. The bo will be hashed, unless it already is hashed.
+          Allocates a new BO with a hash.
+          If the conversion isn't allowed at runtime, an error object will be returned.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_gc_static_do_hash"><a class="var" href="#dpa_u_alloc_bo_gc_static_do_hash">dpa_u_alloc_bo_gc_static_with_hash</a></h4>
+        <p>
+          Takes a BO object. The bo will be hashed. Allocates a new BO with a hash.
+          The tagged BO pointer has the static flag set.
+          If the conversion isn't allowed at runtime, an error object will be returned.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
+      <section>
         <h4 id="dpa_u_alloc_bo_gc_with_refcount_hash"><a class="var" href="#dpa_u_alloc_bo_gc_with_refcount_hash">dpa_u_alloc_bo_gc_with_refcount_hash</a></h4>
         <p>
           Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
@@ -606,6 +722,16 @@
           Allocates a new BO with a pointer to a refcount and a hash. If the refcount
           is static, the BO pointer is tagged as static.
           This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_gc_with_refcount_do_hash"><a class="var" href="#dpa_u_alloc_bo_gc_with_refcount_do_hash">dpa_u_alloc_bo_gc_with_refcount_do_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          The bo will be hashed. Allocates a new BO with a pointer to a refcount and a hash. If the refcount is static,
+          the BO pointer is tagged as static.
           Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
         </p>
       </section>
@@ -631,6 +757,17 @@
           Allocates a new BO with a pointer to a refcount and a hash. If the refcount
           is static, the BO pointer is tagged as static.
           This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_refcounted_do_hash"><a class="var" href="#dpa_u_alloc_bo_refcounted_do_hash">dpa_u_alloc_bo_refcounted_do_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          The bo will be hashed.
+          Allocates a new BO with a pointer to a refcount and a hash. If the refcount
+          is static, the BO pointer is tagged as static.
           Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t*</a>.
         </p>
       </section>
@@ -668,6 +805,36 @@
           Allocates a new BO with a pointer to a refcount and a hash. If the refcount
           is static, the BO pointer is tagged as static.
           This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          Returns a <a class="var" href="#dpa_u_a_bo_hashed_t">dpa_u_a_bo&shy;_hashed_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_hashed_do_hash"><a class="var" href="#dpa_u_alloc_bo_hashed_do_hash">dpa_u_alloc_bo_hashed_do_hash</a></h4>
+        <p>
+          Takes a BO object or a tagged BO pointer. The bo will be hashed, unless it already is hashed.
+          Allocates a new BO with a hash.
+          Returns a <a class="var" href="#dpa_u_a_bo_hashed_t">dpa_u_a_bo&shy;_hashed_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_hashed_static_do_hash"><a class="var" href="#dpa_u_alloc_bo_hashed_static_do_hash">dpa_u_alloc_bo_hashed_static_do_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>. The bo will be hashed.
+          Allocates a new BO with a hash.
+          The tagged BO pointer has the static flag set.
+          Returns a <a class="var" href="#dpa_u_a_bo_hashed_t">dpa_u_a_bo&shy;_hashed_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_hashed_with_refcount_do_hash"><a class="var" href="#dpa_u_alloc_bo_hashed_with_refcount_do_hash">dpa_u_alloc_bo_hashed_with_refcount_do_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a> and a pointer to a
+          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
+          The bo will be hashed.
+          The hash must be the same as would have been calculated using the <a class="var" href="#dpa_u_bo_get_hash">
+          dpa_u_bo&shy;_get&shy;_hash</a> function.
+          Allocates a new BO with a pointer to a refcount and a hash. If the refcount
+          is static, the BO pointer is tagged as static.
           Returns a <a class="var" href="#dpa_u_a_bo_hashed_t">dpa_u_a_bo&shy;_hashed_t*</a>.
         </p>
       </section>
