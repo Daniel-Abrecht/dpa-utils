@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
   <link rel="stylesheet" type="text/css" href="css/style.css" />
+  <script src="js/main.js"></script>
   <title>DAP-Utils - Buffer Object (BO)</title>
 </head>
-<body id="top"><section>
-  <h1><a href="#top">DAP-Utils - Buffer Object (BO)</a></h1>
-  <p>#include &lt;dpa/utils/bo.h&gt;</p>
+<body>
+<ui-index></ui-index>
+<section>
+  <h1 id="top"><a href="#top">DAP-Utils - Buffer Object (BO)</a></h1>
+  <p class="nocolumn">#include &lt;dpa/utils/bo.h&gt;</p>
   <p>
     This header provides types and functions related to buffer objects and tagged buffer object pointers.
     The intent is to make memory management easier, minimize copying of data if not necessary,
@@ -47,7 +50,7 @@
       </figure>
       <figure>
         <figcaption>
-          The tag of a tagged BO Pointer consists of a set of types, and in the case of an inline BO, the size of the data.<br>
+          The tag of a tagged BO Pointer consists of a set of types, and in the case of an inline BO, the size of the data.
           The following Tags exist:
         </figcaption>
         <table class="first-right striped pad">
@@ -270,6 +273,15 @@
     </section>
     <section>
       <h3 id="conversion_functions"><a href="#conversion_functions">Conversion Functions</a></h3>
+      <p>
+        The <var>dpa_u&shy;_to&shy;_bo_*</var> functions just converts between tagged BO pointers.<br/>
+        The <var>dpa_u&shy;_make&shy;_bo_*</var> allocate a BO object in the current scope. They allow to create various
+        BO types whose struct type is not meant to be used directly. This way this library does not have to convert
+        between them, which avoids the incompatibility issue between refcounted, hashed and refcounted + hashed BOs..<br/>
+        <var>dpa_u&shy;_alloc&shy;_bo_*</var> functions exist for every The <var>dpa_u&shy;_make&shy;_bo_*</var>
+        functions. They do the same, but allocate the BO using malloc. They have to be freed using
+        <a class="var" href="dpa_u_bo_free">dpa_u&shy;_bo&shy;_free</a>.
+      </p>
       <section>
         <h4 id="dpa_u_bo_intern"><a class="var" href="#dpa_u_bo_intern">dpa_u_bo&shy;_intern</a></h3>
         <p>
@@ -382,7 +394,7 @@
         </p>
       </section>
       <section>
-        <h4 id="dpa_u_make_bo_any_static_with_hash"><a class="var" href="#dpa_u_make_bo_any_static_with_hash">dpa_u_make_bo_any_static_with_hash</a></h4>
+        <h4 id="dpa_u_make_bo_any_static_do_hash"><a class="var" href="#dpa_u_make_bo_any_static_do_hash">dpa_u_make_bo_any_static_do_hash</a></h4>
         <p>
           Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>. The bo will be hashed.
           Creates a new BO object in the current block scope with a hash.
@@ -619,10 +631,18 @@
         </p>
       </section>
       <section>
-        <h4 id="dpa_u_alloc_bo_any_do_hash"><a class="var" href="#dpa_u_make_bo_any_do_hash">dpa_u_make_bo_any_do_hash</a></h4>
+        <h4 id="dpa_u_alloc_bo_any_do_hash"><a class="var" href="#dpa_u_alloc_bo_any_do_hash">dpa_u_alloc_bo_any_do_hash</a></h4>
         <p>
           Takes a BO object or a tagged BO pointer. Allocates a new BO.
           The bo will be hashed, unless it already is hashed.
+          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_any_static_do_hash"><a class="var" href="#dpa_u_alloc_bo_any_static_do_hash">dpa_u_alloc_bo_any_static_do_hash</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>. Allocates a new BO. The bo will be hashed.
+          The tagged BO pointer has the static flag set.
           Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
         </p>
       </section>
