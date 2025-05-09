@@ -332,23 +332,22 @@
       <section>
         <h4 id="dpa_u_to_bo_hashed"><a class="var" href="#dpa_u_to_bo_hashed">dpa_u_to_bo_hashed</a></h4>
         <p>
+          Takes a tagged BO pointer.
           Returns a <a class="var" href="#dpa_u_a_bo_hashed_t">dpa_u_a_bo&shy;_hashed_t</a> to the specified BO.
           If the conversion isn't allowed at runtime, an error object will be returned.
           The BO to be converted must be pre-hashed.
-        </p>
-      </section>
-      <section>
-        <h4 id="dpa_u_to_bo_hashed_static"><a class="var" href="#dpa_u_to_bo_hashed_static">dpa_u_to_bo_hashed_static</a></h4>
-        <p>
-          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>.
-          Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_hashed_t</a> to the specified BO.
-          It is tagged as a static BO.
-          The BO to be converted must be pre-hashed.
+          Converting unique BOs is not recommended, they are often small and not pre-hashed. Also, this function
+          will not take a <a class="var" href="#dpa_u_a_bo_unique_t">dpa_u_a_bo&shy;_unique_t</a><br/>
+          However, you can use <a class="var" href="#dpa_u_make_bo_hashed_do_hash">
+          dpa_u&shy;_make&shy;_bo&shy;_hashed&shy;_do&shy;_hash</a> or <a class="var" href="#dpa_u_alloc_bo_hashed_do_hash">
+          dpa_u&shy;_alloc&shy;_bo&shy;_hashed&shy;_do&shy;_hash</a>, they create a new hashed bo, hashing a BO is always
+          possible.
         </p>
       </section>
       <section>
         <h4 id="dpa_u_to_bo_refcounted"><a class="var" href="#dpa_u_to_bo_refcounted">dpa_u_to_bo_refcounted</a></h4>
         <p>
+          Takes a tagged BO pointer.
           Returns a <a class="var" href="#dpa_u_a_bo_refcounted_t">dpa_u_a_bo&shy;_refcounted_t</a> to the specified BO.
           If the conversion isn't allowed at runtime, an error object will be returned.
           The BO to be converted must be refcounted or static and can can't be a unique BO.

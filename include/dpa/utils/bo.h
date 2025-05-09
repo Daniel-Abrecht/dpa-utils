@@ -184,6 +184,36 @@ DPA__U_CHECK_GENERIC(dpa_u_to_bo_gc)
   )
 DPA__U_CHECK_GENERIC(dpa_u_to_bo_gc_static)
 
+dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_refcounted_h(dpa__u_boptr_t p){
+  if(dpa_u_bo_is_any_type(p, DPA_U_BO_REFCOUNTED))
+    return p;
+  return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+}
+#define dpa_u_to_bo_refcounted(X) _Generic((X), \
+    struct dpa__u_a_bo_gc        : (dpa_u_a_bo_gc_t){dpa__u_to_bo_refcounted_h(DPA__G(struct dpa__u_a_bo_gc,     (X)).p)}, \
+    struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_gc_t){DPA__G(struct dpa__u_a_bo_refcounted, (X)).p}, \
+    struct dpa__u_a_bo_any       : (dpa_u_a_bo_gc_t){dpa__u_to_bo_refcounted_h(DPA__G(struct dpa__u_a_bo_any,    (X)).p)}, \
+    struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_gc_t){dpa__u_to_bo_refcounted_h(DPA__G(struct dpa__u_a_bo_hashed, (X)).p)}, \
+    \
+    dpa__u_noop_t: 1 \
+  )
+DPA__U_CHECK_GENERIC(dpa_u_to_bo_refcounted)
+
+dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_hashed_h(dpa__u_boptr_t p){
+  if(dpa_u_bo_is_any_type(p, DPA_U_BO_HASHED))
+    return p;
+  return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+}
+#define dpa_u_to_bo_hashed(X) _Generic((X), \
+    struct dpa__u_a_bo_gc        : (dpa_u_a_bo_gc_t){dpa__u_to_bo_hashed_h(DPA__G(struct dpa__u_a_bo_gc,     (X)).p)}, \
+    struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_gc_t){dpa__u_to_bo_hashed_h(DPA__G(struct dpa__u_a_bo_refcounted, (X)).p)}, \
+    struct dpa__u_a_bo_any       : (dpa_u_a_bo_gc_t){dpa__u_to_bo_hashed_h(DPA__G(struct dpa__u_a_bo_any,    (X)).p)}, \
+    struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_gc_t){DPA__G(struct dpa__u_a_bo_hashed, (X)).p}, \
+    \
+    dpa__u_noop_t: 1 \
+  )
+DPA__U_CHECK_GENERIC(dpa_u_to_bo_hashed)
+
 /**
  * This is not a cryptographc hash function.
  * This is meant for things like a hash map.
