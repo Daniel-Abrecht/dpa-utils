@@ -1,5 +1,7 @@
 #include <dpa/utils/bo.h>
 
+extern dpa__u_bo_hashed_t dpa_u_make_bo_any_do_hash_h3(dpa__u_boptr_t p);
+extern dpa__u_bo_refcounted_hashed_t dpa_u_make_bo_any_do_hash_h2(dpa__u_boptr_t p);
 extern dpa__u_boptr_t dpa__u_alloc_bo_p_with_refcount_hash_p(const dpa_u_bo_t bo, dpa_u_refcount_freeable_t* refcount, uint64_t hash);
 extern dpa__u_boptr_t dpa__u_alloc_bo_p_with_refcount_p(const dpa_u_bo_t bo, dpa_u_refcount_freeable_t* refcount);
 extern dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h(const dpa__u_boptr_t bo);
