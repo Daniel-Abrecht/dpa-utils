@@ -6,8 +6,8 @@
   <title>DAP-Utils - Buffer Object (BO)</title>
 </head>
 <body>
-<ui-index></ui-index>
 <section>
+  <ui-index></ui-index>
   <h1 id="top"><a href="#top">DAP-Utils - Buffer Object (BO)</a></h1>
   <p class="nocolumn">#include &lt;dpa/utils/bo.h&gt;</p>
   <p>
@@ -432,7 +432,7 @@
         </p>
       </section>
       <section>
-        <h4 id="dpa_u_make_bo_any_with_refcount_do_hash"><a class="var" href="#dpa_u_make_bo_any_with_refcount_hash">dpa_u_make_bo_any_with_refcount_hash</a></h4>
+        <h4 id="dpa_u_make_bo_any_with_refcount_do_hash"><a class="var" href="#dpa_u_make_bo_any_with_refcount_do_hash">dpa_u_make_bo_any_with_refcount_do_hash</a></h4>
         <p>
           Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
           <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
@@ -528,7 +528,6 @@
         <p>
           Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>.
           Creates a new BO object in the current block scope with a pointer to a refcount.
-          If the conversion isn't allowed at runtime, an error object will be returned.
           Returns a <a class="var" href="#dpa_u_a_bo_refcounted_t">dpa_u_a_bo&shy;_refcounted_t</a> with the static flag set.
         </p>
       </section>
@@ -719,7 +718,7 @@
         </p>
       </section>
       <section>
-        <h4 id="dpa_u_alloc_bo_any_with_refcount_do_hash"><a class="var" href="#dpa_u_alloc_bo_any_with_refcount_hash">dpa_u_alloc_bo_any_with_refcount_hash</a></h4>
+        <h4 id="dpa_u_alloc_bo_any_with_refcount_do_hash"><a class="var" href="#dpa_u_alloc_bo_any_with_refcount_do_hash">dpa_u_alloc_bo_any_with_refcount_do_hash</a></h4>
         <p>
           Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
           <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
@@ -735,17 +734,6 @@
           Takes a tagged BO pointer. Allocates a new BO.
           If the conversion isn't allowed at runtime, an error object will be returned.
           Returns a <a class="var" href="#dpa_u_a_bo_gc_t">dpa_u_a_bo&shy;_gc_t</a>.
-        </p>
-      </section>
-      <section>
-        <h4 id="dpa_u_alloc_bo_any_with_refcount_do_hash"><a class="var" href="#dpa_u_alloc_bo_any_with_refcount_hash">dpa_u_alloc_bo_any_with_refcount_hash</a></h4>
-        <p>
-          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>, a pointer to a
-          <a class="var" href="refcount.html#dpa_u_refcount_freeable_t">dpa_u&shy;_refcount&shy;_freeable_t</a>.
-          The bo will be hashed.
-          Allocates a new BO with a pointer to a refcount and a hash. If the refcount is static, the BO pointer
-          is tagged as static.
-          Returns a <a class="var" href="#dpa_u_a_bo_any_t">dpa_u_a_bo&shy;_any_t*</a>.
         </p>
       </section>
       <section>
@@ -821,6 +809,15 @@
           If the conversion isn't allowed at runtime, an error object will be returned.
           This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
           Returns a <a class="var" href="#dpa_u_a_bo_refcounted_t">#dpa_u_a_bo&shy;_refcounted_t</a>.
+        </p>
+      </section>
+      <section>
+        <h4 id="dpa_u_alloc_bo_refcounted_static"><a class="var" href="#dpa_u_alloc_bo_refcounted_static">dpa_u_alloc_bo_refcounted_static</a></h4>
+        <p>
+          Takes a <a class="var" href="#dpa_u_bo_t">dpa_u_bo_t</a>.
+          Allocates a new BO with a pointer to a refcount.
+          This BO must be freed later using <a class="var" href="#dpa_u_bo_free">dpa_u_bo_free</a>.
+          Returns a <a class="var" href="#dpa_u_a_bo_refcounted_t">#dpa_u_a_bo&shy;_refcounted_t</a> tagged as static.
         </p>
       </section>
       <section>

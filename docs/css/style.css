@@ -44,7 +44,7 @@ var, .var {
   font-weight: bold;
 }
 
-table, section, section > :is(h1,h2,h3,h4,h5,h6), .nocolumn, code, figure {
+table, section, section > :is(h1,h2,h3,h4,h5,h6), .nocolumn, code, figure, ui-index {
   break-inside: avoid-column;
   column-span: all;
 }
@@ -60,7 +60,7 @@ figure {
 }
 
 @supports (orphans: 10) {
-  section:not(.nocolumn) {
+  section:not(.nocolumn) p:not(.nocolumn) {
     text-align: justify;
     column-width: 20em;
     orphans: 10;
@@ -69,8 +69,18 @@ figure {
 }
 
 @supports not (orphans: 10) {
-  section {
+  p {
     max-width: 75em;
+  }
+  section {
+    display: inline;
+  }
+}
+
+@media (max-width: 100rem) {
+  ui-index {
+    position: absolute;
+    left: 100%;
   }
 }
 
