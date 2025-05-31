@@ -5,8 +5,8 @@
 
 /**
  * This example shows how any bo can be automatically converted and passed
- * to a function as dpa_u_bo_t argument using the dpa_u_v_bo_ro macro.
- * There are many conversion macros besides dpa_u_v_bo_ro, to make it easy to convert to other bo types when possible.
+ * to a function as dpa_u_bo_t argument using the dpa_u_to_bo macro.
+ * There are many conversion macros besides dpa_u_to_bo, to make it easy to convert to other bo types when possible.
  *
  * The dpa_u_puts macro doesn't do this to allow more optimisations, althoug it'll probably not matter in practice.
  */
@@ -62,10 +62,10 @@ int main(void){
   {
     printf(
       "Creating a dpa_u_a_bo_unique_t instance with an error value: %.7s %.7s %.7s %.7s %s\n",
-      dpa_u_bo_get_data(dpa_u_bo_error(EINVAL)),
-      dpa_u_bo_get_data(dpa_u_bo_error(123456)),
-      dpa_u_bo_get_data(dpa_u_bo_error(1234568)),
-      dpa_u_bo_get_data(dpa_u_bo_intern(dpa_u_bo_error(EPERM))),
+      (const char*)dpa_u_bo_get_data(dpa_u_bo_error(EINVAL)),
+      (const char*)dpa_u_bo_get_data(dpa_u_bo_error(123456)),
+      (const char*)dpa_u_bo_get_data(dpa_u_bo_error(1234568)),
+      (const char*)dpa_u_bo_get_data(dpa_u_bo_intern(dpa_u_bo_error(EPERM))),
       dpa_u_bo_is_error(dpa_u_bo_error(EINVAL)) ? "true" : "false"
     );
   }
