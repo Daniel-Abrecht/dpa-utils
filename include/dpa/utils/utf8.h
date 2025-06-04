@@ -52,4 +52,22 @@ dpa__u_api inline unsigned char* dpa_u_utf8_from_code_point_p(unsigned char mem[
   return mem;
 }
 
+/**
+ * This stores the current state for the \ref dpa_u_utf8_validate function.
+ * To initialise or reset it, just make sure it's zeroed out.
+ */
+struct dpa_u_streaming_utf8_validator {
+  uint_least8_t index : 3;
+  uint_least8_t state : 4;
+};
+
+/**
+ * For validating if a sequence of bytes is valid UTF-8.
+ * \param v The validator state
+ * \param ch The next character or EOF if the sequence is complete
+ * \returns true if everything is OK, false if the sequence wasn't valid.
+ */
+dpa__u_api bool dpa_u_utf8_validate(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch);
+/** @} */
+
 #endif
