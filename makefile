@@ -215,7 +215,7 @@ test: $(B-TS)
 	$(B-TS) utils $(MAKE) -k $(TESTS)
 
 bin: $(BINS)
-	@f="$$(find build/$(TYPE) -iname '*$(o-ext).err')"; \
+	@f="$$(find build/$(TYPE) -iname '*$(o-ext).err' | grep -v '/test/')"; \
 	if [ -n "$$f" ]; then printf "\nThere have been warnings, see logs:\n%s\n" "$$f"; fi
 
 asm: $(ASMOUT)
