@@ -82,6 +82,8 @@ B-TS := bin/$(TYPE)/dpa-testsuite$(bin-ext)
 
 BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%$(bin-ext),$(filter src/main/%.c,$(SOURCES)))
 TESTS := $(patsubst test/%.c,test//%,$(filter test/%.c,$(SOURCES)))
+#tests += test//bo-conv
+BO-CONV-TESTS := $(patsubst test/%.c,test//%,$(wildcard test/gen/*.c))
 
 export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 
@@ -205,6 +207,9 @@ do-test//%: test/% $(B-TS)
 
 test//%: $(B-TS) FORCE
 	PATH="bin/$(TYPE)/:script/:$$PATH" $(B-TS) $* $(MAKE) "do-test//$*"
+
+test//bo-conv: $(B-TS) FORCE
+	$(B-TS) bo-conv $(MAKE) -k $(BO-CONV-TESTS)
 
 test: $(B-TS)
 	$(B-TS) utils $(MAKE) -k $(TESTS)

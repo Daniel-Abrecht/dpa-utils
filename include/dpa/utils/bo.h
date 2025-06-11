@@ -603,17 +603,17 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t
 DPA__U_CHECK_GENERIC(dpa_u_bo_copy_maybe)
 
 
-#define dpa_u_make_bo_any_static_with_hash(X, H) \
+#define dpa_u_make_a_bo_any_static_with_hash(X, H) \
   ((dpa_u_a_bo_any_t){DPA__U_BO_TAG(&(dpa__u_bo_hashed_t){.bo=(X), .hash=(H)}, DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_STATIC)})
 
-#define dpa_u_make_bo_any_with_hash(X, H) \
+#define dpa_u_make_a_bo_any_with_hash(X, H) \
   ((dpa_u_a_bo_any_t){DPA__U_BO_TAG(&(dpa__u_bo_hashed_t){.bo=(X), .hash=(H)}, DPA_U_BO_SIMPLE|DPA_U_BO_HASHED)})
 
-#define dpa_u_make_bo_hashed_with_hash(X, H) \
+#define dpa_u_make_a_bo_hashed_with_hash(X, H) \
   ((dpa_u_a_bo_hashed_t){DPA__U_BO_TAG(&(dpa__u_bo_hashed_t){.bo=(X), .hash=(H)}, DPA_U_BO_SIMPLE|DPA_U_BO_HASHED)})
 
 // TODO: If (R) has side effects, that could cause trouble
-#define dpa_u_make_bo_any_with_refcount(X, R) \
+#define dpa_u_make_a_bo_any_with_refcount(X, R) \
   ((dpa_u_a_bo_any_t){ \
     DPA__U_BO_TAG( \
       &(dpa__u_bo_refcounted_t){ \
@@ -627,7 +627,7 @@ DPA__U_CHECK_GENERIC(dpa_u_bo_copy_maybe)
   })
 
 // TODO: If (R) has side effects, that could cause trouble
-#define dpa_u_make_bo_any_with_refcount_hash(X, R, H) \
+#define dpa_u_make_a_bo_any_with_refcount_hash(X, R, H) \
   ((dpa_u_a_bo_any_t){ \
     DPA__U_BO_TAG( \
       &(dpa__u_bo_refcounted_hashed_t){ \
@@ -643,11 +643,11 @@ DPA__U_CHECK_GENERIC(dpa_u_bo_copy_maybe)
     ) \
   })
 
-#define dpa_u_make_bo_gc_static_with_hash(X, H) \
+#define dpa_u_make_a_bo_gc_static_with_hash(X, H) \
   ((dpa_u_a_bo_gc_t){DPA__U_BO_TAG(&(dpa__u_bo_hashed_t){.bo=(X), .hash=(H)}, DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_STATIC)})
 
 // TODO: If (R) has side effects, that could cause trouble
-#define dpa_u_make_bo_gc_with_refcount(X, R) \
+#define dpa_u_make_a_bo_gc_with_refcount(X, R) \
   ((dpa_u_a_bo_gc_t){ \
     DPA__U_BO_TAG( \
       &(dpa__u_bo_refcounted_t){ \
@@ -660,7 +660,7 @@ DPA__U_CHECK_GENERIC(dpa_u_bo_copy_maybe)
     ) \
   })
 
-#define dpa_u_make_bo_refcounted_with_refcount(X, R) \
+#define dpa_u_make_a_bo_refcounted_with_refcount(X, R) \
   ((dpa_u_a_bo_refcounted_t){ \
     DPA__U_BO_TAG( \
       &(dpa__u_bo_refcounted_t){ \
@@ -674,7 +674,7 @@ DPA__U_CHECK_GENERIC(dpa_u_bo_copy_maybe)
   })
 
 // TODO: If (R) has side effects, that could cause trouble
-#define dpa_u_make_bo_gc_with_refcount_hash(X, R, H) \
+#define dpa_u_make_a_bo_gc_with_refcount_hash(X, R, H) \
   ((dpa_u_a_bo_gc_t){ \
     DPA__U_BO_TAG( \
       &(dpa__u_bo_refcounted_hashed_t){ \
@@ -690,7 +690,7 @@ DPA__U_CHECK_GENERIC(dpa_u_bo_copy_maybe)
     ) \
   })
 
-#define dpa_u_make_bo_hashed_with_refcount_hash(X, R, H) \
+#define dpa_u_make_a_bo_hashed_with_refcount_hash(X, R, H) \
   ((dpa_u_a_bo_hashed_t){ \
     DPA__U_BO_TAG( \
       &(dpa__u_bo_refcounted_hashed_t){ \
@@ -706,7 +706,7 @@ DPA__U_CHECK_GENERIC(dpa_u_bo_copy_maybe)
     ) \
   })
 
-#define dpa_u_make_bo_refcounted_with_refcount_hash(X, R, H) \
+#define dpa_u_make_a_bo_refcounted_with_refcount_hash(X, R, H) \
   ((dpa_u_a_bo_refcounted_t){ \
     DPA__U_BO_TAG( \
       &(dpa__u_bo_refcounted_hashed_t){ \
@@ -809,7 +809,7 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_bo_hashed_t dpa__u_make_bo_any_do_has
        ? DPA__U_BO_TAG( &dpa_u_rescope(dpa__u_bo_refcounted_hashed_t, *dpa_u_container_of(DPA__U_BO_UNTAG(dpa_u_bo_t*, (X)), dpa__u_bo_refcounted_hashed_t, rbo.bo)), dpa_u_bo_get_type((X)) ) \
        : DPA__U_BO_TAG( &dpa_u_rescope(dpa__u_bo_hashed_t, *DPA__U_BO_UNTAG(dpa__u_bo_hashed_t*, (X))), dpa_u_bo_get_type((X)) )
 
-#define dpa_u_make_bo_any_do_hash(X) _Generic((X), \
+#define dpa_u_make_a_bo_any_do_hash(X) _Generic((X), \
     dpa_u_bo_t: ((dpa_u_a_bo_any_t){DPA__U_BO_TAG((&(dpa__u_bo_hashed_t){.bo=DPA__G(dpa_u_bo_t, (X)), .hash=dpa__u_bo_hash(DPA__G(dpa_u_bo_t, (X)))}), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED)}), \
     \
     struct dpa__u_a_bo_unique    : (dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_unique, (X)).p}, \
@@ -820,19 +820,19 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_bo_hashed_t dpa__u_make_bo_any_do_has
     \
     dpa__u_noop_t: 1 \
   )
-DPA__U_CHECK_GENERIC(dpa_u_make_bo_any_do_hash)
+DPA__U_CHECK_GENERIC(dpa_u_make_a_bo_any_do_hash)
 
-#define dpa_u_make_bo_any_static_do_hash(X) \
+#define dpa_u_make_a_bo_any_static_do_hash(X) \
   ((dpa_u_a_bo_any_t){DPA__U_BO_TAG((&(dpa__u_bo_hashed_t){.bo=(X), .hash=dpa__u_bo_hash(X)}), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_STATIC)})
 
-#define dpa_u_make_bo_gc_static_do_hash(X) \
+#define dpa_u_make_a_bo_gc_static_do_hash(X) \
   ((dpa_u_a_bo_gc_t){DPA__U_BO_TAG((&(dpa__u_bo_hashed_t){.bo=(X), .hash=dpa__u_bo_hash(X)}), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_STATIC)})
 
-#define dpa_u_make_bo_hashed_static dpa_u_make_bo_hashed_static_do_hash
-#define dpa_u_make_bo_hashed_static_do_hash(X) \
+#define dpa_u_make_a_bo_hashed_static dpa_u_make_a_bo_hashed_static_do_hash
+#define dpa_u_make_a_bo_hashed_static_do_hash(X) \
   ((dpa_u_a_bo_hashed_t){DPA__U_BO_TAG((&(dpa__u_bo_hashed_t){.bo=(X), .hash=dpa__u_bo_hash(X)}), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_STATIC)})
 
-#define dpa_u_make_bo_any_with_refcount_do_hash(X, R) \
+#define dpa_u_make_a_bo_any_with_refcount_do_hash(X, R) \
   ((dpa_u_a_bo_any_t){ \
     DPA__U_BO_TAG( \
       (&(dpa__u_bo_refcounted_hashed_t){ \
@@ -848,7 +848,7 @@ DPA__U_CHECK_GENERIC(dpa_u_make_bo_any_do_hash)
     ) \
   })
 
-#define dpa_u_make_bo_gc_with_refcount_do_hash(X, R) \
+#define dpa_u_make_a_bo_gc_with_refcount_do_hash(X, R) \
   ((dpa_u_a_bo_gc_t){ \
     DPA__U_BO_TAG( \
       (&(dpa__u_bo_refcounted_hashed_t){ \
@@ -864,7 +864,7 @@ DPA__U_CHECK_GENERIC(dpa_u_make_bo_any_do_hash)
     ) \
   })
 
-#define dpa_u_make_bo_refcounted_with_refcount_do_hash(X, R) \
+#define dpa_u_make_a_bo_refcounted_with_refcount_do_hash(X, R) \
   ((dpa_u_a_bo_refcounted_t){ \
     DPA__U_BO_TAG( \
       (&(dpa__u_bo_refcounted_hashed_t){ \
@@ -880,7 +880,7 @@ DPA__U_CHECK_GENERIC(dpa_u_make_bo_any_do_hash)
     ) \
   })
 
-#define dpa_u_make_bo_hashed_with_refcount_do_hash(X, R) \
+#define dpa_u_make_a_bo_hashed_with_refcount_do_hash(X, R) \
   ((dpa_u_a_bo_hashed_t){ \
     DPA__U_BO_TAG( \
       (&(dpa__u_bo_refcounted_hashed_t){ \
@@ -896,7 +896,7 @@ DPA__U_CHECK_GENERIC(dpa_u_make_bo_any_do_hash)
     ) \
   })
 
-#define dpa_u_make_bo_hashed dpa_u_make_bo_hashed_do_hash
+#define dpa_u_make_a_bo_hashed dpa_u_make_a_bo_hashed_do_hash
 
 #define dpa__u_make_bo_hashed_do_hash_h1(X) \
   (dpa_u_bo_is_any_type((X), DPA_U_BO_UNIQUE) || !dpa_u_bo_is_any_type((X), DPA_U_BO_SIMPLE)) \
@@ -905,7 +905,7 @@ DPA__U_CHECK_GENERIC(dpa_u_make_bo_any_do_hash)
        ? DPA__U_BO_TAG( &dpa_u_rescope(dpa__u_bo_refcounted_hashed_t, dpa__u_make_bo_any_do_hash_h2((X))), dpa_u_bo_get_type((X)) | (DPA_U_BO_REFCOUNTED | DPA_U_BO_HASHED) ) \
        : DPA__U_BO_TAG( &dpa_u_rescope(dpa__u_bo_hashed_t, dpa__u_make_bo_any_do_hash_h3((X))), dpa_u_bo_get_type((X)) | DPA_U_BO_HASHED ) \
 
-#define dpa_u_make_bo_hashed_do_hash(X) _Generic((X), \
+#define dpa_u_make_a_bo_hashed_do_hash(X) _Generic((X), \
     dpa_u_bo_t: ((dpa_u_a_bo_hashed_t){DPA__U_BO_TAG((&(dpa__u_bo_hashed_t){.bo=DPA__G(dpa_u_bo_t, (X)), .hash=dpa__u_bo_hash(DPA__G(dpa_u_bo_t, (X)))}), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED)}), \
     \
     struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_hashed_t){dpa__u_make_bo_any_do_hash_h5(DPA__G(struct dpa__u_a_bo_hashed, (X)).p)}, \
@@ -915,7 +915,7 @@ DPA__U_CHECK_GENERIC(dpa_u_make_bo_any_do_hash)
     \
     dpa__u_noop_t: 1 \
   )
-DPA__U_CHECK_GENERIC(dpa_u_make_bo_hashed_do_hash)
+DPA__U_CHECK_GENERIC(dpa_u_make_a_bo_hashed_do_hash)
 
 #define dpa__u_make_bo_gc_do_hash_h1(X) \
   (dpa_u_bo_is_any_type((X), DPA_U_BO_UNIQUE) || !dpa_u_bo_is_any_type((X), DPA_U_BO_SIMPLE)) \
@@ -935,7 +935,7 @@ DPA__U_CHECK_GENERIC(dpa_u_make_bo_hashed_do_hash)
           ? DPA__U_BO_TAG( &dpa_u_rescope(dpa__u_bo_hashed_t, *DPA__U_BO_UNTAG(dpa__u_bo_hashed_t*, (X))), dpa_u_bo_get_type((X)) ) \
           : (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')}
 
-#define dpa_u_make_bo_gc_do_hash(X) _Generic((X), \
+#define dpa_u_make_a_bo_gc_do_hash(X) _Generic((X), \
     struct dpa__u_a_bo_unique    : (dpa_u_a_bo_hashed_t){DPA__G(struct dpa__u_a_bo_unique, (X)).p}, \
     struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_hashed_t){dpa__u_make_bo_gc_do_hash_h5(DPA__G(struct dpa__u_a_bo_hashed, (X)).p)}, \
     struct dpa__u_a_bo_any       : (dpa_u_a_bo_hashed_t){dpa__u_make_bo_gc_do_hash_h1(DPA__G(struct dpa__u_a_bo_any,(X)).p)}, \
@@ -944,9 +944,9 @@ DPA__U_CHECK_GENERIC(dpa_u_make_bo_hashed_do_hash)
     \
     dpa__u_noop_t: 1 \
   )
-DPA__U_CHECK_GENERIC(dpa_u_make_bo_gc_do_hash)
+DPA__U_CHECK_GENERIC(dpa_u_make_a_bo_gc_do_hash)
 
-#define dpa_u_make_bo_hashed_static_with_hash(X, H) \
+#define dpa_u_make_a_bo_hashed_static_with_hash(X, H) \
   ((dpa_u_a_bo_hashed_t){DPA__U_BO_TAG(&(dpa__u_bo_hashed_t){.bo=(X), .hash=(H)}, DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_STATIC)})
 
 #define dpa__u_make_bo_gc_h1(X) \
@@ -978,24 +978,24 @@ DPA__U_CHECK_GENERIC(dpa_u_make_bo_gc_do_hash)
        ? DPA__U_BO_TAG( &dpa_u_rescope(dpa__u_bo_refcounted_hashed_t, *dpa_u_container_of(DPA__U_BO_UNTAG(dpa_u_bo_t*, (X)), dpa__u_bo_refcounted_hashed_t, rbo.bo)), dpa_u_bo_get_type((X)) ) \
        : DPA__U_BO_TAG( &dpa_u_rescope(dpa__u_bo_refcounted_t, *dpa_u_container_of(DPA__U_BO_UNTAG(dpa_u_bo_t*, (X)), dpa__u_bo_refcounted_t, bo)), dpa_u_bo_get_type((X)) )
 
-#define dpa_u_make_bo_gc(X) _Generic((X), \
-    struct dpa__u_a_bo_unique    : (dpa_u_a_bo_hashed_t){DPA__G(struct dpa__u_a_bo_unique, (X)).p}, \
-    struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_hashed_t){dpa__u_make_bo_gc_h5(DPA__G(struct dpa__u_a_bo_hashed, (X)).p)}, \
-    struct dpa__u_a_bo_any       : (dpa_u_a_bo_hashed_t){dpa__u_make_bo_gc_h1(DPA__G(struct dpa__u_a_bo_any,(X)).p)}, \
-    struct dpa__u_a_bo_gc        : (dpa_u_a_bo_hashed_t){dpa__u_make_bo_gc_h1(DPA__G(struct dpa__u_a_bo_gc, (X)).p)}, \
-    struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_hashed_t){dpa__u_make_bo_any_h4(DPA__G(struct dpa__u_a_bo_refcounted, (X)).p)}, \
+#define dpa_u_make_a_bo_gc(X) _Generic((X), \
+    struct dpa__u_a_bo_unique    : (dpa_u_a_bo_gc_t){DPA__G(struct dpa__u_a_bo_unique, (X)).p}, \
+    struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_gc_t){dpa__u_make_bo_gc_h5(DPA__G(struct dpa__u_a_bo_hashed, (X)).p)}, \
+    struct dpa__u_a_bo_any       : (dpa_u_a_bo_gc_t){dpa__u_make_bo_gc_h1(DPA__G(struct dpa__u_a_bo_any,(X)).p)}, \
+    struct dpa__u_a_bo_gc        : (dpa_u_a_bo_gc_t){dpa__u_make_bo_gc_h1(DPA__G(struct dpa__u_a_bo_gc, (X)).p)}, \
+    struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_gc_t){dpa__u_make_bo_any_h4(DPA__G(struct dpa__u_a_bo_refcounted, (X)).p)}, \
     \
     dpa__u_noop_t: 1 \
   )
-DPA__U_CHECK_GENERIC(dpa_u_make_bo_gc)
+DPA__U_CHECK_GENERIC(dpa_u_make_a_bo_gc)
 
 /*
-dpa_u_make_bo_any
-dpa_u_make_bo_any_static
-dpa_u_make_bo_refcounted_static
-dpa_u_make_bo_gc_static
-dpa_u_make_bo_refcounted
-dpa_u_make_bo_refcounted_do_hash
+dpa_u_make_a_bo_any
+dpa_u_make_a_bo_any_static
+dpa_u_make_a_bo_refcounted_static
+dpa_u_make_a_bo_gc_static
+dpa_u_make_a_bo_refcounted
+dpa_u_make_a_bo_refcounted_do_hash
 */
 
 #endif

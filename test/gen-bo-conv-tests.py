@@ -1,0 +1,228 @@
+#!/usr/bin/env python3
+
+import json
+
+# STATIC UNIQUE REFCOUNTED HASHED SIMPLE
+
+types={
+  "bo": {
+    "tags": frozenset({
+      frozenset({"SIMPLE"})
+    }),
+    "conv_macros": True
+  },
+  "a_bo_unique": {
+    "tags": frozenset({
+      frozenset({"UNIQUE"}),
+      frozenset({"SIMPLE","UNIQUE","REFCOUNTED"}),
+      frozenset({"SIMPLE","UNIQUE","REFCOUNTED","HASHED"}),
+      frozenset({"STATIC","SIMPLE","UNIQUE"}),
+      frozenset({"STATIC","SIMPLE","UNIQUE","HASHED"}),
+    }),
+    "conv_macros": False
+  },
+  "a_bo_any": {
+    "tags": frozenset({
+      frozenset({"UNIQUE"}),
+      frozenset({"SIMPLE","UNIQUE","REFCOUNTED"}),
+      frozenset({"SIMPLE","UNIQUE","REFCOUNTED","HASHED"}),
+      frozenset({"STATIC","SIMPLE","UNIQUE","REFCOUNTED"}),
+      frozenset({"STATIC","SIMPLE","UNIQUE","REFCOUNTED","HASHED"}),
+      frozenset({"SIMPLE"}),
+      frozenset({"SIMPLE","REFCOUNTED"}),
+      frozenset({"SIMPLE","HASHED"}),
+      frozenset({"SIMPLE","REFCOUNTED","HASHED"}),
+      frozenset({"STATIC","SIMPLE"}),
+      frozenset({"STATIC","SIMPLE","REFCOUNTED"}),
+      frozenset({"STATIC","SIMPLE","HASHED"}),
+      frozenset({"STATIC","SIMPLE","REFCOUNTED","HASHED"}),
+    }),
+    "conv_macros": True
+  },
+  "a_bo_gc": {
+    "tags": frozenset({
+      frozenset({"UNIQUE"}),
+      frozenset({"SIMPLE","UNIQUE","REFCOUNTED"}),
+      frozenset({"SIMPLE","UNIQUE","REFCOUNTED","HASHED"}),
+      frozenset({"STATIC","SIMPLE","UNIQUE","REFCOUNTED"}),
+      frozenset({"STATIC","SIMPLE","UNIQUE","REFCOUNTED","HASHED"}),
+      frozenset({"SIMPLE","REFCOUNTED"}),
+      frozenset({"SIMPLE","REFCOUNTED","HASHED"}),
+      frozenset({"STATIC","SIMPLE"}),
+      frozenset({"STATIC","SIMPLE","REFCOUNTED"}),
+      frozenset({"STATIC","SIMPLE","HASHED"}),
+      frozenset({"STATIC","SIMPLE","REFCOUNTED","HASHED"}),
+    }),
+    "conv_macros": True
+  },
+  "a_bo_refcounted": {
+    "tags": frozenset({
+      frozenset({"SIMPLE","REFCOUNTED"}),
+      frozenset({"SIMPLE","REFCOUNTED","HASHED"}),
+      frozenset({"STATIC","SIMPLE"}),
+      frozenset({"STATIC","SIMPLE","REFCOUNTED"}),
+      frozenset({"STATIC","SIMPLE","HASHED"}),
+      frozenset({"STATIC","SIMPLE","REFCOUNTED","HASHED"}),
+    }),
+    "conv_macros": True
+  },
+  "a_bo_hashed": {
+    "tags": frozenset({
+      frozenset({"SIMPLE","HASHED"}),
+      frozenset({"SIMPLE","REFCOUNTED","HASHED"}),
+      frozenset({"STATIC","SIMPLE","HASHED"}),
+      frozenset({"STATIC","SIMPLE","REFCOUNTED","HASHED"}),
+    }),
+    "conv_macros": True
+  }
+}
+for name, entry in types.items():
+  entry["name"] = name
+
+vi=0
+def get_bo(datatype, tags, value=None, refcount=None):
+  global vi
+  tags = frozenset(tags)
+  typeinfo = types.get(datatype)
+  if not typeinfo:
+    return None
+  if tags not in typeinfo['tags']:
+    return None
+  if not value:
+    vi += 1
+    if 'UNIQUE' in tags:
+      if 'SIMPLE' not in tags:
+        value = str(vi)
+      elif 'HASHED' in tags:
+        value = str(vi) + ' ' * 64
+      else:
+        value = str(vi) + ' ' * 7
+    else:
+      value = str(vi)
+  bo_data = f"""{{
+    .size={len(value)},
+    .data={json.dumps(value)}
+  }}"""
+  bo_data_r = bo_data
+  if 'REFCOUNTED' in tags and 'UNIQUE' not in tags and 'STATIC' not in tags:
+    bo_data_r = f"""{{
+      .size={len(value)},
+      .data=dpa_u_copy_p({json.dumps(value)}, {len(value)})
+    }}"""
+  if 'UNIQUE' in tags:
+    if 'SIMPLE' not in tags:
+      if len(value) > 7:
+        return None
+    elif 'HASHED' in tags:
+      if len(value) < 64:
+        return None
+    else:
+      if len(value) <= 7:
+        return None
+    stags = 'DPA_U_BO_SIMPLE'
+    if 'STATIC' in tags:
+      stags = 'DPA_U_BO_STATIC'
+    return bo_data, f'dpa__u_bo_intern_h(((dpa_u_a_bo_any_t){{DPA__U_BO_TAG((&(dpa_u_bo_t){bo_data}), {stags})}}))'
+  if datatype == 'bo':
+    if tags != frozenset({'SIMPLE'}):
+      return None
+    return bo_data, f'((dpa_u_bo_t){bo_data_r})'
+  if not refcount and 'REFCOUNTED' in tags:
+    if 'STATIC' in tags:
+      refcount = "&dpa_u_refcount_static_v_freeable"
+    else:
+      refcount = '&(dpa_u_refcount_freeable_t)dpa_u_refcount_i_freeable(1)'
+  if 'HASHED' in tags and 'REFCOUNTED' in tags:
+    return bo_data, f'''((dpa_u_{datatype}_t){{DPA__U_BO_TAG((&(struct dpa__u_bo_refcounted_hashed){{
+  .rbo = {{
+    .refcount = {refcount},
+    .bo = {bo_data_r}
+  }},
+  .hash = dpa__u_bo_hash((dpa_u_bo_t){bo_data})
+}}.rbo.bo), {"|".join("DPA_U_BO_"+x for x in tags)})}})'''
+  if 'REFCOUNTED' in tags:
+    return bo_data, f'''((dpa_u_{datatype}_t){{DPA__U_BO_TAG((&(struct dpa__u_bo_refcounted){{
+  .refcount = {refcount},
+  .bo = {bo_data_r}
+}}.bo), {"|".join("DPA_U_BO_"+x for x in tags)})}})'''
+  if 'HASHED' in tags:
+    return bo_data, f'''((dpa_u_{datatype}_t){{DPA__U_BO_TAG((&(struct dpa__u_bo_hashed){{
+  .bo = {bo_data_r},
+  .hash = dpa__u_bo_hash((dpa_u_bo_t){bo_data})
+}}.bo), {"|".join("DPA_U_BO_"+x for x in tags)})}})'''
+  return bo_data, f'((dpa_u_{datatype}_t){{DPA__U_BO_TAG((&(dpa_u_bo_t){bo_data_r}), {"|".join("DPA_U_BO_"+x for x in tags)})}})'
+
+def gen_testcase(f, outbo, inbo=types['bo'], intags=frozenset({'SIMPLE'}), outtags=None):
+  if not outtags:
+    outtags = intags
+  with_refcount = 'with_refcount' in f or 'with_refcount_hash' in f
+  with_hash = 'with_hash' in f or 'with_refcount_hash' in f
+  args=['inbo']
+  if with_refcount:
+    args.append('&refcount')
+  if with_hash:
+    args.append('hash')
+  args=f'({", ".join(args)})'
+  intags = frozenset(intags)
+  outtags = frozenset(outtags)
+  svi = str(vi)
+  sbo, sinbo = get_bo(inbo['name'], intags)
+  s = f"""\
+#include <dpa/utils/bo.h>
+#include <stdio.h>
+
+#define expect(X) \\
+  if(!(X)){{ \\
+    fprintf(stderr, "assertion failed: %s\\n", #X); \\
+    exit(1); \\
+  }}
+
+int main(){{
+  const dpa_u_{inbo['name']}_t inbo = {sinbo};
+"""
+  if with_refcount:
+    if 'STATIC' in intags:
+      s += f'  dpa_u_refcount_freeable_t refcount = dpa_u_refcount_static_v_freeable;\n';
+    else:
+      s += f'  dpa_u_refcount_freeable_t refcount = dpa_u_refcount_i_freeable(1);\n';
+  if with_hash:
+    s += f'  const uint64_t hash = dpa__u_bo_hash((dpa_u_bo_t){sbo});\n';
+  s += f"""\
+  const dpa_u_{outbo['name']}_t outbo = {f}{args};
+  expect((dpa_u_bo_get_type(outbo) & 0xF8) == ({"|".join("DPA_U_BO_"+x for x in outtags)}));
+  expect(dpa_u_bo_compare_data(inbo, outbo) == 0);
+  dpa_u_bo_put(outbo);
+}}
+"""
+  name=f'test/gen/{f}-from-{inbo["name"]}-{"-".join(sorted(intags))}.c'
+  with open(name, 'w') as f:
+    print(s, file=f)
+  #print(s)
+
+def gen_testcases():
+  for f in "dpa_u_make_", : # , "dpa_u_alloc_":
+    for a in types.values():
+      if not a['conv_macros']:
+        continue
+      if frozenset({"SIMPLE","REFCOUNTED"}) in a["tags"]:
+        gen_testcase(f'{f}{a["name"]}_with_refcount', a, types['bo'], {'SIMPLE'}, {'SIMPLE',"REFCOUNTED"})
+      if frozenset({"SIMPLE","HASHED"}) in a["tags"]:
+        gen_testcase(f'{f}{a["name"]}_with_hash', a, types['bo'], {'SIMPLE'}, {'SIMPLE',"HASHED"})
+      if frozenset({"SIMPLE","HASHED","REFCOUNTED"}) in a["tags"]:
+        gen_testcase(f'{f}{a["name"]}_with_refcount_hash', a, types['bo'], {'SIMPLE'}, {'SIMPLE',"REFCOUNTED","HASHED"})
+        gen_testcase(f'{f}{a["name"]}_with_refcount_do_hash', a, types['bo'], {'SIMPLE'}, {'SIMPLE',"REFCOUNTED","HASHED"})
+      if frozenset({"SIMPLE","HASHED","STATIC"}) in a["tags"]:
+        gen_testcase(f'{f}{a["name"]}_immortal_with_hash', a, types['bo'], {'SIMPLE'}, {'SIMPLE',"HASHED","STATIC"})
+        gen_testcase(f'{f}{a["name"]}_immortal_do_hash', a, types['bo'], {'SIMPLE'}, {'SIMPLE',"HASHED","STATIC"})
+      if frozenset({"SIMPLE","STATIC"}) in a["tags"]:
+        gen_testcase(f'{f}{a["name"]}_immortal', a, types['bo'], {'SIMPLE'}, {'SIMPLE',"STATIC"})
+      for b in types.values():
+        common_tags = a["tags"].intersection(b["tags"])
+        if len(common_tags) == 0:
+          continue
+        for tags in common_tags:
+          if a["name"] != 'bo':
+            gen_testcase(f'{f}{a["name"]}_do_hash', a, b, tags, frozenset({*tags,'HASHED'}))
+          gen_testcase(f'{f}{a["name"]}', a, b, tags)
+
+gen_testcases()
