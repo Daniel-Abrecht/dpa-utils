@@ -1,9 +1,25 @@
 #include <dpa/utils/bo.h>
 
-extern dpa__u_bo_hashed_t dpa__u_make_bo_any_do_hash_h3(dpa__u_boptr_t p);
-extern dpa__u_bo_refcounted_hashed_t dpa__u_make_bo_any_do_hash_h2(dpa__u_boptr_t p);
 extern dpa__u_boptr_t dpa__u_alloc_bo_p_with_refcount_hash_p(const dpa_u_bo_t bo, dpa_u_refcount_freeable_t* refcount, uint64_t hash);
 extern dpa__u_boptr_t dpa__u_alloc_bo_p_with_refcount_p(const dpa_u_bo_t bo, dpa_u_refcount_freeable_t* refcount);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_any(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_any_do_hash(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_bo_do_hash(dpa_u_bo_t bo, dpa__u_bo_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_hashed(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_refcounted(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_refcounted_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_gc_gc(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_gc_gc_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_gc_hashed(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_any(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_hashed(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_refcounted(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_hashed(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_unique_any(dpa__u_boptr_t boptr);
 extern dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h(const dpa__u_boptr_t bo);
 extern dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h2(const dpa__u_boptr_t bo);
 extern dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t bo);

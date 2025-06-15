@@ -82,7 +82,7 @@ B-TS := bin/$(TYPE)/dpa-testsuite$(bin-ext)
 
 BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%$(bin-ext),$(filter src/main/%.c,$(SOURCES)))
 TESTS := $(patsubst test/%.c,test//%,$(filter test/%.c,$(SOURCES)))
-#tests += test//bo-conv
+tests += test//bo-conv
 BO-CONV-TESTS := $(patsubst test/%.c,test//%,$(wildcard test/gen/*.c))
 
 export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
