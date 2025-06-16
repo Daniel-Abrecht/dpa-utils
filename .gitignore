@@ -11,3 +11,4 @@ lib/
 *~
 src/main/t-*
 tmp/
+__pycache__

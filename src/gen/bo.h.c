@@ -1,10 +1,12 @@
 #include <dpa/utils/bo.h>
 
-extern dpa__u_boptr_t dpa__u_alloc_bo_p_with_refcount_hash_p(const dpa_u_bo_t bo, dpa_u_refcount_freeable_t* refcount, uint64_t hash);
-extern dpa__u_boptr_t dpa__u_alloc_bo_p_with_refcount_p(const dpa_u_bo_t bo, dpa_u_refcount_freeable_t* refcount);
+extern dpa__u_bo_hashed_t dpa__u_bo__alloc_p_any_bo_do_hash(dpa_u_bo_t bo);
+extern dpa__u_bo_refcounted_hashed_t dpa__u_bo__alloc_p_refcounted_static_bo_do_hash(dpa_u_bo_t bo);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_any(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_any_do_hash(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
-extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_bo_do_hash(dpa_u_bo_t bo, dpa__u_bo_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_bo_with_refcount(dpa_u_bo_t bo, dpa_u_refcount_freeable_t* refcount, dpa__u_bo_refcounted_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_bo_with_refcount_do_hash(dpa_u_bo_t bo, dpa_u_refcount_freeable_t* refcount, dpa__u_bo_refcounted_hashed_t*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_bo_with_refcount_hash(dpa_u_bo_t bo, dpa_u_refcount_freeable_t* refcount, uint64_t hash, dpa__u_bo_refcounted_hashed_t*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_hashed(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_refcounted(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_refcounted_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
