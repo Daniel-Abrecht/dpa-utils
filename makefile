@@ -60,7 +60,7 @@ CSTD ?= c17
 CFLAGS  += --std=$(CSTD)
 CFLAGS  += -D_DEFAULT_SOURCE
 CFLAGS  += -Iinclude -I.
-CFLAGS  += -Wall -Wextra -pedantic #-Werror
+CFLAGS  := -Wall -Wextra -pedantic $(CFLAGS)
 #CFLAGS  += -fstack-protector-all
 CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces -Wno-static-in-inline
 #CFLAGS  += -fmax-errors=2

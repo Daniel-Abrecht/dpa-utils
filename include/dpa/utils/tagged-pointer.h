@@ -1,9 +1,12 @@
 #ifndef DPA_U_TAGGED_POINTER_H
 #define DPA_U_TAGGED_POINTER_H
 
+#include <dpa/utils/common.h>
 #include <stdint.h>
 
+#ifndef BYTE_ORDER
 #include <endian.h>
+#endif
 #ifndef BYTE_ORDER
 #error "BYTE_ORDER undefined. POSIX specifies that it should be defined in endian.h. You may need to define _DEFAULT_SOURCE or _GNU_SOURCE on some platforms (like glibc) to get it."
 #endif

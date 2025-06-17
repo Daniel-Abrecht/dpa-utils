@@ -1,9 +1,9 @@
 #ifndef DPA_U_THREADS_H
 #define DPA_U_THREADS_H
-#ifdef DPA_U_NO_THREADS
-#error "DPA_U_NO_THREADS has been specified!"
-#endif
 #include <dpa/utils/common.h>
+#ifdef DPA_U_NO_THREADS
+#warning "DPA_U_NO_THREADS has been specified!"
+#else
 #if !defined(__STDC_NO_THREADS__) && DPA__U__has_include(<threads.h>)
 #include <threads.h>
 #else
@@ -197,5 +197,6 @@ dpa__u_api inline void tss_delete(tss_t key){
   pthread_key_delete(key.v);
 }
 
+#endif
 #endif
 #endif

@@ -9,6 +9,7 @@ genexports(){
 declare -A extra
 extra=(
   ["bo.h"]="_bo/"
+  ["hash.h"]="_hash/"
 )
 
 root="$(realpath "$(dirname "$0")/..")"

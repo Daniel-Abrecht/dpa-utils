@@ -1,3 +1,5 @@
+#include <dpa/utils/common.h>
+#ifndef DPA_U_NO_THREADS
 #include <dpa/utils/threads.h>
 #ifdef DPA__U_THREADS_POLYFILL
 
@@ -39,4 +41,5 @@ dpa__u_api void* dpa__u_thrd_create_wrapper(void* p){
   return (void*)(uintptr_t)a->func(a->arg);
 }
 
+#endif
 #endif

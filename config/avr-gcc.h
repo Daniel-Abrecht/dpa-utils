@@ -1,4 +1,5 @@
-#define DPA_U_NO_BUILTIN
 #define DPA_U_NO_THREADS
-#define DPA_U_SINGLE_BUCKET
-#define DPA_U_BUCKET_BASE 6
+
+#define BYTE_ORDER 2
+#define LITTLE_ENDIAN 2
+#define BIG_ENDIAN 3

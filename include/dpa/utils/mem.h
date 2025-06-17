@@ -1,6 +1,7 @@
 #ifndef DPA_UTILS_MEM_H
 #define DPA_UTILS_MEM_H
 
+#include <dpa/utils/common.h>
 #include <dpa/utils/refcount.h>
 #include <stdalign.h>
 #include <stddef.h>
