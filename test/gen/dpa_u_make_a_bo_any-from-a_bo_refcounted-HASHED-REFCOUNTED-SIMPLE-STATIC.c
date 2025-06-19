@@ -12,7 +12,7 @@ int main(){
     .size=6,
     .data="test 1"
   };
-const dpa_u_a_bo_refcounted_t inbo = ((dpa_u_a_bo_refcounted_t){DPA__U_BO_TAG((&(struct dpa__u_bo_refcounted_hashed){
+  const dpa_u_a_bo_refcounted_t inbo = ((dpa_u_a_bo_refcounted_t){DPA__U_BO_TAG((&(struct dpa__u_bo_refcounted_hashed){
   .rbo = {
     .refcount = &dpa_u_refcount_static_v_freeable,
     .bo = bo

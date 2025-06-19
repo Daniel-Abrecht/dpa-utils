@@ -12,7 +12,7 @@ int main(){
     .size=6,
     .data="test 1"
   };
-const dpa_u_a_bo_hashed_t inbo = ((dpa_u_a_bo_hashed_t){DPA__U_BO_TAG((&(struct dpa__u_bo_hashed){
+  const dpa_u_a_bo_hashed_t inbo = ((dpa_u_a_bo_hashed_t){DPA__U_BO_TAG((&(struct dpa__u_bo_hashed){
   .bo = bo,
   .hash = dpa__u_bo_hash(bo)
 }.bo), DPA_U_BO_HASHED|DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)});

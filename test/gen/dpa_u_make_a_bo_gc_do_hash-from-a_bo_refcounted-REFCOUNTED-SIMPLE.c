@@ -13,7 +13,7 @@ int main(){
     .size=6,
     .data=refdata->data
   };
-const dpa_u_a_bo_refcounted_t inbo = ((dpa_u_a_bo_refcounted_t){DPA__U_BO_TAG((&(struct dpa__u_bo_refcounted){
+  const dpa_u_a_bo_refcounted_t inbo = ((dpa_u_a_bo_refcounted_t){DPA__U_BO_TAG((&(struct dpa__u_bo_refcounted){
   .refcount = &refdata->refcount,
   .bo = bo
 }.bo), DPA_U_BO_REFCOUNTED|DPA_U_BO_SIMPLE)});

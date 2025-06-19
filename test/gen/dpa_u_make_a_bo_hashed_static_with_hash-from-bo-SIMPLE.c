@@ -12,7 +12,7 @@ int main(){
     .size=6,
     .data="test 1"
   };
-const dpa_u_bo_t inbo = bo;
+  const dpa_u_bo_t inbo = bo;
   const uint64_t hash = dpa__u_bo_hash(bo);
   const dpa_u_a_bo_hashed_t outbo = dpa_u_make_a_bo_hashed_static_with_hash(inbo, hash);
   expect((dpa_u_bo_get_type(outbo) & (DPA_U_BO_STATIC|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED|DPA_U_BO_SIMPLE)) == (DPA_U_BO_HASHED|DPA_U_BO_SIMPLE|DPA_U_BO_STATIC));

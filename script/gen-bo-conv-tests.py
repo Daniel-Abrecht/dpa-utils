@@ -57,7 +57,7 @@ def get_bo(datatype, tags, value=None, refcount=None):
   return  f'((dpa_u_{datatype}_t){{DPA__U_BO_TAG(&bo, {"|".join("DPA_U_BO_"+x for x in sorted(tags))})}})'
 
 def gen_testcase(f, outbo, inbo=types['bo'], intags=frozenset({'SIMPLE'}), outtags=None):
-  if not outtags:
+  if outtags == None:
     outtags = intags
   with_refcount = 'with_refcount' in f or 'with_refcount_hash' in f
   with_hash = 'with_hash' in f or 'with_refcount_hash' in f
@@ -109,7 +109,7 @@ int main(){{
   }};
 """
   sinbo = get_bo(inbo['name'], intags, value)
-  s += f"const dpa_u_{inbo['name']}_t inbo = {sinbo};\n"
+  s += f"  const dpa_u_{inbo['name']}_t inbo = {sinbo};\n"
   if with_refcount:
     if 'STATIC' in intags:
       s += f'  dpa_u_refcount_freeable_t* refcount = &dpa_u_refcount_static_v_freeable;\n';
@@ -117,18 +117,19 @@ int main(){{
       s += f'  dpa_u_refcount_freeable_t* refcount = &refdata->refcount;\n';
   if with_hash:
     s += f'  const uint64_t hash = dpa__u_bo_hash(bo);\n';
-  s += f"""\
-  const dpa_u_{outbo['name']}_t outbo = {f}{args};
-"""
-  if 'STATIC' in outtags: # If a bo is static, it is always optional for it to have a refcount, because it'd always be a static refcount anyway
-    s += f"""  expect((dpa_u_bo_get_type(outbo) & (DPA_U_BO_STATIC|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED|DPA_U_BO_SIMPLE)) == ({"|".join("DPA_U_BO_"+x for x in sorted(outtags - {'REFCOUNTED'}))}));\n"""
+  s += f"""  const dpa_u_{outbo['name']}_t outbo = {f}{args};\n"""
+  if not outtags:
+    s += f"""  expect(dpa_u_bo_is_error(outbo));\n"""
   else:
-    s += f"""  expect((dpa_u_bo_get_type(outbo) & (DPA_U_BO_STATIC|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED|DPA_U_BO_SIMPLE)) == ({"|".join("DPA_U_BO_"+x for x in sorted(outtags))}));\n"""
-  s += f"""\
+    if 'STATIC' in outtags: # If a bo is static, it is always optional for it to have a refcount, because it'd always be a static refcount anyway
+      s += f"""  expect((dpa_u_bo_get_type(outbo) & (DPA_U_BO_STATIC|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED|DPA_U_BO_SIMPLE)) == ({"|".join("DPA_U_BO_"+x for x in sorted(outtags - {'REFCOUNTED'}))}));\n"""
+    else:
+      s += f"""  expect((dpa_u_bo_get_type(outbo) & (DPA_U_BO_STATIC|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED|DPA_U_BO_SIMPLE)) == ({"|".join("DPA_U_BO_"+x for x in sorted(outtags))}));\n"""
+    s += f"""\
   expect(dpa_u_bo_compare_data(inbo, outbo) == 0);
   dpa_u_bo_put(outbo);
-}}
 """
+  s += "}\n"
   name=f'test/gen/{f}-from-{inbo["name"]}-{"-".join(sorted(intags))}.c'
   with open(name, 'w') as f:
     print(s, file=f)
@@ -155,9 +156,13 @@ def gen_testcases():
         common_tags = a["tags"].intersection(b["tags"])
         if len(common_tags) == 0:
           continue
-        for tags in sorted(common_tags, key=lambda x: sorted(x)):
+        for tags in sorted(b['tags'], key=lambda x: sorted(x)):
+          otags = tags if 'UNIQUE' in tags else frozenset({*tags,'HASHED'})
           if a["name"] != 'bo':
-            gen_testcase(f'{f}{a["name"]}_do_hash', a, b, tags, tags if 'UNIQUE' in tags else frozenset({*tags,'HASHED'}))
-          gen_testcase(f'{f}{a["name"]}', a, b, tags)
+            otags = tags if 'UNIQUE' in tags else frozenset({*tags,'HASHED'})
+            gen_testcase(f'{f}{a["name"]}_do_hash', a, b, tags, otags if otags in a["tags"] else frozenset())
+          if a["name"] != 'a_bo_hashed':
+            otags = tags
+          gen_testcase(f'{f}{a["name"]}', a, b, tags, otags if otags in a["tags"] else frozenset())
 
 gen_testcases()

@@ -15,7 +15,7 @@ extern dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any_do_hash(dpa__u_boptr_t boptr, dp
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_gc_gc(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_gc_gc_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_gc_hashed(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
-extern dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_any(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
+extern dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_any_do_hash(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_hashed(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_refcounted(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);

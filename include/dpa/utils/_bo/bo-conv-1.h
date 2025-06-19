@@ -100,21 +100,24 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any_do_hash(dpa__u_boptr_
   return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HASHED);
 }
 
-// TODO: remove this function
-dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_any(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem){
+dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_any_do_hash(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem){
   const unsigned type = dpa_u_bo_get_type(boptr);
-  if(!(type & DPA_U_BO_HASHED) || (type & DPA_U_BO_UNIQUE))
+  if(type & DPA_U_BO_UNIQUE)
     return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+  if(!(type & DPA_U_BO_SIMPLE))
+    return boptr;
   const dpa_u_bo_t*restrict sbo = DPA__U_BO_UNTAG(const dpa_u_bo_t*restrict, boptr);
   dpa_u_bo_t*restrict dbo = type & DPA_U_BO_REFCOUNTED ? &cmem->rh.rbo.bo : &cmem->hr.hashed.bo;
   if(type & DPA_U_BO_REFCOUNTED)
     dpa_u_container_of(dbo, dpa__u_bo_refcounted_t, bo)->refcount = dpa_u_container_of(sbo, const dpa__u_bo_refcounted_t, bo)->refcount;
   *dbo = *sbo;
-  *(uint64_t*restrict)(((char*)dbo) + offsetof(dpa__u_bo_hashed_t, hash)) = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(dbo, type);
+  if(type & DPA_U_BO_HASHED){
+    *(uint64_t*restrict)(((char*)dbo) + offsetof(dpa__u_bo_hashed_t, hash)) = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
+  }else{
+    *(uint64_t*restrict)(((char*)dbo) + offsetof(dpa__u_bo_hashed_t, hash)) = dpa__u_bo_hash(*sbo);
+  }
+  return DPA__U_BO_TAG(dbo, type | DPA_U_BO_HASHED);
 }
-
-#define dpa__u_bo__alloc_p_hashed_any_do_hash dpa__u_bo__alloc_p_any_any_do_hash
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem){
   const unsigned type = dpa_u_bo_get_type(boptr);

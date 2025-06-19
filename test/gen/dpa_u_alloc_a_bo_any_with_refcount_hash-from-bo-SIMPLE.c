@@ -13,7 +13,7 @@ int main(){
     .size=6,
     .data=refdata->data
   };
-const dpa_u_bo_t inbo = bo;
+  const dpa_u_bo_t inbo = bo;
   dpa_u_refcount_freeable_t* refcount = &refdata->refcount;
   const uint64_t hash = dpa__u_bo_hash(bo);
   const dpa_u_a_bo_any_t outbo = dpa_u_alloc_a_bo_any_with_refcount_hash(inbo, refcount, hash);

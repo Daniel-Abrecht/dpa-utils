@@ -12,7 +12,7 @@ int main(){
     .size=70,
     .data="test 1                                                                "
   };
-const dpa_u_a_bo_unique_t inbo = ((dpa_u_a_bo_unique_t){dpa__u_bo_intern_h(((dpa_u_a_bo_any_t){DPA__U_BO_TAG(&bo, DPA_U_BO_SIMPLE)})).p});
+  const dpa_u_a_bo_unique_t inbo = ((dpa_u_a_bo_unique_t){dpa__u_bo_intern_h(((dpa_u_a_bo_any_t){DPA__U_BO_TAG(&bo, DPA_U_BO_SIMPLE)})).p});
   const dpa_u_a_bo_any_t outbo = dpa_u_make_a_bo_any(inbo);
   expect((dpa_u_bo_get_type(outbo) & (DPA_U_BO_STATIC|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED|DPA_U_BO_SIMPLE)) == (DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_SIMPLE|DPA_U_BO_UNIQUE));
   expect(dpa_u_bo_compare_data(inbo, outbo) == 0);
