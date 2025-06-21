@@ -1,6 +1,16 @@
 #ifndef DPA_U_MAP_H
 #define DPA_U_MAP_H
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup dpa-u-map Map
+ * @{
+ */
+
 #include <dpa/utils/map-int.h>
 #include <dpa/utils/map-string.h>
 
@@ -148,5 +158,8 @@
 #define dpa_u_map_count(THAT) DPA__U_MAP_GENERIC_WRAPPER(count, (THAT))((THAT))
 #define dpa_u_map_copy(DST,SRC) DPA__U_MAP_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
 #define dpa_u_map_dump_hashmap_key_hashes(THAT) DPA__U_MAP_GENERIC_WRAPPER(dump_hashmap_key_hashes, (THAT))((THAT))
+
+/** @} */
+/** @} */
 
 #endif

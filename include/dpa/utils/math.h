@@ -5,6 +5,16 @@
 #include <stdbool.h>
 #include <limits.h>
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup dpa-u-math Math functions
+ * @{
+ */
+
 #define DPA_U_CONSTEXPR_LOG2(X) ( \
     (X)<=0x0000000000000001llu? 0: \
     (X)<=0x0000000000000002llu? 1: \
@@ -126,5 +136,8 @@ dpa_u_unsequenced dpa__u_api inline int dpa_u_count_bits(long long unsigned int 
 dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline bool dpa_u_sign(long long x){
   return (x > 0) - (x < 0);
 }
+
+/** @} */
+/** @} */
 
 #endif

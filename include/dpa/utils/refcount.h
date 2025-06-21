@@ -1,6 +1,16 @@
 #ifndef DPA_UTILS_REFCOUNT_H
 #define DPA_UTILS_REFCOUNT_H
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup dpa-u-refcount Reference Counting
+ * @{
+ */
+
 #include <dpa/utils/common.h>
 
 #include <assert.h>
@@ -424,5 +434,8 @@ dpa_u_reproducible dpa__u_really_inline dpa__u_api inline bool dpa_u_refcount_is
   )
 
 #endif
+
+/** @} */
+/** @} */
 
 #endif

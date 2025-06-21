@@ -4,6 +4,16 @@
 #include <dpa/utils/common.h>
 #include <stdint.h>
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup dpa-u-utf8 UTF-8 Utils
+ * @{
+ */
+
 #define dpa_u_utf8_from_code_point(X) dpa_u_utf8_from_code_point_p((char[8]){0},(X))
 dpa__u_api inline unsigned char* dpa_u_utf8_from_code_point_p(unsigned char mem[8], uint32_t codepoint){
   if(codepoint < 0x80u){
@@ -68,6 +78,9 @@ struct dpa_u_streaming_utf8_validator {
  * \returns true if everything is OK, false if the sequence wasn't valid.
  */
 dpa__u_api bool dpa_u_utf8_validate(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch);
+/** @} */
+
+/** @} */
 /** @} */
 
 #endif

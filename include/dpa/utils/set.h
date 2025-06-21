@@ -1,6 +1,17 @@
 #ifndef DPA_U_SET_H
 #define DPA_U_SET_H
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup dpa-u-set Set
+ * @{
+ */
+
+
 #include <dpa/utils/set-int.h>
 #include <dpa/utils/set-string.h>
 
@@ -124,5 +135,8 @@
 #define dpa_u_set_count(THAT) DPA__U_SET_GENERIC_WRAPPER(count, (THAT))((THAT))
 #define dpa_u_set_copy(DST,SRC) DPA__U_SET_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
 #define dpa_u_set_dump_hashmap_key_hashes(THAT) DPA__U_SET_GENERIC_WRAPPER(dump_hashmap_key_hashes, (THAT))((THAT))
+
+/** @} */
+/** @} */
 
 #endif

@@ -10,6 +10,11 @@
 #include <stdalign.h>
 #include <stdbool.h>
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
 #ifdef DPA_U_CONFIG
 #include DPA_U_CONFIG
 #endif
@@ -439,5 +444,7 @@ typedef struct dpa_u_optional_pointer {
 } dpa_u_optional_pointer_t;
 
 dpa__u_api_var extern alignas(256) char dpa_u_seed[256];
+
+/** @} */
 
 #endif

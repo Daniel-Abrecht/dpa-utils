@@ -7,6 +7,16 @@
 #include <stddef.h>
 #include <string.h>
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup dpa-u-mem Memory Management
+ * @{
+ */
+
 typedef struct dpa_u_refcount_freeable_data dpa_u_refcount_freeable_data_t;
 
 struct dpa_u_refcount_freeable_data {
@@ -36,5 +46,8 @@ dpa__u_api inline void* dpa_u_copy_p(const void* p, size_t s){
 // The following won't always work, but there is nothing that can be done about that
 #define dpa_u_calloc(T) ((T*)calloc(1, sizeof(T)))
 #endif
+
+/** @} */
+/** @} */
 
 #endif

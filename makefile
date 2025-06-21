@@ -107,7 +107,7 @@ export TYPE
 
 all: source-checks bin lib
 
-.PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm FORCE
+.PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm docs test//bo-conv FORCE
 FORCE:
 
 do-test//set-map: build/unique-random
@@ -262,6 +262,16 @@ build/$(TYPE)/o/main/%.c$(o-ext): %.c makefile $(HEADERS)
 	( $(CC) -c -o $@ $(CFLAGS) $< >&3 2>&1 | tee "$@.err" >&2; ) 3>&1
 	@if [ ! -s "$@.err" ]; then rm -f "$@.err"; fi
 
+build/docs/api/.done: $(HEADERS) Doxyfile
+	rm -rf build/docs/api/
+	mkdir -p build/docs/api/
+	-doxygen
+	-cp -r docs/. build/docs/api/html/
+	-touch "$@"
+
+clean//docs:
+	rm -rf build/docs/api/
+
 clean:
 	rm -rf build/$(TYPE)/ bin/$(TYPE)/ lib/$(TYPE)/
 
@@ -294,3 +304,5 @@ shell:
 	PATH="$$PWD/bin/$(TYPE)/:$$PWD/script/:$$PATH" \
 	MANPATH="$$PWD/build/docs/api/man/:$$(man -w)" \
 	  $(SHELL_CMD)
+
+docs: build/docs/api/.done

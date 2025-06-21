@@ -1,6 +1,16 @@
 #ifndef DPA_U_BO_H
 #define DPA_U_BO_H
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup dpa-u-bo Buffer Objects
+ * @{
+ */
+
 #include <dpa/utils/common.h>
 #include <dpa/utils/refcount.h>
 #include <dpa/utils/tagged-pointer.h>
@@ -812,5 +822,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t
 #define dpa_u_alloc_a_bo_refcounted_with_refcount(X, R) \
   ((dpa_u_a_bo_refcounted_t){dpa__u_bo__alloc_p_refcounted_bo_with_refcount((X), (R), (dpa__u_bo_refcounted_t*)calloc(1, sizeof(dpa__u_bo_refcounted_t)))})
 
+/** @} */
+/** @} */
 
 #endif

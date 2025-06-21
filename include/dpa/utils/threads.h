@@ -15,12 +15,23 @@
 #include <errno.h>
 #include <stdint.h>
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup threads C11 Threads - pthread polyfill
+ * @{
+ */
+
+
 #ifndef thread_local
 #define thread_local _Thread_local
 #endif
 
 typedef pthread_once_t once_flag;
-#define ONCE_FLAG_INIT PTHREAD_ONCE_INIT;
+#define ONCE_FLAG_INIT PTHREAD_ONCE_INIT
 
 typedef int(*thrd_start_t)(void*);
 typedef void(*tss_dtor_t)(void*);
@@ -196,6 +207,9 @@ dpa__u_api inline int tss_set(tss_t key, void* val){
 dpa__u_api inline void tss_delete(tss_t key){
   pthread_key_delete(key.v);
 }
+
+/** @} */
+/** @} */
 
 #endif
 #endif
