@@ -1,6 +1,15 @@
 #ifndef DPA_U_BO_TYPES_H
 #define DPA_U_BO_TYPES_H
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup dpa-u-bo Buffer Objects
+ **/
+
 typedef struct dpa__u_boptr {
   uint64_t value[1];
 } dpa__u_boptr_t;
@@ -40,5 +49,8 @@ typedef struct dpa__u_a_bo_hashed     { dpa__u_boptr_t p; } dpa_u_a_bo_hashed_t;
 static_assert(sizeof(dpa_u_a_bo_unique_t) == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
 static_assert(sizeof(dpa_u_a_bo_any_t)    == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
 static_assert(sizeof(dpa_u_a_bo_gc_t)     == sizeof(uint64_t), "Unexpected padding in struct dpa_u_a_bo_unique_t");
+
+/** @} */
+/** @} */
 
 #endif
