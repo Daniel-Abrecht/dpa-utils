@@ -8,10 +8,79 @@
 
 /**
  * \addtogroup dpa-u-bo Buffer Objects
+ * @{
+ *
  * This header provides types and functions related to buffer objects and tagged buffer object pointers.
  * The intent is to make memory management easier, minimize copying of data if not necessary,
  * and providing a means to create identifiers that are unique and can be compared in O(1).
- * @{
+ *
+ *
+ * ### Tagged BO pointers - dpa_u_a_bo_*
+ *
+ * The following tagged poiter types exist:
+ * | Tagged BO Pointer types |
+ * |-----------------|
+ * | \ref dpa_u_a_bo_any_t |
+ * | \ref dpa_u_a_bo_gc_t |
+ * | \ref dpa_u_a_bo_unique_t |
+ * | \ref dpa_u_a_bo_refcounted_t |
+ * | \ref dpa_u_a_bo_hashed_t |
+ *
+ * The tag of a tagged BO Pointer consists of a set of types, and in the case of an inline BO, the size of the data. The following Tags exist:
+ *
+ * | enum \ref dpa_u_bo_type_flags |
+ * |-----------------|
+ * | \ref DPA_U_BO_SIMPLE |
+ * | \ref DPA_U_BO_STATIC |
+ * | \ref DPA_U_BO_REFCOUNTED |
+ * | \ref DPA_U_BO_UNIQUE |
+ * | \ref DPA_U_BO_HASHED |
+ *
+ * All `dpa_u_a_bo_*` objects represent either tagged BO pointers, or inlined data.
+ * Inlined data can be at most 7 bytes big. The first byte is reserved for the tag of the tagged BO pointer.
+ * The tag contains information about the type of object it points to, and the lifetime of the data the BO refers to,
+ * but the lifetime of the BO object itself may differ from that.
+ * The tag also contains the length of inline data if it is an inline BO.
+ *
+ * A tagged BO pointer without any tags represents an error value.
+ * An error value is an inline BO object which is not marked as unique.
+ * In other words, it can be safely dereferenced, and then contains the name of the error.
+ * However, it is recommended to actually check if a tagged BO pointer is an error object,
+ * using the \ref dpa_u_bo_is_error function.
+ *
+ *
+ * ### BO Types - dpa_u_bo_*
+ *
+ * Currently, only the simple \ref dpa_u_bo_t type is implemented. There are internal types for hashed and refcounted BOs,
+ * but there are no plans to expose them as of now. This is because there is no way to define a hashed refcounted bo
+ * in such a way that a pointer to it can be converted to both, a hashed bo and a refcounted bo, without type-punning,
+ * which would be UB.
+ *
+ * There are tagged pointers for hashed and refcounted BOs, and functions for creating them in the current block scope,
+ * as well as functions for getting the refcount and the hash.
+ *
+ *
+ * ### Object lifetimes
+ *
+ * The lifetime of BO objects may be shorter than that of the data. The only exception are inline BOs.
+ * The lifetime of an inline BO always matches that of the tagged BO pointer value itself.
+ * Special care must be taken when passing a refcounted BO which is not a unique BO to another function,
+ * or when storing it in a shared object. In that case only the data is refcounted, and multiple refcounted
+ * BO objects referencing the same data with shorter lifetimes could exist.
+ * Unlike with unique BOs, incrementing the refcount is insufficient in this case,
+ * BO objects of sufficient lifetime must be created.
+ * A BO pointer tagged as static has statically allocated data,
+ * but the BO may not be statically allocated.
+ * This is similar to refcounted BOs.
+ *
+ * When storing, for example, a \ref dpa_u_a_bo_gc_t in a shared object,
+ * when it is not known if the BO has a sufficient lifetime, a new BO Object needs to be allocated.
+ * The functions \ref dpa_u_bo_copy_maybe and the `dpa_u_bo_alloc_*` functions exist to help with that.
+ *
+ * As a convention, functions will assume that the BOs tagged pointers point to, and their data, are immutable.
+ * They may store them under that assumption. However, this doesn't always have to be the case.
+ * If the BO or it's data is not immutable, it may be necessarey to copy it in that case.
+ * The function \ref dpa_u_bo_needs_copy can be used to force a BO to be copied later if necessary.
  */
 
 #include <dpa/utils/common.h>
