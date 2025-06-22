@@ -60,7 +60,7 @@ static_assert(offsetof(union dpa__u_bo_cmem, rh.hash) == offsetof(union dpa__u_b
 enum dpa_u_bo_type_flags {
   DPA_U_BO_STATIC     = 0x80, /**< The lifetime of the data in the BO is static */
   DPA_U_BO_REFCOUNTED = 0x40, /**< The BO has a pointer to a refcount, which determins the lifetime of the data it points to */
-  DPA_U_BO_UNIQUE     = 0x20, /**< This BO is unique. There are no 2 pointers to this BO with the same data. */
+  DPA_U_BO_UNIQUE     = 0x20, /**< This BO is unique. There are no distinct unique BO with the same data. */
   DPA_U_BO_HASHED     = 0x10, /**< This BO is pre-hashed. It contains the hash of it's data. */
   DPA_U_BO_SIMPLE     = 0x08, /**< This is always set, unless it is a unique inline bo, or an error bo. Those can be at most 7 characters long. The length of an inline BO is encoded in the lower 3 bits of the BO type. */
 };
@@ -330,6 +330,7 @@ dpa__u_api dpa_u_reproducible inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_t a
  * \returns 0 if the BOs have the same size & data.
  */
 #define dpa_u_bo_compare_data(A, B) dpa_u_bo_compare_data_p(dpa_u_to_bo_any((A)), dpa_u_to_bo_any((B)))
+/** \see dpa_u_bo_compare_data */
 dpa__u_api dpa_u_reproducible inline int dpa_u_bo_compare_data_p(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
   if(!(a.p.value[0] & b.p.value[0] & DPA_U_MOVE_TAG(DPA_U_BO_SIMPLE)))
     return memcmp(&a,&b,sizeof(a));
@@ -348,6 +349,7 @@ dpa__u_api dpa_u_reproducible inline int dpa_u_bo_compare_data_p(dpa_u_a_bo_any_
  * \returns true if the BOs are the same object
  */
 #define dpa_u_bo_is_same(A, B) dpa_u_bo_is_same_p(dpa_u_to_bo_any((A)), dpa_u_to_bo_any((B)))
+/** \see dpa_u_bo_is_same */
 dpa__u_api dpa_u_reproducible inline int dpa_u_bo_is_same_p(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
   return (a.p.value[0] & ~DPA_U_MOVE_TAG(DPA_U_BO_STATIC|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED))
       == (b.p.value[0] & ~DPA_U_MOVE_TAG(DPA_U_BO_STATIC|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED));
@@ -393,7 +395,7 @@ dpa__u_api dpa_u_unsequenced dpa_u_a_bo_unique_t dpa_u_bo_error(int err);
  * \param bo an error BO
  * \returns an errno value. If it can't be determined, EINVAL is returned.
  */
-dpa__u_api dpa_u_unsequenced int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo);
+dpa__u_api dpa_u_unsequenced int dpa_u_bo_error_to_errno(dpa_u_a_bo_any_t bo);
 
 dpa__u_api inline void dpa__u_bo_ref_h(const dpa__u_boptr_t bo){
   if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
@@ -464,6 +466,12 @@ dpa__u_api dpa_u_unsequenced inline dpa_u_refcount_freeable_t* dpa__u_bo_get_ref
   return dpa_u_container_of(DPA__U_BO_UNTAG(dpa_u_bo_t*, bo), dpa__u_bo_refcounted_t, bo)->refcount;
 }
 
+/**
+ * If it is a unique BO, only the unique BOs refcount is incremented.
+ * Otherwise the datas refcount is incremented.
+ * If there is no refcount, nothing happens.
+ * This function is thread safe.
+ */
 #define dpa_u_bo_ref(X) _Generic((X), \
     struct dpa__u_a_bo_unique    : dpa__u_bo_ref_h1(DPA__G(struct dpa__u_a_bo_unique,     (X))), \
     struct dpa__u_a_bo_any       : dpa__u_bo_ref_h (DPA__G(struct dpa__u_a_bo_any,        (X)).p), \
@@ -472,6 +480,15 @@ dpa__u_api dpa_u_unsequenced inline dpa_u_refcount_freeable_t* dpa__u_bo_get_ref
     struct dpa__u_a_bo_refcounted: dpa__u_bo_ref_h2(DPA__G(struct dpa__u_a_bo_refcounted, (X)).p) \
   )
 
+/**
+ * If it is a unique BO, only the unique BOs refcount is decremented.
+ * Otherwise the datas refcount is decremented.
+ * If there is no refcount, nothing happens.
+ * If the refcount hits 0, the data is freed.
+ * If it is a unique BO, the unique BO is removed from the set of unique BOs,
+ * and the refcount of the data is decremented if there is one, and freed once nothing references it anymore.
+ * This function is thread safe.
+ */
 #define dpa_u_bo_put(X) _Generic((X), \
     struct dpa__u_a_bo_unique    : dpa__u_bo_put_h1(DPA__G(struct dpa__u_a_bo_unique,    (X))), \
     struct dpa__u_a_bo_any       : dpa__u_bo_put_h (DPA__G(struct dpa__u_a_bo_any,       (X)).p), \
@@ -480,6 +497,13 @@ dpa__u_api dpa_u_unsequenced inline dpa_u_refcount_freeable_t* dpa__u_bo_get_ref
     struct dpa__u_a_bo_refcounted: dpa__u_bo_put_h2(DPA__G(struct dpa__u_a_bo_refcounted,(X)).p) \
   )
 
+/**
+ * Returns a pointer to a \ref dpa_u_refcount_freeable_t.
+ * If it is a unique BO, this is the refcount of the BO object.
+ * Otherwise, it is only the refcount of the data.
+ * If there is no refcount, it returns \ref dpa_u_refcount_v_static,
+ * which is a global refcount which will never reach 0.
+ */
 #define dpa_u_bo_get_refcount(X) _Generic((X), \
     struct dpa__u_a_bo_unique    : dpa__u_bo_get_refcount_h1(DPA__G(struct dpa__u_a_bo_unique,     (X))), \
     struct dpa__u_a_bo_any       : dpa__u_bo_get_refcount_h (DPA__G(struct dpa__u_a_bo_any,        (X)).p), \
@@ -505,6 +529,11 @@ dpa__u_api inline void dpa__u_bo_free_h2(const dpa__u_boptr_t bo){
   free(pbo);
 }
 
+/**
+ * This takes a tagged pointer and frees the BO it points to.
+ * It does not free the data the BO points to.
+ * If it is a unique bo, it does nothing.
+ */
 #define dpa_u_bo_free(X) _Generic((X), \
     struct dpa_u_bo*: free(DPA__G(struct dpa_u_bo*, (X))) \
     const struct dpa_u_bo*: free((void*)DPA__G(const struct dpa_u_bo*, (X))) \
@@ -522,6 +551,13 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_bo_needs_copy_h(const 
   return (dpa__u_boptr_t){bo.value[0] & ~DPA_U_MOVE_TAG(DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)};
 }
 
+/**
+ * In case of a \ref dpa_u_a_bo_unique_t, this does nothing, the same pointer is returned.
+ * Otherwise, it removes refcounted and static BO pointer tags, and returns a \ref dpa_u_a_bo_any_t.
+ * This is useful if the BO may change later, but the function it is passed to may store it but shouldn't
+ * be affected by the changes to the BO.
+ * Removing these tags forces the BO to be copied in that case if necessary.
+ */
 #define dpa_u_bo_needs_copy(X) _Generic((X), \
     struct dpa_u_bo: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(struct dpa_u_bo, (X))._c, DPA_U_BO_SIMPLE)}, \
     struct dpa_u_bo*: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(struct dpa_u_bo*, (X)), DPA_U_BO_SIMPLE)}, \
@@ -538,48 +574,6 @@ dpa__u_api inline dpa_u_a_bo_unique_t dpa__u_bo_copy_maybe_h1(const dpa_u_a_bo_u
   dpa__u_bo_ref_h1(bo);
   return bo;
 }
-
-dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h(const dpa__u_boptr_t bo){
-  const unsigned type = dpa_u_bo_get_type(bo);
-  if(!(type & DPA_U_BO_SIMPLE))
-    return bo;
-  const char*restrict src = (const char*)DPA__U_BO_UNTAG(dpa_u_bo_t*, bo);
-  if(type & DPA_U_BO_UNIQUE){
-    dpa_u_refcount_ref(((dpa_u_refcount_freeable_t*)src)-1);
-    return bo;
-  }
-  unsigned size = sizeof(dpa_u_bo_t);
-  if(type & DPA_U_BO_REFCOUNTED){
-    src = (const char*)dpa_u_container_of((dpa_u_bo_t*)src, dpa__u_bo_refcounted_t, bo);
-    size = sizeof(dpa__u_bo_refcounted_t);
-  }
-  if(type & DPA_U_BO_HASHED)
-    size += sizeof(uint64_t);
-  void*restrict dest = dpa_u_copy_p(src, size);
-  if(type & DPA_U_BO_REFCOUNTED)
-    dest = &((dpa__u_bo_refcounted_t*)dest)->bo;
-  return DPA__U_BO_TAG(dest, type);
-}
-
-dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h2(const dpa__u_boptr_t bo){
-  const unsigned type = dpa_u_bo_get_type(bo);
-  if(!(type & DPA_U_BO_SIMPLE))
-    return bo;
-  const dpa__u_bo_refcounted_t*restrict src = dpa_u_container_of(DPA__U_BO_UNTAG(dpa_u_bo_t*, bo), dpa__u_bo_refcounted_t, bo);
-  dpa__u_bo_refcounted_t*restrict dest = dpa_u_copy_p(src, type & DPA_U_BO_HASHED ? sizeof(dpa__u_bo_refcounted_hashed_t) : sizeof(dpa__u_bo_refcounted_t));
-  return DPA__U_BO_TAG(&dest->bo, type);
-}
-
-#define dpa_u_bo_copy_bo_maybe(X) _Generic((X), \
-    struct dpa_u_bo*: dpa_u_copy_p(DPA__G(struct dpa_u_bo*, (X)), sizeof(struct dpa_u_bo)), \
-    const struct dpa_u_bo*: dpa_u_copy_p(DPA__G(const struct dpa_u_bo*, (X)), sizeof(struct dpa_u_bo)), \
-    \
-    struct dpa__u_a_bo_unique    : dpa__u_bo_copy_maybe_h1(DPA__G(struct dpa__u_a_bo_unique, (X))), \
-    struct dpa__u_a_bo_any       : (dpa_u_a_bo_any_t){dpa__u_bo_copy_bo_maybe_h (DPA__G(struct dpa__u_a_bo_any,        (X)).p)}, \
-    struct dpa__u_a_bo_gc        : (dpa_u_a_bo_any_t){dpa__u_bo_copy_bo_maybe_h (DPA__G(struct dpa__u_a_bo_gc,         (X)).p)}, \
-    struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_any_t){dpa__u_bo_copy_bo_maybe_h (DPA__G(struct dpa__u_a_bo_hashed,     (X)).p)}, \
-    struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_any_t){dpa__u_bo_copy_bo_maybe_h2(DPA__G(struct dpa__u_a_bo_refcounted, (X)).p)} \
-  )
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_maybe_h(const dpa__u_boptr_t bo){
   const unsigned type = dpa_u_bo_get_type(bo);
@@ -623,6 +617,12 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t
   return DPA__U_BO_TAG(&dest->bo, type);
 }
 
+/**
+ * If the BO is a unique BO, this function just increments the BOs refcount.
+ * Otherwise a new BO object is allocated. The refcount of the data of a refcounted BO is also incremented,
+ * in addition to a new BO object being allocated.
+ * If a BO is neither unique, nor refcounted, nor static, the data is also copied.
+ */
 #define dpa_u_bo_copy_maybe(X) _Generic((X), \
     struct dpa_u_bo*: dpa__u_bo_copy_maybe_h2(*DPA__G(struct dpa_u_bo*, (X))), \
     const struct dpa_u_bo*: dpa__u_bo_copy_maybe_h2(*DPA__G(const struct dpa_u_bo*, (X))), \

@@ -22,8 +22,6 @@ extern dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any(dpa__u_boptr_t boptr, dp
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_hashed(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem);
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_unique_any(dpa__u_boptr_t boptr);
-extern dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h(const dpa__u_boptr_t bo);
-extern dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h2(const dpa__u_boptr_t bo);
 extern dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t bo);
 extern dpa__u_boptr_t dpa__u_bo_copy_maybe_h(const dpa__u_boptr_t bo);
 extern dpa__u_boptr_t dpa__u_bo_needs_copy_h(const dpa__u_boptr_t bo);

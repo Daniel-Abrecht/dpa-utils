@@ -474,7 +474,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa_u_bo_error(int err){
 #endif
 }
 
-dpa__u_api int dpa_u_bo_error_to_errno(dpa_u_a_bo_unique_t bo){
+dpa__u_api int dpa_u_bo_error_to_errno(dpa_u_a_bo_any_t bo){
   (void)bo;
 #ifndef BAD_ERRNOS
   for(unsigned i=0; i<sizeof(bo_error)/sizeof(*bo_error); i++)
