@@ -16,14 +16,14 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_any(dpa__u_boptr_t boptr
     }else{
       cmem->rh.rbo = *dpa_u_container_of(bo, const dpa__u_bo_refcounted_t, bo);
     }
-    return DPA__U_BO_TAG(&cmem->rh.rbo.bo, type);
+    return DPA__U_BO_TAG(&cmem->rh.rbo.bo, type | DPA_U_BO_HAS_REFCOUNT_FIELD);
   }else{
     if(type & DPA_U_BO_HASHED){
       cmem->hr.hashed = *dpa_u_container_of(bo, const dpa__u_bo_hashed_t, bo);
     }else{
       cmem->hr.hashed.bo = *bo;
     }
-    return DPA__U_BO_TAG(&cmem->hr.hashed.bo, type);
+    return DPA__U_BO_TAG(&cmem->hr.hashed.bo, type | DPA_U_BO_HAS_REFCOUNT_FIELD);
   }
 }
 extern dpa__u_boptr_t dpa__u_bo__alloc_p_any_any(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem);
@@ -41,7 +41,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_any(dpa__u_boptr_t boptr
   *dbo = *sbo;
   if(type & DPA_U_BO_HASHED)
     *(uint64_t*restrict)(((char*)dbo) + offsetof(dpa__u_bo_hashed_t, hash)) = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(dbo, type);
+  return DPA__U_BO_TAG(dbo, type | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_any_do_hash(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem){
@@ -58,7 +58,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_any_do_hash(dpa__u_boptr
   }else{
     *(uint64_t*restrict)(((char*)dbo) + offsetof(dpa__u_bo_hashed_t, hash)) = dpa__u_bo_hash(*sbo);
   }
-  return DPA__U_BO_TAG(dbo, type | DPA_U_BO_HASHED);
+  return DPA__U_BO_TAG(dbo, type | DPA_U_BO_HASHED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem){
@@ -76,7 +76,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any(dpa__u_boptr_t boptr,
   cmem->rbo.bo = *sbo;
   if(type & DPA_U_BO_HASHED)
     cmem->hash = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem){
@@ -97,7 +97,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any_do_hash(dpa__u_boptr_
   }else{
     cmem->hash = dpa__u_bo_hash(*sbo);
   }
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HASHED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HASHED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_any_do_hash(dpa__u_boptr_t boptr, union dpa__u_bo_cmem*restrict cmem){
@@ -116,7 +116,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_any_do_hash(dpa__u_bo
   }else{
     *(uint64_t*restrict)(((char*)dbo) + offsetof(dpa__u_bo_hashed_t, hash)) = dpa__u_bo_hash(*sbo);
   }
-  return DPA__U_BO_TAG(dbo, type | DPA_U_BO_HASHED);
+  return DPA__U_BO_TAG(dbo, type | DPA_U_BO_HASHED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem){
@@ -132,7 +132,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any(dpa__u_boptr_
   cmem->rbo.bo = *sbo;
   if(type & DPA_U_BO_HASHED)
     cmem->hash = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem){
@@ -151,7 +151,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any_do_hash(dpa__
   }else{
     cmem->hash = dpa__u_bo_hash(*sbo);
   }
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HASHED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HASHED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_unique_any(dpa__u_boptr_t boptr){
@@ -180,7 +180,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_gc(dpa__u_boptr_t boptr, 
   cmem->rbo.bo = *sbo;
   if(type & DPA_U_BO_HASHED)
     cmem->hash = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_gc_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem){
@@ -199,7 +199,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_gc_do_hash(dpa__u_boptr_t
   }else{
     cmem->hash = dpa__u_bo_hash(*sbo);
   }
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HASHED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HASHED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 #define dpa__u_bo__alloc_p_hashed_gc dpa__u_bo__alloc_p_hashed_any
@@ -226,7 +226,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_refcounted(dpa__u_boptr_
   cmem->rbo.bo = *sbo;
   if(type & DPA_U_BO_HASHED)
     cmem->hash = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_refcounted_do_hash(dpa__u_boptr_t boptr, dpa__u_bo_refcounted_hashed_t*restrict cmem){
@@ -245,7 +245,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_refcounted_do_hash(dpa__
   }else{
     cmem->hash = dpa__u_bo_hash(*sbo);
   }
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HASHED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HASHED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 #define dpa__u_bo__alloc_p_gc_refcounted dpa__u_bo__alloc_p_gc_any
@@ -263,7 +263,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_refcounted(dpa__u_bop
   }
   cmem->rbo.bo = *sbo;
   cmem->hash = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 
 #define dpa__u_bo__alloc_p_hashed_refcounted_do_hash dpa__u_bo__alloc_p_refcounted_any_do_hash
@@ -283,7 +283,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_hashed(dpa__u_boptr_t bo
     dpa_u_container_of(dbo, dpa__u_bo_refcounted_t, bo)->refcount = dpa_u_container_of(sbo, const dpa__u_bo_refcounted_t, bo)->refcount;
   *dbo = *sbo;
   *(uint64_t*restrict)(((char*)dbo) + offsetof(dpa__u_bo_hashed_t, hash)) = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(dbo, type);
+  return DPA__U_BO_TAG(dbo, type | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 #define dpa__u_bo__alloc_p_any_hashed_do_hash dpa__u_bo__alloc_p_any_hashed
 
@@ -299,7 +299,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_hashed(dpa__u_boptr_t bop
   }
   cmem->rbo.bo = *sbo;
   cmem->hash = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 #define dpa__u_bo__alloc_p_gc_hashed_do_hash dpa__u_bo__alloc_p_gc_hashed
 
@@ -313,7 +313,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_hashed(dpa__u_boptr_t
     dpa_u_container_of(dbo, dpa__u_bo_refcounted_t, bo)->refcount = dpa_u_container_of(sbo, const dpa__u_bo_refcounted_t, bo)->refcount;
   *dbo = *sbo;
   *(uint64_t*restrict)(((char*)dbo) + offsetof(dpa__u_bo_hashed_t, hash)) = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(dbo, type);
+  return DPA__U_BO_TAG(dbo, type | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 #define dpa__u_bo__alloc_p_hashed_hashed_do_hash dpa__u_bo__alloc_p_hashed_hashed
 
@@ -329,7 +329,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_hashed(dpa__u_bop
   }
   cmem->rbo.bo = *sbo;
   cmem->hash = *(uint64_t*restrict)(((char*)sbo) + offsetof(dpa__u_bo_hashed_t, hash));
-  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED);
+  return DPA__U_BO_TAG(&cmem->rbo.bo, type | DPA_U_BO_REFCOUNTED | DPA_U_BO_HAS_REFCOUNT_FIELD);
 }
 #define dpa__u_bo__alloc_p_refcounted_hashed_do_hash dpa__u_bo__alloc_p_refcounted_hashed
 
@@ -366,8 +366,8 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_bo_with_refcount_do_hash
   return DPA__U_BO_TAG(
     &cmem->rbo.bo, 
     dpa_u_refcount_is_static_p(&refcount->refcount)
-     ? DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC
-     : DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED
+     ? DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_HAS_REFCOUNT_FIELD|DPA_U_BO_STATIC
+     : DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_HAS_REFCOUNT_FIELD
   );
 }
 #define dpa__u_bo__alloc_p_gc_bo_with_refcount_do_hash dpa__u_bo__alloc_p_any_bo_with_refcount_do_hash
@@ -385,8 +385,8 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_bo_with_refcount_hash(dp
   return DPA__U_BO_TAG(
     &cmem->rbo.bo, 
     dpa_u_refcount_is_static_p(&refcount->refcount)
-     ? DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC
-     : DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED
+     ? DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_HAS_REFCOUNT_FIELD|DPA_U_BO_STATIC
+     : DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_HAS_REFCOUNT_FIELD
   );
 }
 #define dpa__u_bo__alloc_p_gc_bo_with_refcount_hash dpa__u_bo__alloc_p_any_bo_with_refcount_hash
@@ -401,8 +401,8 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_bo_with_refcount(dpa_u_b
   return DPA__U_BO_TAG(
     &cmem->bo, 
     dpa_u_refcount_is_static_p(&refcount->refcount)
-     ? DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC
-     : DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED
+     ? DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_HAS_REFCOUNT_FIELD|DPA_U_BO_STATIC
+     : DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_HAS_REFCOUNT_FIELD
   );
 }
 #define dpa__u_bo__alloc_p_gc_bo_with_refcount dpa__u_bo__alloc_p_any_bo_with_refcount

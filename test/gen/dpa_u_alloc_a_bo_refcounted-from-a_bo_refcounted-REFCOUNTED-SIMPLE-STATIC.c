@@ -20,5 +20,6 @@ int main(){
   expect((dpa_u_bo_get_type(outbo) & (DPA_U_BO_STATIC|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED|DPA_U_BO_SIMPLE)) == (DPA_U_BO_SIMPLE|DPA_U_BO_STATIC));
   expect(dpa_u_bo_compare_data(inbo, outbo) == 0);
   dpa_u_bo_put(outbo);
+  dpa_u_bo_free(outbo);
 }
 

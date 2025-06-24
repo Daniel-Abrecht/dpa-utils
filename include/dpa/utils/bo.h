@@ -132,6 +132,9 @@ enum dpa_u_bo_type_flags {
   DPA_U_BO_UNIQUE     = 0x20, /**< This BO is unique. There are no distinct unique BO with the same data. */
   DPA_U_BO_HASHED     = 0x10, /**< This BO is pre-hashed. It contains the hash of it's data. */
   DPA_U_BO_SIMPLE     = 0x08, /**< This is always set, unless it is a unique inline bo, or an error bo. Those can be at most 7 characters long. The length of an inline BO is encoded in the lower 3 bits of the BO type. */
+  
+  // DPA_U_BO_ALLOCATED  = 0x04, /**< This is a hint for the dpa_u_bo_free function, that this BO was indeed allocated and needs to be freed. Only valid for simple BOs. */
+  DPA_U_BO_HAS_REFCOUNT_FIELD = 0x01, /**< This is a hint for the dpa_u_bo_free function, that the BO pointer is offset by the refcount field. That can be true even for some non-refcounted BOs sometimes. */
 };
 /** \cond 0 */
 #define DPA_U_BO_STATIC DPA_U_BO_STATIC
@@ -139,6 +142,7 @@ enum dpa_u_bo_type_flags {
 #define DPA_U_BO_UNIQUE DPA_U_BO_UNIQUE
 #define DPA_U_BO_HASHED DPA_U_BO_HASHED
 #define DPA_U_BO_SIMPLE DPA_U_BO_SIMPLE
+#define DPA_U_BO_HAS_REFCOUNT_FIELD DPA_U_BO_HAS_REFCOUNT_FIELD
 /** \endcond */
 
 /**
@@ -583,10 +587,10 @@ dpa__u_api dpa_u_unsequenced inline dpa_u_refcount_freeable_t* dpa__u_bo_get_ref
 
 dpa__u_api inline void dpa__u_bo_free_h(const dpa__u_boptr_t bo){
   if( dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE)
-   ||!dpa_u_bo_is_every_type(bo, DPA_U_BO_SIMPLE)
+   ||!dpa_u_bo_is_any_type(bo, DPA_U_BO_SIMPLE)
   ) return;
   void* pbo = DPA__U_BO_UNTAG(dpa_u_bo_t*, bo);
-  if(dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED))
+  if(dpa_u_bo_is_any_type(bo, (DPA_U_BO_REFCOUNTED|DPA_U_BO_HAS_REFCOUNT_FIELD)))
     pbo = dpa_u_container_of(pbo, dpa__u_bo_refcounted_t, bo);
   free(pbo);
 }
@@ -604,8 +608,8 @@ dpa__u_api inline void dpa__u_bo_free_h2(const dpa__u_boptr_t bo){
  * If it is a unique bo, it does nothing.
  */
 #define dpa_u_bo_free(X) _Generic((X), \
-    struct dpa_u_bo*: free(DPA__G(struct dpa_u_bo*, (X))) \
-    const struct dpa_u_bo*: free((void*)DPA__G(const struct dpa_u_bo*, (X))) \
+    struct dpa_u_bo*: free(DPA__G(struct dpa_u_bo*, (X))), \
+    const struct dpa_u_bo*: free((void*)DPA__G(const struct dpa_u_bo*, (X))), \
     \
     struct dpa__u_a_bo_unique    : (void)0, \
     struct dpa__u_a_bo_any       : dpa__u_bo_free_h (DPA__G(struct dpa__u_a_bo_any,        (X)).p), \
@@ -645,7 +649,7 @@ dpa__u_api inline dpa_u_a_bo_unique_t dpa__u_bo_copy_maybe_h1(const dpa_u_a_bo_u
 }
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_maybe_h(const dpa__u_boptr_t bo){
-  const unsigned type = dpa_u_bo_get_type(bo);
+  unsigned type = dpa_u_bo_get_type(bo) & ~DPA_U_BO_HAS_REFCOUNT_FIELD;
   if(!(type & DPA_U_BO_SIMPLE))
     return bo;
   const char*restrict src = (const char*)DPA__U_BO_UNTAG(dpa_u_bo_t*, bo);
@@ -657,6 +661,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_maybe_h(const dpa__u_boptr_t bo)
   if(type & DPA_U_BO_REFCOUNTED){
     src = (const char*)dpa_u_container_of((dpa_u_bo_t*)src, dpa__u_bo_refcounted_t, bo);
     size = sizeof(dpa__u_bo_refcounted_t);
+    type |= DPA_U_BO_HAS_REFCOUNT_FIELD;
   }
   if(type & DPA_U_BO_HASHED)
     size += sizeof(uint64_t);
@@ -964,13 +969,13 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t
   ((dpa_u_a_bo_hashed_t){DPA__U_BO_TAG(dpa_u_copy_p(&(dpa__u_bo_hashed_t){.bo=(X), .hash=(H)}, sizeof(dpa__u_bo_hashed_t)), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_STATIC)})
 
 #define dpa_u_alloc_a_bo_refcounted_static(X) \
-  ((dpa_u_a_bo_refcounted_t){DPA__U_BO_TAG(&((dpa__u_bo_refcounted_t*)dpa_u_copy_p(&(dpa__u_bo_refcounted_t){ .refcount=&dpa_u_refcount_static_v_freeable, .bo=(X) }, sizeof(dpa__u_bo_refcounted_t)))->bo, DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)})
+  ((dpa_u_a_bo_refcounted_t){DPA__U_BO_TAG(&((dpa__u_bo_refcounted_t*)dpa_u_copy_p(&(dpa__u_bo_refcounted_t){ .refcount=&dpa_u_refcount_static_v_freeable, .bo=(X) }, sizeof(dpa__u_bo_refcounted_t)))->bo, DPA_U_BO_SIMPLE|DPA_U_BO_REFCOUNTED|DPA_U_BO_HAS_REFCOUNT_FIELD|DPA_U_BO_STATIC)})
 
 #define dpa_u_alloc_a_bo_refcounted_static_do_hash(X) \
-  ((dpa_u_a_bo_refcounted_t){DPA__U_BO_TAG(&((struct dpa__u_bo_refcounted_hashed*)dpa_u_copy_p(dpa__u_bo__alloc_p_refcounted_static_bo_do_hash((X)).rbo.bo._c-offsetof(dpa__u_bo_refcounted_hashed_t, rbo.bo._c), sizeof(struct dpa__u_bo_refcounted_hashed)))->rbo.bo, DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)})
+  ((dpa_u_a_bo_refcounted_t){DPA__U_BO_TAG(&((struct dpa__u_bo_refcounted_hashed*)dpa_u_copy_p(dpa__u_bo__alloc_p_refcounted_static_bo_do_hash((X)).rbo.bo._c-offsetof(dpa__u_bo_refcounted_hashed_t, rbo.bo._c), sizeof(struct dpa__u_bo_refcounted_hashed)))->rbo.bo, DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_HAS_REFCOUNT_FIELD|DPA_U_BO_STATIC)})
 
 #define dpa_u_alloc_a_bo_refcounted_static_with_hash(X, H) \
-  ((dpa_u_a_bo_refcounted_t){DPA__U_BO_TAG(&((dpa__u_bo_refcounted_hashed_t*)dpa_u_copy_p(&(dpa__u_bo_refcounted_hashed_t){ .rbo={ .refcount=&dpa_u_refcount_static_v_freeable, .bo=(X) }, .hash=(H)}, sizeof(dpa__u_bo_refcounted_hashed_t)))->rbo.bo, DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)})
+  ((dpa_u_a_bo_refcounted_t){DPA__U_BO_TAG(&((dpa__u_bo_refcounted_hashed_t*)dpa_u_copy_p(&(dpa__u_bo_refcounted_hashed_t){ .rbo={ .refcount=&dpa_u_refcount_static_v_freeable, .bo=(X) }, .hash=(H)}, sizeof(dpa__u_bo_refcounted_hashed_t)))->rbo.bo, DPA_U_BO_SIMPLE|DPA_U_BO_HASHED|DPA_U_BO_REFCOUNTED|DPA_U_BO_HAS_REFCOUNT_FIELD|DPA_U_BO_STATIC)})
 
 #define dpa_u_alloc_a_bo_any_with_hash(X, H) \
   ((dpa_u_a_bo_any_t){DPA__U_BO_TAG(dpa_u_copy_p(&(dpa__u_bo_hashed_t){.bo=(X), .hash=(H)}, sizeof(dpa__u_bo_hashed_t)), DPA_U_BO_SIMPLE|DPA_U_BO_HASHED)})

@@ -59,6 +59,7 @@ def get_bo(datatype, tags, value=None, refcount=None):
 def gen_testcase(f, outbo, inbo=types['bo'], intags=frozenset({'SIMPLE'}), outtags=None):
   if outtags == None:
     outtags = intags
+  do_free = '_alloc_' in f
   with_refcount = 'with_refcount' in f or 'with_refcount_hash' in f
   with_hash = 'with_hash' in f or 'with_refcount_hash' in f
   args=['inbo']
@@ -119,7 +120,12 @@ int main(){{
     s += f'  const uint64_t hash = dpa__u_bo_hash(bo);\n';
   s += f"""  const dpa_u_{outbo['name']}_t outbo = {f}{args};\n"""
   if not outtags:
-    s += f"""  expect(dpa_u_bo_is_error(outbo));\n"""
+    s += f"""\
+  expect(dpa_u_bo_is_error(outbo));
+  dpa_u_bo_put(inbo);
+"""
+    if do_free:
+      s += '  dpa_u_bo_free(inbo);\n';
   else:
     if 'STATIC' in outtags: # If a bo is static, it is always optional for it to have a refcount, because it'd always be a static refcount anyway
       s += f"""  expect((dpa_u_bo_get_type(outbo) & (DPA_U_BO_STATIC|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED|DPA_U_BO_SIMPLE)) == ({"|".join("DPA_U_BO_"+x for x in sorted(outtags - {'REFCOUNTED'}))}));\n"""
@@ -129,6 +135,8 @@ int main(){{
   expect(dpa_u_bo_compare_data(inbo, outbo) == 0);
   dpa_u_bo_put(outbo);
 """
+    if do_free:
+      s += '  dpa_u_bo_free(outbo);\n';
   s += "}\n"
   name=f'test/gen/{f}-from-{inbo["name"]}-{"-".join(sorted(intags))}.c'
   with open(name, 'w') as f:
