@@ -16,6 +16,5 @@ int main(){
   const dpa_u_a_bo_gc_t outbo = dpa_u_alloc_a_bo_gc(inbo);
   expect(dpa_u_bo_is_error(outbo));
   dpa_u_bo_put(inbo);
-  dpa_u_bo_free(inbo);
 }
 

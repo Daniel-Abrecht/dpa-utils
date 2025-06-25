@@ -124,8 +124,6 @@ int main(){{
   expect(dpa_u_bo_is_error(outbo));
   dpa_u_bo_put(inbo);
 """
-    if do_free:
-      s += '  dpa_u_bo_free(inbo);\n';
   else:
     if 'STATIC' in outtags: # If a bo is static, it is always optional for it to have a refcount, because it'd always be a static refcount anyway
       s += f"""  expect((dpa_u_bo_get_type(outbo) & (DPA_U_BO_STATIC|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED|DPA_U_BO_SIMPLE)) == ({"|".join("DPA_U_BO_"+x for x in sorted(outtags - {'REFCOUNTED'}))}));\n"""
