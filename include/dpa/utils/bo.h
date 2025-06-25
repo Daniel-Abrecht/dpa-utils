@@ -719,6 +719,22 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t
 /**
  * \defgroup dpa_u_make_-_bo_- dpa_u_make_*_bo_*
  * @{
+ * This are a bunch of conversion functions.
+ * These functions return a tagged BO pointer. The type is indicated in the function name.
+ * For example, \ref dpa_u_make_a_bo_any returns a \ref dpa_u_a_bo_any_t.
+ *
+ * All `dpa_u_make_*` conversion function allocate a new buffer object in the current block scope.  
+ * All `*_do_hash` functions hash the bo if necessary and store the hash in the bo.  
+ * All `*_with_hash` functions take a hash, which must match what \ref dpa_u_bo_get_hash returns.  
+ * All `*_with_refcount` functions take a pointer to the refcount used to refcount the data of the BO.  
+ * All `*_with_refcount_hash` functions take a refcount and a hash.  
+ * All `*_static_*` functions set the \ref DPA_U_BO_STATIC tag, they are for static data.
+ *
+ * The conversion functions only take \ref dpa_u_bo_t or tagged BO pointers, which do have valid conversions.
+ * If only some conversions are valid, then for invalid conversions, an error BO is returned.
+ *
+ * Conversions from unique BOs to refcounted or hashed BOs are never valid.  
+ * Refcounts are not changed by these functions.
  */
 
 #define dpa_u_make_a_bo_any(X) _Generic((X), \
@@ -871,6 +887,23 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t
 /**
  * \defgroup dpa_u_alloc_-_bo_ dpa_u_alloc_*_bo_*
  * @{
+ * This are a bunch of conversion functions.
+ * These functions return a tagged BO pointer. The type is indicated in the function name.
+ * For example, \ref dpa_u_alloc_a_bo_any returns a \ref dpa_u_a_bo_any_t.
+ *
+ * All `dpa_u_alloc_*` conversion function allocate a new buffer object using malloc.
+ * They must be freed using \ref dpa_u_bo_free.
+ * All `*_do_hash` functions hash the bo if necessary and store the hash in the bo.  
+ * All `*_with_hash` functions take a hash, which must match what \ref dpa_u_bo_get_hash returns.  
+ * All `*_with_refcount` functions take a pointer to the refcount used to refcount the data of the BO.  
+ * All `*_with_refcount_hash` functions take a refcount and a hash.  
+ * All `*_static_*` functions set the \ref DPA_U_BO_STATIC tag, they are for static data.
+ *
+ * The conversion functions only take \ref dpa_u_bo_t or tagged BO pointers, which do have valid conversions.
+ * If only some conversions are valid, then for invalid conversions, an error BO is returned.
+ *
+ * Conversions from unique BOs to refcounted or hashed BOs are never valid.  
+ * Refcounts are not changed by these functions.
  */
 
 #define dpa_u_alloc_a_bo_any(X) _Generic((X), \
