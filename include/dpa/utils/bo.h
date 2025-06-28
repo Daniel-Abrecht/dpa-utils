@@ -97,7 +97,7 @@
 #include <assert.h>
 
 
-#define DPA__U_INLINE_STRING(...) DPA__U_INLINE_STRING_2(__VA_ARGS__ +0,0,0,0,0,0,0,0,7,6,5,4,3,2,1)
+#define DPA__U_INLINE_STRING(...) DPA__U_INLINE_STRING_2(__VA_ARGS__ +0,0,0,0,0,0,0,0,7,6,5,4,3,2,1,0)
 
 #if BYTE_ORDER == LITTLE_ENDIAN
 #define DPA__U_INLINE_STRING_2(x1,x2,x3,x4,x5,x6,x7,_1,_2,_3,_4,_5,_6,_7,n,...) \
@@ -200,10 +200,20 @@ enum dpa_u_bo_type_flags {
 /**
  * \defgroup dpa_u_to_-_bo_ dpa_u_to_*_bo_*
  * @{
+ * These functions convert between BOs and tagged BOs.
+ * When converting to a tagged BO, the BO it points to does not change.
+ * When a conversion is not allowed, an error BO pointer is returned.
+ * \see dpa_u_bo_is_error
  */
 
+/**
+ * Converts a tagged pointer to a BO.
+ * This function never fails, not even for an error BO.
+ */
 #define dpa_u_to_bo(X) _Generic((X), \
     dpa_u_bo_t: DPA__G(dpa_u_bo_t, (X)), \
+    dpa_u_bo_t*: *DPA__G(dpa_u_bo_t*, (X)), \
+    const dpa_u_bo_t*: *DPA__G(const dpa_u_bo_t*, (X)), \
     \
     struct dpa__u_a_bo_unique    : dpa__u_to_bo_h((const dpa__u_boptr_t*)DPA__G(struct dpa__u_a_bo_unique,     (X)).p.value), \
     struct dpa__u_a_bo_any       : dpa__u_to_bo_h((const dpa__u_boptr_t*)DPA__G(struct dpa__u_a_bo_any,        (X)).p.value), \
@@ -218,7 +228,7 @@ dpa__u_api dpa_u_reproducible inline dpa_u_bo_t dpa__u_to_bo_h(const dpa__u_bopt
   return (const dpa_u_bo_t){ .size=DPA_U_GET_TAG(boptr->value[0])&7, .data=((char*)boptr->value)+1 };
 }
 
-#define dpa_u_to_bo_any(X) _Generic((X), \
+#define dpa_u_to_a_bo_any(X) _Generic((X), \
     dpa_u_bo_t: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE)}, \
     \
     struct dpa__u_a_bo_unique    : (dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_unique,     (X)).p}, \
@@ -228,7 +238,7 @@ dpa__u_api dpa_u_reproducible inline dpa_u_bo_t dpa__u_to_bo_h(const dpa__u_bopt
     struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_any_t){DPA__G(struct dpa__u_a_bo_hashed,     (X)).p} \
   )
 
-#define dpa_u_to_bo_any_static(X) _Generic((X), \
+#define dpa_u_to_a_bo_any_static(X) _Generic((X), \
     dpa_u_bo_t: (dpa_u_a_bo_any_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)} \
   )
 
@@ -239,7 +249,7 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_gc_h(dpa__u_bopt
   return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
 }
 
-#define dpa_u_to_bo_gc(X) _Generic((X), \
+#define dpa_u_to_a_bo_gc(X) _Generic((X), \
     struct dpa__u_a_bo_unique    : (dpa_u_a_bo_gc_t){DPA__G(struct dpa__u_a_bo_unique,     (X)).p}, \
     struct dpa__u_a_bo_gc        : (dpa_u_a_bo_gc_t){DPA__G(struct dpa__u_a_bo_gc,         (X)).p}, \
     struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_gc_t){DPA__G(struct dpa__u_a_bo_refcounted, (X)).p}, \
@@ -247,7 +257,7 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_gc_h(dpa__u_bopt
     struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_gc_t){dpa__u_to_bo_gc_h(DPA__G(struct dpa__u_a_bo_hashed,(X)).p)} \
   )
 
-#define dpa_u_to_bo_gc_static(X) _Generic((X), \
+#define dpa_u_to_a_bo_gc_static(X) _Generic((X), \
     dpa_u_bo_t: (dpa_u_a_bo_gc_t){DPA__U_BO_TAG(DPA__G(dpa_u_bo_t, (X))._c, DPA_U_BO_SIMPLE|DPA_U_BO_STATIC)} \
   )
 
@@ -256,7 +266,7 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_refcounted_h(dpa
     return p;
   return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
 }
-#define dpa_u_to_bo_refcounted(X) _Generic((X), \
+#define dpa_u_to_a_bo_refcounted(X) _Generic((X), \
     struct dpa__u_a_bo_gc        : (dpa_u_a_bo_refcounted_t){dpa__u_to_bo_refcounted_h(DPA__G(struct dpa__u_a_bo_gc,     (X)).p)}, \
     struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_refcounted_t){DPA__G(struct dpa__u_a_bo_refcounted, (X)).p}, \
     struct dpa__u_a_bo_any       : (dpa_u_a_bo_refcounted_t){dpa__u_to_bo_refcounted_h(DPA__G(struct dpa__u_a_bo_any,    (X)).p)}, \
@@ -268,11 +278,23 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_hashed_h(dpa__u_
     return p;
   return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
 }
-#define dpa_u_to_bo_hashed(X) _Generic((X), \
+#define dpa_u_to_a_bo_hashed(X) _Generic((X), \
     struct dpa__u_a_bo_gc        : (dpa_u_a_bo_hashed_t){dpa__u_to_bo_hashed_h(DPA__G(struct dpa__u_a_bo_gc,     (X)).p)}, \
     struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_hashed_t){dpa__u_to_bo_hashed_h(DPA__G(struct dpa__u_a_bo_refcounted, (X)).p)}, \
     struct dpa__u_a_bo_any       : (dpa_u_a_bo_hashed_t){dpa__u_to_bo_hashed_h(DPA__G(struct dpa__u_a_bo_any,    (X)).p)}, \
     struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_hashed_t){DPA__G(struct dpa__u_a_bo_hashed, (X)).p} \
+  )
+
+dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_unique_h(dpa__u_boptr_t p){
+  if(dpa_u_bo_is_any_type(p, DPA_U_BO_UNIQUE))
+    return p;
+  return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+}
+
+#define dpa_u_to_a_bo_unique(X) _Generic((X), \
+    struct dpa__u_a_bo_unique: (dpa_u_a_bo_unique_t){DPA__G(struct dpa__u_a_bo_unique, (X)).p}, \
+    struct dpa__u_a_bo_any   : (dpa_u_a_bo_unique_t){dpa__u_to_bo_unique_h(DPA__G(struct dpa__u_a_bo_any, (X)).p)}, \
+    struct dpa__u_a_bo_gc    : (dpa_u_a_bo_unique_t){dpa__u_to_bo_unique_h(DPA__G(struct dpa__u_a_bo_gc, (X)).p)} \
   )
 
 /** @} */
@@ -348,7 +370,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo);
  * \param X A tagged BO pointer or a \ref dpa_u_bo_t
  * \returns A \ref dpa_u_a_bo_unique_t
  */
-#define dpa_u_bo_intern(X) dpa__u_bo_intern_h(dpa_u_to_bo_any((X)))
+#define dpa_u_bo_intern(X) dpa__u_bo_intern_h(dpa_u_to_a_bo_any((X)))
 
 /**
  * Converts a unique BO to an integer
@@ -377,7 +399,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo);
         default: dpa__u_bo_compare_h2 \
       ), \
     default: dpa__u_bo_compare_h2 \
-  )(dpa_u_to_bo_any((A)), dpa_u_to_bo_any((B)))
+  )(dpa_u_to_a_bo_any((A)), dpa_u_to_a_bo_any((B)))
 
 dpa__u_api dpa_u_unsequenced inline int dpa__u_bo_compare_h1(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
   return memcmp(&a,&b,sizeof(a));
@@ -402,7 +424,7 @@ dpa__u_api dpa_u_reproducible inline int dpa__u_bo_compare_h2(dpa_u_a_bo_any_t a
  * Error BOs are never considered equal to other BOs.
  * \returns 0 if the BOs have the same size & data.
  */
-#define dpa_u_bo_compare_data(A, B) dpa_u_bo_compare_data_p(dpa_u_to_bo_any((A)), dpa_u_to_bo_any((B)))
+#define dpa_u_bo_compare_data(A, B) dpa_u_bo_compare_data_p(dpa_u_to_a_bo_any((A)), dpa_u_to_a_bo_any((B)))
 /** \see dpa_u_bo_compare_data */
 dpa__u_api dpa_u_reproducible inline int dpa_u_bo_compare_data_p(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
   if(!(a.p.value[0] & b.p.value[0] & DPA_U_MOVE_TAG(DPA_U_BO_SIMPLE)))
@@ -421,7 +443,7 @@ dpa__u_api dpa_u_reproducible inline int dpa_u_bo_compare_data_p(dpa_u_a_bo_any_
  * If it's a BO object, it is referenced and the resulting pointer is compared.
  * \returns true if the BOs are the same object
  */
-#define dpa_u_bo_is_same(A, B) dpa_u_bo_is_same_p(dpa_u_to_bo_any((A)), dpa_u_to_bo_any((B)))
+#define dpa_u_bo_is_same(A, B) dpa_u_bo_is_same_p(dpa_u_to_a_bo_any((A)), dpa_u_to_a_bo_any((B)))
 /** \see dpa_u_bo_is_same */
 dpa__u_api dpa_u_reproducible inline int dpa_u_bo_is_same_p(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
   return (a.p.value[0] & ~DPA_U_MOVE_TAG(DPA_U_BO_STATIC|DPA_U_BO_REFCOUNTED|DPA_U_BO_UNIQUE|DPA_U_BO_HASHED))
@@ -437,7 +459,7 @@ dpa__u_api dpa_u_reproducible inline int dpa_u_bo_is_same_p(dpa_u_a_bo_any_t a, 
         default: dpa__u_bo_is_equal_h2 \
       ), \
     default: dpa__u_bo_is_equal_h2 \
-  )(dpa_u_to_bo_any((A)), dpa_u_to_bo_any((B)))
+  )(dpa_u_to_a_bo_any((A)), dpa_u_to_a_bo_any((B)))
 
 dpa__u_api dpa_u_unsequenced inline int dpa__u_bo_is_equal_h1(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b){
   return a.p.value[0] == b.p.value[0];

@@ -2,6 +2,7 @@
 #define DPA_U_UTF8_H
 
 #include <dpa/utils/common.h>
+#include <dpa/utils/bo.h>
 #include <stdint.h>
 
 /**
@@ -12,10 +13,29 @@
 /**
  * \addtogroup dpa-u-utf8 UTF-8 Utils
  * @{
+ * Utilities for working with UTF-8 data.
  */
 
-#define dpa_u_utf8_from_code_point(X) dpa_u_utf8_from_code_point_p((char[8]){0},(X))
-dpa__u_api inline unsigned char* dpa_u_utf8_from_code_point_p(unsigned char mem[8], uint32_t codepoint){
+/**
+ * Turns a unicode code point into an UTF-8 sequence.
+ * In practice, there should never be a sequence longer than 4 bytes / no code points >= U+200000,
+ * bt this function will convert any value anyway, including U+FFFFFFFF
+ * 
+ * \param X A unicode code point
+ * \returns The corresponding UTF-8 sequence, 0 terminated. Up to 8 bytes long. Beware of codepoint 0, which is a 0 byte in UTF-8.
+ */
+#define dpa_u_utf8_cstr_from_code_point(X) dpa_u_utf8_cstr_from_code_point_p((char[8]){0},(X))
+
+/**
+ * Turns a unicode code point into an UTF-8 sequence.
+ * In practice, there should never be a sequence longer than 4 bytes / no code points >= U+200000,
+ * bt this function will convert any value anyway, including U+FFFFFFFF
+ * 
+ * \param mem The UTF-8 sequence will be written there. Must be at least 8 bytes big
+ * \param codepoint The unicode code point
+ * \see dpa_u_utf8_from_code_point
+ */
+dpa__u_api inline unsigned char* dpa_u_utf8_cstr_from_code_point_p(unsigned char mem[8], uint32_t codepoint){
   if(codepoint < 0x80u){
     mem[0] = codepoint;
     mem[1] = 0;
@@ -60,6 +80,65 @@ dpa__u_api inline unsigned char* dpa_u_utf8_from_code_point_p(unsigned char mem[
     mem[7] = 0;
   }
   return mem;
+}
+
+/**
+ * Converts a unicode code point to an UTF-8 inline unique BO.
+ * In practice, there should never be a sequence longer than 4 bytes / no code points >= U+200000,
+ * bt this function will convert any value anyway, including U+FFFFFFFF
+ * 
+ * \param codepoint a unicode codepoint
+ * \returns The UTF-8 sequence, as an inline unique BO
+ */
+dpa_u_unsequenced
+dpa__u_api inline dpa_u_a_bo_unique_t dpa_u_utf8_from_code_point(uint32_t codepoint){
+  if(codepoint < 0x80u){
+    return (dpa_u_a_bo_unique_t){{{DPA__U_INLINE_STRING((codepoint))|DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE)}}};
+  }else if(codepoint < 0x800u){
+    return (dpa_u_a_bo_unique_t){{{DPA__U_INLINE_STRING(
+      (0xC0 | (codepoint >> 6)),
+      (0x80 | (codepoint & 0x3F))
+    )|DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE)}}};
+  }else if(codepoint < 0x10000u){
+    return (dpa_u_a_bo_unique_t){{{DPA__U_INLINE_STRING(
+      (0xE0 | ( codepoint >> 12)),
+      (0x80 | ((codepoint >> 6 ) & 0x3F)),
+      (0x80 | ( codepoint        & 0x3F))
+    )|DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE)}}};
+  }else if(codepoint < 0x200000u){
+    return (dpa_u_a_bo_unique_t){{{DPA__U_INLINE_STRING(
+      (0xF0 | ( codepoint >> 18)),
+      (0x80 | ((codepoint >> 12) & 0x3F)),
+      (0x80 | ((codepoint >> 6 ) & 0x3F)),
+      (0x80 | ( codepoint        & 0x3F))
+    )|DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE)}}};
+  }else if(codepoint < 0x4000000u){
+    return (dpa_u_a_bo_unique_t){{{DPA__U_INLINE_STRING(
+      (0xF8 | ( codepoint >> 24)),
+      (0x80 | ((codepoint >> 18) & 0x3F)),
+      (0x80 | ((codepoint >> 12) & 0x3F)),
+      (0x80 | ((codepoint >> 6 ) & 0x3F)),
+      (0x80 | ( codepoint        & 0x3F))
+    )|DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE)}}};
+  }else if(codepoint < 0x80000000u){
+    return (dpa_u_a_bo_unique_t){{{DPA__U_INLINE_STRING(
+      (0xFC | ( codepoint >> 30)),
+      (0x80 | ((codepoint >> 24) & 0x3F)),
+      (0x80 | ((codepoint >> 18) & 0x3F)),
+      (0x80 | ((codepoint >> 12) & 0x3F)),
+      (0x80 | ((codepoint >> 6 ) & 0x3F)),
+      (0x80 | ( codepoint        & 0x3F))
+    )|DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE)}}};
+  } // codepoint < 0x1000000000u
+  return (dpa_u_a_bo_unique_t){{{DPA__U_INLINE_STRING(
+    (0xFE),
+    (0x80 | ( codepoint >> 30)),
+    (0x80 | ((codepoint >> 24) & 0x3F)),
+    (0x80 | ((codepoint >> 18) & 0x3F)),
+    (0x80 | ((codepoint >> 12) & 0x3F)),
+    (0x80 | ((codepoint >> 6 ) & 0x3F)),
+    (0x80 | ( codepoint        & 0x3F))
+  )|DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE)}}};
 }
 
 /**

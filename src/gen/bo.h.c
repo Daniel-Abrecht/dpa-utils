@@ -45,6 +45,7 @@ extern dpa__u_boptr_t dpa__u_bo_needs_copy_h(const dpa__u_boptr_t bo);
 extern dpa__u_boptr_t dpa__u_to_bo_gc_h(dpa__u_boptr_t p);
 extern dpa__u_boptr_t dpa__u_to_bo_hashed_h(dpa__u_boptr_t p);
 extern dpa__u_boptr_t dpa__u_to_bo_refcounted_h(dpa__u_boptr_t p);
+extern dpa__u_boptr_t dpa__u_to_bo_unique_h(dpa__u_boptr_t p);
 extern dpa_u_a_bo_unique_t dpa__u_bo_copy_maybe_h1(const dpa_u_a_bo_unique_t bo);
 extern dpa_u_bo_t dpa__u_to_bo_h(const dpa__u_boptr_t*restrict const boptr);
 extern dpa_u_bo_t* dpa__u_bo_copy_maybe_h2(const dpa_u_bo_t bo);

@@ -4,6 +4,16 @@
 #include <dpa/utils/common.h>
 #include <stdint.h>
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup dpa-u-tag Tagged Pointer
+ * @{
+ */
+
 #ifndef BYTE_ORDER
 #include <endian.h>
 #endif
@@ -12,9 +22,26 @@
 #endif
 
 #if BYTE_ORDER == LITTLE_ENDIAN
+/**
+ * \param X a pointer
+ * \param T a tag
+ * \returns the tagged pointer, as a uint64_t. If cast to a char, the first byte is the tag.
+ */
 #define DPA_U_TAG(X, T) (((uint64_t)(uintptr_t)(X)<<8) | (T))
+/**
+ * \param X a tagged pointer
+ * \returns the original, untagged, pointer
+ */
 #define DPA_U_UNTAG(X) ((void*)(uintptr_t)((X)>>8))
+/**
+ * \param X a tagged pointer
+ * \returns the tag
+ */
 #define DPA_U_GET_TAG(X) ((X) & 0xFF)
+/**
+ * \param X a tag
+ * \returns Moves it so the tag can be and-ed or or-ed with a tagged pointer
+ */
 #define DPA_U_MOVE_TAG(X) ((uint64_t)(X))
 #elif BYTE_ORDER == BIG_ENDIAN
 #define DPA_U_TAG(X, T) (((uint64_t)(uintptr_t)(X)) | ((T)<<56))
@@ -24,5 +51,8 @@
 #else
 #error "Unknown endianess"
 #endif
+
+/** @} */
+/** @} */
 
 #endif

@@ -23,6 +23,7 @@
 /**
  * \addtogroup threads C11 Threads - pthread polyfill
  * @{
+ * A polyfill for C11 threads
  */
 
 
