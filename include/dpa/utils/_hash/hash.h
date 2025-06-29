@@ -7,7 +7,7 @@
 #define DPA_U_FNV_32_PRIME        UINT32_C(0x01000193) ///< This is the FNV Prime used for 32 bit hashs by the FNV algorithm
 #define DPA_U_FNV_32_OFFSET_BASIS UINT32_C(0x811c9dc5) ///< This is the initial hash value used when calculating the 32 bit FNV hash
 
-#include <dpa/utils/_bo/bo-type.h>
+#include <dpa/utils/_bo/bo-type-2.h>
 
 /**
  * Updates the hash using the new data in bo

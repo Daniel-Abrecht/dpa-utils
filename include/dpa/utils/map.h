@@ -30,7 +30,7 @@
  * For all generic function macros, there also exist dedicated functions for all map types.  
  * For example, for `dpa_u_map_count`, there also exists `dpa_u_map_u_count`,  `dpa_u_map_string_count`, etc.
  * 
- * Currently, these maps only store \ref dpa_u_any_value_t values, which can hold pointers, integers, or unique BOs.
+ * Currently, these maps only store \ref dpa_u_any_value_t values, which can hold pointers and integers.
  * 
  * Here is what types the various type names correspond to:
  * | name    | type                |

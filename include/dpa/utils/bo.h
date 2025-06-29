@@ -87,7 +87,7 @@
 #include <dpa/utils/refcount.h>
 #include <dpa/utils/tagged-pointer.h>
 #include <dpa/utils/mem.h>
-#include <dpa/utils/_bo/bo-type.h>
+#include <dpa/utils/_bo/bo-type-2.h>
 #include <dpa/utils/_hash/hash.h>
 
 #include <stdint.h>

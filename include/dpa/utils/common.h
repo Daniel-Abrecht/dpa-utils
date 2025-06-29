@@ -425,11 +425,18 @@ typedef unsigned dpa_u_bitmap_entry_t;
 #define DPA__U_ISS_NONE
 #endif
 
+#include <dpa/utils/_bo/bo-type-1.h>
+
 typedef struct dpa_u_any_value {
   union {
     uintptr_t uptr;
     uint64_t u64;
     void* ptr;
+    dpa_u_a_bo_unique_t ubo;
+    dpa_u_a_bo_any_t abo;
+    dpa_u_a_bo_gc_t gbo;
+    dpa_u_a_bo_refcounted_t rbo;
+    dpa_u_a_bo_hashed_t hbo;
   };
 } dpa_u_any_value_t;
 

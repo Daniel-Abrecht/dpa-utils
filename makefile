@@ -9,7 +9,7 @@ endif
 
 ifndef notest
 HEADERS := $(shell find include -type f -name "*.h" -not -name ".*")
-SOURCES := $(shell find src test -not -path "src/special/*" -type f -iname "*.c")
+SOURCES := $(shell find src -not -path "src/special/*" -type f -iname "*.c")
 else
 HEADERS := $(shell find include -type f -name "*.h" -not -name ".*" -not -iname "*test*")
 SOURCES := $(shell find src -not -path "src/special/*" -type f -iname "*.c" -not -iname "*test*")
@@ -81,8 +81,8 @@ ASMOUT  := $(patsubst %,build/$(TYPE)/s/%.s,$(SOURCES))
 B-TS := bin/$(TYPE)/dpa-testsuite$(bin-ext)
 
 BINS  := $(patsubst src/main/%.c,bin/$(TYPE)/%$(bin-ext),$(filter src/main/%.c,$(SOURCES)))
-TESTS := $(patsubst test/%.c,test//%,$(filter test/%.c,$(SOURCES)))
-tests += test//bo-conv
+TESTS := $(patsubst test/%.c,test//%,$(wildcard test/*.c))
+TESTS += test//bo-conv
 BO-CONV-TESTS := $(patsubst test/%.c,test//%,$(wildcard test/gen/*.c))
 
 export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
@@ -282,6 +282,7 @@ ifdef has_shared
 	ln -sf "lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR)"
 	ln -sf "lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext)"
 endif
+	cp "bin/$(TYPE)/dpa-testsuite" "$(DESTDIR)$(prefix)/bin/"
 	cp "lib/$(TYPE)/lib$(SONAME)$(a-ext)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(a-ext)"
 	mkdir -p "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	cp -a include/dpa/utils/./ "$(DESTDIR)$(prefix)/include/dpa/utils/"
@@ -294,6 +295,7 @@ uninstall:
 	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR)"
 	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext)"
 	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(a-ext)"
+	rm -f "bin/$(TYPE)/dpa-testsuite"
 	rm -rf "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	rm -f "$(DESTDIR)$(prefix)/include/dpa/utils.h"
 
