@@ -137,6 +137,10 @@ dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline bool dpa_u_sign(long lo
   return (x > 0) - (x < 0);
 }
 
+// TODO: This is currently not a very safe macro
+#define DPA_U_MIN(X,Y) ((X)<(Y)?(X):(Y))
+#define DPA_U_MAX(X,Y) ((X)>(Y)?(X):(Y))
+
 /** @} */
 /** @} */
 
