@@ -1,6 +1,9 @@
 #ifndef DPA_U_MAP_H
 #define DPA_U_MAP_H
 
+#include <dpa/utils/map-int.h>
+#include <dpa/utils/map-string.h>
+
 /**
  * \addtogroup dpa-u-utils Utils
  * @{
@@ -9,10 +12,45 @@
 /**
  * \addtogroup dpa-u-map Map
  * @{
+ * A simple "unordered" map, meaning the insertion order doesn't correspond with the iteration order.
+ * The order changes between program executions, based on \ref dpa_u_seed.  
+ * Different maps with the same key types do have their entries in the same order, though, even if their size is different.
+ * This strict ordering of the unorderd map was originally intended to allow for faster intersection & merge functions,
+ * but those haven't been implemented yet.
+ * 
+ * There are dedicated map types for various data types, along with corresponding iterator types.
+ * Those types can be a pointer, an unsigned integer, or a string, as a unique BO pointer.
+ * Some of the unsigned integer types may not be available on some platforms, and then neither will the corresponding map types.
+ * 
+ * There are `*_fast_t` and `*_safe_t` iterators.  
+ * The fast iterators become invalid if the map is modified. The first/last entry may also vary.  
+ * The safe iterator can handle the map being modified while it's being used. If the current iterator index no longer
+ * matches the current entry, it simply looks up the current entry again, before performing any operation.
+ * 
+ * For all generic function macros, there also exist dedicated functions for all map types.  
+ * For example, for `dpa_u_map_count`, there also exists `dpa_u_map_u_count`,  `dpa_u_map_string_count`, etc.
+ * 
+ * Currently, these maps only store \ref dpa_u_any_value_t values, which can hold pointers, integers, or unique BOs.
+ * 
+ * Here is what types the various type names correspond to:
+ * | name    | type                |
+ * |---------|---------------------|
+ * | pointer | void*               |
+ * | string  | dpa_u_a_bo_unique_t |
+ * | uc      | unsigned char       |
+ * | us      | unsigned short      |
+ * | u       | unsigned            |
+ * | lu      | long unsigned       |
+ * | llu     | long long unsigned  |
+ * | z       | size_t              |
+ * | u8      | uint8_t             |
+ * | u16     | uint16_t            |
+ * | u24     | uint24_t            |
+ * | u32     | uint32_t            |
+ * | u64     | uint64_t            |
+ * | u128    | uint128_t           |
+ * | u256    | uint256_t           |
  */
-
-#include <dpa/utils/map-int.h>
-#include <dpa/utils/map-string.h>
 
 
 #define DPA__U_MAP_GENERIC_WRAPPER_G(F, X) \

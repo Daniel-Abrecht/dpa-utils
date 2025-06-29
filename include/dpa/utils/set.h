@@ -1,6 +1,9 @@
 #ifndef DPA_U_SET_H
 #define DPA_U_SET_H
 
+#include <dpa/utils/set-int.h>
+#include <dpa/utils/set-string.h>
+
 /**
  * \addtogroup dpa-u-utils Utils
  * @{
@@ -9,11 +12,44 @@
 /**
  * \addtogroup dpa-u-set Set
  * @{
+ * @{
+ * A simple "unordered" set, meaning the insertion order doesn't correspond with the iteration order.
+ * The order changes between program executions, based on \ref dpa_u_seed.  
+ * Different sets with the same key types do have their entries in the same order, though, even if their size is different.
+ * This strict ordering of the unorderd set was originally intended to allow for faster intersection & merge functions,
+ * but those haven't been implemented yet.
+ * 
+ * There are dedicated set types for various data types, along with corresponding iterator types.
+ * Those types can be a pointer, an unsigned integer, or a string, as a unique BO pointer.
+ * Some of the unsigned integer types may not be available on some platforms, and then neither will the corresponding set types.
+ * 
+ * There are `*_fast_t` and `*_safe_t` iterators.  
+ * The fast iterators become invalid if the set is modified. The first/last entry may also vary.  
+ * The safe iterator can handle the set being modified while it's being used. If the current iterator index no longer
+ * matches the current entry, it simply looks up the current entry again, before performing any operation.
+ * 
+ * For all generic function macros, there also exist dedicated functions for all set types.  
+ * For example, for `dpa_u_set_count`, there also exists `dpa_u_set_u_count`,  `dpa_u_set_string_count`, etc.
+ * 
+ * Here is what types the various type names correspond to:
+ * | name    | type                |
+ * |---------|---------------------|
+ * | pointer | void*               |
+ * | string  | dpa_u_a_bo_unique_t |
+ * | uc      | unsigned char       |
+ * | us      | unsigned short      |
+ * | u       | unsigned            |
+ * | lu      | long unsigned       |
+ * | llu     | long long unsigned  |
+ * | z       | size_t              |
+ * | u8      | uint8_t             |
+ * | u16     | uint16_t            |
+ * | u24     | uint24_t            |
+ * | u32     | uint32_t            |
+ * | u64     | uint64_t            |
+ * | u128    | uint128_t           |
+ * | u256    | uint256_t           |
  */
-
-
-#include <dpa/utils/set-int.h>
-#include <dpa/utils/set-string.h>
 
 
 #define DPA__U_SET_GENERIC_WRAPPER_G(F, X) \

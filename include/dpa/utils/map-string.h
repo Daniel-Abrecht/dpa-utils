@@ -3,6 +3,16 @@
 
 #include <dpa/utils/map-int.h>
 
+/**
+ * \addtogroup dpa-u-utils Utils
+ * @{
+ */
+
+/**
+ * \addtogroup dpa-u-map Map
+ * @{
+ */
+
 typedef struct dpa_u_map_string dpa_u_map_string_t;
 typedef struct dpa_u_map_string_it_safe dpa_u_map_string_it_safe_t;
 typedef struct dpa_u_map_string_it_fast dpa_u_map_string_it_fast_t;
@@ -19,7 +29,7 @@ struct dpa_u_map_string_it_fast {
   dpa_u_map_u64_it_fast_t v;
 };
 
-
+/** \cond 0 */
 
 dpa__u_api dpa__u_really_inline inline bool dpa_u_map_string_it_safe_next(const dpa_u_map_string_t* that, dpa_u_map_string_it_safe_t* it){
   return dpa_u_map_u64_it_safe_next(&that->v, &it->v);
@@ -82,5 +92,10 @@ dpa__u_api dpa__u_really_inline inline bool dpa_u_map_string_copy(dpa_u_map_stri
 dpa__u_api dpa__u_really_inline inline void dpa_u_map_string_dump_hashmap_key_hashes(dpa_u_map_string_t* that){
   dpa_u_map_u64_dump_hashmap_key_hashes(&that->v);
 }
+
+/** \endcond */
+
+/** @} */
+/** @} */
 
 #endif
