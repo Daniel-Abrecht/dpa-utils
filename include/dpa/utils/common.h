@@ -43,8 +43,18 @@
 #endif
 
 #if __STDC_VERSION__ < 202311
+/**
+ * Before C23, returns \__attribute__((ext)). Otherwise [[c23]].
+ * \param ext \__attribute__((ext))
+ * \param c23 [[ext]]
+ */
 #define dpa_u_attribute(ext,c23) __attribute__((ext))
 #else
+/**
+ * Before C23, returns \__attribute__((ext)). Otherwise [[c23]].
+ * \param ext \__attribute__((ext))
+ * \param c23 [[ext]]
+ */
 #define dpa_u_attribute(ext,c23) [[c23]]
 #endif
 
@@ -298,15 +308,15 @@ typedef struct { int x; } dpa_u_invalid_selection_t;
 #endif
 
 enum {
-  DPA_U_I8_MAX_B10_DIGITS = 5,
-  DPA_U_I16_MAX_B10_DIGITS = 7,
-  DPA_U_I32_MAX_B10_DIGITS = 12,
-  DPA_U_I64_MAX_B10_DIGITS = 21,
-  DPA_U_CHAR_MAX_B10_DIGITS = CHAR_BIT * sizeof(char) / 3 + 3,
-  DPA_U_SHORT_MAX_B10_DIGITS = CHAR_BIT * sizeof(short) / 3 + 3,
-  DPA_U_INT_MAX_B10_DIGITS = CHAR_BIT * sizeof(int) / 3 + 3,
-  DPA_U_LONG_MAX_B10_DIGITS = CHAR_BIT * sizeof(long) / 3 + 3,
-  DPA_U_LONG_LONG_MAX_B10_DIGITS = CHAR_BIT * sizeof(long long) / 3 + 3,
+  DPA_U_I8_MAX_B10_DIGITS = 5, ///< Maximum number of digits needed for a uint8_t in base 10
+  DPA_U_I16_MAX_B10_DIGITS = 7, ///< Maximum number of digits needed for a uint16_t in base 10
+  DPA_U_I32_MAX_B10_DIGITS = 12, ///< Maximum number of digits needed for a uint32_t in base 10
+  DPA_U_I64_MAX_B10_DIGITS = 21, ///< Maximum number of digits needed for a uint64_t in base 10
+  DPA_U_CHAR_MAX_B10_DIGITS = CHAR_BIT * sizeof(char) / 3 + 3, ///< Maximum number of digits needed for a signed char sized integer in base 10
+  DPA_U_SHORT_MAX_B10_DIGITS = CHAR_BIT * sizeof(short) / 3 + 3, ///< Maximum number of digits needed for a short sized integer in base 10
+  DPA_U_INT_MAX_B10_DIGITS = CHAR_BIT * sizeof(int) / 3 + 3, ///< Maximum number of digits needed for a int sized integer in base 10
+  DPA_U_LONG_MAX_B10_DIGITS = CHAR_BIT * sizeof(long) / 3 + 3, ///< Maximum number of digits needed for a long sized integer in base 10
+  DPA_U_LONG_LONG_MAX_B10_DIGITS = CHAR_BIT * sizeof(long long) / 3 + 3, ///< Maximum number of digits needed for a long long sized integer in base 10
 };
 
 dpa__u_api dpa_u_format_param(printf, 3, 4) inline char* dpa__u_compound_printf(size_t s, char c[], const char* format, ...){
