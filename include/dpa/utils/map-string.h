@@ -89,8 +89,8 @@ dpa__u_api dpa_u_reproducible dpa__u_really_inline inline size_t dpa_u_map_strin
 dpa__u_api dpa__u_really_inline inline bool dpa_u_map_string_copy(dpa_u_map_string_t*restrict dst, const dpa_u_map_string_t*restrict src){
   return dpa_u_map_u64_copy(&dst->v, &src->v);
 }
-dpa__u_api dpa__u_really_inline inline void dpa_u_map_string_dump_hashmap_key_hashes(dpa_u_map_string_t* that){
-  dpa_u_map_u64_dump_hashmap_key_hashes(&that->v);
+dpa__u_api dpa__u_really_inline inline void dpa_u_map_string_dump(dpa_u_map_string_t* that){
+  dpa_u_map_u64_dump(&that->v);
 }
 
 /** \endcond */

@@ -1053,7 +1053,7 @@ error:
 #endif
 
 
-dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__U_SM_TYPE* that){
+dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump)(DPA__U_SM_TYPE* that){
   (void)that;
 #if !defined(DPA__U_SM_MICRO_SET) || DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
 #ifndef DPA__U_SM_NO_BITSET

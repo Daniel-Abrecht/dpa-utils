@@ -195,7 +195,7 @@
 #define dpa_u_map_clear(THAT) DPA__U_MAP_GENERIC_WRAPPER(clear, (THAT))((THAT))
 #define dpa_u_map_count(THAT) DPA__U_MAP_GENERIC_WRAPPER(count, (THAT))((THAT))
 #define dpa_u_map_copy(DST,SRC) DPA__U_MAP_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
-#define dpa_u_map_dump_hashmap_key_hashes(THAT) DPA__U_MAP_GENERIC_WRAPPER(dump_hashmap_key_hashes, (THAT))((THAT))
+#define dpa_u_map_dump(THAT) DPA__U_MAP_GENERIC_WRAPPER(dump, (THAT))((THAT))
 
 /** @} */
 /** @} */

@@ -12,4 +12,4 @@ extern dpa_u_a_bo_unique_t dpa_u_set_string_it_safe_get_key(const dpa_u_set_stri
 extern int dpa_u_set_string_add(dpa_u_set_string_t*restrict that, dpa_u_a_bo_unique_t key);
 extern size_t dpa_u_set_string_count(const dpa_u_set_string_t* that);
 extern void dpa_u_set_string_clear(dpa_u_set_string_t* that);
-extern void dpa_u_set_string_dump_hashmap_key_hashes(dpa_u_set_string_t* that);
+extern void dpa_u_set_string_dump(dpa_u_set_string_t* that);

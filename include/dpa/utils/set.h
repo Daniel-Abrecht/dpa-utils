@@ -170,7 +170,7 @@
 #define dpa_u_set_clear(THAT) DPA__U_SET_GENERIC_WRAPPER(clear, (THAT))((THAT))
 #define dpa_u_set_count(THAT) DPA__U_SET_GENERIC_WRAPPER(count, (THAT))((THAT))
 #define dpa_u_set_copy(DST,SRC) DPA__U_SET_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
-#define dpa_u_set_dump_hashmap_key_hashes(THAT) DPA__U_SET_GENERIC_WRAPPER(dump_hashmap_key_hashes, (THAT))((THAT))
+#define dpa_u_set_dump(THAT) DPA__U_SET_GENERIC_WRAPPER(dump, (THAT))((THAT))
 
 /** @} */
 /** @} */

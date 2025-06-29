@@ -19,4 +19,4 @@ extern int dpa_u_map_string_set(dpa_u_map_string_t*restrict that, dpa_u_a_bo_uni
 extern int dpa_u_map_string_set_if_unset(dpa_u_map_string_t*restrict that, dpa_u_a_bo_unique_t key, dpa_u_any_value_t value);
 extern size_t dpa_u_map_string_count(const dpa_u_map_string_t* that);
 extern void dpa_u_map_string_clear(dpa_u_map_string_t* that);
-extern void dpa_u_map_string_dump_hashmap_key_hashes(dpa_u_map_string_t* that);
+extern void dpa_u_map_string_dump(dpa_u_map_string_t* that);

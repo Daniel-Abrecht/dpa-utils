@@ -708,7 +708,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _copy)(DPA__U_SM_TYPE*restrict 
 /**
  * For debugging purposes only
  */
-dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump_hashmap_key_hashes)(DPA__U_SM_TYPE* that);
+dpa__u_api void DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _dump)(DPA__U_SM_TYPE* that);
 
 /**
  * Used internally, for bo_unique implementation.

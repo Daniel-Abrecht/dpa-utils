@@ -40,7 +40,7 @@
 #define DPA_U_GET_TAG(X) ((X) & 0xFF)
 /**
  * \param X a tag
- * \returns Moves it so the tag can be and-ed or or-ed with a tagged pointer
+ * \returns Moves the tag such that it can be and-ed or or-ed with a tagged pointer
  */
 #define DPA_U_MOVE_TAG(X) ((uint64_t)(X))
 #elif BYTE_ORDER == BIG_ENDIAN
