@@ -157,17 +157,17 @@
 
 #define DPA__U_MAP_VALUE_GENERIC(VAL) _Generic((VAL), \
     dpa_u_any_value_t : (VAL), \
-    char              : (dpa_u_any_value_t){.u64=DPA__G(char, (VAL))}, \
-    signed char       : (dpa_u_any_value_t){.u64=DPA__G(signed char, (VAL))}, \
-    signed short      : (dpa_u_any_value_t){.u64=DPA__G(signed short, (VAL))}, \
-    signed int        : (dpa_u_any_value_t){.u64=DPA__G(signed int, (VAL))}, \
-    signed long       : (dpa_u_any_value_t){.u64=DPA__G(signed long, (VAL))}, \
-    signed long long  : (dpa_u_any_value_t){.u64=DPA__G(signed long long, (VAL))}, \
-    unsigned char     : (dpa_u_any_value_t){.u64=DPA__G(unsigned char, (VAL))}, \
-    unsigned short    : (dpa_u_any_value_t){.u64=DPA__G(unsigned short, (VAL))}, \
-    unsigned int      : (dpa_u_any_value_t){.u64=DPA__G(unsigned int, (VAL))}, \
-    unsigned long     : (dpa_u_any_value_t){.u64=DPA__G(unsigned long, (VAL))}, \
-    unsigned long long: (dpa_u_any_value_t){.u64=DPA__G(unsigned long long, (VAL))}, \
+    char              : (dpa_u_any_value_t){.u64=DPA_U_G(char, (VAL))}, \
+    signed char       : (dpa_u_any_value_t){.u64=DPA_U_G(signed char, (VAL))}, \
+    signed short      : (dpa_u_any_value_t){.u64=DPA_U_G(signed short, (VAL))}, \
+    signed int        : (dpa_u_any_value_t){.u64=DPA_U_G(signed int, (VAL))}, \
+    signed long       : (dpa_u_any_value_t){.u64=DPA_U_G(signed long, (VAL))}, \
+    signed long long  : (dpa_u_any_value_t){.u64=DPA_U_G(signed long long, (VAL))}, \
+    unsigned char     : (dpa_u_any_value_t){.u64=DPA_U_G(unsigned char, (VAL))}, \
+    unsigned short    : (dpa_u_any_value_t){.u64=DPA_U_G(unsigned short, (VAL))}, \
+    unsigned int      : (dpa_u_any_value_t){.u64=DPA_U_G(unsigned int, (VAL))}, \
+    unsigned long     : (dpa_u_any_value_t){.u64=DPA_U_G(unsigned long, (VAL))}, \
+    unsigned long long: (dpa_u_any_value_t){.u64=DPA_U_G(unsigned long long, (VAL))}, \
     default: (dpa_u_any_value_t){.ptr=(void*)(VAL)} \
   )
 
