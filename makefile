@@ -170,12 +170,12 @@ build/.check-g-macro: $(HEADERS)
 	  while IFS= read -r line; \
 	  do \
 	    macro="$$(printf "%s\n" "$$line" | sed 's/\xFF/\n/g')"; \
-	    line="$$(printf "%s\n" "$$macro" | grep -a ': .*DPA__G(')" || true; \
+	    line="$$(printf "%s\n" "$$macro" | grep -a ': .*DPA_U_G(')" || true; \
 	    printf '%s\n' "$$line" | while IFS=':' read -r T V; \
 	    do \
 	      l="$$( ( \
 	          printf '%s\n' "$$T" | sed 's/^  *\|  *$$//g'; \
-	          printf '%s\n' "$$V" | grep -o 'DPA__G([^,]*' | sed 's/DPA__G(//'; \
+	          printf '%s\n' "$$V" | grep -o 'DPA_U_G([^,]*' | sed 's/DPA_U_G(//'; \
 	        ) | sed 's/^\s*\|\s*$$//' | sed 's/\([a-zA-Z0-9_]\)  *\([a-zA-Z_]\)/\1 \2/' \
 	          | sed 's/ \([^a-zA-Z_]\)/\1/' | sed 's/\([^a-zA-Z_]\) /\1/' \
 	          | sort -u \
