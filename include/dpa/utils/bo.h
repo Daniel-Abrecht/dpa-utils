@@ -368,7 +368,6 @@ dpa__u_api dpa_u_reproducible inline uint64_t dpa__u_bo_get_hash(const dpa__u_bo
  */
 dpa__u_api dpa_u_unsequenced const char* dpa_u_bo_type_to_string(enum dpa_u_bo_type_flags type);
 
-dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo);
 /**
  * Interns a BO. For the same data, the same unique bo will be returned, so long as there are still any references to it left.
  *
@@ -381,7 +380,8 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo);
  * \param X A tagged BO pointer or a \ref dpa_u_bo_t
  * \returns A \ref dpa_u_a_bo_unique_t
  */
-#define dpa_u_bo_intern(X) dpa__u_bo_intern_h(dpa_u_to_a_bo_any((X)))
+#define dpa_u_bo_intern(X) dpa_u_bo_intern_p(dpa_u_to_a_bo_any((X)))
+dpa__u_api dpa_u_a_bo_unique_t dpa_u_bo_intern_p(dpa_u_a_bo_any_t bo);
 
 /**
  * Converts a unique BO to an integer

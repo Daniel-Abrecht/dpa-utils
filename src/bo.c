@@ -504,7 +504,7 @@ dpa__u_api void dpa__u_bo_unique_destroy(const dpa_u_refcount_freeable_t* rc){
   mtx_lock(&unique_string_map_lock);
   if(!dpa_u_refcount_is_zero(rc)){
     // This only happens if the entry was picked from the set before it was removed. In that case, it was incremented.
-    // That reference is taken by dpa__u_bo_intern_h on behalf of this function, under the unique_string_map_lock lock.
+    // That reference is taken by dpa_u_bo_intern_p on behalf of this function, under the unique_string_map_lock lock.
     // We drop it again.
     if(dpa_u_refcount_decrement(&rc->refcount))
       goto end; // This is not the last reference anymore.
@@ -531,7 +531,7 @@ end:
 #endif
 }
 
-dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
+dpa__u_api dpa_u_a_bo_unique_t dpa_u_bo_intern_p(dpa_u_a_bo_any_t bo){
   if(dpa_u_bo_is_error(bo))
     return (dpa_u_a_bo_unique_t){{{DPA__U_INLINE_STRING('E','I','N','V','A','L')}}};
   const int bo_type = dpa_u_bo_get_type(bo);
@@ -555,7 +555,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
 #endif
 
   if(dpa__u_map_u64_maybe_grow(&unique_string_map) == -1){
-    fprintf(stderr, "dpa__u_bo_intern_h failed: failed to increase size of hash map of all unique strings\n");
+    fprintf(stderr, "dpa_u_bo_intern_p failed: failed to increase size of hash map of all unique strings\n");
     error = errno;
     goto error;
   }
@@ -609,7 +609,7 @@ dpa__u_api dpa_u_a_bo_unique_t dpa__u_bo_intern_h(dpa_u_a_bo_any_t bo){
     i += I;
   }
   if(unused_i == (uint64_t)-1){
-    fprintf(stderr, "dpa__u_bo_intern_h failed: bucket full, there can only be up to 65535 entries per bucket\n");
+    fprintf(stderr, "dpa_u_bo_intern_p failed: bucket full, there can only be up to 65535 entries per bucket\n");
     error = errno;
     goto error;
   }
