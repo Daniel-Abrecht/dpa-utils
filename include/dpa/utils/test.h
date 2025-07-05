@@ -11,8 +11,12 @@
  */
 
 /**
- * \addtogroup dpa-u-test Test Utils
+ * \addtogroup dpa-u-test Unit Tests
  * @{
+ * The functions here are meant for unit tests, compatible with the `dpa-testsuite` program.
+ * The `dpa-testsuite` program can be used to run any program as a test case, based on it's exit code,
+ * and can be used in scripts and makefiles to compile the result of multiple tests.
+ * But if a single test program contains multiple tests, using this module is the way to go.
  */
 
 /**
@@ -39,8 +43,21 @@ dpa__u_api bool dpa_u_testcase_result(int fd, const char* name, const char* resu
   } \
   static int DPA_U_CONCAT_E(dpa_u_test_f_, DPA_U_TESTCASE_SUFFIX)(void)
 
+/**
+ * If a custom main function is used for the test program, you can use this to run the test cases and so on.
+ * Note: The program will re-launch itself for every test, unless a specific test is specified.
+ * This should prevent tests from interfearing with each other.
+ * \ref dpa_u_testcase_result is going to be called automatically as needed.
+ * 
+ * \see DPA_U_TEST_MAIN
+ */
 dpa__u_api int dpa_u_test_main(int argc, const char* argv[]);
 
+/**
+ * Defines the default main function for unit tests.
+ * 
+ * \see dpa_u_test_main
+ */
 #define DPA_U_TEST_MAIN \
   int main(int argc, const char* argv[]){ \
     return dpa_u_test_main(argc, argv); \
@@ -57,8 +74,19 @@ struct dpa__u_testcase {
 };
 dpa__u_api_var extern struct dpa__u_testcase* dpa__u_testcase_list;
 
-dpa__u_api dpa_u_weak void dpa__u_test_setup(void);
-dpa__u_api dpa_u_weak void dpa__u_test_teardown(void);
+#ifdef DPA__U_BUILD_LIB
+dpa__u_api dpa_u_weak void dpa_u_test_setup(void);
+dpa__u_api dpa_u_weak void dpa_u_test_teardown(void);
+#else
+/**
+ * If a unit test program defines this function, it is going to be run before every test.
+ */
+dpa_u_export void dpa_u_test_setup(void);
+/**
+ * If a unit test program defines this function, it is going to be run after every test.
+ */
+dpa_u_export void dpa_u_test_teardown(void);
+#endif
 
 /** @} */
 /** @} */

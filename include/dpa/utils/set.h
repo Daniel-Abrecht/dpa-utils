@@ -12,7 +12,6 @@
 /**
  * \addtogroup dpa-u-set Set
  * @{
- * @{
  * A simple "unordered" set, meaning the insertion order doesn't correspond with the iteration order.
  * The order changes between program executions, based on \ref dpa_u_seed.  
  * Different sets with the same key types do have their entries in the same order, though, even if their size is different.
@@ -49,6 +48,8 @@
  * | u64     | uint64_t            |
  * | u128    | uint128_t           |
  * | u256    | uint256_t           |
+ * 
+ * This set implementation is not thread safe.
  */
 
 
@@ -154,15 +155,42 @@
 #define DPA__U_SET_GENERIC_WRAPPER(F, X) dpa_u_assert_selection(DPA__U_SET_GENERIC_WRAPPER_G(F, X))
 #define DPA__U_SET_GENERIC_WRAPPER_IT(F, X) dpa_u_assert_selection(DPA__U_SET_GENERIC_WRAPPER_IT_G(F, X))
 
-#define dpa_u_set_it_next(THAT, IT) DPA__U_SET_GENERIC_WRAPPER_IT(next, (IT))((THAT), (IT))
-#define dpa_u_set_it_prev(THAT, IT) DPA__U_SET_GENERIC_WRAPPER_IT(prev, (IT))((THAT), (IT))
-
 #define DPA__U_LAST_ARG__H1_S1(A, B) A
 #define DPA__U_LAST_ARG__H1_S2(A, B) B
 #define DPA__U_LAST_ARG__H1_S(A, B, N, ...) DPA__U_LAST_ARG__H1_S ## N(A,B)
 #define DPA__U_LAST_ARG__H1(...) DPA__U_LAST_ARG__H1_S(__VA_ARGS__,2,1,0)
 
+
+/**
+ * Moves the iterator to the next entry.
+ * Using the safe iterator on different sets is allowed if it is a safe iterator.
+ * See \ref dpa-u-set for restrictions of fast iterators.
+ * 
+ * \param THAT a set
+ * \param IT an iterator
+ * \returns if there was a next entry, returns true
+ */
+#define dpa_u_set_it_next(THAT, IT) DPA__U_SET_GENERIC_WRAPPER_IT(next, (IT))((THAT), (IT))
+/**
+ * Moves the iterator to the preceeding entry.
+ * Using the safe iterator on different sets is allowed if it is a safe iterator.
+ * See \ref dpa-u-set for restrictions of fast iterators.
+ * 
+ * \param THAT a set
+ * \param IT an iterator
+ * \returns if there was a preceeding entry, returns true
+ */
+#define dpa_u_set_it_prev(THAT, IT) DPA__U_SET_GENERIC_WRAPPER_IT(prev, (IT))((THAT), (IT))
+
+
+/**
+ * Takes either a safe iterator, or a set and a fast iterator.
+ * Returns the key the iterator points to. In the case of a safe iterator, the iterator has a copy of the keys value,
+ * which is what is returned.  
+ * In the case of a fast iterator, the key at the index indicated by the iterator is returned.
+ */
 #define dpa_u_set_it_get_key(...) DPA__U_SET_GENERIC_WRAPPER_IT(get_key, DPA__U_LAST_ARG__H1(__VA_ARGS__))(__VA_ARGS__)
+
 
 #define dpa_u_set_add(THAT, KEY) DPA__U_SET_GENERIC_WRAPPER(add, (THAT))((THAT), (KEY))
 #define dpa_u_set_remove(THAT, KEY) DPA__U_SET_GENERIC_WRAPPER(remove, (THAT))((THAT), (KEY))
@@ -170,6 +198,8 @@
 #define dpa_u_set_clear(THAT) DPA__U_SET_GENERIC_WRAPPER(clear, (THAT))((THAT))
 #define dpa_u_set_count(THAT) DPA__U_SET_GENERIC_WRAPPER(count, (THAT))((THAT))
 #define dpa_u_set_copy(DST,SRC) DPA__U_SET_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
+  
+/** This function is mainly meant for debuggin purposes. */
 #define dpa_u_set_dump(THAT) DPA__U_SET_GENERIC_WRAPPER(dump, (THAT))((THAT))
 
 /** @} */

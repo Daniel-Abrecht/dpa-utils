@@ -73,7 +73,7 @@ static void to_ustring(dpa_u_a_bo_unique_t*const ret, size_t n, const unsigned c
   *ret = dpa_u_bo_intern(bo);
 }
 
-void dpa__u_test_setup(void){
+void dpa_u_test_setup(void){
   FILE* f = fopen("build/unique-random", "rb");
   if(!f) dpa_u_abort("Failed to open build/unique-random: %d %s", errno, strerror(errno));
   unsigned char line[1024];

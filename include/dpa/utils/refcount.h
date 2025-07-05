@@ -120,6 +120,9 @@ static_assert(offsetof(struct dpa_u_refcount_callback, value) == 0, "Unexpected 
 static_assert(offsetof(struct dpa_u_refcount_callback, refcount) == 0, "Unexpected offset of member .refcount");
 static_assert(offsetof(struct dpa_u_refcount_callback, freeable) == 0, "Unexpected offset of member .freeable");
 
+/**
+ * This is an internal refcount type, used by unique BOs.
+ */
 struct dpa__u_refcount_bo_unique {
   union {
     dpa__u_refcount_value_t value;

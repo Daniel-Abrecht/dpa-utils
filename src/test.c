@@ -58,11 +58,11 @@ dpa__u_api int dpa_u_test_main(int argc, const char* argv[]){
     for(struct dpa__u_testcase* it=dpa__u_testcase_list; it; it=it->next){
       if(argc > 1 && strcmp(it->name, argv[1]))
         continue;
-      if(dpa__u_test_setup)
-        dpa__u_test_setup();
+      if(dpa_u_test_setup)
+        dpa_u_test_setup();
       int res = it->run();
-      if(dpa__u_test_teardown)
-        dpa__u_test_teardown();
+      if(dpa_u_test_teardown)
+        dpa_u_test_teardown();
       return res;
     }
     fprintf(stderr, "No test '%s' found\n", argv[1]);
