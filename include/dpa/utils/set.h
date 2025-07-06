@@ -171,6 +171,7 @@
  * \returns if there was a next entry, returns true
  */
 #define dpa_u_set_it_next(THAT, IT) DPA__U_SET_GENERIC_WRAPPER_IT(next, (IT))((THAT), (IT))
+
 /**
  * Moves the iterator to the preceeding entry.
  * Using the safe iterator on different sets is allowed if it is a safe iterator.
@@ -192,11 +193,52 @@
 #define dpa_u_set_it_get_key(...) DPA__U_SET_GENERIC_WRAPPER_IT(get_key, DPA__U_LAST_ARG__H1(__VA_ARGS__))(__VA_ARGS__)
 
 
+/**
+ * Add an entry to the set.
+ * \param THAT the set
+ * \param KEY the entry to add
+ * \returns -1 on failure
+ * \returns  1 (true)  if the entry already existed in the set
+ * \returns  0 (false) if the entry didn't exist yet in the set
+ */
 #define dpa_u_set_add(THAT, KEY) DPA__U_SET_GENERIC_WRAPPER(add, (THAT))((THAT), (KEY))
+
+/**
+ * Remove an entry to the set.
+ * \param THAT the set
+ * \param KEY the entry to remove
+ * \returns true  if the entry was in the set
+ * \returns false if the entry wasn't in the set
+ */
 #define dpa_u_set_remove(THAT, KEY) DPA__U_SET_GENERIC_WRAPPER(remove, (THAT))((THAT), (KEY))
+
+/**
+ * Check if an entry is in the set.
+ * \param THAT the set
+ * \param KEY the entry
+ * \returns true if the entry is in the set
+ * \returns false if the entry is in the set
+ */
 #define dpa_u_set_has(THAT, KEY) DPA__U_SET_GENERIC_WRAPPER(has, (THAT))((THAT), (KEY))
+
+/**
+ * Remove all entries from the set.
+ * This will free all the memory that was allocated by the set, call it if you no longer need the set.
+ * \param THAT the set
+ */
 #define dpa_u_set_clear(THAT) DPA__U_SET_GENERIC_WRAPPER(clear, (THAT))((THAT))
+
+/**
+ * \param THAT the set
+ * \returns the number of entreis in the set
+ */
 #define dpa_u_set_count(THAT) DPA__U_SET_GENERIC_WRAPPER(count, (THAT))((THAT))
+
+/**
+ * Create a copy of a set. This does not merge sets.
+ * \param DST this set is going to be the copy
+ * \param SRC the set to be copied
+ */
 #define dpa_u_set_copy(DST,SRC) DPA__U_SET_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
   
 /** This function is mainly meant for debuggin purposes. */
