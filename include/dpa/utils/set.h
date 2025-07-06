@@ -240,7 +240,8 @@
  * \param SRC the set to be copied
  */
 #define dpa_u_set_copy(DST,SRC) DPA__U_SET_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
-  
+
+
 /** This function is mainly meant for debuggin purposes. */
 #define dpa_u_set_dump(THAT) DPA__U_SET_GENERIC_WRAPPER(dump, (THAT))((THAT))
 

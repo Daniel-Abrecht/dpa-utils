@@ -179,28 +179,162 @@
 #define DPA__U_LAST_ARG__H2(...) DPA__U_LAST_ARG__H2_S(__VA_ARGS__,2,1,0)
 
 
+/**
+ * Moves the iterator to the next entry.
+ * Using the safe iterator on different maps is allowed if it is a safe iterator.
+ * See \ref dpa-u-map for restrictions of fast iterators.
+ * 
+ * \param THAT a map
+ * \param IT an iterator
+ * \returns if there was a next entry, returns true
+ */
 #define dpa_u_map_it_next(THAT, IT) DPA__U_MAP_GENERIC_WRAPPER_IT(next, (IT))((THAT), (IT))
+
+/**
+ * Moves the iterator to the preceeding entry.
+ * Using the safe iterator on different maps is allowed if it is a safe iterator.
+ * See \ref dpa-u-map for restrictions of fast iterators.
+ * 
+ * \param THAT a map
+ * \param IT an iterator
+ * \returns if there was a preceeding entry, returns true
+ */
 #define dpa_u_map_it_prev(THAT, IT) DPA__U_MAP_GENERIC_WRAPPER_IT(prev, (IT))((THAT), (IT))
 
 
+/**
+ * Moves the iterator to the next entry and returns the value at the new location.
+ * The iterator has to be a safe iterator.
+ * 
+ * \param THAT a map
+ * \param IT an iterator
+ * \param RVAL A pointer to a variable which will be set to the value at the new iterator location.
+ * \returns if there was a next entry, returns true
+ */
 #define dpa_u_map_it_next_value(THAT, IT, RVAL) DPA__U_MAP_GENERIC_WRAPPER(it_safe_next_value, (THAT))((THAT), (IT), (RVAL))
+
+/**
+ * Moves the iterator to the preceeding entry and returns the value at the new location.
+ * The iterator has to be a safe iterator.
+ * 
+ * \param THAT a map
+ * \param IT an iterator
+ * \param RVAL A pointer to a variable which will be set to the value at the new iterator location.
+ * \returns if there was a preceeding entry, returns true
+ */
 #define dpa_u_map_it_prev_value(THAT, IT, RVAL) DPA__U_MAP_GENERIC_WRAPPER(it_safe_prev_value, (THAT))((THAT), (IT), (RVAL))
 
 
+/**
+ * Takes either a safe iterator, or a map and a fast iterator.
+ * Returns the key the iterator points to. In the case of a safe iterator, the iterator has a copy of the keys value,
+ * which is what is returned.  
+ * In the case of a fast iterator, the key at the index indicated by the iterator is returned.
+ */
 #define dpa_u_map_it_get_key(...) DPA__U_MAP_GENERIC_WRAPPER_IT(get_key, DPA__U_LAST_ARG__H2(__VA_ARGS__))(__VA_ARGS__)
+
+/**
+ * Returns the value at the current iterator position.
+ * This operation is only defined for fast iterators, for safe iterators, use the
+ * \ref dpa_u_map_get, \ref dpa_u_map_it_prev_value and \ref dpa_u_map_it_next_value functions to get the value if you
+ * have a safe iterator.
+ *
+ * \param THAT a map
+ * \param IT an iterator
+ * \returns the value
+ */
 #define dpa_u_map_it_get_value(THAT, IT) DPA__U_MAP_GENERIC_WRAPPER(it_fast_value, (THAT))((THAT), (IT))
 
-
+/**
+ * Sets the value for a given key in the set.
+ * 
+ * \param THAT the map
+ * \param KEY the key
+ * \param VAL the value to be set
+ * \returns -1 on failure
+ * \returns  1 (true)  if the entry already existed in the set
+ * \returns  0 (false) if the entry didn't exist yet in the set
+ */
 #define dpa_u_map_set(THAT, KEY, VAL) DPA__U_MAP_GENERIC_WRAPPER(set, (THAT))((THAT), (KEY), DPA__U_MAP_VALUE_GENERIC(VAL))
+
+/**
+ * Sets the value for a given key in the set, and returns the old value.
+ * 
+ * \param THAT the map
+ * \param KEY the key
+ * \param VAL a pointer to a variable. The variables value will be set in the map. The variable will be set to the old value in the set.
+ * \returns -1 on failure
+ * \returns  1 (true)  if the entry already existed in the set
+ * \returns  0 (false) if the entry didn't exist yet in the set
+ */
 #define dpa_u_map_exchange(THAT, KEY, VAL) DPA__U_MAP_GENERIC_WRAPPER(exchange, (THAT))((THAT), (KEY), DPA__U_MAP_VALUE_GENERIC(VAL))
+
+/**
+ * Sets the value for a given key in the set, if the key is not in the map yet.
+ * 
+ * \param THAT the map
+ * \param KEY the key
+ * \param VAL the value to be set
+ * \returns -1 on failure
+ * \returns  1 (true)  if the entry already existed in the set
+ * \returns  0 (false) if the entry didn't exist yet in the set
+ */
 #define dpa_u_map_set_if_unset(THAT, KEY, VAL) DPA__U_MAP_GENERIC_WRAPPER(set_if_unset, (THAT))((THAT), (KEY), DPA__U_MAP_VALUE_GENERIC(VAL))
+
+/**
+ * Remove an entry to the map.
+ * \param THAT the map
+ * \param KEY the entry to remove
+ * \returns true  if the entry was in the map
+ * \returns false if the entry wasn't in the map
+ */
 #define dpa_u_map_remove(THAT, KEY) DPA__U_MAP_GENERIC_WRAPPER(remove, (THAT))((THAT), (KEY))
+
+/**
+ * Check if an entry is in the map.
+ * \param THAT the map
+ * \param KEY the entry
+ * \returns true if the entry is in the map
+ * \returns false if the entry is in the map
+ */
 #define dpa_u_map_has(THAT, KEY) DPA__U_MAP_GENERIC_WRAPPER(has, (THAT))((THAT), (KEY))
+
+/**
+ * Get the value for a key in the map.
+ * \param THAT the map
+ * \param KEY the key
+ * \returns The value in a \ref dpa_u_optional_t. That structure has a member to indicate if the entry was found.
+ */
 #define dpa_u_map_get(THAT, KEY) DPA__U_MAP_GENERIC_WRAPPER(get, (THAT))((THAT), (KEY))
+
+/**
+ * Get the value for a key in the map, and remove it from the map.
+ * \param THAT the map
+ * \param KEY the key
+ * \returns The value in a \ref dpa_u_optional_t. That structure has a member to indicate if the entry was found.
+ */
 #define dpa_u_map_get_and_remove(THAT, KEY) DPA__U_MAP_GENERIC_WRAPPER(get_and_remove, (THAT))((THAT), (KEY))
+
+/**
+ * Remove all entries from the map.
+ * This will free all the memory that was allocated by the map, call it if you no longer need the map.
+ * \param THAT the map
+ */
 #define dpa_u_map_clear(THAT) DPA__U_MAP_GENERIC_WRAPPER(clear, (THAT))((THAT))
+
+/**
+ * \param THAT the map
+ * \returns the number of entreis in the map
+ */
 #define dpa_u_map_count(THAT) DPA__U_MAP_GENERIC_WRAPPER(count, (THAT))((THAT))
+
+/**
+ * Create a copy of a map. This does not merge maps.
+ * \param DST this map is going to be the copy
+ * \param SRC the map to be copied
+ */
 #define dpa_u_map_copy(DST,SRC) DPA__U_MAP_GENERIC_WRAPPER(count, (SRC))((DST),(SRC))
+
 
 /** This function is mainly meant for debuggin purposes. */
 #define dpa_u_map_dump(THAT) DPA__U_MAP_GENERIC_WRAPPER(dump, (THAT))((THAT))
