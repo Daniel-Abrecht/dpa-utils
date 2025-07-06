@@ -1020,6 +1020,10 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _copy)(DPA__U_SM_TYPE*restrict 
       DPA__U_SM_KEY_ENTRY_TYPE*const key_list = malloc((((size_t)1)<<lbsize)*sizeof(*key_list));
       if(!key_list)
         goto error_1;
+      free(dst->key_list);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      free(dst->value_list);
+#endif
       *dst = *src;
       memcpy(key_list, src->key_list, (((size_t)1)<<lbsize)*sizeof(*key_list));
       dst->key_list = key_list;
@@ -1030,6 +1034,10 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _copy)(DPA__U_SM_TYPE*restrict 
       dpa_u_bitmap_entry_t*const bitmask = malloc(size);
       if(!bitmask)
         goto error_1;
+      free(dst->bitmask);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+      free(dst->value_list);
+#endif
       *dst = *src;
       memcpy(bitmask, src->bitmask, size);
       dst->bitmask = bitmask;
