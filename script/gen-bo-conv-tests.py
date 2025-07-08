@@ -26,7 +26,7 @@ def get_bo(datatype, tags, value=None, refcount=None):
     stags = 'DPA_U_BO_SIMPLE'
     if 'STATIC' in tags:
       stags = 'DPA_U_BO_SIMPLE|DPA_U_BO_STATIC'
-    return f'((dpa_u_{datatype}_t){{dpa__u_bo_intern_h(((dpa_u_a_bo_any_t){{DPA__U_BO_TAG(&bo, {stags})}})).p}})'
+    return f'((dpa_u_{datatype}_t){{dpa_u_bo_intern_p(((dpa_u_a_bo_any_t){{DPA__U_BO_TAG(&bo, {stags})}})).p}})'
   if datatype == 'bo':
     if tags != frozenset({'SIMPLE'}):
       return None
