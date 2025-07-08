@@ -13,8 +13,13 @@
 /**
  * \addtogroup dpa-u-math Math functions
  * @{
+ * Various math functions.
  */
 
+/**
+ * This is macro expands to a constant expression for calcuating the log2 of an unsigned integer.
+ * The parameter expands multiple times, beware of input expressions with side effects.
+ */
 #define DPA_U_CONSTEXPR_LOG2(X) ( \
     (X)<=0x0000000000000001llu? 0: \
     (X)<=0x0000000000000002llu? 1: \
@@ -83,6 +88,9 @@
     64 \
   )
 
+/**
+ * Returns the log2 of an unsigned integer.
+ */
 dpa_u_unsequenced dpa__u_api inline int dpa_u_log2(long long unsigned int x){
 #if DPA__U__has_builtin(__builtin_clzll)
   return 63 - __builtin_clzll(x);
@@ -98,6 +106,9 @@ dpa_u_unsequenced dpa__u_api inline int dpa_u_log2(long long unsigned int x){
 #elif DPA__U__has_builtin(__builtin_ctzll)
 #define dpa_u_ctzll __builtin_ctzll
 #else
+/**
+ * Count the number of zero bits from the less significant side.
+ */
 dpa_u_unsequenced dpa__u_api inline int dpa_u_ctzll(long long unsigned int x){
   int i = 0;
   for(; i<64 && !(1&x); i++)
@@ -106,7 +117,11 @@ dpa_u_unsequenced dpa__u_api inline int dpa_u_ctzll(long long unsigned int x){
 }
 #endif
 
-
+/**
+ * Returns true, if x is smaller then y, if you invert their bits beforehands.
+ * It's useful for sorting things, if you use some of the least instead of the most significant bits to do so,
+ * and you need it to stay in the same order if you use more or less bits.
+ */
 dpa_u_unsequenced dpa__u_api inline bool dpa_u_rbit_less_than_unsigned(long long unsigned x, long long unsigned y){
 #if DPA__U__has_builtin(__builtin_bitreverse64) && defined(__aarch64__)
   // Note: clang has __builtin_bitreverse64. gcc does not. And some archs have it, but the compiler won't use it.
@@ -124,6 +139,9 @@ dpa_u_unsequenced dpa__u_api inline bool dpa_u_rbit_less_than_unsigned(long long
 #elif DPA__U__has_builtin(__builtin_popcountll)
 #define dpa_u_count_bits __builtin_popcountll
 #else
+/**
+ * Count the number of bits set in an integer.
+ */
 dpa_u_unsequenced dpa__u_api inline int dpa_u_count_bits(long long unsigned int x){
   int n = 0;
   for(unsigned i=0; i<sizeof(x)*CHAR_BIT; i++)
@@ -133,12 +151,26 @@ dpa_u_unsequenced dpa__u_api inline int dpa_u_count_bits(long long unsigned int 
 }
 #endif
 
+/**
+ * \returns -1 if x is negative, +1 if it is positive, 0 if it is 0.
+ */
 dpa_u_unsequenced dpa__u_really_inline dpa__u_api inline bool dpa_u_sign(long long x){
   return (x > 0) - (x < 0);
 }
 
-// TODO: This is currently not a very safe macro
+/**
+ * Takes 2 numbers, and returns the smaller one.
+ * The parameter expands multiple times, beware of input expressions with side effects.
+ * Also, make sure not to mix types in the parameters, that could lead to unexpected / wrong results.
+ * This macro may get changed in the future.
+ */
 #define DPA_U_MIN(X,Y) ((X)<(Y)?(X):(Y))
+/**
+ * Takes 2 numbers, and returns the bigger one.
+ * The parameter expands multiple times, beware of input expressions with side effects.
+ * Also, make sure not to mix types in the parameters, that could lead to unexpected / wrong results.
+ * This macro may get changed in the future.
+ */
 #define DPA_U_MAX(X,Y) ((X)>(Y)?(X):(Y))
 
 /** @} */

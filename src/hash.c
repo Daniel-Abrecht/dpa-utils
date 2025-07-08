@@ -26,7 +26,7 @@ void dpa_u_getrandom(void* _buf, size_t buflen){
 }
 #endif
 
-dpa__u_api alignas(256) char dpa_u_seed[256];
+dpa__u_api alignas(DPA_U_SEED_SIZE) char dpa_u_seed[DPA_U_SEED_SIZE];
 
 dpa_u_init void dpa_u_init_seed(void){
   static bool init_done = false;

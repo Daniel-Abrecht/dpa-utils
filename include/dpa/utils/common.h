@@ -70,6 +70,9 @@
 #if DPA__U__has_c_attribute_opt(constructor,gnu::constructor)
 #define dpa_u_init dpa_u_attribute(constructor,gnu::constructor)
 #endif
+#if DPA__U__has_c_attribute_opt(constructor,gnu::constructor)
+#define dpa_u_cleanup dpa_u_attribute(destructor,gnu::destructor)
+#endif
 
 #ifdef _MSC_VER
 #define dpa_u_export __declspec(dllexport)
@@ -131,6 +134,9 @@
 #ifndef dpa_u_init
 #define dpa_u_init
 #warning "WARNING: No attribute for initializer functions available. Some things may not work correctly!"
+#endif
+#ifndef dpa_u_cleanup
+#define dpa_u_cleanup
 #endif
 
 #ifdef DPA__U_BUILD_LIB
@@ -663,10 +669,19 @@ typedef struct dpa_u_optional_pointer {
   bool present;
 } dpa_u_optional_pointer_t;
 
+#ifndef DPA_U_SEED_SIZE
+/**
+ * The size of dpa_u_seed, defaults to 256.
+ * Can be overwritten in the config. Should be at least 8 bytes.
+ * Should not be more than 256 bytes.
+ */
+#define DPA_U_SEED_SIZE 256
+#endif
+
 /**
  * 256 bytes which are randomly initialized at program startup.
  */
-dpa__u_api_var extern alignas(256) char dpa_u_seed[256];
+dpa__u_api_var extern alignas(DPA_U_SEED_SIZE) char dpa_u_seed[DPA_U_SEED_SIZE];
 
 /** @} */
 

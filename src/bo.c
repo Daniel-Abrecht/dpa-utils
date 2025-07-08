@@ -677,3 +677,20 @@ error:
 #endif
   return dpa_u_bo_error(error);
 }
+
+#ifdef DPA_U_DEBUG
+#include <dpa/utils/io.h>
+dpa_u_cleanup static void cleanup(){
+  dpa_u_any_value_t value;
+  dpa_u_map_u64_it_safe_t it = {0};
+  while(dpa_u_map_u64_it_safe_next_value(&unique_string_map, &it, &value)){
+    dpa_u_a_bo_unique_t ubo = dpa_u_bo_unique_from_uint(value.u64);
+    if(dpa_u_bo_is_any_type(ubo, DPA_U_BO_STATIC)){
+      dpa_u_map_u64_remove(&unique_string_map, dpa_u_map_it_get_key(&it));
+      free(DPA__U_BO_UNTAG(dpa_u_bo_t*, ubo.p));
+    }else{
+      // fprintf(stderr, "Non-static interned entry still reachable at exit: %.*s\n", (int)dpa_u_bo_get_size(ubo), dpa_u_bo_get_data(ubo));
+    }
+  }
+}
+#endif
