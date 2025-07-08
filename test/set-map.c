@@ -92,6 +92,11 @@ void dpa_u_test_setup(void){
 #undef READ_NUMBERS
 }
 
+void dpa_u_test_teardown(void){
+  while(ustr_count--)
+    dpa_u_bo_put(ustr[ustr_count]);
+}
+
 DPA_U_TEST_MAIN
 
 #define GET_RAND_ENTRY DPA_U_CONCAT_E(DPA__U_SM_PREFIX, __get_rand)
