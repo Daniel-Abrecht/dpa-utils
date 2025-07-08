@@ -507,7 +507,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next)(const DPA__U_SM
       i += I;
     index = i >> shift;
   }
-  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(current) > DPA__U_SM_KEY_ENTRY_HASH(next))){
+  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(current) >= DPA__U_SM_KEY_ENTRY_HASH(next))){
     memset(it, 0, sizeof(*it));
     return false;
   }else{
@@ -547,7 +547,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next_value)(const DPA
       i += I;
     index = i >> shift;
   }
-  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(current) > DPA__U_SM_KEY_ENTRY_HASH(next))){
+  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(current) >= DPA__U_SM_KEY_ENTRY_HASH(next))){
     memset(it, 0, sizeof(*it));
     return false;
   }else{
@@ -584,7 +584,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM
       i -= I;
     index = i >> shift;
   }
-  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(prev) > DPA__U_SM_KEY_ENTRY_HASH(current))){
+  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(prev) >= DPA__U_SM_KEY_ENTRY_HASH(current))){
     memset(it, 0, sizeof(*it));
     return false;
   }else{
@@ -620,7 +620,7 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev_value)(const DPA
       i -= I;
     index = i >> shift;
   }
-  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(current) < DPA__U_SM_KEY_ENTRY_HASH(prev))){
+  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(prev) >= DPA__U_SM_KEY_ENTRY_HASH(current))){
     memset(it, 0, sizeof(*it));
     return false;
   }else{
