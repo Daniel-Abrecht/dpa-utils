@@ -32,3 +32,15 @@ and it'll carry over to any subsequenbt make calls in that shell.
 
 You can create debug builds using `make debug=1`. You can create builds with asan enabled using `make asan=1`.
 You can combine these options.
+
+## Usage conventions
+
+Any identifiers starting with `dpa__` (two underscores) or with `_`, is reserved, and should not be used.
+
+There are some macro functions which can take a variety of types, thanks to generic selections. Most of them
+also have a verison suffixed with `_g`, those take any argument, and return an instance of \ref dpa_u_invalid_selection_t
+if the arguments are not supported. You can use them if you need to extend a function with generic selections, see also
+\ref dpa_u_assert_selection. The `_g` functions aren't all listed in the documentation.
+
+Sometimes, there are also functions suffixed with `_p`. Those are regular functions, which are wrapped using a macro
+which does not have the `_p` suffix.

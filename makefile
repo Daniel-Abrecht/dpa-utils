@@ -85,6 +85,9 @@ TESTS := $(patsubst test/%.c,test//%,$(wildcard test/*.c))
 TESTS += test//bo-conv
 BO-CONV-TESTS := $(patsubst test/%.c,test//%,$(wildcard test/gen/*.c))
 
+DOCSRC += README.md
+DOCSRC += $(find docs -type f)
+
 export LD_LIBRARY_PATH=$(shell realpath -m "lib/$(TYPE)/")
 
 SHELL_CMD="$$SHELL"
@@ -262,7 +265,7 @@ build/$(TYPE)/o/main/%.c$(o-ext): %.c makefile $(HEADERS)
 	( $(CC) -c -o $@ $(CFLAGS) $< >&3 2>&1 | tee "$@.err" >&2; ) 3>&1
 	@if [ ! -s "$@.err" ]; then rm -f "$@.err"; fi
 
-build/docs/api/.done: $(HEADERS) Doxyfile
+build/docs/api/.done: $(HEADERS) $(DOCSRC) Doxyfile
 	rm -rf build/docs/api/
 	mkdir -p build/docs/api/
 	-doxygen
