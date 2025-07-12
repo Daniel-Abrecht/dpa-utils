@@ -2,9 +2,13 @@
 
 This is going to be a library with a lot of useful utility functions.
 
-This library should work on any c17 compatible compiler. If c23 is qavailable, it uses some C23 features too.  
+This library should with on any c17 compatible compiler. If c23 is qavailable, it uses some C23 features too.  
 It has been tested with clang and gcc on linux. msvc is explicitly not supported. You can use clang or gcc to cross
-compile it to windows, but you can't do it with the windows ABI.
+compile it to windows, but you can't do it with the windows ABI.  
+
+There is one implementation & target specific assumption made in this library. Currently, the tagged pointer
+functionality assumes the most significant byte of a pointer is always 0 after converting it to a uint64_t,
+and that a pointer can be converted to an uint64_t and back.
 
 ## Building & installing the library
 
@@ -22,6 +26,7 @@ This requires doxygen to be installed.
 
 Some platforms may need some additional compiler options & config options. Take a look at the `mk/` and `config/` directories.
 If you use a config when building the library, make sure the same one is used when you build any program which uses it.
+Also take a look at the dpa/utils/config.h file for what you can put in there.
 
 To use one of the files in the `mk/` folder, you can specify it in the make command. For example `make use=avr`.
 Make sure to do a `make clean` before building the libtary is you use one of those files or a custom config.

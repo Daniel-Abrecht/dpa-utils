@@ -15,6 +15,8 @@
  * @{
  */
 
+#include <dpa/utils/config.h>
+
 #ifdef DPA_U_CONFIG
 #include DPA_U_CONFIG
 #endif
@@ -671,7 +673,7 @@ typedef struct dpa_u_optional_pointer {
 
 #ifndef DPA_U_SEED_SIZE
 /**
- * The size of dpa_u_seed, defaults to 256.
+ * The size of \refdpa_u_seed, defaults to 256.
  * Can be overwritten in the config. Should be at least 8 bytes.
  * Should not be more than 256 bytes.
  */

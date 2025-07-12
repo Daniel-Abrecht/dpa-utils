@@ -7,6 +7,11 @@ ifdef use
 include $(patsubst %,mk/%.mk,$(use))
 endif
 
+ifdef config
+export DPA_U_CONFIG=$(shell realpath $(config))
+CFLAGS += '-DDPA_U_CONFIG="$(DPA_U_CONFIG)"'
+endif
+
 ifndef notest
 HEADERS := $(shell find include -type f -name "*.h" -not -name ".*")
 SOURCES := $(shell find src -not -path "src/special/*" -type f -iname "*.c")
@@ -279,18 +284,23 @@ clean:
 	rm -rf build/$(TYPE)/ bin/$(TYPE)/ lib/$(TYPE)/
 
 install:
+	mkdir -p "$(DESTDIR)$(prefix)/include/dpa/utils/"
+	mkdir -p "$(DESTDIR)$(prefix)/lib/"
 ifdef has_shared
 	cp "lib/$(TYPE)/lib$(SONAME)$(so-ext)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)"
 	ln -sf "lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR)"
 	ln -sf "lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR)"
 	ln -sf "lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext)"
 endif
-	cp "bin/$(TYPE)/dpa-testsuite" "$(DESTDIR)$(prefix)/bin/"
+ifndef notest
+	cp "bin/$(TYPE)/dpa-testsuite$(bin-ext)" "$(DESTDIR)$(prefix)/bin/"
+endif
 	cp "lib/$(TYPE)/lib$(SONAME)$(a-ext)" "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(a-ext)"
 	mkdir -p "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	cp -a include/dpa/utils/./ "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	cp include/dpa/utils.h "$(DESTDIR)$(prefix)/include/dpa/"
-	ldconfig
+	if [ -n "$$DPA_U_CONFIG" ]; then cp "$$DPA_U_CONFIG" "$(DESTDIR)$(prefix)/include/dpa/config.h"; fi
+	-ldconfig
 
 uninstall:
 	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR).$(MINOR).$(PATCH)"
@@ -298,7 +308,7 @@ uninstall:
 	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext).$(MAJOR)"
 	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(so-ext)"
 	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(a-ext)"
-	rm -f "bin/$(TYPE)/dpa-testsuite"
+	rm -f "bin/$(TYPE)/dpa-testsuite$(bin-ext)"
 	rm -rf "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	rm -f "$(DESTDIR)$(prefix)/include/dpa/utils.h"
 

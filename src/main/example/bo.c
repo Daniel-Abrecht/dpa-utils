@@ -5,8 +5,8 @@
 
 /**
  * This example shows how any bo can be automatically converted and passed
- * to a function as dpa_u_bo_t argument using the dpa_u_to_bo macro.
- * There are many conversion macros besides dpa_u_to_bo, to make it easy to convert to other bo types when possible.
+ * to a function as \ref dpa_u_bo_t argument using the \ref dpa_u_to_bo macro.
+ * There are many conversion macros besides \ref dpa_u_to_bo, to make it easy to convert to other bo types when possible.
  *
  * The dpa_u_puts macro doesn't do this to allow more optimisations, althoug it'll probably not matter in practice.
  */
