@@ -4,11 +4,21 @@
 #ifdef DPA_U_NO_THREADS
 #warning "DPA_U_NO_THREADS has been specified!"
 #else
-#if !defined(__STDC_NO_THREADS__) && DPA__U__has_include(<threads.h>)
+#if !defined(__STDC_NO_THREADS__) && DPA__U__has_include(<threads.h>) && !defined(DPA_U_THREADS_POLYFILL)
 #include <threads.h>
 #else
 // polyfill //
-#define DPA__U_THREADS_POLYFILL
+#ifndef DPA_U_THREADS_POLYFILL
+/**
+ * Defined if the c11 threads polyfill is used.
+ * You can also define it in the config to force the polyfill to be used.
+ */
+#define DPA_U_THREADS_POLYFILL
+#endif
+#ifdef __STDC_NO_THREADS__
+#undef __STDC_NO_THREADS__
+#endif
+
 #include <pthread.h>
 #include <time.h>
 #include <sched.h>
