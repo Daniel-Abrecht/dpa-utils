@@ -255,7 +255,7 @@
  * \param IT an iterator
  * \returns the value
  */
-#define dpa_u_map_it_get_value(THAT, IT) DPA__U_MAP_GENERIC_WRAPPER(it_fast_value, (THAT))((THAT), (IT))
+#define dpa_u_map_it_get_value(THAT, IT) DPA__U_MAP_GENERIC_WRAPPER(it_fast_get_value, (THAT))((THAT), (IT))
 
 /**
  * Sets the value for a given key in the set.
