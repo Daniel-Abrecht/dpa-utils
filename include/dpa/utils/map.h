@@ -170,7 +170,19 @@
     unsigned int      : (dpa_u_any_value_t){.u64=DPA_U_G(unsigned int, (VAL))}, \
     unsigned long     : (dpa_u_any_value_t){.u64=DPA_U_G(unsigned long, (VAL))}, \
     unsigned long long: (dpa_u_any_value_t){.u64=DPA_U_G(unsigned long long, (VAL))}, \
-    default: (dpa_u_any_value_t){.ptr=(void*)(VAL)} \
+    dpa_u_a_bo_any_t: (dpa_u_any_value_t){.abo=DPA_U_G(dpa_u_a_bo_any_t, (VAL))}, \
+    dpa_u_a_bo_unique_t: (dpa_u_any_value_t){.ubo=DPA_U_G(dpa_u_a_bo_unique_t, (VAL))}, \
+    dpa_u_a_bo_gc_t: (dpa_u_any_value_t){.gbo=DPA_U_G(dpa_u_a_bo_gc_t, (VAL))}, \
+    dpa_u_a_bo_refcounted_t: (dpa_u_any_value_t){.rbo=DPA_U_G(dpa_u_a_bo_refcounted_t, (VAL))}, \
+    dpa_u_a_bo_hashed_t: (dpa_u_any_value_t){.hbo=DPA_U_G(dpa_u_a_bo_hashed_t, (VAL))}, \
+    default: (dpa_u_any_value_t){.ptr=(void*)_Generic((VAL), \
+      dpa_u_a_bo_any_t: (void*)0, \
+      dpa_u_a_bo_unique_t: (void*)0, \
+      dpa_u_a_bo_gc_t: (void*)0, \
+      dpa_u_a_bo_refcounted_t: (void*)0, \
+      dpa_u_a_bo_hashed_t: (void*)0, \
+      default: (VAL) \
+    )} \
   )
 
 #define DPA__U_LAST_ARG__H2_S1(A, B) A
