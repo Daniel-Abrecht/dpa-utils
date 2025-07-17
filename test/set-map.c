@@ -642,7 +642,414 @@ error:
 }
 #endif
 
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "zero entries")){
+  DPA__U_SM_TYPE container = {0};
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t) it={0};
+  if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(&container, &it)){
+    fprintf(stderr, "Error 1: it_fast_next() returned true, but there aren't any entries!\n");
+    return 1;
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "one entry")){
+  DPA__U_SM_TYPE container = {0};
+  DPA__U_SM_KEY_TYPE ikey = {0};
+  GET_RAND_ENTRY(&ikey, 0);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+#endif
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t) it={0};
+  if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(&container, &it)){
+    fprintf(stderr, "Error 1: it_fast_next() prematurely signaled the end of the list\n");
+    goto error;
+  }
+  DPA__U_SM_KEY_TYPE key = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_key)(&container, &it);
+  if(memcmp(&key, &ikey, sizeof(key))){
+    fprintf(stderr, "Error 2: returned key had an unexpected value\n");
+    goto error;
+  }
+  if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(&container, &it)){
+    fprintf(stderr, "Error 3: it_fast_next() returned true, but we already traversed the last element!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "many entries")){
+  enum { COUNT = 99 };
+  DPA__U_SM_TYPE container = {0};
+  for(int i=0; i<COUNT; i++){
+    DPA__U_SM_KEY_TYPE ikey = {0};
+    GET_RAND_ENTRY(&ikey, i);
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+  #endif
+  }
+  int i = 0;
+  for(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t) it={0}; DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(&container, &it); i++){
+    if(i >= COUNT){
+      fprintf(stderr, "Error 1: iteration count exceeded number of entries in map!\n");
+      goto error;
+    }
+  }
+  if(i != COUNT){
+    fprintf(stderr, "Error 2: not all entries have been iterated over!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "all entries")){
+  size_t count = 0;
+  DPA__U_SM_TYPE container = {0};
+  while(true){
+    DPA__U_SM_KEY_TYPE ikey = {0};
+    if(!GET_RAND_ENTRY(&ikey, count))
+      break;
+    count++;
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+  #endif
+  }
+  size_t i = 0;
+  for(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t) it={0}; DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(&container, &it); i++){
+    if(i >= count){
+      fprintf(stderr, "Error 1: iteration count exceeded number of entries in map!\n");
+      goto error;
+    }
+  }
+  if(i != count){
+    fprintf(stderr, "Error 2: not all entries have been iterated over!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "zero entries")){
+  DPA__U_SM_TYPE container = {0};
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t) it={0};
+  if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(&container, &it)){
+    fprintf(stderr, "Error 1: it_safe_next() returned true, but there aren't any entries!\n");
+    return 1;
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "one entry")){
+  DPA__U_SM_TYPE container = {0};
+  DPA__U_SM_KEY_TYPE ikey = {0};
+  GET_RAND_ENTRY(&ikey, 0);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+#endif
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t) it={0};
+  if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(&container, &it)){
+    fprintf(stderr, "Error 1: it_safe_next() prematurely signaled the end of the list\n");
+    goto error;
+  }
+  DPA__U_SM_KEY_TYPE key = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_get_key)(&it);
+  if(memcmp(&key, &ikey, sizeof(key))){
+    fprintf(stderr, "Error 2: returned key had an unexpected value\n");
+    goto error;
+  }
+  if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(&container, &it)){
+    fprintf(stderr, "Error 3: it_safe_next() returned true, but we already traversed the last element!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "many entries")){
+  enum { COUNT = 99 };
+  DPA__U_SM_TYPE container = {0};
+  for(int i=0; i<COUNT; i++){
+    DPA__U_SM_KEY_TYPE ikey = {0};
+    GET_RAND_ENTRY(&ikey, i);
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+  #endif
+  }
+  int i = 0;
+  for(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t) it={0}; DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(&container, &it); i++){
+    if(i >= COUNT){
+      fprintf(stderr, "Error 1: iteration count exceeded number of entries in map!\n");
+      goto error;
+    }
+  }
+  if(i != COUNT){
+    fprintf(stderr, "Error 2: not all entries have been iterated over!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "all entries")){
+  size_t count = 0;
+  DPA__U_SM_TYPE container = {0};
+  while(true){
+    DPA__U_SM_KEY_TYPE ikey = {0};
+    if(!GET_RAND_ENTRY(&ikey, count))
+      break;
+    count++;
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+  #endif
+  }
+  size_t i = 0;
+  for(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t) it={0}; DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(&container, &it); i++){
+    if(i >= count){
+      fprintf(stderr, "Error 1: iteration count exceeded number of entries in map!\n");
+      goto error;
+    }
+  }
+  if(i != count){
+    fprintf(stderr, "Error 2: not all entries have been iterated over!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "zero entries")){
+  DPA__U_SM_TYPE container = {0};
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t) it={0};
+  if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(&container, &it)){
+    fprintf(stderr, "Error 1: it_fast_prev() returned true, but there aren't any entries!\n");
+    return 1;
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "one entry")){
+  DPA__U_SM_TYPE container = {0};
+  DPA__U_SM_KEY_TYPE ikey = {0};
+  GET_RAND_ENTRY(&ikey, 0);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+#endif
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t) it={0};
+  if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(&container, &it)){
+    fprintf(stderr, "Error 1: it_fast_prev() prematurely signaled the end of the list\n");
+    goto error;
+  }
+  DPA__U_SM_KEY_TYPE key = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_get_key)(&container, &it);
+  if(memcmp(&key, &ikey, sizeof(key))){
+    fprintf(stderr, "Error 2: returned key had an unexpected value\n");
+    goto error;
+  }
+  if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(&container, &it)){
+    fprintf(stderr, "Error 3: it_fast_prev() returned true, but we already traversed the last element!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "many entries")){
+  enum { COUNT = 99 };
+  DPA__U_SM_TYPE container = {0};
+  for(int i=0; i<COUNT; i++){
+    DPA__U_SM_KEY_TYPE ikey = {0};
+    GET_RAND_ENTRY(&ikey, i);
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+  #endif
+  }
+  int i = 0;
+  for(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t) it={0}; DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(&container, &it); i++){
+    if(i >= COUNT){
+      fprintf(stderr, "Error 1: iteration count exceeded number of entries in map!\n");
+      goto error;
+    }
+  }
+  if(i != COUNT){
+    fprintf(stderr, "Error 2: not all entries have been iterated over!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "all entries")){
+  size_t count = 0;
+  DPA__U_SM_TYPE container = {0};
+  while(true){
+    DPA__U_SM_KEY_TYPE ikey = {0};
+    if(!GET_RAND_ENTRY(&ikey, count))
+      break;
+    count++;
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+  #endif
+  }
+  size_t i = 0;
+  for(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t) it={0}; DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(&container, &it); i++){
+    if(i >= count){
+      fprintf(stderr, "Error 1: iteration count exceeded number of entries in map!\n");
+      goto error;
+    }
+  }
+  if(i != count){
+    fprintf(stderr, "Error 2: not all entries have been iterated over!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "zero entries")){
+  DPA__U_SM_TYPE container = {0};
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t) it={0};
+  if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(&container, &it)){
+    fprintf(stderr, "Error 1: it_safe_prev() returned true, but there aren't any entries!\n");
+    return 1;
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "one entry")){
+  DPA__U_SM_TYPE container = {0};
+  DPA__U_SM_KEY_TYPE ikey = {0};
+  GET_RAND_ENTRY(&ikey, 0);
+#if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+#elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+#endif
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t) it={0};
+  if(!DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(&container, &it)){
+    fprintf(stderr, "Error 1: it_safe_prev() prematurely signaled the end of the list\n");
+    goto error;
+  }
+  DPA__U_SM_KEY_TYPE key = DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_get_key)(&it);
+  if(memcmp(&key, &ikey, sizeof(key))){
+    fprintf(stderr, "Error 2: returned key had an unexpected value\n");
+    goto error;
+  }
+  if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(&container, &it)){
+    fprintf(stderr, "Error 3: it_safe_prev() returned true, but we already traversed the last element!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "many entries")){
+  enum { COUNT = 99 };
+  DPA__U_SM_TYPE container = {0};
+  for(int i=0; i<COUNT; i++){
+    DPA__U_SM_KEY_TYPE ikey = {0};
+    GET_RAND_ENTRY(&ikey, i);
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+  #endif
+  }
+  int i = 0;
+  for(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t) it={0}; DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(&container, &it); i++){
+    if(i >= COUNT){
+      fprintf(stderr, "Error 1: iteration count exceeded number of entries in map!\n");
+      goto error;
+    }
+  }
+  if(i != COUNT){
+    fprintf(stderr, "Error 2: not all entries have been iterated over!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
+DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "all entries")){
+  size_t count = 0;
+  DPA__U_SM_TYPE container = {0};
+  while(true){
+    DPA__U_SM_KEY_TYPE ikey = {0};
+    if(!GET_RAND_ENTRY(&ikey, count))
+      break;
+    count++;
+  #if DPA__U_SM_KIND == DPA__U_SM_KIND_SET
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _add)(&container, ikey);
+  #elif DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
+    DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _set)(&container, ikey, (dpa_u_any_value_t){.u64=666});
+  #endif
+  }
+  size_t i = 0;
+  for(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t) it={0}; DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(&container, &it); i++){
+    if(i >= count){
+      fprintf(stderr, "Error 1: iteration count exceeded number of entries in map!\n");
+      goto error;
+    }
+  }
+  if(i != count){
+    fprintf(stderr, "Error 2: not all entries have been iterated over!\n");
+    goto error;
+  }
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 0;
+error:
+  DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _clear)(&container);
+  return 1;
+}
+
 // TODO: Add test case for map_set_if_unset functions
-// TODO: Add tests for iterator functions
 
 #endif

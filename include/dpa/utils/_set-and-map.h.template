@@ -111,7 +111,9 @@ bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_TYPE* that,
     case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next)(that, it);
     case DPA__U_SM_BITMAP: {
 #endif
-      size_t i = it->index;
+      size_t i = it->entry;
+      if(dpa_u_likely(i || it->index))
+        i++;
       const size_t count = (size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT);
       while(1){
         if(dpa_u_unlikely(i >= count)){
@@ -154,7 +156,9 @@ bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE*
     case DPA__U_SM_LIST: return DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next_value)(that, it, ret);
     case DPA__U_SM_BITMAP: {
 #endif
-      size_t i = it->index;
+      size_t i = it->entry;
+      if(dpa_u_likely(i || it->index))
+        i++;
       const size_t count = (size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT);
       while(1){
         if(dpa_u_unlikely(i >= count)){
@@ -193,12 +197,14 @@ dpa__u_api inline bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA
     case DPA__U_SM_BITMAP: {
 #endif
       const size_t count = (size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT);
-      size_t i = it->index;
-      if(!i) i = count + 1;
-      i--;
+      size_t i = it->entry;
+      if(dpa_u_unlikely(!(i || it->index)))
+        i = count;
       while(1){
-        if(dpa_u_unlikely(--i >= count)){
+        i--;
+        if(dpa_u_unlikely(i >= count)){
           it->index = 0;
+          it->entry = 0;
           return false;
         }
         if(that->bitmask[DPA__U_SM_BITMAP_OFFSET(i)] & DPA__U_SM_BITMAP_BIT(i))
@@ -236,11 +242,12 @@ dpa__u_api inline bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(con
     case DPA__U_SM_BITMAP: {
 #endif
       const size_t count = (size_t)1<<(sizeof(DPA__U_SM_KEY_TYPE)*CHAR_BIT);
-      size_t i = it->index;
-      if(!i) i = count + 1;
-      i--;
+      size_t i = it->entry;
+      if(dpa_u_unlikely(!(i || it->index)))
+        i = count;
       while(1){
-        if(dpa_u_unlikely(--i >= count)){
+        i--;
+        if(dpa_u_unlikely(i >= count)){
           it->index = 0;
           return false;
         }
@@ -285,6 +292,11 @@ bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(const DPA__U_SM_TYPE* that,
       it->index = 0;
       return false;
     case DPA__U_SM_LIST: {
+#else
+      if(!that->key_list){
+        it->index = 0;
+        return false;
+      }
 #endif
       const int shift = sizeof(DPA__U_SM_ENTRY_HASH_TYPE)*CHAR_BIT-that->lbsize;
       const size_t count = (size_t)1<<that->lbsize;
@@ -338,6 +350,11 @@ bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(const DPA__U_SM_TYPE* that,
       it->index = 0;
       return false;
     case DPA__U_SM_LIST: {
+#else
+      if(!that->key_list){
+        it->index = 0;
+        return false;
+      }
 #endif
       const size_t count = (size_t)1<<that->lbsize;
       if(!i) i = count + 1;
