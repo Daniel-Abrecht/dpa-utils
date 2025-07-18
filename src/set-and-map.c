@@ -485,15 +485,17 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_
 #else
 dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it){
 #endif
-  size_t index = it->index-1;
+  size_t index = it->index;
   const DPA__U_SM_KEY_ENTRY_TYPE current = it->entry;
+  const bool init = !index && !current;
+  index--;
   const bool valid = index < (size_t)1 << that->lbsize;
   if(!valid || memcmp(&current, &that->key_list[index], sizeof(current))){
-    const bool init = index == (size_t)-1;
     const struct dpa__u_sm_lookup_result result = LOOKUP(that, current, that->lbsize);
-    // Note: "current != next" is for the case current == 0 && index == 0, in other words, for the first entry, if it is 0, and in the set, we do need to return it.
     index = result.index;
-    if(result.found || init)
+    // Initially, an iterator has it->index=0 and it->entry=0. We do need to return that entry.
+    // Entry 0 will never be found at index 0, because entry==index is reserved for empty entries.
+    if(result.found && !init)
       index++;
   }else{
     index++;
@@ -507,7 +509,9 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next)(const DPA__U_SM
       i += I;
     index = i >> shift;
   }
-  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(current) >= DPA__U_SM_KEY_ENTRY_HASH(next))){
+  // We need init for the edge case that the biggest entry is at index 0, in which case prev==current for the first iteration
+  // We can not use > instead of >= to avoid this, because if there si only one entry, then prev == next in the next iteration
+  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(current) >= DPA__U_SM_KEY_ENTRY_HASH(next) && !init)){
     memset(it, 0, sizeof(*it));
     return false;
   }else{
@@ -525,15 +529,17 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next_value)(const DPA_
 #else
 dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret){
 #endif
-  size_t index = it->index-1;
+  size_t index = it->index;
   const DPA__U_SM_KEY_ENTRY_TYPE current = it->entry;
+  const bool init = !index && !current;
+  index--;
   const bool valid = index < (size_t)1 << that->lbsize;
   if(!valid || memcmp(&current, &that->key_list[index], sizeof(current))){
-    const bool init = index == (size_t)-1;
     const struct dpa__u_sm_lookup_result result = LOOKUP(that, current, that->lbsize);
-    // Note: "current != next" is for the case current == 0 && index == 0, in other words, for the first entry, if it is 0, and in the set, we do need to return it.
     index = result.index;
-    if(result.found || init)
+    // Initially, an iterator has it->index=0 and it->entry=0. We do need to return that entry.
+    // Entry 0 will never be found at index 0, because entry==index is reserved for empty entries.
+    if(result.found && !init)
       index++;
   }else{
     index++;
@@ -547,11 +553,13 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_next_value)(const DPA
       i += I;
     index = i >> shift;
   }
-  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(current) >= DPA__U_SM_KEY_ENTRY_HASH(next))){
+  // We need init for the edge case that the biggest entry is at index 0, in which case prev==current for the first iteration
+  // We can not use > instead of >= to avoid this, because if there si only one entry, then prev == next in the next iteration
+  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(current) >= DPA__U_SM_KEY_ENTRY_HASH(next) && !init)){
     memset(it, 0, sizeof(*it));
     return false;
   }else{
-    it->index = index;
+    it->index = index+1;
     it->entry = next;
     *ret = that->value_list[index];
     return true;
@@ -566,13 +574,13 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_
 #else
 dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it){
 #endif
-  size_t index = it->index-1;
+  size_t index = it->index;
   DPA__U_SM_KEY_ENTRY_TYPE current = it->entry;
+  const bool init = !index-- && !current;
   const bool valid = index < (size_t)1 << that->lbsize;
   if(!valid || memcmp(&current, &that->key_list[index], sizeof(current))){
-    const bool init = index == (size_t)-1;
     index = LOOKUP(that, current, that->lbsize).index;
-    if(!init) DPA__U_SM_KEY_ENTRY_HASH(current) = -1;
+    if(init) DPA__U_SM_KEY_ENTRY_HASH(current) = -1;
   }
   index--;
   DPA__U_SM_KEY_ENTRY_TYPE prev;
@@ -584,7 +592,9 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev)(const DPA__U_SM
       i -= I;
     index = i >> shift;
   }
-  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(prev) >= DPA__U_SM_KEY_ENTRY_HASH(current))){
+  // We need init for the edge case that the biggest entry is at index 0, in which case prev==current for the first iteration
+  // We can not use > instead of >= to avoid this, because if there si only one entry, then prev == next in the next iteration
+  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(prev) >= DPA__U_SM_KEY_ENTRY_HASH(current) && !init)){
     memset(it, 0, sizeof(*it));
     return false;
   }else{
@@ -602,13 +612,13 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev_value)(const DPA_
 #else
 dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev_value)(const DPA__U_SM_TYPE* that, DPA__U_SM_TYPE_IT_S* it, dpa_u_any_value_t* ret){
 #endif
-  size_t index = it->index-1;
+  size_t index = it->index;
   DPA__U_SM_KEY_ENTRY_TYPE current = it->entry;
+  const bool init = !index-- && !current;
   const bool valid = index < (size_t)1 << that->lbsize;
   if(!valid || memcmp(&current, &that->key_list[index], sizeof(current))){
-    const bool init = index == (size_t)-1;
     index = LOOKUP(that, current, that->lbsize).index;
-    if(!init) DPA__U_SM_KEY_ENTRY_HASH(current) = -1;
+    if(init) DPA__U_SM_KEY_ENTRY_HASH(current) = -1;
   }
   index--;
   DPA__U_SM_KEY_ENTRY_TYPE prev;
@@ -620,11 +630,13 @@ dpa__u_api bool DPA_U_CONCAT_E(DPA___U_SM_PREFIX, _it_safe_prev_value)(const DPA
       i -= I;
     index = i >> shift;
   }
-  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(prev) >= DPA__U_SM_KEY_ENTRY_HASH(current))){
+  // We need init for the edge case that the biggest entry is at index 0, in which case prev==current for the first iteration
+  // We can not use > instead of >= to avoid this, because if there si only one entry, then prev == next in the next iteration
+  if(dpa_u_unlikely(DPA__U_SM_KEY_ENTRY_HASH(prev) >= DPA__U_SM_KEY_ENTRY_HASH(current) && !init)){
     memset(it, 0, sizeof(*it));
     return false;
   }else{
-    it->index = index;
+    it->index = index+1;
     it->entry = prev;
     *ret = that->value_list[index];
     return true;
