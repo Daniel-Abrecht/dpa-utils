@@ -673,15 +673,20 @@ typedef struct dpa_u_optional_pointer {
 
 #ifndef DPA_U_SEED_SIZE
 /**
- * The size of \refdpa_u_seed, defaults to 256.
+ * The size of \ref dpa_u_seed, defaults to 64.
  * Can be overwritten in the config. Should be at least 8 bytes.
  * Should not be more than 256 bytes.
  */
-#define DPA_U_SEED_SIZE 256
+#define DPA_U_SEED_SIZE 64
 #endif
 
 /**
- * 256 bytes which are randomly initialized at program startup.
+ * \ref DPA_U_SEED_SIZE bytes which are randomly initialized at program startup, defaults to 64.
+ * The seed can be overwritten using the `DPA_U_SEED` environment variable,
+ * which should contain the bytes in hexadecimal representation.
+ * This is useful for reproducing things that happen seamingly randomly, as those may depend on the seed.
+ * If the `DPA_U_SEED` environment variable is set but smaller than `DPA_U_SEED_SIZE`,
+ * the remaining bytes will be initialized randomly.
  */
 dpa__u_api_var extern alignas(DPA_U_SEED_SIZE) char dpa_u_seed[DPA_U_SEED_SIZE];
 

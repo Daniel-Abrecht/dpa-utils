@@ -113,6 +113,13 @@ endif
 
 export TYPE
 
+ifndef DPA_U_SEED
+DPA_U_SEED=$(shell xxd -p -l 64 -c 128 </dev/urandom)
+$(info DPA_U_SEED=$(DPA_U_SEED))
+endif
+export DPA_U_SEED
+
+
 all: source-checks bin lib
 
 .PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm docs test//bo-conv FORCE

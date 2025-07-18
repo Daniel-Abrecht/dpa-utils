@@ -28,9 +28,27 @@ void dpa_u_getrandom(void* _buf, size_t buflen){
 
 dpa__u_api alignas(DPA_U_SEED_SIZE) char dpa_u_seed[DPA_U_SEED_SIZE];
 
+static int hex2int(char digit){
+  if(digit >= '0' && digit <= '9')
+    return digit - '0';
+  if(digit >= 'a' && digit <= 'z')
+    return digit - 'a';
+  if(digit >= 'A' && digit <= 'Z')
+    return digit - 'A';
+  return 0;
+}
+
 dpa_u_init void dpa_u_init_seed(void){
   static bool init_done = false;
   if(init_done) return;
   init_done = true;
-  dpa_u_getrandom(dpa_u_seed, sizeof(dpa_u_seed));
+  unsigned seed_predefined_length = 0;
+  const char* force_seed = getenv("DPA_U_SEED");
+  if(force_seed)
+    for(
+      int i = 0;
+      seed_predefined_length < sizeof(dpa_u_seed) && force_seed[i] && force_seed[i+1];
+      i+=2, seed_predefined_length++
+    ) dpa_u_seed[seed_predefined_length] = hex2int(force_seed[i])*0x10 + hex2int(force_seed[i+1]);
+  dpa_u_getrandom(dpa_u_seed+seed_predefined_length, sizeof(dpa_u_seed)-seed_predefined_length);
 }
