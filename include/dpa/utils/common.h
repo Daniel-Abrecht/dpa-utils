@@ -204,6 +204,12 @@ typedef struct { int x; } dpa_u_invalid_selection_t;
 #endif
 
 #ifdef dpa_u_typeof
+#define dpa__u_typeof_maybe(...) dpa_u_typeof(__VA_ARGS__)
+#else
+#define dpa__u_typeof_maybe(...) (__VA_ARGS__)
+#endif
+
+#ifdef dpa_u_typeof
 /**
  * \param ptr a pointer to a member of a struct
  * \param type a containing struct type
