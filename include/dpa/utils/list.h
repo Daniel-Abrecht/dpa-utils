@@ -20,10 +20,19 @@
 #include <stdbool.h>
 #include <stdalign.h>
 
+/** This is a generic opaque type to signify all lists. */
 typedef struct dpa_u_list dpa_u_list_t;
 
+/**
+ * Generic type for linked lists. In a definition, it is to be used like so:
+ * ```
+ * dpa_u_list(int) mylist;
+ * ```
+ * 
+ * \param T the type of the list entries
+ */
 #define dpa_u_list(T) union { \
-    T* ptr; /* All access is done using this member. */ \
+    dpa__u_typeof_maybe(T)* ptr; /* All access is done using this member. */ \
     dpa_u_list_t* _meta; /* This is to verify that it's a dpa_u_list_t. */ \
   }
 
@@ -116,10 +125,10 @@ dpa__u_api inline void dpa__u_list_swap_p(dpa_u_list_t** a, dpa_u_list_t** b){
   *a = *b;
   *b = tmp;
 }
-/** See \ref dpa_u_list_swap */
+/** \cond 0 */
 #define dpa_u_list_swap_sa_p dpa__u_list_swap_p
-/** See \ref dpa_u_list_swap */
 #define dpa_u_list_swap_ma_p dpa__u_list_swap_p
+/** \endcond */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #elif DPA_U_LIST_H < 3
