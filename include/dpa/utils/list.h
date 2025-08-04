@@ -106,8 +106,15 @@ typedef struct dpa_u_list dpa_u_list_t;
 
 #ifdef dpa_u_typeof
 #define dpa_u_list_push(LIST, VALUE) dpa_u_list_append((LIST), 1, (dpa_u_typeof(VALUE)[]){(VALUE)})
-// #define dpa_u_list_pop(LIST) /*TODO*/
 #endif
+
+/**
+ * Returns the last item in RET & removes it from the list.
+ * 
+ * \param LIST the list
+ * \param RET A pointer to the variable the item is to be stored in
+ */
+#define dpa_u_list_pop(LIST, RET) dpa__u_list_av((LIST), dpa_u_list_pop)( dpa__u_list_plist((LIST)), sizeof((LIST)->ptr[0]), (1? (RET) : (LIST)->ptr) )
 
 struct dpa__u_list_small {
   size_t count : sizeof(size_t)*CHAR_BIT-CHAR_BIT;
@@ -174,6 +181,7 @@ void X(dpa_u_list_clear)(dpa_u_list_t** list){
   *list = 0;
 }
 
+dpa__u_api bool X(dpa_u_list_pop)(dpa_u_list_t** list, unsigned entry_size, void* ret);
 dpa__u_api bool X(dpa_u_list_grow)(dpa_u_list_t** list, unsigned entry_size, size_t count);
 dpa__u_api void X(dpa_u_list_shrink)(dpa_u_list_t** list, unsigned entry_size, size_t count);
 dpa__u_api bool X(dpa_u_list_append)(dpa_u_list_t** list, unsigned entry_size, size_t count, const void* entries);

@@ -144,3 +144,24 @@ DPA_U_TESTCASE("dpa_u_list_clear\tnon-empty list"){
     dpa_u_abort("dpa_u_list_shrink: %s", "unexpected length");
   return 0;
 }
+
+DPA_U_TESTCASE("dpa_u_list_pop\tempty list"){
+  int x = 1;
+  if(dpa_u_list_pop(&list, &x))
+    return 1;
+  if(x != 1)
+    return 1;
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_list_pop\tnon-empty list"){
+  int x = 1;
+  dpa_u_list_grow(&list, 10);
+  if(!dpa_u_list_pop(&list, &x))
+    return 1;
+  if(x != 0)
+    return 1;
+  if(dpa_u_list_length(&list) != 9)
+    return 1;
+  return 0;
+}

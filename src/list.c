@@ -90,6 +90,15 @@ bool X(dpa_u_list_append)(dpa_u_list_t** list, unsigned entry_size, size_t count
   return true;
 }
 
+bool X(dpa_u_list_pop)(dpa_u_list_t** list, unsigned entry_size, void* ret){
+  const size_t count = X(dpa_u_list_length)(*list);
+  if(!count)
+    return false;
+  memcpy(ret, ((char*)*list)+entry_size*(count-1), entry_size);
+  X(dpa_u_list_shrink)(list, entry_size, 1);
+  return true;
+}
+
 #undef X
 #undef DPA__U_LIST_T
 #else
