@@ -106,5 +106,5 @@ bool X(dpa_u_list_pop)(dpa_u_list_t** list, unsigned entry_size, void* ret){
 #define DPA__U_PASS 1000
 #endif
 #if DPA__U_PASS != 1000
-#include "list.c"
+#include __FILE__
 #endif

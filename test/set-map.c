@@ -182,7 +182,7 @@ bool GET_RAND_ENTRY(DPA__U_SM_KEY_TYPE*const ret, size_t i){
   return false;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add different")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "add different")){
   DPA__U_SM_TYPE container = {0};
   DPA__U_SM_KEY_TYPE key;
   size_t j=0, k=0;
@@ -278,7 +278,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "add twice")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "add twice")){
   DPA__U_SM_TYPE container = {0};
   size_t j=0;
   for(size_t i=0; i<16; i++,j++){
@@ -386,7 +386,7 @@ error:
 
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "exchange value")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "exchange value")){
   DPA__U_SM_TYPE container = {0};
   size_t j=0;
   for(size_t i=0; i<16; i++,j++){
@@ -494,7 +494,7 @@ error:
 #endif
 
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "remove")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "remove")){
   DPA__U_SM_TYPE container = {0};
   DPA__U_SM_KEY_TYPE key;
   size_t n = 0;
@@ -567,7 +567,7 @@ error:
 
 
 #if DPA__U_SM_KIND == DPA__U_SM_KIND_MAP
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "get and remove")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "get and remove")){
   DPA__U_SM_TYPE container = {0};
   DPA__U_SM_KEY_TYPE key;
   size_t n = 0;
@@ -642,7 +642,7 @@ error:
 }
 #endif
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "zero entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "zero entries")){
   DPA__U_SM_TYPE container = {0};
   DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t) it={0};
   if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_next)(&container, &it)){
@@ -652,7 +652,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "zero en
   return 0;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "one entry")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "one entry")){
   DPA__U_SM_TYPE container = {0};
   DPA__U_SM_KEY_TYPE ikey = {0};
   GET_RAND_ENTRY(&ikey, 0);
@@ -682,7 +682,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "many entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "many entries")){
   enum { COUNT = 99 };
   DPA__U_SM_TYPE container = {0};
   for(int i=0; i<COUNT; i++){
@@ -712,7 +712,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "all entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_fast_next" "\t" "all entries")){
   size_t count = 0;
   DPA__U_SM_TYPE container = {0};
   while(true){
@@ -744,7 +744,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "zero entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "zero entries")){
   DPA__U_SM_TYPE container = {0};
   DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t) it={0};
   if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_next)(&container, &it)){
@@ -754,7 +754,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "zero en
   return 0;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "one entry")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "one entry")){
   DPA__U_SM_TYPE container = {0};
   DPA__U_SM_KEY_TYPE ikey = {0};
   GET_RAND_ENTRY(&ikey, 0);
@@ -784,7 +784,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "many entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "many entries")){
   enum { COUNT = 99 };
   DPA__U_SM_TYPE container = {0};
   for(int i=0; i<COUNT; i++){
@@ -814,7 +814,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "all entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_safe_next" "\t" "all entries")){
   size_t count = 0;
   DPA__U_SM_TYPE container = {0};
   while(true){
@@ -846,7 +846,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "zero entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "zero entries")){
   DPA__U_SM_TYPE container = {0};
   DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_t) it={0};
   if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_fast_prev)(&container, &it)){
@@ -856,7 +856,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "zero en
   return 0;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "one entry")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "one entry")){
   DPA__U_SM_TYPE container = {0};
   DPA__U_SM_KEY_TYPE ikey = {0};
   GET_RAND_ENTRY(&ikey, 0);
@@ -886,7 +886,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "many entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "many entries")){
   enum { COUNT = 99 };
   DPA__U_SM_TYPE container = {0};
   for(int i=0; i<COUNT; i++){
@@ -916,7 +916,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "all entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_fast_prev" "\t" "all entries")){
   size_t count = 0;
   DPA__U_SM_TYPE container = {0};
   while(true){
@@ -948,7 +948,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "zero entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "zero entries")){
   DPA__U_SM_TYPE container = {0};
   DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_t) it={0};
   if(DPA_U_CONCAT_E(DPA__U_SM_PREFIX, _it_safe_prev)(&container, &it)){
@@ -958,7 +958,7 @@ DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "zero en
   return 0;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "one entry")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "one entry")){
   DPA__U_SM_TYPE container = {0};
   DPA__U_SM_KEY_TYPE ikey = {0};
   GET_RAND_ENTRY(&ikey, 0);
@@ -988,7 +988,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "many entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "many entries")){
   enum { COUNT = 99 };
   DPA__U_SM_TYPE container = {0};
   for(int i=0; i<COUNT; i++){
@@ -1018,7 +1018,7 @@ error:
   return 1;
 }
 
-DPA_U_TESTCASE((DPA_U_STR_EVAL(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "all entries")){
+DPA_U_TESTCASE((DPA_U_STR_E(DPA__U_SM_TYPE) "\t" "it_safe_prev" "\t" "all entries")){
   size_t count = 0;
   DPA__U_SM_TYPE container = {0};
   while(true){

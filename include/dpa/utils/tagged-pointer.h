@@ -12,6 +12,7 @@
 
 /**
  * \addtogroup dpa-u-tag Tagged Pointer
+ * The first byte is used as the tag. This may not be ideal for all use-cases.
  * @{
  */
 

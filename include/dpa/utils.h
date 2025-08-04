@@ -13,5 +13,6 @@
 #include <dpa/utils/utf8.h>
 #include <dpa/utils/list.h>
 #include <dpa/utils/refcount.h>
+#include <dpa/utils/linked-set.h>
 
 #endif
