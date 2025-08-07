@@ -2,6 +2,7 @@
 #define DPA_U_TAGGED_POINTER_H
 
 #include <dpa/utils/common.h>
+#include <dpa/utils/endian.h>
 #include <stdint.h>
 
 /**
@@ -14,14 +15,8 @@
  * @{
  */
 
-#ifndef BYTE_ORDER
-#include <endian.h>
-#endif
-#ifndef BYTE_ORDER
-#error "BYTE_ORDER undefined. POSIX specifies that it should be defined in endian.h. You may need to define _DEFAULT_SOURCE or _GNU_SOURCE on some platforms (like glibc) to get it."
-#endif
 
-#if BYTE_ORDER == LITTLE_ENDIAN
+#if DPA_U_BYTE_ORDER == DPA_U_ENDIAN_LITTLE
 /**
  * \param X a pointer
  * \param T a tag
@@ -43,7 +38,7 @@
  * \returns Moves the tag such that it can be and-ed or or-ed with a tagged pointer
  */
 #define DPA_U_MOVE_TAG(X) ((uint64_t)(X))
-#elif BYTE_ORDER == BIG_ENDIAN
+#elif DPA_U_BYTE_ORDER == DPA_U_ENDIAN_BIG
 #define DPA_U_TAG(X, T) (((uint64_t)(uintptr_t)(X)) | ((T)<<56))
 #define DPA_U_UNTAG(X) ((void*)(uintptr_t)((X) & 0x00FFFFFFFFFFFFFFu))
 #define DPA_U_GET_TAG(X) ((X) >> 56)

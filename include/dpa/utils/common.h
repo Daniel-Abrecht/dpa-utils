@@ -114,7 +114,7 @@
 /** Stringify the passed parameter */
 #define DPA_U_STR(X) #X
 /** Stringify the passed parameter, after macro substitution */
-#define DPA_U_STR_EVAL(X) DPA_U_STR(X)
+#define DPA_U_STR_E(X) DPA_U_STR(X)
 
 #ifndef dpa__u_gcc_struct
 #define dpa__u_gcc_struct

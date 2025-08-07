@@ -196,7 +196,7 @@ dpa__u_api bool X(dpa_u_list_reserve)(dpa_u_list_t** list, unsigned entry_size, 
 #define DPA_U_LIST_H 1000
 #endif
 #if DPA_U_LIST_H != 1000
-#include <dpa/utils/list.h>
+#include __FILE__
 #endif
 
 /** @} */

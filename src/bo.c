@@ -488,7 +488,7 @@ static dpa_u_map_u64_t unique_string_map;
 
 #ifndef DPA_U_NO_THREADS
 static mtx_t unique_string_map_lock;
-static dpa_u_init void init(void){
+dpa_u_init static void init(void){
   mtx_init(&unique_string_map_lock, mtx_plain);
 }
 #endif
