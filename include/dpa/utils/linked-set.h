@@ -25,15 +25,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-typedef struct dpa_u_linked_set_s {
-  struct dpa_u_linked_set_s_entry *first, *last;
-} dpa_u_linked_set_s_t;
-
-typedef struct dpa_u_linked_set_p {
-  size_t size;
-  struct dpa_u_linked_set_p_entry *first, *last;
-} dpa_u_linked_set_p_t;
-
 typedef struct dpa_u_linked_set_s_entry {
   struct dpa_u_linked_set_s_entry *previous, *next;
 } dpa_u_linked_set_s_entry_t;
@@ -41,7 +32,18 @@ typedef struct dpa_u_linked_set_s_entry {
 typedef struct dpa_u_linked_set_p_entry {
   struct dpa_u_linked_set_p* set;
   struct dpa_u_linked_set_p_entry *previous, *next;
-} dpa_u_linked_set_entry_t;
+} dpa_u_linked_set_p_entry_t;
+
+typedef struct dpa_u_linked_set_s {
+  dpa_u_linked_set_s_entry_t v;
+} dpa_u_linked_set_s_t;
+
+typedef struct dpa_u_linked_set_p {
+  size_t length;
+  struct {
+    struct dpa_u_linked_set_p_entry *previous, *next;
+  } v;
+} dpa_u_linked_set_p_t;
 
 dpa__u_api bool dpa_u_linked_set_s_set(
   struct dpa_u_linked_set_s* set,
@@ -70,20 +72,20 @@ dpa__u_api bool dpa_u_linked_set_p_move(
 dpa__u_api void dpa_u_linked_set_s_clear(struct dpa_u_linked_set_s* set);
 dpa__u_api void dpa_u_linked_set_p_clear(struct dpa_u_linked_set_p* set);
 
-#define dpa_u_linked_set_set(SET, ENTRY, BEFORE) _Generic((SET), \
-    struct dpa_u_linked_set_s*: dpa_u_linked_set_s_set((SET), (ENTRY), (BEFORE)), \
-    struct dpa_u_linked_set_p*: dpa_u_linked_set_p_set((SET), (ENTRY), (BEFORE)) \
-  )
+#define dpa_u_linked_set_set(SET, ENTRY, BEFORE) _Generic((ENTRY), \
+    struct dpa_u_linked_set_s_entry*: dpa_u_linked_set_s_set, \
+    struct dpa_u_linked_set_p_entry*: dpa_u_linked_set_p_set \
+  )((SET), (ENTRY), (BEFORE))
 
 #define dpa_u_linked_set_move(DST, SRC, BEFORE) _Generic((SET), \
-    struct dpa_u_linked_set_s*: dpa_u_linked_set_s_move((DST), (SRC), (BEFORE)), \
-    struct dpa_u_linked_set_p*: dpa_u_linked_set_p_move((DST), (SRC), (BEFORE)) \
-  )
+    struct dpa_u_linked_set_s*: dpa_u_linked_set_s_move, \
+    struct dpa_u_linked_set_p*: dpa_u_linked_set_p_move \
+  )((DST), (SRC), (BEFORE))
 
 #define dpa_u_linked_set_clear(SET) _Generic((SET), \
-    struct dpa_u_linked_set_s*: dpa_u_linked_set_s_clear((SET)), \
-    struct dpa_u_linked_set_p*: dpa_u_linked_set_p_clear((SET)) \
-  )
+    struct dpa_u_linked_set_s*: dpa_u_linked_set_s_clear, \
+    struct dpa_u_linked_set_p*: dpa_u_linked_set_p_clear \
+  )((SET))
 
 /** @} */
 /** @} */
