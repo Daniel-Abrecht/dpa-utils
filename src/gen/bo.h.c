@@ -1,3 +1,4 @@
+#define DPA__U_GEN_EXPORTS
 #include <dpa/utils/bo.h>
 
 extern dpa__u_bo_hashed_t dpa__u_bo__assign_p_any_bo_do_hash(dpa_u_bo_t bo);

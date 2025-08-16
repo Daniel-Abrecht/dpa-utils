@@ -21,9 +21,10 @@ cd "$root"
   do (
     f="$root/src/gen/$h.c"
     exec >"$f"
+    echo "#define DPA__U_GEN_EXPORTS"
     printf "#include <dpa/utils/%s>\n\n" "$h"
     genexports "$h" ${extra["$h"]}
-    if [ "$(wc -l <"$f")" -le 2 ]
+    if [ "$(wc -l <"$f")" -le 3 ]
       then rm "$f"
     fi
   ); done

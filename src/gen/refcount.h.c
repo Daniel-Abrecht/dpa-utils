@@ -1,3 +1,4 @@
+#define DPA__U_GEN_EXPORTS
 #include <dpa/utils/refcount.h>
 
 extern bool dpa_u_refcount_decrement_p(const struct dpa_u_refcount*const _rc);

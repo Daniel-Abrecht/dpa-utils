@@ -1,3 +1,4 @@
+#define DPA__U_GEN_EXPORTS
 #include <dpa/utils/math.h>
 
 extern bool dpa_u_rbit_less_than_unsigned(long long unsigned x, long long unsigned y);

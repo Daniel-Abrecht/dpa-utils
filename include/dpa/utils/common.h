@@ -91,7 +91,13 @@
  * an object of the expected type.  
  * Be careful with this though. Making a mistake with this can be very difficult to figure out, and is very easy to make.
  */
+#if defined(__GNUC__) && !defined(__llvm__)
+// This is a workaround for gcc warning about missing braces.
+// That should never happen for (T){0}, but with gcc, it does, if it's a nested struct initialisation...
+#define DPA_U_G(T, V) _Generic((V), T: (V), default: (struct {int x; T v;}){.x=0}.v)
+#else
 #define DPA_U_G(T, V) _Generic((V), T: (V), default: (T){0})
+#endif
 #define DPA_U_GS(T, V) T: DPA_U_G(T, (V))
 
 /////////////////////////////////////

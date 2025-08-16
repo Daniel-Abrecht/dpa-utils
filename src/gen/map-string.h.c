@@ -1,3 +1,4 @@
+#define DPA__U_GEN_EXPORTS
 #include <dpa/utils/map-string.h>
 
 extern bool dpa_u_map_string_copy(dpa_u_map_string_t*restrict dst, const dpa_u_map_string_t*restrict src);

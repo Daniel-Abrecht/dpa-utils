@@ -69,7 +69,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any(dpa__u_boptr_t boptr)
   if(!(type & DPA_U_BO_SIMPLE) || (type & DPA_U_BO_UNIQUE))
     return boptr;
   if(!(type & (DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)))
-    return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+    return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
   dpa__u_bo_refcounted_hashed_t*restrict cmem = malloc(sizeof(*cmem));
   const dpa_u_bo_t*restrict sbo = DPA__U_BO_UNTAG(const dpa_u_bo_t*restrict, boptr);
   if(type & DPA_U_BO_REFCOUNTED){
@@ -88,7 +88,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any_do_hash(dpa__u_boptr_
   if(!(type & DPA_U_BO_SIMPLE) || (type & DPA_U_BO_UNIQUE))
     return boptr;
   if(!(type & (DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)))
-    return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+    return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
   dpa__u_bo_refcounted_hashed_t*restrict cmem = malloc(sizeof(*cmem));
   const dpa_u_bo_t*restrict sbo = DPA__U_BO_UNTAG(const dpa_u_bo_t*restrict, boptr);
   if(type & DPA_U_BO_REFCOUNTED){
@@ -108,7 +108,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_any_do_hash(dpa__u_boptr_
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_any_do_hash(dpa__u_boptr_t boptr){
   const unsigned type = dpa_u_bo_get_type(boptr);
   if(type & DPA_U_BO_UNIQUE)
-    return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+    return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
   if(!(type & DPA_U_BO_SIMPLE))
     return boptr;
   union dpa__u_bo_cmem*restrict cmem = malloc(sizeof(*cmem));
@@ -128,7 +128,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_any_do_hash(dpa__u_bo
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any(dpa__u_boptr_t boptr){
   const unsigned type = dpa_u_bo_get_type(boptr);
   if(!(type & (DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)) || (type & DPA_U_BO_UNIQUE))
-    return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+    return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
   dpa__u_bo_refcounted_hashed_t*restrict cmem = malloc(sizeof(*cmem));
   const dpa_u_bo_t*restrict sbo = DPA__U_BO_UNTAG(const dpa_u_bo_t*restrict, boptr);
   if(type & DPA_U_BO_REFCOUNTED){
@@ -145,7 +145,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any(dpa__u_boptr_
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any_do_hash(dpa__u_boptr_t boptr){
   const unsigned type = dpa_u_bo_get_type(boptr);
   if(!(type & (DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)) || (type & DPA_U_BO_UNIQUE))
-    return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+    return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
   dpa__u_bo_refcounted_hashed_t*restrict cmem = malloc(sizeof(*cmem));
   const dpa_u_bo_t*restrict sbo = DPA__U_BO_UNTAG(const dpa_u_bo_t*restrict, boptr);
   if(type & DPA_U_BO_REFCOUNTED){
@@ -164,7 +164,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_any_do_hash(dpa__
 
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_unique_any(dpa__u_boptr_t boptr){
   if(!dpa_u_bo_is_any_type(boptr, DPA_U_BO_UNIQUE))
-    return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+    return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
   return boptr;
 }
 #define dpa__u_bo__alloc_p_unique_any_do_hash dpa__u_bo__alloc_p_unique_any
@@ -266,7 +266,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_refcounted_do_hash(dpa__
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_refcounted(dpa__u_boptr_t boptr){
   const unsigned type = dpa_u_bo_get_type(boptr);
   if(!(type & DPA_U_BO_HASHED))
-    return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+    return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
   dpa__u_bo_refcounted_hashed_t*restrict cmem = malloc(sizeof(*cmem));
   const dpa_u_bo_t*restrict sbo = DPA__U_BO_UNTAG(const dpa_u_bo_t*restrict, boptr);
   if(type & DPA_U_BO_REFCOUNTED){
@@ -304,7 +304,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_any_hashed(dpa__u_boptr_t bo
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_gc_hashed(dpa__u_boptr_t boptr){
   const unsigned type = dpa_u_bo_get_type(boptr);
   if(!(type & (DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)))
-    return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+    return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
   dpa__u_bo_refcounted_hashed_t*restrict cmem = malloc(sizeof(*cmem));
   const dpa_u_bo_t*restrict sbo = DPA__U_BO_UNTAG(const dpa_u_bo_t*restrict, boptr);
   if(type & DPA_U_BO_REFCOUNTED){
@@ -336,7 +336,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_hashed_hashed(dpa__u_boptr_t
 dpa__u_api inline dpa__u_boptr_t dpa__u_bo__alloc_p_refcounted_hashed(dpa__u_boptr_t boptr){
   const unsigned type = dpa_u_bo_get_type(boptr);
   if(!(type & (DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)))
-    return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+    return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
   dpa__u_bo_refcounted_hashed_t*restrict cmem = malloc(sizeof(*cmem));
   const dpa_u_bo_t*restrict sbo = DPA__U_BO_UNTAG(const dpa_u_bo_t*restrict, boptr);
   if(type & DPA_U_BO_REFCOUNTED){

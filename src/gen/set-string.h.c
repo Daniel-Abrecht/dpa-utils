@@ -1,3 +1,4 @@
+#define DPA__U_GEN_EXPORTS
 #include <dpa/utils/set-string.h>
 
 extern bool dpa_u_set_string_copy(dpa_u_set_string_t*restrict dst, const dpa_u_set_string_t*restrict src);

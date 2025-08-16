@@ -16,7 +16,7 @@ static inline size_t my_puts_p(dpa_u_bo_t bo){
 }
 #define my_puts(bo) my_puts_p(dpa_u_to_bo((bo)))
 
-#define S(X) sizeof(X)-1, (X)
+#define S(X) .size=sizeof(X)-1, .data=(X)
 
 int main(void){
   {

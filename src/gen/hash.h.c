@@ -1,3 +1,4 @@
+#define DPA__U_GEN_EXPORTS
 #include <dpa/utils/hash.h>
 
 extern uint16_t dpa_u_hash_16_append_p(dpa_u_bo_t bo, uint_fast32_t hash);

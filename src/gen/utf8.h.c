@@ -1,3 +1,4 @@
+#define DPA__U_GEN_EXPORTS
 #include <dpa/utils/utf8.h>
 
 extern dpa_u_a_bo_unique_t dpa_u_utf8_from_code_point(uint32_t codepoint);

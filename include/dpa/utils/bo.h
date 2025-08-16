@@ -251,7 +251,7 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_gc_h(dpa__u_bopt
   if( dpa_u_bo_is_any_type(p, DPA_U_BO_UNIQUE|DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)
    ||!dpa_u_bo_is_any_type(p, DPA_U_BO_SIMPLE)
   ) return p;
-  return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+  return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
 }
 
 #define dpa_u_to_a_bo_gc(X) dpa_u_assert_selection(dpa_u_to_a_bo_gc_g((X)))
@@ -271,7 +271,7 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_gc_h(dpa__u_bopt
 dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_refcounted_h(dpa__u_boptr_t p){
   if(dpa_u_bo_is_any_type(p, DPA_U_BO_REFCOUNTED) && !dpa_u_bo_is_any_type(p, DPA_U_BO_UNIQUE))
     return p;
-  return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+  return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
 }
 #define dpa_u_to_a_bo_refcounted(X) dpa_u_assert_selection(dpa_u_to_a_bo_refcounted_g((X)))
 #define dpa_u_to_a_bo_refcounted_g(X) dpa_u_generic((X), \
@@ -284,7 +284,7 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_refcounted_h(dpa
 dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_hashed_h(dpa__u_boptr_t p){
   if(dpa_u_bo_is_any_type(p, DPA_U_BO_HASHED))
     return p;
-  return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+  return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
 }
 #define dpa_u_to_a_bo_hashed(X) dpa_u_assert_selection(dpa_u_to_a_bo_hashed_g((X)))
 #define dpa_u_to_a_bo_hashed_g(X) dpa_u_generic((X), \
@@ -297,7 +297,7 @@ dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_hashed_h(dpa__u_
 dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_to_bo_unique_h(dpa__u_boptr_t p){
   if(dpa_u_bo_is_any_type(p, DPA_U_BO_UNIQUE))
     return p;
-  return (dpa__u_boptr_t){DPA__U_INLINE_STRING('E','I','N','V','A','L')};
+  return (dpa__u_boptr_t){{DPA__U_INLINE_STRING('E','I','N','V','A','L')}};
 }
 
 #define dpa_u_to_a_bo_unique(X) dpa_u_assert_selection(dpa_u_to_a_bo_unique_g((X)))
@@ -689,7 +689,7 @@ dpa__u_api inline void dpa__u_bo_free_h2(const dpa__u_boptr_t bo){
 dpa__u_api dpa_u_unsequenced inline dpa__u_boptr_t dpa__u_bo_needs_copy_h(const dpa__u_boptr_t bo){
   if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE))
     return bo;
-  return (dpa__u_boptr_t){bo.value[0] & ~DPA_U_MOVE_TAG(DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)};
+  return (dpa__u_boptr_t){{bo.value[0] & ~DPA_U_MOVE_TAG(DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)}};
 }
 
 /**

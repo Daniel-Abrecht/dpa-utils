@@ -101,11 +101,15 @@ dpa_u_unsequenced dpa__u_api inline int dpa_u_log2(long long unsigned int x){
 #endif
 }
 
+#ifndef DPA__U_GEN_EXPORTS
 #if DPA__U__has_builtin(__builtin_ctzg)
 #define dpa_u_ctzll __builtin_ctzg
 #elif DPA__U__has_builtin(__builtin_ctzll)
 #define dpa_u_ctzll __builtin_ctzll
-#else
+#endif
+#endif
+
+#ifndef dpa_u_ctzll
 /**
  * Count the number of zero bits from the less significant side.
  */
@@ -134,11 +138,15 @@ dpa_u_unsequenced dpa__u_api inline bool dpa_u_rbit_less_than_unsigned(long long
 #endif
 }
 
+#ifndef DPA__U_GEN_EXPORTS
 #if DPA__U__has_builtin(__builtin_popcountg)
 #define dpa_u_count_bits __builtin_popcountg
 #elif DPA__U__has_builtin(__builtin_popcountll)
 #define dpa_u_count_bits __builtin_popcountll
-#else
+#endif
+#endif
+
+#ifndef dpa_u_count_bits
 /**
  * Count the number of bits set in an integer.
  */

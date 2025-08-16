@@ -67,7 +67,6 @@ CFLAGS  += -D_DEFAULT_SOURCE
 CFLAGS  += -Iinclude -I.
 CFLAGS  := -Wall -Wextra -pedantic $(CFLAGS)
 #CFLAGS  += -fstack-protector-all
-CFLAGS  += -Wno-missing-field-initializers -Wno-missing-braces -Wno-static-in-inline
 #CFLAGS  += -fmax-errors=2
 CFLAGS  += -fdiagnostics-color=always
 
@@ -158,7 +157,7 @@ source-checks: build/.check-all
 build/.check-header-compile: $(HEADERS)
 	mkdir -p $(dir $@)
 	@echo "Verifying that headers compile on their own..."
-	find include/dpa/ -type f -iname "*.h" -not -path '*/_*' -print0 | xargs -0tL1 $(CC) -x c -c -o /dev/null $(CFLAGS)
+	find include/dpa/ -type f -iname "*.h" -not -path '*/_*' -not -iname "config.h" -print0 | xargs -0tL1 $(CC) -x c -c -o /dev/null $(CFLAGS)
 	touch $@
 
 build/.check-inline-export: $(HEADERS)
