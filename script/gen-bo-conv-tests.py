@@ -91,7 +91,7 @@ def gen_testcase(f, outbo, inbo=types['bo'], intags=frozenset({'SIMPLE'}), outta
     exit(1); \\
   }}
 
-int main(){{
+int main(void){{
 """
 
   if (with_refcount or 'REFCOUNTED' in intags) and 'UNIQUE' not in intags and 'STATIC' not in intags:

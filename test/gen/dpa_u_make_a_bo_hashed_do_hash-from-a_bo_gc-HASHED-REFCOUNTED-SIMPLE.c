@@ -7,7 +7,7 @@
     exit(1); \
   }
 
-int main(){
+int main(void){
   dpa_u_refcount_freeable_data_t* refdata = dpa_u_refcount_freeable_copy("test 1", 6, 1);
   const dpa_u_bo_t bo = {
     .size=6,

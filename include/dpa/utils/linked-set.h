@@ -175,8 +175,7 @@ dpa__u_api void dpa_u_linked_set_p_clear(struct dpa_u_linked_set_p* set);
     const struct dpa_u_linked_set_p*: (const dpa_u_linked_set_p_entry_t*)DPA_U_G(const struct dpa_u_linked_set_p*, (SET))->v.p[1] \
   )
 
-static inline
-dpa_u_linked_set_s_entry_t* dpa__u_linked_set_s_to_entry(uintptr_t x){
+dpa_u_unsequenced dpa__u_api inline dpa_u_linked_set_s_entry_t* dpa__u_linked_set_s_to_entry(uintptr_t x){
   if(x & DPA_U_LINKED_SET_S_TAG_SET)
     return 0;
   return (dpa_u_linked_set_s_entry_t*)x;

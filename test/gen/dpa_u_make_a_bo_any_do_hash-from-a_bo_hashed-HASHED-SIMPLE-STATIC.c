@@ -7,7 +7,7 @@
     exit(1); \
   }
 
-int main(){
+int main(void){
   const dpa_u_bo_t bo = {
     .size=6,
     .data="test 1"
