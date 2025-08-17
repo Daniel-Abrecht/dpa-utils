@@ -52,10 +52,10 @@ DPA_U_TEST_MAIN
 
 #endif
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd one entry to set"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tadd one entry to set"){
   T_SET set = {0};
   T_ENTRY e = {0};
-  expect(dpa_u_linked_set_set(&set, &e, 0) == true);
+  expect(dpa__u_linked_set_set_sub(&set, &e, 0) == true);
   expect(set.FIRST == (uintptr_t)&e);
   expect(set.LAST == (uintptr_t)&e);
   expect_p(set.length == 1);
@@ -65,17 +65,17 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd one entry to set"
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd 3 entries to end of set"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tadd 3 entries to end of set"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
-  expect(dpa_u_linked_set_set(&set, &e[0], 0) == true);
+  expect(dpa__u_linked_set_set_sub(&set, &e[0], 0) == true);
   expect_p(e[0].set == &set);
   expect(set.FIRST == (uintptr_t)&e[0]);
   expect(set.LAST == (uintptr_t)&e[0]);
   expect_p(set.length == 1);
   expect_s(e[0].PREV == (DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v));
   expect_s(e[0].NEXT == (DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v));
-  expect(dpa_u_linked_set_set(&set, &e[1], 0) == true);
+  expect(dpa__u_linked_set_set_sub(&set, &e[1], 0) == true);
   expect_p(e[1].set == &set);
   expect(set.FIRST == (uintptr_t)&e[0]);
   expect(set.LAST == (uintptr_t)&e[1]);
@@ -83,7 +83,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd 3 entries to end 
   expect_s(e[1].NEXT == (DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v));
   expect(e[1].PREV == (uintptr_t)&e[0]);
   expect(e[0].NEXT == (uintptr_t)&e[1]);
-  expect(dpa_u_linked_set_set(&set, &e[2], 0) == true);
+  expect(dpa__u_linked_set_set_sub(&set, &e[2], 0) == true);
   expect_p(e[2].set == &set);
   expect(set.FIRST == (uintptr_t)&e[0]);
   expect(set.LAST == (uintptr_t)&e[2]);
@@ -95,12 +95,12 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd 3 entries to end 
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd 3 entries to beginning of set"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tadd 3 entries to beginning of set"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
-  expect(dpa_u_linked_set_set(&set, &e[2], dpa_u_linked_set_get_first(set)) == true);
-  expect(dpa_u_linked_set_set(&set, &e[1], dpa_u_linked_set_get_first(set)) == true);
-  expect(dpa_u_linked_set_set(&set, &e[0], dpa_u_linked_set_get_first(set)) == true);
+  expect(dpa__u_linked_set_set_sub(&set, &e[2], dpa_u_linked_set_get_first(set)) == true);
+  expect(dpa__u_linked_set_set_sub(&set, &e[1], dpa_u_linked_set_get_first(set)) == true);
+  expect(dpa__u_linked_set_set_sub(&set, &e[0], dpa_u_linked_set_get_first(set)) == true);
   expect(set.FIRST == (uintptr_t)&e[0]);
   expect(set.LAST == (uintptr_t)&e[2]);
   expect_p(set.length == 3);
@@ -112,7 +112,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd 3 entries to begi
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove only entry from set"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tremove only entry from set"){
   T_SET set = {0};
   T_ENTRY e = {0};
   set.FIRST = (uintptr_t)&e;
@@ -121,7 +121,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove only entry fro
   only_p(e.set = &set);
   only_s(e.NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   only_s(e.PREV = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
-  expect(dpa_u_linked_set_set(0, &e, 0) == true);
+  expect(dpa__u_linked_set_set_sub(0, &e, 0) == true);
   expect(set.FIRST == 0);
   expect(set.LAST == 0);
   expect_p(set.length == 0);
@@ -131,7 +131,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove only entry fro
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove only entry from one set to another"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tmove only entry from one set to another"){
   T_SET set = {0};
   T_SET set2 = {0};
   T_ENTRY e = {0};
@@ -141,7 +141,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove only entry from 
   only_p(e.set = &set);
   only_s(e.NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   only_s(e.PREV = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
-  expect(dpa_u_linked_set_set(&set2, &e, 0) == true);
+  expect(dpa__u_linked_set_set_sub(&set2, &e, 0) == true);
   expect(set.FIRST == 0);
   expect(set.LAST == 0);
   expect_p(set.length == 0);
@@ -156,7 +156,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove only entry from 
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove first entry from one set to another"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tmove first entry from one set to another"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
   set.FIRST = (uintptr_t)&e[0];
@@ -173,7 +173,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove first entry from
   e[2].PREV = (uintptr_t)&e[1];
 
   T_SET set2 = {0};
-  expect(dpa_u_linked_set_set(&set2, &e[0], 0) == true);
+  expect(dpa__u_linked_set_set_sub(&set2, &e[0], 0) == true);
   expect(set.FIRST == (uintptr_t)&e[1]);
   expect(set.LAST == (uintptr_t)&e[2]);
   expect_p(set.length == 2);
@@ -193,7 +193,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove first entry from
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove last entry from one set to another"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tmove last entry from one set to another"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
   set.FIRST = (uintptr_t)&e[0];
@@ -210,7 +210,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove last entry from 
   e[2].PREV = (uintptr_t)&e[1];
 
   T_SET set2 = {0};
-  expect(dpa_u_linked_set_set(&set2, &e[2], 0) == true);
+  expect(dpa__u_linked_set_set_sub(&set2, &e[2], 0) == true);
   expect(set.FIRST == (uintptr_t)&e[0]);
   expect(set.LAST == (uintptr_t)&e[1]);
   expect_p(set.length == 2);
@@ -231,7 +231,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove last entry from 
 }
 
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove middle entry from one set to another"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tmove middle entry from one set to another"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
   set.FIRST = (uintptr_t)&e[0];
@@ -248,7 +248,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove middle entry fro
   e[2].PREV = (uintptr_t)&e[1];
 
   T_SET set2 = {0};
-  expect(dpa_u_linked_set_set(&set2, &e[1], 0) == true);
+  expect(dpa__u_linked_set_set_sub(&set2, &e[1], 0) == true);
   expect(set.FIRST == (uintptr_t)&e[0]);
   expect(set.LAST == (uintptr_t)&e[2]);
   expect_p(set.length == 2);
@@ -271,7 +271,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tmove middle entry fro
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadding an entry before a detached one with no set specified must fail, and the entry must stay unmodified"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tadding an entry before a detached one with no set specified must fail, and the entry must stay unmodified"){
   T_SET set = {0};
   T_ENTRY e = {0};
   set.FIRST = (uintptr_t)&e;
@@ -280,7 +280,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadding an entry befor
   only_p(e.set = &set);
   only_s(e.NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   only_s(e.PREV = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
-  expect(dpa_u_linked_set_set(0, &e, &(T_ENTRY){0}) == false);
+  expect(dpa__u_linked_set_set_sub(0, &e, &(T_ENTRY){0}) == false);
   expect(set.FIRST == (uintptr_t)&e);
   expect(set.LAST == (uintptr_t)&e);
   expect_p(set.length == 1);
@@ -290,7 +290,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadding an entry befor
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadding an entry before a detached one with a set specified must fail, and the entry must stay unmodified"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tadding an entry before a detached one with a set specified must fail, and the entry must stay unmodified"){
   T_SET set = {0};
   T_ENTRY e = {0};
   set.FIRST = (uintptr_t)&e;
@@ -299,7 +299,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadding an entry befor
   only_p(e.set = &set);
   only_s(e.NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   only_s(e.PREV = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
-  expect(dpa_u_linked_set_set(&set, &e, &(T_ENTRY){0}) == false);
+  expect(dpa__u_linked_set_set_sub(&set, &e, &(T_ENTRY){0}) == false);
   expect(set.FIRST == (uintptr_t)&e);
   expect(set.LAST == (uintptr_t)&e);
   expect_p(set.length == 1);
@@ -309,7 +309,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadding an entry befor
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadding an entry before one from a different set must fail if the former set is empty"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tadding an entry before one from a different set must fail if the former set is empty"){
   T_SET set = {0};
   T_ENTRY e = {0};
   set.FIRST = (uintptr_t)&e;
@@ -318,13 +318,13 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadding an entry befor
   only_p(e.set = &set);
   only_s(e.NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   only_s(e.PREV = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
-  expect(dpa_u_linked_set_set(&(T_SET){0}, &(T_ENTRY){0}, &e) == false);
+  expect(dpa__u_linked_set_set_sub(&(T_SET){0}, &(T_ENTRY){0}, &e) == false);
   return 0;
 }
 
 #if PASS == 2
 // Note: this will fail for dpa_u_linked_set_s_t. Checking this would require traversing the whole list until the list head is found, which would be inefficient.
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadding an entry before one from a different set must fail if the former set is not empty"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tadding an entry before one from a different set must fail if the former set is not empty"){
   T_SET sa = {0};
   T_ENTRY a = {0};
   sa.FIRST = (uintptr_t)&a;
@@ -343,12 +343,12 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadding an entry befor
   only_s(b.NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&sb.v);
   only_s(b.PREV = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&sb.v);
 
-  expect(dpa_u_linked_set_set(&sa, &a, &b) == false);
+  expect(dpa__u_linked_set_set_sub(&sa, &a, &b) == false);
   return 0;
 }
 #endif
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove all 3 entries from set, starting with the first"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tremove all 3 entries from set, starting with the first"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
   set.FIRST = (uintptr_t)&e[0];
@@ -363,7 +363,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove all 3 entries 
   only_p(e[2].set = &set);
   only_s(e[2].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   e[2].PREV = (uintptr_t)&e[1];
-  expect(dpa_u_linked_set_set(0, &e[0], 0) == true);
+  expect(dpa__u_linked_set_set_sub(0, &e[0], 0) == true);
   expect_p(e[0].set == 0);
   expect(e[0].NEXT == 0);
   expect(e[0].PREV == 0);
@@ -372,7 +372,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove all 3 entries 
   expect_p(set.length == 2);
   expect_p(e[1].PREV == 0);
   expect_s(e[1].PREV == (DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v));
-  expect(dpa_u_linked_set_set(0, &e[1], 0) == true);
+  expect(dpa__u_linked_set_set_sub(0, &e[1], 0) == true);
   expect_p(e[1].set == 0);
   expect(e[1].NEXT == 0);
   expect(e[1].PREV == 0);
@@ -381,7 +381,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove all 3 entries 
   expect_p(set.length == 1);
   expect_p(e[2].PREV == 0);
   expect_s(e[2].PREV == (DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v));
-  expect(dpa_u_linked_set_set(0, &e[2], 0) == true);
+  expect(dpa__u_linked_set_set_sub(0, &e[2], 0) == true);
   expect_p(e[2].set == 0);
   expect(e[2].NEXT == 0);
   expect(e[2].PREV == 0);
@@ -391,7 +391,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove all 3 entries 
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove all 3 entries from set, starting with last"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tremove all 3 entries from set, starting with last"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
   set.FIRST = (uintptr_t)&e[0];
@@ -406,7 +406,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove all 3 entries 
   only_p(e[2].set = &set);
   only_s(e[2].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   e[2].PREV = (uintptr_t)&e[1];
-  expect(dpa_u_linked_set_set(0, &e[2], 0) == true);
+  expect(dpa__u_linked_set_set_sub(0, &e[2], 0) == true);
   expect_p(e[2].set == 0);
   expect(e[2].NEXT == 0);
   expect(e[2].PREV == 0);
@@ -415,7 +415,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove all 3 entries 
   expect(set.FIRST == (uintptr_t)&e[0]);
   expect(set.LAST == (uintptr_t)&e[1]);
   expect_p(set.length == 2);
-  expect(dpa_u_linked_set_set(0, &e[1], 0) == true);
+  expect(dpa__u_linked_set_set_sub(0, &e[1], 0) == true);
   expect_p(e[1].set == 0);
   expect(e[1].NEXT == 0);
   expect(e[1].PREV == 0);
@@ -424,7 +424,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove all 3 entries 
   expect_p(set.length == 1);
   expect_p(e[0].NEXT == 0);
   expect_s(e[0].NEXT == (DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v));
-  expect(dpa_u_linked_set_set(0, &e[0], 0) == true);
+  expect(dpa__u_linked_set_set_sub(0, &e[0], 0) == true);
   expect_p(e[0].set == 0);
   expect(e[0].NEXT == 0);
   expect(e[0].PREV == 0);
@@ -434,7 +434,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tremove all 3 entries 
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tof 3 entries, remove the middle one"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tof 3 entries, remove the middle one"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
   set.FIRST = (uintptr_t)&e[0];
@@ -449,7 +449,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tof 3 entries, remove 
   only_p(e[2].set = &set);
   only_s(e[2].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   e[2].PREV = (uintptr_t)&e[1];
-  expect(dpa_u_linked_set_set(0, &e[1], 0) == true);
+  expect(dpa__u_linked_set_set_sub(0, &e[1], 0) == true);
   expect_p(e[1].set == 0);
   expect(e[1].NEXT == 0);
   expect(e[1].PREV == 0);
@@ -461,7 +461,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tof 3 entries, remove 
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd entry between 2 other entries, set implicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tadd entry between 2 other entries, set implicit"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
   set.FIRST = (uintptr_t)&e[0];
@@ -473,7 +473,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd entry between 2 o
   only_p(e[2].set = &set);
   only_s(e[2].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   e[2].PREV = (uintptr_t)&e[0];
-  expect(dpa_u_linked_set_set(0, &e[1], &e[2]) == true);
+  expect(dpa__u_linked_set_set_sub(0, &e[1], &e[2]) == true);
   expect_p(e[1].set == &set);
   expect(e[1].NEXT == (uintptr_t)&e[2]);
   expect(e[1].PREV == (uintptr_t)&e[0]);
@@ -485,7 +485,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd entry between 2 o
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd entry between 2 other entries, set explicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_set_sub\tadd entry between 2 other entries, set explicit"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
   set.FIRST = (uintptr_t)&e[0];
@@ -497,7 +497,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_set\tadd entry between 2 o
   only_p(e[2].set = &set);
   only_s(e[2].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   e[2].PREV = (uintptr_t)&e[0];
-  expect(dpa_u_linked_set_set(&set, &e[1], &e[2]) == true);
+  expect(dpa__u_linked_set_set_sub(&set, &e[1], &e[2]) == true);
   expect_p(e[1].set == &set);
   expect(e[1].NEXT == (uintptr_t)&e[2]);
   expect(e[1].PREV == (uintptr_t)&e[0]);
@@ -738,16 +738,16 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_clear\tset has 3 entries")
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tclear entries: set already clear"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tclear entries: set already clear"){
   T_SET set = {0};
-  expect(dpa_u_linked_set_move(0, &set, 0) == true);
+  expect(dpa__u_linked_set_move_sub(0, &set, 0) == true);
   expect(set.FIRST == 0);
   expect(set.LAST == 0);
   expect_p(set.length == 0);
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tclear entries: set has 1 entry"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tclear entries: set has 1 entry"){
   T_SET set = {0};
   T_ENTRY e = {0};
   set.FIRST = (uintptr_t)&e;
@@ -756,7 +756,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tclear entries: set h
   only_p(e.set = &set);
   only_s(e.NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   only_s(e.PREV = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
-  expect(dpa_u_linked_set_move(0, &set, 0) == true);
+  expect(dpa__u_linked_set_move_sub(0, &set, 0) == true);
   expect(set.FIRST == 0);
   expect(set.LAST == 0);
   expect_p(set.length == 0);
@@ -766,7 +766,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tclear entries: set h
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tclear entries: set has 3 entries"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tclear entries: set has 3 entries"){
   T_SET set = {0};
   T_ENTRY e[3] = {0};
   set.FIRST = (uintptr_t)&e[0];
@@ -781,7 +781,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tclear entries: set h
   only_p(e[2].set = &set);
   only_s(e[2].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&set.v);
   e[2].PREV = (uintptr_t)&e[1];
-  expect(dpa_u_linked_set_move(0, &set, 0) == true);
+  expect(dpa__u_linked_set_move_sub(0, &set, 0) == true);
   expect(set.FIRST == 0);
   expect(set.LAST == 0);
   expect_p(set.length == 0);
@@ -797,10 +797,10 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tclear entries: set h
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty set to empty set"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove empty set to empty set"){
   T_SET src = {0};
   T_SET dst = {0};
-  expect(dpa_u_linked_set_move(&dst, &src, 0) == true);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, 0) == true);
   expect(src.FIRST == 0);
   expect(src.LAST == 0);
   expect_p(src.length == 0);
@@ -810,10 +810,10 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty set to em
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty set to empty set, before entry from neither set, should fail"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove empty set to empty set, before entry from neither set, should fail"){
   T_SET src = {0};
   T_SET dst = {0};
-  expect(dpa_u_linked_set_move(&dst, &src, &(T_ENTRY){0}) == false);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, &(T_ENTRY){0}) == false);
   expect(src.FIRST == 0);
   expect(src.LAST == 0);
   expect_p(src.length == 0);
@@ -824,7 +824,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty set to em
 }
 
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with 1 entry to empty set"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove source set with 1 entry to empty set"){
   T_SET dst = {0};
   T_ENTRY e = {0};
 
@@ -836,7 +836,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
   src.FIRST = (uintptr_t)&e;
   src.LAST = (uintptr_t)&e;
 
-  expect(dpa_u_linked_set_move(&dst, &src, 0) == true);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, 0) == true);
   expect_p(e.set == &dst);
   expect_p(e.PREV == 0);
   expect_s(e.PREV == (DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&dst.v));
@@ -852,7 +852,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
 }
 
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with 3 entries to empty set"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove source set with 3 entries to empty set"){
   T_SET dst = {0};
   T_ENTRY e[3] = {0};
 
@@ -870,7 +870,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
   only_s(e[2].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&src.v);
   e[2].PREV = (uintptr_t)&e[1];
 
-  expect(dpa_u_linked_set_move(&dst, &src, 0) == true);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, 0) == true);
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
   expect_p(e[2].set == &dst);
@@ -892,7 +892,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
 }
 
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with 3 entries to middle of destination set, destination set explicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove source set with 3 entries to middle of destination set, destination set explicit"){
   T_SET dst = {0};
   T_ENTRY e[5] = {0};
   dst.FIRST = (uintptr_t)&e[0];
@@ -919,7 +919,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
   only_s(e[3].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&src.v);
   e[3].PREV = (uintptr_t)&e[2];
 
-  expect(dpa_u_linked_set_move(&dst, &src, &e[4]) == true);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, &e[4]) == true);
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
   expect_p(e[2].set == &dst);
@@ -947,7 +947,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
 }
 
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with 1 entry to middle of destination set, destination set implicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove source set with 1 entry to middle of destination set, destination set implicit"){
   T_SET dst = {0};
   T_ENTRY e[3] = {0};
   dst.FIRST = (uintptr_t)&e[0];
@@ -968,7 +968,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
   src.FIRST = (uintptr_t)&e[1];
   src.LAST = (uintptr_t)&e[1];
 
-  expect(dpa_u_linked_set_move(0, &src, &e[2]) == true);
+  expect(dpa__u_linked_set_move_sub(0, &src, &e[2]) == true);
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
   expect_p(e[2].set == &dst);
@@ -990,7 +990,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
 }
 
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with 1 entry to middle of destination set, destination set explicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove source set with 1 entry to middle of destination set, destination set explicit"){
   T_SET dst = {0};
   T_ENTRY e[3] = {0};
   dst.FIRST = (uintptr_t)&e[0];
@@ -1011,7 +1011,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
   src.FIRST = (uintptr_t)&e[1];
   src.LAST = (uintptr_t)&e[1];
 
-  expect(dpa_u_linked_set_move(&dst, &src, &e[2]) == true);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, &e[2]) == true);
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
   expect_p(e[2].set == &dst);
@@ -1032,7 +1032,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with 1 entry to start of destination set, destination set explicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove source set with 1 entry to start of destination set, destination set explicit"){
   T_SET dst = {0};
   T_ENTRY e[3] = {0};
   dst.FIRST = (uintptr_t)&e[1];
@@ -1053,7 +1053,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
   src.FIRST = (uintptr_t)&e[0];
   src.LAST = (uintptr_t)&e[0];
 
-  expect(dpa_u_linked_set_move(&dst, &src, &e[1]) == true);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, &e[1]) == true);
 
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
@@ -1076,7 +1076,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
 }
 
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with 1 entry to start of destination set, destination set implicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove source set with 1 entry to start of destination set, destination set implicit"){
   T_SET dst = {0};
   T_ENTRY e[3] = {0};
   dst.FIRST = (uintptr_t)&e[1];
@@ -1097,7 +1097,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
   src.FIRST = (uintptr_t)&e[0];
   src.LAST = (uintptr_t)&e[0];
 
-  expect(dpa_u_linked_set_move(0, &src, &e[1]) == true);
+  expect(dpa__u_linked_set_move_sub(0, &src, &e[1]) == true);
 
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
@@ -1120,7 +1120,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
 }
 
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with 1 entry to end of destination set"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove source set with 1 entry to end of destination set"){
   T_SET dst = {0};
   T_ENTRY e[3] = {0};
   dst.FIRST = (uintptr_t)&e[0];
@@ -1141,7 +1141,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
   src.FIRST = (uintptr_t)&e[2];
   src.LAST = (uintptr_t)&e[2];
 
-  expect(dpa_u_linked_set_move(&dst, &src, 0) == true);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, 0) == true);
 
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
@@ -1164,7 +1164,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove source set with
 }
 
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source set entries to start of destination set, destination set explicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove empty source set entries to start of destination set, destination set explicit"){
   T_SET dst = {0};
   T_ENTRY e[2] = {0};
   dst.FIRST = (uintptr_t)&e[0];
@@ -1177,7 +1177,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source se
   only_s(e[1].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&dst.v);
   e[1].PREV = (uintptr_t)&e[0];
   T_SET src = {0};
-  expect(dpa_u_linked_set_move(&dst, &src, &e[0]) == true);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, &e[0]) == true);
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
   expect_p(e[0].PREV == 0);
@@ -1195,7 +1195,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source se
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source set entries to start of destination set, destination set implicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove empty source set entries to start of destination set, destination set implicit"){
   T_SET dst = {0};
   T_ENTRY e[2] = {0};
   dst.FIRST = (uintptr_t)&e[0];
@@ -1208,7 +1208,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source se
   only_s(e[1].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&dst.v);
   e[1].PREV = (uintptr_t)&e[0];
   T_SET src = {0};
-  expect(dpa_u_linked_set_move(0, &src, &e[0]) == true);
+  expect(dpa__u_linked_set_move_sub(0, &src, &e[0]) == true);
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
   expect_p(e[0].PREV == 0);
@@ -1226,7 +1226,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source se
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source set entries to middle of destination set, destination set explicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove empty source set entries to middle of destination set, destination set explicit"){
   T_SET dst = {0};
   T_ENTRY e[2] = {0};
   dst.FIRST = (uintptr_t)&e[0];
@@ -1239,7 +1239,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source se
   only_s(e[1].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&dst.v);
   e[1].PREV = (uintptr_t)&e[0];
   T_SET src = {0};
-  expect(dpa_u_linked_set_move(&dst, &src, &e[0]) == true);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, &e[0]) == true);
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
   expect_p(e[0].PREV == 0);
@@ -1257,7 +1257,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source se
   return 0;
 }
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source set entries to middle of destination set, destination set implicit"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove empty source set entries to middle of destination set, destination set implicit"){
   T_SET dst = {0};
   T_ENTRY e[2] = {0};
   dst.FIRST = (uintptr_t)&e[0];
@@ -1270,7 +1270,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source se
   only_s(e[1].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&dst.v);
   e[1].PREV = (uintptr_t)&e[0];
   T_SET src = {0};
-  expect(dpa_u_linked_set_move(0, &src, &e[1]) == true);
+  expect(dpa__u_linked_set_move_sub(0, &src, &e[1]) == true);
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
   expect_p(e[0].PREV == 0);
@@ -1289,7 +1289,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source se
 }
 
 
-DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source set entries to end of destination set"){
+DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa__u_linked_set_move_sub\tmove empty source set entries to end of destination set"){
   T_SET dst = {0};
   T_ENTRY e[2] = {0};
   dst.FIRST = (uintptr_t)&e[0];
@@ -1302,7 +1302,7 @@ DPA_U_TESTCASE(DPA_U_STR_E(T_SET) "\tdpa_u_linked_set_move\tmove empty source se
   only_s(e[1].NEXT = DPA_U_LINKED_SET_S_TAG_SET | (uintptr_t)&dst.v);
   e[1].PREV = (uintptr_t)&e[0];
   T_SET src = {0};
-  expect(dpa_u_linked_set_move(&dst, &src, 0) == true);
+  expect(dpa__u_linked_set_move_sub(&dst, &src, 0) == true);
   expect_p(e[0].set == &dst);
   expect_p(e[1].set == &dst);
   expect_p(e[0].PREV == 0);

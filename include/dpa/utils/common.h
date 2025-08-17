@@ -417,7 +417,7 @@ dpa__u_api dpa_u_format_param(printf, 3, 4) inline char* dpa__u_compound_printf(
 /** Prints the supplied format string & parameters, to stderr, before calling abort. */
 dpa__u_api dpa_u_format_param(printf, 1, 2) extern noreturn void dpa_u_abort_p(const char* format, ...);
 /** Prints file, line, a function, and the supplied format string & parameters, to stderr, before calling abort. */
-#define dpa_u_abort(F, ...) { dpa_u_abort_p("%s:%d: %s: " F "\n",  __FILE__, __LINE__, __func__, __VA_ARGS__); }
+#define dpa_u_abort(F, ...) dpa_u_abort_p("%s:%d: %s: " F "\n",  __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #if DPA__U__has_c_attribute_opt(always_inline,gnu::always_inline)
 #define dpa__u_really_inline dpa_u_attribute(always_inline,gnu::always_inline)
@@ -434,7 +434,7 @@ dpa__u_api dpa_u_format_param(printf, 1, 2) extern noreturn void dpa_u_abort_p(c
  * Otherwise, it tells the compiler that it's not supposed to be reached.
  * What happens if it's reached in a release build is UB.
  */
-#define dpa_u_unreachable(...) dpa_u_abort(__VA_ARGS__)
+#define dpa_u_unreachable(...) { dpa_u_abort(__VA_ARGS__); }
 #elif DPA__U__has_builtin(__builtin_unreachable)
 #define dpa_u_unreachable(...) { __builtin_unreachable(); if(0){ dpa_u_abort(__VA_ARGS__); } }
 #elif DPA__U__has_builtin(__builtin_trap)

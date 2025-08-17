@@ -85,6 +85,10 @@ dpa__u_api void dpa_u_linked_set_s_clear(struct dpa_u_linked_set_s* set);
 /** \see dpa_u_linked_set_clear */
 dpa__u_api void dpa_u_linked_set_p_clear(struct dpa_u_linked_set_p* set);
 
+#ifdef DPA_U_DEBUG
+#define dpa_u_linked_set_set(SET, ENTRY, BEFORE) \
+  (dpa__u_linked_set_set_sub((SET), (ENTRY), (BEFORE)) || (dpa_u_abort("%s", "dpa_u_linked_set_set called with invalid arguments"), true))
+#else
 /**
  * Adds an entry to a set before another entry. If the other entry is 0, it adds it to the end of the list.
  * The set can be omitted if the entry it is to be inserted before is specified.
@@ -92,7 +96,7 @@ dpa__u_api void dpa_u_linked_set_p_clear(struct dpa_u_linked_set_p* set);
  * 
  * If an entry the entry is to be inserted before is specified, it must belong to a set, and if a set is also
  * passed to this function, it must be the same set. If it is not, inconsistencies can occur.
- * In a debug build, if such a condition is detected, the program aborts.
+ * In a debug build (if the macro DPA_U_DEBUG is set), if such a condition is detected, the program aborts.
  * In a production build, if such a condition is detected, it returns false, and does not modify anything.
  * For a \ref dpa_u_linked_set_p_t, this condition is always detected. For a \ref dpa_u_linked_set_s_t, it is not
  * alwas detected. Regardless, if a program does pass such invalid arguments, it is always to be considered an error.
@@ -101,11 +105,19 @@ dpa__u_api void dpa_u_linked_set_p_clear(struct dpa_u_linked_set_p* set);
  * \param ENTRY the entry to add or remove to/from a set
  * \param BEFORE the entry is to be inserted before this entry
  */
-#define dpa_u_linked_set_set(SET, ENTRY, BEFORE) _Generic((ENTRY), \
+#define dpa_u_linked_set_set(SET, ENTRY, BEFORE) \
+  dpa__u_linked_set_set_sub((SET), (ENTRY), (BEFORE))
+#endif
+
+#define dpa__u_linked_set_set_sub(SET, ENTRY, BEFORE) _Generic((ENTRY), \
     struct dpa_u_linked_set_s_entry*: dpa_u_linked_set_s_set, \
     struct dpa_u_linked_set_p_entry*: dpa_u_linked_set_p_set \
   )((SET), (ENTRY), (BEFORE))
 
+#ifdef DPA_U_DEBUG
+#define dpa_u_linked_set_move(DST, SRC, BEFORE) \
+  (dpa__u_linked_set_move_sub((DST), (SRC), (BEFORE)) || (dpa_u_abort("%s", "dpa_u_linked_set_move called with invalid arguments"), true))
+#else
 /**
  * Takes all entries from the source set, and inserts them before the specified entry of the destination set,
  * or at the end of the destination set if no such entry is specified.
@@ -121,7 +133,7 @@ dpa__u_api void dpa_u_linked_set_p_clear(struct dpa_u_linked_set_p* set);
  * set is is also passed to this function, it must be the same set. If it is not, inconsistencies can occur.
  * Additionally, the source set and destination set must never be the same.
  * 
- * In a debug build, if such a condition is detected, the program aborts.
+ * In a debug build (if the macro DPA_U_DEBUG is set), if such a condition is detected, the program aborts.
  * In a production build, if such a condition is detected, it returns false, and does not modify anything.
  * For a \ref dpa_u_linked_set_p_t, this condition is always detected. For a \ref dpa_u_linked_set_s_t, it is not
  * always detected. Regardless, if a program does pass such invalid arguments, it is always to be considered an error.
@@ -130,7 +142,11 @@ dpa__u_api void dpa_u_linked_set_p_clear(struct dpa_u_linked_set_p* set);
  * \param SRC the set the entries are taken from
  * \param BEFORE the entry is to be inserted before this entry
  */
-#define dpa_u_linked_set_move(DST, SRC, BEFORE) _Generic((SRC), \
+#define dpa_u_linked_set_move(DST, SRC, BEFORE) \
+  dpa__u_linked_set_move_sub((DST), (SRC), (BEFORE))
+#endif
+
+#define dpa__u_linked_set_move_sub(DST, SRC, BEFORE) _Generic((SRC), \
     struct dpa_u_linked_set_s*: dpa_u_linked_set_s_move, \
     struct dpa_u_linked_set_p*: dpa_u_linked_set_p_move \
   )((DST), (SRC), (BEFORE))
