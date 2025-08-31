@@ -118,11 +118,31 @@ $(info DPA_U_SEED=$(DPA_U_SEED))
 endif
 export DPA_U_SEED
 
+ifeq ($(shell test -d /usr/share/unicode/; echo $$?),0)
+unicode_dir=/usr/share/unicode/
+else
+unicode_dir=external/unicode/
+endif
 
-all: source-checks bin lib
 
-.PHONY: all source-checks bin lib clean get//bin get//lib install uninstall shell test asm docs test//bo-conv FORCE
+all: source-checks bin lib data
+
+.PHONY: all source-checks bin lib data clean get//bin get//lib install uninstall shell test asm docs test//bo-conv FORCE
 FORCE:
+
+data: data/unicode/.dir
+
+external/unicode/:
+	mkdir -p external/.unicode/
+	wget https://www.unicode.org/Public/16.0.0/ucd/UCD.zip -O external/.unicode/UCD.zip
+	unzip -d external/.unicode/ external/.unicode/UCD.zip
+	mv external/.unicode/ external/unicode
+	touch $@
+
+data/unicode/.dir: $(unicode_dir)
+	mkdir -p data/unicode/
+	script/ucd2bin.py $(unicode_dir) data/unicode/
+	touch $@
 
 do-test//set-map: build/unique-random
 
@@ -287,7 +307,7 @@ clean//docs:
 	rm -rf build/docs/api/
 
 clean:
-	rm -rf build/$(TYPE)/ bin/$(TYPE)/ lib/$(TYPE)/
+	rm -rf build/$(TYPE)/ bin/$(TYPE)/ lib/$(TYPE)/ data/
 
 install:
 	mkdir -p "$(DESTDIR)$(prefix)/include/dpa/utils/"

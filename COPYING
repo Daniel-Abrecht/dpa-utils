@@ -1,0 +1,23 @@
+
+Unless stated otherwise, all files are released unter the MIT license.
+This includes this library, the generated binaries, and all it's source code.
+A copy of the MIT license is provided in the LICENSE.MIT file alongside this document.
+
+There is currently also a copy of the unicode data files included in this project.
+These files are located in the folder `external/unicode/`. They have been taken from
+https://www.unicode.org/Public/16.0.0/ucd/UCD.zip.
+
+The unicode data files files are licensed under the UNICODE LICENSE V3.
+A copy of the license can be found in the LICENSE.UNICODE file.
+In case you want to update them in the future, take a look at https://www.unicode.org/ucd/
+and https://www.unicode.org/copyright.html, and update the information in this file as needed.
+
+The library itself does not require the unicode data files nor any files derived from them,
+and they are not used to build the library, but the library does load files derived from
+the unicode data files if they are available at runtime when the library is loaded by a program.
+If those files are not available, some functions may be limited.
+
+The files derived from the unicode data files are located in the folder `data/unicode/`.
+They are generated using the script `script/ucd2bin.py`. Because the files in `data/unicode/`
+are derived from the unicode data files, they are licensed using the same license the
+unicode data files are.

@@ -1,6 +1,7 @@
 bin/
 build/
 lib/
+data/
 *.o
 *.so
 *.a
