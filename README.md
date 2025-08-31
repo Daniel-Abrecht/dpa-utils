@@ -38,6 +38,12 @@ and it'll carry over to any subsequenbt make calls in that shell.
 You can create debug builds using `make debug=1`. You can create builds with asan enabled using `make asan=1`.
 You can combine these options.
 
+The files in `data/unicode/` are generated from unicode data files. See https://www.unicode.org/ucd/ for the
+most recent version of those files. If those files are present in `/usr/share/unicode/` on your system,
+then those files will be used. Otherwise, the files in `external/unicode/` will be used. It is also possible
+to override the directory where the unicode data files to be used for this are located.  
+For example: `make unicode_dir=/unicode/ data` will use the files in `/unicode/` for generating the ones in `data/unicode/`.
+
 ## Usage conventions
 
 Any identifiers starting with `dpa__` (two underscores) or with `_`, is reserved, and should not be used.
@@ -49,3 +55,11 @@ if the arguments are not supported. You can use them if you need to extend a fun
 
 Sometimes, there are also functions suffixed with `_p`. Those are regular functions, which are wrapped using a macro
 which does not have the `_p` suffix.
+
+## LICENSE
+
+For the specifics, see the [COPYING](COPYING) file.
+
+The short version is, the library and everything is [MIT](LICENSE.MIT) licensed, including generated binaries,
+but the unicode data files in `external/unicode/` use the [UNICODE V3](LICENSE.UNICODE) license,
+and the files in `data/unicode/` are generated using the unicode data files, and use the same license as those files.
