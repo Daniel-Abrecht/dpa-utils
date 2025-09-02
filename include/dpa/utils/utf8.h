@@ -31,6 +31,9 @@
  * In practice, there should never be a sequence longer than 4 bytes / no code points >= U+200000,
  * bt this function will convert any value anyway, including U+FFFFFFFF
  * 
+ * This function does not care if a codepoint is actually allowed to appear in UTF-8,
+ * it will encode code points such as U+D800.
+ * 
  * \param mem The UTF-8 sequence will be written there. Must be at least 8 bytes big
  * \param codepoint The unicode code point
  * \see dpa_u_utf8_from_code_point
@@ -85,7 +88,12 @@ dpa__u_api inline unsigned char* dpa_u_utf8_cstr_from_code_point_p(unsigned char
 /**
  * Converts a unicode code point to an UTF-8 inline unique BO.
  * In practice, there should never be a sequence longer than 4 bytes / no code points >= U+200000,
- * bt this function will convert any value anyway, including U+FFFFFFFF
+ * but this function will convert any value anyway, including U+FFFFFFFF.
+ * 
+ * This function does not care if a codepoint is actually allowed to appear in UTF-8,
+ * it will encode code points such as U+D800.
+ * 
+ * Use \ref dpa_u_is_codepoint_valid if you want to check if a codepoint is valid.
  * 
  * \param codepoint a unicode codepoint
  * \returns The UTF-8 sequence, as an inline unique BO
@@ -151,13 +159,39 @@ struct dpa_u_streaming_utf8_validator {
 };
 
 /**
- * For validating if a sequence of bytes is valid UTF-8.
+ * This function validates if a sequence of bytes is valid UTF-8.
+ *
+ * Please note that some codepoints, such as U+D800 mustn't appearin valid UTF-8, even if they are otherwise correctly
+ * encoded. Unlike most other functions in this library, this function will treat those codepoints as invalid.
+ * 
  * \param v The validator state
  * \param ch The next character or EOF if the sequence is complete
  * \returns true if everything is OK, false if the sequence wasn't valid.
  */
 dpa__u_api bool dpa_u_utf8_validate(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch);
-/** @} */
+
+/**
+ * This function can be used to iterate over an UTF-8 string codepoint-by-codepoint. It returns one codepoint every
+ * time it's called. In case some data is invalid, a codepoint is invalid, a codepoint is too big to be stored in
+ * a 32bit integer, or *it >= end, -1 is returned.
+ * 
+ * The parameter \ref it points to a pointer to the start of the UTF-8 data to process. This pointer will be incremented
+ * to point to the next codepoint, or the end of the data. The parameter \ref end must point to the end of the utf-8 data.
+ * 
+ * So long as there is data left, this function is guaranteed to make progress, that is, it will eventually consume the
+ * entire of the input data if called repetedly, even if the input contains data which is not valid in UTF-8.
+ * 
+ * UTF-8 sequences, and invalid sequences are dealt with as follows:  
+ *  * Any byte NOT starting with 0b10XXXXXX is always considered the start of a new codepoint.  
+ *  * A byte in the ascii range is always a valid & complete code point, no matter what came before. The following bytes are part of a new codepoint.  
+ *  * After the start of a sequence longer than one byte, all following bytes starting with 0b10XXXXXX are considered part of tha same sequence,
+ *    but if the sequence is valid, only at most as many bytes as indicated in the first byte of the sequence.
+ *    For example, `C3 84 80` is the sequences `C3 84` and `80`, but `C0 A1 80` is considered a single invalid sequence.
+ *  * Some codepoints such as U+D800 are technically considered invalid in UTF-8. However, if it's not an overlong sequence or otherwise
+ *    wrongly encoded, those codepoints will still be returned by this function, and are not considered invalid by it.
+ *    This differs from \ref dpa_u_utf8_validate, but is not going to change.
+ */
+dpa__u_api uint32_t dpa_u_next_codepoint(const unsigned char** it, const unsigned char* end);
 
 /** @} */
 /** @} */
