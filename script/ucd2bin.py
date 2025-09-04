@@ -181,7 +181,7 @@ for first, last, entry in data:
     value |= entry['Numeric_Type']<<16
     if entry['Bidi_Class']:
       bidi_major, bidi_minor, bidi_name = Bidi_Class[entry['Bidi_Class']]
-      value |= bidi_minor<<18
+      value |= bidi_major<<18
       value |= bidi_minor<<22
     value |= entry['Canonical_Combining_Class']<<24
     result[codepoint*4:codepoint*4+4] = value.to_bytes(4, 'little')

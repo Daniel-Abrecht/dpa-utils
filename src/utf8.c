@@ -80,27 +80,28 @@ uint32_t dpa_u_next_codepoint(const unsigned char** pit, const unsigned char* en
   if(it == end)
     return -1;
   unsigned char ch = *(it++);
+  if(ch == 0xC1)
+    goto error;
   int length = 0;
   for(; ch & 0x80; ch<<=1)
     length++;
   if(length == 1 || length > 7)
     goto error;
-  if(start+length >= end)
+  if(start+length > end)
     goto error;
-  end = start+length;
   uint32_t codepoint = ch>>length;
-  for(; it<end; it++){
+  for(const unsigned char* end2 = start+length; it<end2; it++){
     ch = *it;
     if((ch & 0xC0) != 0x80)
       goto error;
     codepoint = (codepoint << 6) | (ch & 0x3F);
   }
-  if(length > 1 && codepoint < (uint64_t)0x40<<((length-2)*5))
+  if(length > 1 && codepoint < (uint32_t)1<<(1+5*(length-1)))
     goto error; // overlong sequence
   *pit = it;
   return codepoint;
 error:
-  while((*it & 0xC0) == 0x80)
+  while(it < end && (*it & 0xC0) == 0x80)
     it++;
   *pit = it;
   return -1;

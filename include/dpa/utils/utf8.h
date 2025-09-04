@@ -24,7 +24,7 @@
  * \param X A unicode code point
  * \returns The corresponding UTF-8 sequence, 0 terminated. Up to 8 bytes long. Beware of codepoint 0, which is a 0 byte in UTF-8.
  */
-#define dpa_u_utf8_cstr_from_code_point(X) dpa_u_utf8_cstr_from_code_point_p((char[8]){0},(X))
+#define dpa_u_utf8_cstr_from_codepoint(X) dpa_u_utf8_cstr_from_codepoint_p((unsigned char[8]){0},(X))
 
 /**
  * Turns a unicode code point into an UTF-8 sequence.
@@ -36,9 +36,9 @@
  * 
  * \param mem The UTF-8 sequence will be written there. Must be at least 8 bytes big
  * \param codepoint The unicode code point
- * \see dpa_u_utf8_from_code_point
+ * \see dpa_u_utf8_from_codepoint
  */
-dpa__u_api inline unsigned char* dpa_u_utf8_cstr_from_code_point_p(unsigned char mem[8], uint32_t codepoint){
+dpa__u_api inline unsigned char* dpa_u_utf8_cstr_from_codepoint_p(unsigned char mem[8], uint32_t codepoint){
   if(codepoint < 0x80u){
     mem[0] = codepoint;
     mem[1] = 0;
@@ -99,7 +99,7 @@ dpa__u_api inline unsigned char* dpa_u_utf8_cstr_from_code_point_p(unsigned char
  * \returns The UTF-8 sequence, as an inline unique BO
  */
 dpa_u_unsequenced
-dpa__u_api inline dpa_u_a_bo_unique_t dpa_u_utf8_from_code_point(uint32_t codepoint){
+dpa__u_api inline dpa_u_a_bo_unique_t dpa_u_utf8_from_codepoint(uint32_t codepoint){
   if(codepoint < 0x80u){
     return (dpa_u_a_bo_unique_t){{{DPA__U_INLINE_STRING((codepoint))|DPA_U_MOVE_TAG(DPA_U_BO_UNIQUE)}}};
   }else if(codepoint < 0x800u){

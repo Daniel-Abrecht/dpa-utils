@@ -124,6 +124,7 @@ else
 unicode_dir=external/unicode/
 endif
 
+export DPA_U_DATA_DIR=data/
 
 all: source-checks bin lib data
 
@@ -310,6 +311,7 @@ clean:
 	rm -rf build/$(TYPE)/ bin/$(TYPE)/ lib/$(TYPE)/ data/
 
 install:
+	mkdir -p "$(DESTDIR)$(prefix)/share/dpa/utils/"
 	mkdir -p "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	mkdir -p "$(DESTDIR)$(prefix)/lib/"
 ifdef has_shared
@@ -325,6 +327,7 @@ endif
 	mkdir -p "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	cp -a include/dpa/utils/./ "$(DESTDIR)$(prefix)/include/dpa/utils/"
 	cp include/dpa/utils.h "$(DESTDIR)$(prefix)/include/dpa/"
+	cp -r data/. "$(DESTDIR)$(prefix)/share/dpa/utils/"
 	if [ -n "$$DPA_U_CONFIG" ]; then cp "$$DPA_U_CONFIG" "$(DESTDIR)$(prefix)/include/dpa/config.h"; fi
 	-ldconfig
 
@@ -336,6 +339,7 @@ uninstall:
 	rm -f "$(DESTDIR)$(prefix)/lib/lib$(SONAME)$(a-ext)"
 	rm -f "bin/$(TYPE)/dpa-testsuite$(bin-ext)"
 	rm -rf "$(DESTDIR)$(prefix)/include/dpa/utils/"
+	rm -rf "$(DESTDIR)$(prefix)/share/dpa/utils/"
 	rm -f "$(DESTDIR)$(prefix)/include/dpa/utils.h"
 
 shell:
