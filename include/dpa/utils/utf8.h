@@ -169,6 +169,11 @@ struct dpa_u_streaming_utf8_validator {
  * \returns true if everything is OK, false if the sequence wasn't valid.
  */
 dpa__u_api bool dpa_u_utf8_validate(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch);
+dpa__u_api bool dpa_u_utf8_validate_ext(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch);
+dpa__u_api bool dpa_u_utf8_validate_only_unicode(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch);
+dpa__u_api bool dpa_u_utf8_validate_only_unicode_no_noncharacters(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch);
+dpa__u_api bool dpa_u_utf8_validate_no_noncharacters(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch);
+dpa__u_api bool dpa_u_utf8_validate_ext_no_noncharacters(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch);
 
 /**
  * This function can be used to iterate over an UTF-8 string codepoint-by-codepoint. It returns one codepoint every
