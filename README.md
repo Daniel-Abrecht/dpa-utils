@@ -58,7 +58,7 @@ which does not have the `_p` suffix.
 
 ## LICENSE
 
-For the specifics, see the [COPYING](COPYING) file.
+For the specifics, see the [COPYING](./COPYING) file.
 
 The short version is, the library and everything is [MIT](LICENSE.MIT) licensed, including generated binaries,
 but the unicode data files in `external/unicode/` use the [UNICODE V3](LICENSE.UNICODE) license,

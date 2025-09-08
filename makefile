@@ -301,7 +301,8 @@ build/docs/api/.done: $(HEADERS) $(DOCSRC) Doxyfile
 	rm -rf build/docs/api/
 	mkdir -p build/docs/api/
 	-doxygen
-	-cp -r docs/. build/docs/api/html/
+	# -cp -r docs/. build/docs/api/html/
+	-cp -r COPYING LICENSE.* build/docs/api/html/
 	-touch "$@"
 
 clean//docs:
