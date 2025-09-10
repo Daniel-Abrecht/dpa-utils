@@ -708,29 +708,12 @@ dpa__u_api_var extern alignas(DPA_U_SEED_SIZE) char dpa_u_seed[DPA_U_SEED_SIZE];
  */
 /**
  * This is a signed 32bit integer which can hold any unicode value.
- *
- * We only care about the UTF-8 encoding and unicode codepoint values in this library, as far as this library are concerned, UTF-16 does not exist.
- *
- * UTF-8 can't contain codepoints >U+7FFFFFFF.
- * Trying to encode such a codepoint will result in an invalid UTF-8 sequence, using 0xFE to initiate a 7 byte sequence.
- * This library will also let you decode such sequences again, although, they will use -1 for error values as well, overlapping with U+FFFFFFFF.
- * So, to check for invalid sequences from a UTF-8 decoding function, check for negative values to catch them all.
- *
- * When UTF-8 encoding, you should check if the values are valid, for example using \ref dpa_u_unicode_is_invalid.
- * Unicode codepoints > 0x10FFFF (UNICODE_CODEPOINT_MAX) are invalid (don't forget that dpa_u_unicode_codepoint_t is signed though),
- * as well as UTF-16 surrogates, although any non-negative (>u+7FFFFFFF) value has a valid UTF-8 representation (in older standards such as RFC 2279),
- * even if the unicode codepoint is invalid.
- *
- * Also, non-characters meant for internal use are valid in both unicode and UTF-8, so if you sanitize and/or validate decoded UTF-8 or unicode codepoints,
- * consider if you wnad to allow them or not too. Unless you do anything special with them, you should probably just leafe them be there.
- *
- * This library leaves the decision when to validate and/or sanitize any input entirely up to you.
- * The recommandation is to be relaxed when decoding UTF-8 and handling code points, but strict when encoding them.
- * 
- * It's not usually necessary to convert a whole string to codepoints. You can iterate over a utf-8 string on a
- * codepoint-by-codepoint basis, and this library can handle arbitrary non-utf8 binary data when doing so.
- * It's usually best not to sanitize or validate any data. Just treat it as binary data, and interpret it as utf-8
- * only when needed.
+ * The biggest codepoint allowed in unicode is U+10FFFF.
+ * In UTF-8, the largest defined sequences are 6 byte sequences, which can encode 2**31 codepoints, the biggest
+ * codepoint representable in UTF-8 is U+7FFFFFFF, which happens to also be the biggest positive number which fits
+ * into a signed 32bit integer. As an extension, this library lets you encode / decode 7 byte sequences with the start
+ * byte 0xFE.  
+ * You may want to check and/or sanitize the codepoint values before / after encodinf/decodinf them.
  */
 typedef int32_t dpa_u_unicode_codepoint_t;
 /** @} */

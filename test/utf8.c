@@ -284,108 +284,7 @@ DPA_U_TESTCASE("dpa_u_next_codepoint\tVerify all possible overlong sequences are
 */
 
 
-
-
-DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_noncharacters\tTest all valid sequences"){
-  uint32_t codepoint=0;
-  do {
-    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
-    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_ext_no_noncharacters);
-    bool expected = (codepoint < 0xD800 || codepoint > 0xDFFF) //!dpa_u_unicode_is_invalid(codepoint)
-                  && !dpa_u_unicode_is_noncharacter(codepoint);
-    if(valid != expected){
-      fprintf(stderr, "dpa_u_utf8_validate_ext_no_noncharacters: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
-      return 1;
-    }
-    codepoint++;
-  } while(codepoint);
-  return 0;
-}
-
-DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_noncharacters\tTest overlong sequences"){
-  // Note: the validator fails an invalid sequence at the earliest point possible.
-  { // 1 byte sequence / continuation byte. Not valid.
-    for(int i=0; i<0x40; i++){
-      struct dpa_u_streaming_utf8_validator v = {0};
-      expect(!dpa_u_utf8_validate_ext_no_noncharacters(&v, 0x80+i));
-    }
-  }
-  { // 2 byte sequence
-    struct dpa_u_streaming_utf8_validator v = {0};
-    expect(!dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xC0));
-  }
-  { // 2 byte sequence
-    struct dpa_u_streaming_utf8_validator v = {0};
-    expect(!dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xC1));
-  }
-  { // 3 byte sequence \xE0\x80 .. \xE0\x9F
-    for(int i=0; i<0x20; i++){
-      struct dpa_u_streaming_utf8_validator v = {0};
-      expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xE0));
-      expect(!dpa_u_utf8_validate_ext_no_noncharacters(&v, 0x80+i));
-    }
-  }
-  { // 4 byte sequence \xF0\x80 .. \xF0\x8F
-    for(int i=0; i<0x10; i++){
-      struct dpa_u_streaming_utf8_validator v = {0};
-      expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xF0));
-      expect(!dpa_u_utf8_validate_ext_no_noncharacters(&v, 0x80+i));
-    }
-  }
-  { // 5 byte sequence \xF8\x80 .. \xF8\x87
-    for(int i=0; i<0x08; i++){
-      struct dpa_u_streaming_utf8_validator v = {0};
-      expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xF8));
-      expect(!dpa_u_utf8_validate_ext_no_noncharacters(&v, 0x80+i));
-    }
-  }
-  { // 6 byte sequence \xFC\x80 .. \xFC\x83
-    for(int i=0; i<0x04; i++){
-      struct dpa_u_streaming_utf8_validator v = {0};
-      expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xFC));
-      expect(!dpa_u_utf8_validate_ext_no_noncharacters(&v, 0x80+i));
-    }
-  }
-  { // 7 byte sequence \xFE\x80 .. \xFE\x81
-    for(int i=0; i<0x02; i++){
-      struct dpa_u_streaming_utf8_validator v = {0};
-      expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xFE));
-      expect(!dpa_u_utf8_validate_ext_no_noncharacters(&v, 0x80+i));
-    }
-  }
-  return 0;
-}
-
-DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_noncharacters\tTest utf-16 surrogate range"){
-  // Surrogate range: U+D800 .. U+DFFF or \xED\xA0\x80 .. \xED\xBF\xBF
-  for(int i=0; i<0x20; i++){
-    struct dpa_u_streaming_utf8_validator v = {0};
-    expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xED));
-    expect(!dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xA0+i));
-  }
-  return 0;
-}
-
-
-
-
-DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode_no_noncharacters\tTest all valid sequences"){
-  uint32_t codepoint=0;
-  do {
-    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
-    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_only_unicode_no_noncharacters);
-    bool expected = !dpa_u_unicode_is_invalid(codepoint)
-                 && !dpa_u_unicode_is_noncharacter(codepoint);
-    if(valid != expected){
-      fprintf(stderr, "dpa_u_utf8_validate_only_unicode_no_noncharacters: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
-      return 1;
-    }
-    codepoint++;
-  } while(codepoint);
-  return 0;
-}
-
-DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode_no_noncharacters\tTest overlong sequences"){
+static int test_overlong_sequences_only_unicode(bool (*validator)(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch)){
   // Note: the validator fails an invalid sequence at the earliest point possible.
   { // 1 byte sequence / continuation byte. Not valid.
     for(int i=0; i<0x40; i++){
@@ -417,6 +316,207 @@ DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode_no_noncharacters\tTest overlong
   }
   // All 5 byte sequences are larger than the biggest valid unicode code point
   // dpa_u_utf8_validate_only_unicode_no_noncharacters does not allow such code points
+  {
+    for(int i=0; i<0x8; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(!validator(&v, 0xF8+i));
+    }
+  }
+  return 0;
+}
+
+static int test_overlong_sequences(bool (*validator)(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch)){
+  // Note: the validator fails an invalid sequence at the earliest point possible.
+  { // 1 byte sequence / continuation byte. Not valid.
+    for(int i=0; i<0x40; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(!validator(&v, 0x80+i));
+    }
+  }
+  { // 2 byte sequence
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(!validator(&v, 0xC0));
+  }
+  { // 2 byte sequence
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(!validator(&v, 0xC1));
+  }
+  { // 3 byte sequence \xE0\x80 .. \xE0\x9F
+    for(int i=0; i<0x20; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(validator(&v, 0xE0));
+      expect(!validator(&v, 0x80+i));
+    }
+  }
+  { // 4 byte sequence \xF0\x80 .. \xF0\x8F
+    for(int i=0; i<0x10; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(validator(&v, 0xF0));
+      expect(!validator(&v, 0x80+i));
+    }
+  }
+  { // 5 byte sequence \xF8\x80 .. \xF8\x87
+    for(int i=0; i<0x08; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(validator(&v, 0xF8));
+      expect(!validator(&v, 0x80+i));
+    }
+  }
+  { // 6 byte sequence \xFC\x80 .. \xFC\x83
+    for(int i=0; i<0x04; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(validator(&v, 0xFC));
+      expect(!validator(&v, 0x80+i));
+    }
+  }
+  { // 7 byte sequence
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(!validator(&v, 0xFE));
+  }
+  { // 8 byte sequence
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(!validator(&v, 0xFF));
+  }
+  return 0;
+}
+
+static int test_overlong_sequences_ext(bool (*validator)(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch)){
+  // Note: the validator fails an invalid sequence at the earliest point possible.
+  { // 1 byte sequence / continuation byte. Not valid.
+    for(int i=0; i<0x40; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(!validator(&v, 0x80+i));
+    }
+  }
+  { // 2 byte sequence
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(!validator(&v, 0xC0));
+  }
+  { // 2 byte sequence
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(!validator(&v, 0xC1));
+  }
+  { // 3 byte sequence \xE0\x80 .. \xE0\x9F
+    for(int i=0; i<0x20; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(validator(&v, 0xE0));
+      expect(!validator(&v, 0x80+i));
+    }
+  }
+  { // 4 byte sequence \xF0\x80 .. \xF0\x8F
+    for(int i=0; i<0x10; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(validator(&v, 0xF0));
+      expect(!validator(&v, 0x80+i));
+    }
+  }
+  { // 5 byte sequence \xF8\x80 .. \xF8\x87
+    for(int i=0; i<0x08; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(validator(&v, 0xF8));
+      expect(!validator(&v, 0x80+i));
+    }
+  }
+  { // 6 byte sequence \xFC\x80 .. \xFC\x83
+    for(int i=0; i<0x04; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(validator(&v, 0xFC));
+      expect(!validator(&v, 0x80+i));
+    }
+  }
+  { // 7 byte sequence \xFE\x80 .. \xFE\x81
+    for(int i=0; i<0x02; i++){
+      struct dpa_u_streaming_utf8_validator v = {0};
+      expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xFE));
+      expect(!dpa_u_utf8_validate_ext_no_noncharacters(&v, 0x80+i));
+    }
+  }
+  { // 8 byte sequence
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(!validator(&v, 0xFF));
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_relaxed\tTest overlong sequences"){
+  return test_overlong_sequences(dpa_u_utf8_validate_relaxed);
+}
+DPA_U_TESTCASE("dpa_u_utf8_validate_no_noncharacters\tTest overlong sequences"){
+  return test_overlong_sequences(dpa_u_utf8_validate_no_noncharacters);
+}
+DPA_U_TESTCASE("dpa_u_utf8_validate_no_surrogates\tTest overlong sequences"){
+  return test_overlong_sequences(dpa_u_utf8_validate_no_surrogates);
+}
+DPA_U_TESTCASE("dpa_u_utf8_validate_no_surrogates_no_noncharacters\tTest overlong sequences"){
+  return test_overlong_sequences(dpa_u_utf8_validate_no_surrogates_no_noncharacters);
+}
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_noncharacters\tTest overlong sequences"){
+  return test_overlong_sequences_ext(dpa_u_utf8_validate_ext_no_noncharacters);
+}
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_relaxed\tTest overlong sequences"){
+  return test_overlong_sequences_ext(dpa_u_utf8_validate_ext_relaxed);
+}
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_surrogates\tTest overlong sequences"){
+  return test_overlong_sequences_ext(dpa_u_utf8_validate_ext_no_surrogates);
+}
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_surrogates_no_noncharacters\tTest overlong sequences"){
+  return test_overlong_sequences_ext(dpa_u_utf8_validate_ext_no_surrogates_no_noncharacters);
+}
+DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode\tTest overlong sequences"){
+  return test_overlong_sequences_only_unicode(dpa_u_utf8_validate_only_unicode);
+}
+DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode_no_noncharacters\tTest overlong sequences"){
+  return test_overlong_sequences_only_unicode(dpa_u_utf8_validate_only_unicode_no_noncharacters);
+}
+
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_relaxed\tTest utf-16 surrogate range"){
+  // Surrogate range: U+D800 .. U+DFFF or \xED\xA0\x80 .. \xED\xBF\xBF
+  for(int i=0; i<0x20; i++){
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xED));
+    expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xA0+i));
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_relaxed\tTest utf-16 surrogate range"){
+  // Surrogate range: U+D800 .. U+DFFF or \xED\xA0\x80 .. \xED\xBF\xBF
+  for(int i=0; i<0x20; i++){
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xED));
+    expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xA0+i));
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_no_noncharacters\tTest utf-16 surrogate range"){
+  // Surrogate range: U+D800 .. U+DFFF or \xED\xA0\x80 .. \xED\xBF\xBF
+  for(int i=0; i<0x20; i++){
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xED));
+    expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xA0+i));
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_noncharacters\tTest utf-16 surrogate range"){
+  // Surrogate range: U+D800 .. U+DFFF or \xED\xA0\x80 .. \xED\xBF\xBF
+  for(int i=0; i<0x20; i++){
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xED));
+    expect(dpa_u_utf8_validate_ext_no_noncharacters(&v, 0xA0+i));
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode\tTest utf-16 surrogate range"){
+  // Surrogate range: U+D800 .. U+DFFF or \xED\xA0\x80 .. \xED\xBF\xBF
+  for(int i=0; i<0x20; i++){
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(dpa_u_utf8_validate_only_unicode(&v, 0xED));
+    expect(!dpa_u_utf8_validate_only_unicode(&v, 0xA0+i));
+  }
   return 0;
 }
 
@@ -427,5 +527,78 @@ DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode_no_noncharacters\tTest utf-16 s
     expect(dpa_u_utf8_validate_only_unicode_no_noncharacters(&v, 0xED));
     expect(!dpa_u_utf8_validate_only_unicode_no_noncharacters(&v, 0xA0+i));
   }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_no_surrogates_no_noncharacters\tTest utf-16 surrogate range"){
+  // Surrogate range: U+D800 .. U+DFFF or \xED\xA0\x80 .. \xED\xBF\xBF
+  for(int i=0; i<0x20; i++){
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(dpa_u_utf8_validate_no_surrogates_no_noncharacters(&v, 0xED));
+    expect(!dpa_u_utf8_validate_no_surrogates_no_noncharacters(&v, 0xA0+i));
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_surrogates_no_noncharacters\tTest utf-16 surrogate range"){
+  // Surrogate range: U+D800 .. U+DFFF or \xED\xA0\x80 .. \xED\xBF\xBF
+  for(int i=0; i<0x20; i++){
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(dpa_u_utf8_validate_ext_no_surrogates_no_noncharacters(&v, 0xED));
+    expect(!dpa_u_utf8_validate_ext_no_surrogates_no_noncharacters(&v, 0xA0+i));
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_no_surrogates\tTest utf-16 surrogate range"){
+  // Surrogate range: U+D800 .. U+DFFF or \xED\xA0\x80 .. \xED\xBF\xBF
+  for(int i=0; i<0x20; i++){
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(dpa_u_utf8_validate_no_surrogates(&v, 0xED));
+    expect(!dpa_u_utf8_validate_no_surrogates(&v, 0xA0+i));
+  }
+  return 0;
+}
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_surrogates\tTest utf-16 surrogate range"){
+  // Surrogate range: U+D800 .. U+DFFF or \xED\xA0\x80 .. \xED\xBF\xBF
+  for(int i=0; i<0x20; i++){
+    struct dpa_u_streaming_utf8_validator v = {0};
+    expect(dpa_u_utf8_validate_ext_no_surrogates(&v, 0xED));
+    expect(!dpa_u_utf8_validate_ext_no_surrogates(&v, 0xA0+i));
+  }
+  return 0;
+}
+
+
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_surrogates_no_noncharacters\tTest all valid sequences"){
+  uint32_t codepoint=0;
+  do {
+    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
+    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_ext_no_surrogates_no_noncharacters);
+    bool expected = (codepoint < 0xD800 || codepoint > 0xDFFF)
+                  && !dpa_u_unicode_is_noncharacter(codepoint);
+    if(valid != expected){
+      fprintf(stderr, "dpa_u_utf8_validate_ext_no_surrogates_no_noncharacters: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
+      return 1;
+    }
+    codepoint++;
+  } while(codepoint);
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode_no_noncharacters\tTest all valid sequences"){
+  uint32_t codepoint=0;
+  do {
+    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
+    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_only_unicode_no_noncharacters);
+    bool expected = !dpa_u_unicode_is_invalid(codepoint)
+                 && !dpa_u_unicode_is_noncharacter(codepoint);
+    if(valid != expected){
+      fprintf(stderr, "dpa_u_utf8_validate_only_unicode_no_noncharacters: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
+      return 1;
+    }
+    codepoint++;
+  } while(codepoint);
   return 0;
 }
