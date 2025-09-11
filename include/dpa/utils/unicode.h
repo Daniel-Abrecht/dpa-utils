@@ -128,6 +128,70 @@ enum dpa_u_unicode_category {
 #define DPA_U_UNICODE_CATEGORY_MAJOR_MASK 0x38
 #define DPA_U_UNICODE_CATEGORY_MINOR_MASK 0x07
 
+enum dpa_u_unicode_bidi_type {
+  DPA_U_UNICODE_BIDI_TYPE_STRONG              = 0<<4,
+  DPA_U_UNICODE_BIDI_TYPE_WEAK                = 1<<4,
+  DPA_U_UNICODE_BIDI_TYPE_NEUTRAL             = 2<<4,
+  DPA_U_UNICODE_BIDI_TYPE_EXPLICIT_FORMATTING = 3<<4,
+};
+
+enum dpa_u_unicode_bidi_class {
+  DPA_U_UNICODE_BIDI_CLASS_LEFT_TO_RIGHT = 0 | DPA_U_UNICODE_BIDI_TYPE_STRONG, //< L
+  DPA_U_UNICODE_BIDI_CLASS_RIGHT_TO_LEFT = 1 | DPA_U_UNICODE_BIDI_TYPE_STRONG, //< R
+  DPA_U_UNICODE_BIDI_CLASS_ARABIC_LETTER = 2 | DPA_U_UNICODE_BIDI_TYPE_STRONG, //< AL
+
+  DPA_U_UNICODE_BIDI_CLASS_EUROPEAN_NUMBER     = 0 | DPA_U_UNICODE_BIDI_TYPE_WEAK, //< EN
+  DPA_U_UNICODE_BIDI_CLASS_EUROPEAN_SEPARATOR  = 1 | DPA_U_UNICODE_BIDI_TYPE_WEAK, //< ES
+  DPA_U_UNICODE_BIDI_CLASS_EUROPEAN_TERMINATOR = 2 | DPA_U_UNICODE_BIDI_TYPE_WEAK, //< ET
+  DPA_U_UNICODE_BIDI_CLASS_ARABIC_NUMBER       = 3 | DPA_U_UNICODE_BIDI_TYPE_WEAK, //< AN
+  DPA_U_UNICODE_BIDI_CLASS_COMMON_SEPARATOR    = 4 | DPA_U_UNICODE_BIDI_TYPE_WEAK, //< CS
+  DPA_U_UNICODE_BIDI_CLASS_NONSPACING_MARK     = 5 | DPA_U_UNICODE_BIDI_TYPE_WEAK, //< NSM
+  DPA_U_UNICODE_BIDI_CLASS_BOUNDARY_NEUTRAL    = 6 | DPA_U_UNICODE_BIDI_TYPE_WEAK, //< BN
+
+  DPA_U_UNICODE_BIDI_CLASS_PARAGRAPH_SEPARATOR = 0 | DPA_U_UNICODE_BIDI_TYPE_NEUTRAL, //< B
+  DPA_U_UNICODE_BIDI_CLASS_SEGMENT_SEPARATOR   = 1 | DPA_U_UNICODE_BIDI_TYPE_NEUTRAL, //< S
+  DPA_U_UNICODE_BIDI_CLASS_WHITE_SPACE         = 2 | DPA_U_UNICODE_BIDI_TYPE_NEUTRAL, //< WS
+  DPA_U_UNICODE_BIDI_CLASS_OTHER_NEUTRAL       = 3 | DPA_U_UNICODE_BIDI_TYPE_NEUTRAL, //< ON
+
+  DPA_U_UNICODE_BIDI_CLASS_LEFT_TO_RIGHT_EMBEDDING = 0 | DPA_U_UNICODE_BIDI_TYPE_EXPLICIT_FORMATTING, //< LRE
+  DPA_U_UNICODE_BIDI_CLASS_LEFT_TO_RIGHT_OVERRIDE  = 1 | DPA_U_UNICODE_BIDI_TYPE_EXPLICIT_FORMATTING, //< LRO
+  DPA_U_UNICODE_BIDI_CLASS_RIGHT_TO_LEFT_EMBEDDING = 2 | DPA_U_UNICODE_BIDI_TYPE_EXPLICIT_FORMATTING, //< RLE
+  DPA_U_UNICODE_BIDI_CLASS_RIGHT_TO_LEFT_OVERRIDE  = 3 | DPA_U_UNICODE_BIDI_TYPE_EXPLICIT_FORMATTING, //< RLO
+  DPA_U_UNICODE_BIDI_CLASS_POP_DIRECTIONAL_FORMAT  = 4 | DPA_U_UNICODE_BIDI_TYPE_EXPLICIT_FORMATTING, //< PDF
+  DPA_U_UNICODE_BIDI_CLASS_LEFT_TO_RIGHT_ISOLATE   = 5 | DPA_U_UNICODE_BIDI_TYPE_EXPLICIT_FORMATTING, //< LRI
+  DPA_U_UNICODE_BIDI_CLASS_RIGHT_TO_LEFT_ISOLATE   = 6 | DPA_U_UNICODE_BIDI_TYPE_EXPLICIT_FORMATTING, //< RLI
+  DPA_U_UNICODE_BIDI_CLASS_FIRST_STRONG_ISOLATE    = 7 | DPA_U_UNICODE_BIDI_TYPE_EXPLICIT_FORMATTING, //< FSI
+  DPA_U_UNICODE_BIDI_CLASS_POP_DIRECTIONAL_ISOLATE = 8 | DPA_U_UNICODE_BIDI_TYPE_EXPLICIT_FORMATTING, //< PDI
+};
+
+enum dpa_u_unicode_decomposition_type {
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_NONE,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_CANONICAL,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_FONT,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_NOBREAK,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_INITIAL,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_MEDIAL,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_FINAL,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_ISOLATED,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_CIRCLE,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_SUPER,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_SUB,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_VERTICAL,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_WIDE,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_NARROW,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_SMALL,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_SQUARE,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_FRACTION,
+  DPA_U_UNICODE_DECOMPOSITION_TYPE_COMPAT,
+};
+
+enum dpa_u_unicode_numeric_type {
+  DPA_U_UNICODE_NUMERIC_TYPE_NONE,    //< This is not a number
+  DPA_U_UNICODE_NUMERIC_TYPE_DECIMAL, //< This is a normal number in a base 10 system
+  DPA_U_UNICODE_NUMERIC_TYPE_DIGIT,   //< This is a symbol containing a decimal number. Things like super/sub-script, circled numbers, etc.
+  DPA_U_UNICODE_NUMERIC_TYPE_NUMERIC, //< This is a symbol representing a special number. Things like ratios, roman numerals, etc.
+};
+
 /**
  * \see dpa_u_get_codepoint_info
  */
@@ -135,13 +199,13 @@ struct dpa_u_unicode_info {
   struct {
     // Hopefully, the compilers layout will match the bit shifts in dpa_u_get_codepoint_info,
     // and the compiler will optimize it all away
-    enum dpa_u_unicode_category general_category  : 6; //< \ref dpa_u_get_category_from_codepoint
-    uint32_t decomposition_type                   : 5;
-    uint32_t bidi_mirror                          : 1;
-    uint32_t numeric_value                        : 4;
-    uint32_t numeric_type                         : 2;
-    uint32_t bidi                                 : 6;
-    uint32_t canonical_combining_class            : 8;
+    enum dpa_u_unicode_category general_category             : 6; //< \ref dpa_u_get_category_from_codepoint
+    enum dpa_u_unicode_decomposition_type decomposition_type : 5;
+    uint32_t bidi_mirror                                     : 1;
+    uint32_t numeric_value                                   : 4; //< A number between 0 and 10. Only set if numeric type is decimal or digit.
+    enum dpa_u_unicode_numeric_type numeric_type             : 2;
+    enum dpa_u_unicode_bidi_class bidi                       : 6;
+    uint32_t canonical_combining_class                       : 8;
   };
 };
 

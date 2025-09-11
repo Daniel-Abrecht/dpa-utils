@@ -571,6 +571,60 @@ DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_surrogates\tTest utf-16 surrogate ran
 
 
 
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_surrogates\tTest all valid sequences"){
+  uint32_t codepoint=0;
+  do {
+    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
+    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_ext_no_surrogates);
+    bool expected = (codepoint < 0xD800 || codepoint > 0xDFFF);
+    if(valid != expected){
+      fprintf(stderr, "dpa_u_utf8_validate_ext_no_surrogates: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
+      return 1;
+    }
+    codepoint++;
+  } while(codepoint);
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_no_surrogates\tTest all valid sequences"){
+  for(uint32_t codepoint=0; codepoint<0x80000000u; codepoint++){
+    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
+    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_no_surrogates);
+    bool expected = (codepoint < 0xD800 || codepoint > 0xDFFF);
+    if(valid != expected){
+      fprintf(stderr, "dpa_u_utf8_validate_no_surrogates: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_relaxed\tTest all valid sequences"){
+  uint32_t codepoint=0;
+  do {
+    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
+    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_ext_relaxed);
+    if(!valid){
+      fprintf(stderr, "dpa_u_utf8_validate_ext_relaxed: %08"PRIX32"\n", codepoint);
+      return 1;
+    }
+    codepoint++;
+  } while(codepoint);
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_relaxed\tTest all valid sequences"){
+  for(uint32_t codepoint=0; codepoint<0x80000000u; codepoint++){
+    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
+    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_relaxed);
+    if(!valid){
+      fprintf(stderr, "dpa_u_utf8_validate_relaxed: %08"PRIX32"\n", codepoint);
+      return 1;
+    }
+  }
+  return 0;
+}
+
 DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_surrogates_no_noncharacters\tTest all valid sequences"){
   uint32_t codepoint=0;
   do {
@@ -587,9 +641,50 @@ DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_surrogates_no_noncharacters\tTest all
   return 0;
 }
 
-DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode_no_noncharacters\tTest all valid sequences"){
+DPA_U_TESTCASE("dpa_u_utf8_validate_no_surrogates_no_noncharacters\tTest all valid sequences"){
+  for(uint32_t codepoint=0; codepoint<0x80000000u; codepoint++){
+    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
+    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_no_surrogates_no_noncharacters);
+    bool expected = (codepoint < 0xD800 || codepoint > 0xDFFF)
+                  && !dpa_u_unicode_is_noncharacter(codepoint);
+    if(valid != expected){
+      fprintf(stderr, "dpa_u_utf8_validate_no_surrogates_no_noncharacters: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_ext_no_noncharacters\tTest all valid sequences"){
   uint32_t codepoint=0;
   do {
+    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
+    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_ext_no_noncharacters);
+    bool expected = !dpa_u_unicode_is_noncharacter(codepoint);
+    if(valid != expected){
+      fprintf(stderr, "dpa_u_utf8_validate_ext_no_noncharacters: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
+      return 1;
+    }
+    codepoint++;
+  } while(codepoint);
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_no_noncharacters\tTest all valid sequences"){
+  for(uint32_t codepoint=0; codepoint<0x80000000u; codepoint++){
+    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
+    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_no_noncharacters);
+    bool expected = !dpa_u_unicode_is_noncharacter(codepoint);
+    if(valid != expected){
+      fprintf(stderr, "dpa_u_utf8_validate_no_noncharacters: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode_no_noncharacters\tTest all valid sequences"){
+  for(uint32_t codepoint=0; codepoint<0x110000; codepoint++){
     dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
     bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_only_unicode_no_noncharacters);
     bool expected = !dpa_u_unicode_is_invalid(codepoint)
@@ -598,7 +693,19 @@ DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode_no_noncharacters\tTest all vali
       fprintf(stderr, "dpa_u_utf8_validate_only_unicode_no_noncharacters: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
       return 1;
     }
-    codepoint++;
-  } while(codepoint);
+  }
+  return 0;
+}
+
+DPA_U_TESTCASE("dpa_u_utf8_validate_only_unicode\tTest all valid sequences"){
+  for(uint32_t codepoint=0; codepoint<0x110000; codepoint++){
+    dpa_u_a_bo_unique_t sequence = dpa_u_utf8_from_codepoint(codepoint);
+    bool valid = utf8_validate(dpa_u_bo_get_size(sequence), dpa_u_bo_get_data(sequence), dpa_u_utf8_validate_only_unicode);
+    bool expected = !dpa_u_unicode_is_invalid(codepoint);
+    if(valid != expected){
+      fprintf(stderr, "dpa_u_utf8_validate_only_unicode: %08"PRIX32" %d != %d\n", codepoint, valid, expected);
+      return 1;
+    }
+  }
   return 0;
 }
