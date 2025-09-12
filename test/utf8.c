@@ -200,16 +200,15 @@ static const struct dpa_u_utf8_test_data edgecases[] = {
 
 
 
-/*
-DPA_U_TESTCASE("dpa_u_next_codepoint\tCheck edge cases"){
+DPA_U_TESTCASE("dpa_u_utf8_next_codepoint\tCheck edge cases"){
   bool all_ok = true;
   for(size_t i=0; i<sizeof(edgecases)/sizeof(*edgecases); i++){
     const unsigned char* it = edgecases[i].sequence.data;
-    uint32_t result = dpa_u_next_codepoint(&it, (unsigned char*)edgecases[i].sequence.data + edgecases[i].sequence.size);
+    uint32_t result = dpa_u_utf8_next_codepoint(&it, (unsigned char*)edgecases[i].sequence.data + edgecases[i].sequence.size);
     if(result != edgecases[i].codepoint || (int)(it-(const unsigned char*)edgecases[i].sequence.data) != edgecases[i].length){
       fprintf(
         stderr,
-        "dpa_u_next_codepoint: test for sequence %zu failed: sequence: %s, bytes in first sequence: %d, bytes processed: %d, expected result: %08"PRIX32" result: %08"PRIX32"\n",
+        "dpa_u_utf8_next_codepoint: test for sequence %zu failed: sequence: %s, bytes in first sequence: %d, bytes processed: %d, expected result: %08"PRIX32" result: %08"PRIX32"\n",
         i, edgecases[i].str, edgecases[i].length, (int)(it-(const unsigned char*)edgecases[i].sequence.data), edgecases[i].codepoint, result
       );
       all_ok = false;
@@ -218,13 +217,13 @@ DPA_U_TESTCASE("dpa_u_next_codepoint\tCheck edge cases"){
   return !all_ok;
 }
 
-DPA_U_TESTCASE("dpa_u_next_codepoint\tCheck all valid code points (generated using dpa_u_utf8_from_codepoint)"){
+DPA_U_TESTCASE("dpa_u_utf8_next_codepoint\tCheck all valid code points (generated using dpa_u_utf8_from_codepoint)"){
   uint32_t codepoint=0;
   do {
     const unsigned char* cstr = dpa_u_utf8_cstr_from_codepoint(codepoint);
-    uint32_t result = dpa_u_next_codepoint(&cstr, cstr+8);
+    uint32_t result = dpa_u_utf8_next_codepoint(&cstr, cstr+8);
     if(result != codepoint || *cstr){
-      fprintf(stderr, "dpa_u_next_codepoint: Codepoint %08"PRIX32" not handled properly, got %08"PRIX32"\n", codepoint, result);
+      fprintf(stderr, "dpa_u_utf8_next_codepoint: Codepoint %08"PRIX32" not handled properly, got %08"PRIX32"\n", codepoint, result);
       return 1;
     }
     codepoint++;
@@ -232,7 +231,7 @@ DPA_U_TESTCASE("dpa_u_next_codepoint\tCheck all valid code points (generated usi
   return 0;
 }
 
-DPA_U_TESTCASE("dpa_u_next_codepoint\tVerify all possible overlong sequences are handled properly"){
+DPA_U_TESTCASE("dpa_u_utf8_next_codepoint\tVerify all possible overlong sequences are handled properly"){
   unsigned char overlong_sequence[9];
   for(int length=1; length<=7; length++)
   for(uint32_t codepoint=0; ; codepoint++){
@@ -240,9 +239,9 @@ DPA_U_TESTCASE("dpa_u_next_codepoint\tVerify all possible overlong sequences are
       break;
     {
       const unsigned char* it = overlong_sequence;
-      uint32_t result = dpa_u_next_codepoint(&it, overlong_sequence+length);
+      uint32_t result = dpa_u_utf8_next_codepoint(&it, overlong_sequence+length);
       if(result != 0xFFFFFFFF || it != overlong_sequence+length){
-        fprintf(stderr, "dpa_u_next_codepoint: 1: Overlong sequence of length %d codepoint %08"PRIX32" was not handled properly\n", length, codepoint);
+        fprintf(stderr, "dpa_u_utf8_next_codepoint: 1: Overlong sequence of length %d codepoint %08"PRIX32" was not handled properly\n", length, codepoint);
         fprintf(stderr, "%08"PRIX32" %d %02X%02X%02X%02X\n", result, (int)(it-overlong_sequence), overlong_sequence[0], overlong_sequence[1], overlong_sequence[2], overlong_sequence[3]);
         return 1;
       }
@@ -250,9 +249,9 @@ DPA_U_TESTCASE("dpa_u_next_codepoint\tVerify all possible overlong sequences are
     {
       overlong_sequence[length] = 0x00;
       const unsigned char* it = overlong_sequence;
-      uint32_t result = dpa_u_next_codepoint(&it, overlong_sequence+length+1);
+      uint32_t result = dpa_u_utf8_next_codepoint(&it, overlong_sequence+length+1);
       if(result != 0xFFFFFFFF || it != overlong_sequence+length){
-        fprintf(stderr, "dpa_u_next_codepoint: 2: Overlong sequence of length %d codepoint %08"PRIX32" was not handled properly\n", length, codepoint);
+        fprintf(stderr, "dpa_u_utf8_next_codepoint: 2: Overlong sequence of length %d codepoint %08"PRIX32" was not handled properly\n", length, codepoint);
         fprintf(stderr, "%08"PRIX32" %d %02X%02X%02X%02X\n", result, (int)(it-overlong_sequence), overlong_sequence[0], overlong_sequence[1], overlong_sequence[2], overlong_sequence[3]);
         return 1;
       }
@@ -260,9 +259,9 @@ DPA_U_TESTCASE("dpa_u_next_codepoint\tVerify all possible overlong sequences are
     {
       overlong_sequence[length] = 0x80;
       const unsigned char* it = overlong_sequence;
-      uint32_t result = dpa_u_next_codepoint(&it, overlong_sequence+length+1);
+      uint32_t result = dpa_u_utf8_next_codepoint(&it, overlong_sequence+length+1);
       if(result != 0xFFFFFFFF || it != overlong_sequence+length+1){
-        fprintf(stderr, "dpa_u_next_codepoint: 3: Overlong sequence of length %d codepoint %08"PRIX32" was not handled properly\n", length, codepoint);
+        fprintf(stderr, "dpa_u_utf8_next_codepoint: 3: Overlong sequence of length %d codepoint %08"PRIX32" was not handled properly\n", length, codepoint);
         fprintf(stderr, "%08"PRIX32" %d %02X%02X%02X%02X\n", result, (int)(it-overlong_sequence), overlong_sequence[0], overlong_sequence[1], overlong_sequence[2], overlong_sequence[3]);
         return 1;
       }
@@ -271,9 +270,9 @@ DPA_U_TESTCASE("dpa_u_next_codepoint\tVerify all possible overlong sequences are
       overlong_sequence[length] = 0xC2;
       overlong_sequence[length+1] = 0x80;
       const unsigned char* it = overlong_sequence;
-      uint32_t result = dpa_u_next_codepoint(&it, overlong_sequence+length+2);
+      uint32_t result = dpa_u_utf8_next_codepoint(&it, overlong_sequence+length+2);
       if(result != 0xFFFFFFFF || it != overlong_sequence+length){
-        fprintf(stderr, "dpa_u_next_codepoint: 4: Overlong sequence of length %d codepoint %08"PRIX32" was not handled properly\n", length, codepoint);
+        fprintf(stderr, "dpa_u_utf8_next_codepoint: 4: Overlong sequence of length %d codepoint %08"PRIX32" was not handled properly\n", length, codepoint);
         fprintf(stderr, "%08"PRIX32" %d %02X%02X%02X%02X\n", result, (int)(it-overlong_sequence), overlong_sequence[0], overlong_sequence[1], overlong_sequence[2], overlong_sequence[3]);
         return 1;
       }
@@ -281,7 +280,7 @@ DPA_U_TESTCASE("dpa_u_next_codepoint\tVerify all possible overlong sequences are
   }
   return 0;
 }
-*/
+
 
 
 static int test_overlong_sequences_only_unicode(bool (*validator)(struct dpa_u_streaming_utf8_validator*restrict const v, const int ch)){

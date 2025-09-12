@@ -640,7 +640,8 @@ bad:
   v->index = 0;
   return false;
 }
-dpa_u_unicode_codepoint_t dpa_u_next_codepoint(const unsigned char** pit, const unsigned char* end){
+
+dpa_u_unicode_codepoint_t dpa_u_utf8_next_codepoint(const unsigned char** pit, const unsigned char* end){
   const unsigned char*const start = *pit;
   const unsigned char* it = start;
   if(it == end)

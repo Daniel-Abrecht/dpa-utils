@@ -1,0 +1,15 @@
+#include <dpa/utils/unicode.h>
+
+DPA_U_ENUM_DEF(dpa_u_unicode_category_major)
+DPA_U_ENUM_DEF(dpa_u_unicode_category_minor_other)
+DPA_U_ENUM_DEF(dpa_u_unicode_category_minor_letter)
+DPA_U_ENUM_DEF(dpa_u_unicode_category_minor_mark)
+DPA_U_ENUM_DEF(dpa_u_unicode_category_minor_number)
+DPA_U_ENUM_DEF(dpa_u_unicode_category_minor_punctuation)
+DPA_U_ENUM_DEF(dpa_u_unicode_category_minor_symbol)
+DPA_U_ENUM_DEF(dpa_u_unicode_category_minor_seperator)
+DPA_U_ENUM_DEF(dpa_u_unicode_category)
+DPA_U_ENUM_DEF(dpa_u_unicode_bidi_type)
+DPA_U_ENUM_DEF(dpa_u_unicode_bidi_class)
+DPA_U_ENUM_DEF(dpa_u_unicode_decomposition_type)
+DPA_U_ENUM_DEF(dpa_u_unicode_numeric_type)

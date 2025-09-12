@@ -93,7 +93,7 @@ dpa__u_api inline unsigned char* dpa_u_utf8_cstr_from_codepoint_p(unsigned char 
  * This function does not care if a codepoint is actually allowed to appear in UTF-8,
  * it will encode code points such as U+D800.
  * 
- * Use \ref dpa_u_is_codepoint_valid if you want to check if a codepoint is valid.
+ * Use \ref dpa_u_unicode_is_invalid if you want to check if a codepoint is valid.
  * 
  * \param codepoint a unicode codepoint
  * \returns The UTF-8 sequence, as an inline unique BO
@@ -338,7 +338,7 @@ dpa__u_api bool dpa_u_utf8_validate_ext_no_noncharacters(struct dpa_u_streaming_
  *  * Some codepoints such as U+D800 are technically considered invalid in UTF-8. However, if it's not an overlong sequence or otherwise
  *    wrongly encoded, those codepoints will still be returned by this function, and are not considered invalid by it.
  */
-dpa__u_api dpa_u_unicode_codepoint_t dpa_u_next_codepoint(const unsigned char** it, const unsigned char* end);
+dpa__u_api dpa_u_unicode_codepoint_t dpa_u_utf8_next_codepoint(const unsigned char** it, const unsigned char* end);
 
 /** @} */
 /** @} */

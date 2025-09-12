@@ -13,6 +13,9 @@
 
 #define DPA_U_DEFAULT_DATA_DIR "/usr/local/share/dpa/utils/"
 
+dpa__u_api_var extern const dpa_u_unicode_codepoint_t* unicodedata_0;
+dpa__u_api_var extern size_t unicodedata_0_length;
+
 const dpa_u_unicode_codepoint_t* unicodedata_0;
 size_t unicodedata_0_length;
 
