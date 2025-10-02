@@ -1,8 +1,8 @@
 # DPA Utils
 
-This is going to be a library with a lot of useful utility functions.
+This library is still in it's alpha phase. Some APIs may still change significantly.
 
-This library should with on any c17 compatible compiler. If c23 is qavailable, it uses some C23 features too.  
+This library should work on any c17 compatible compiler. If c23 is available, it uses some C23 features too.  
 It has been tested with clang and gcc on linux. msvc is explicitly not supported. You can use clang or gcc to cross
 compile it to windows, but you can't do it with the windows ABI.  
 
@@ -29,11 +29,11 @@ If you use a config when building the library, make sure the same one is used wh
 Also take a look at the dpa/utils/config.h file for what you can put in there.
 
 To use one of the files in the `mk/` folder, you can specify it in the make command. For example `make use=avr`.
-Make sure to do a `make clean` before building the libtary is you use one of those files or a custom config.
+Make sure to do a `make clean` before building the library is you use one of those files or a custom config.
 
 You can open a shell in a build environment using `make shell`. It'll set `PATH` and `LD_LIBRARY_PATH`.
 You can then run the example binaries without installing the library. You can also specify things like CC there,
-and it'll carry over to any subsequenbt make calls in that shell.
+and it'll carry over to any subsequent make calls in that shell.
 
 You can create debug builds using `make debug=1`. You can create builds with asan enabled using `make asan=1`.
 You can combine these options.
@@ -49,9 +49,9 @@ For example: `make unicode_dir=/unicode/ data` will use the files in `/unicode/`
 Any identifiers starting with `dpa__` (two underscores) or with `_`, is reserved, and should not be used.
 
 There are some macro functions which can take a variety of types, thanks to generic selections. Most of them
-also have a verison suffixed with `_g`, those take any argument, and return an instance of \ref dpa_u_invalid_selection_t
+also have a version suffixed with `_g`, those take any argument, and return an instance of `dpa_u_invalid_selection_t`
 if the arguments are not supported. You can use them if you need to extend a function with generic selections, see also
-\ref dpa_u_assert_selection. The `_g` functions aren't all listed in the documentation.
+`dpa_u_assert_selection`. The `_g` functions aren't all listed in the documentation.
 
 Sometimes, there are also functions suffixed with `_p`. Those are regular functions, which are wrapped using a macro
 which does not have the `_p` suffix.
