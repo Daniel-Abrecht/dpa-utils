@@ -773,9 +773,9 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t
     \
     struct dpa__u_a_bo_unique    : dpa__u_bo_copy_maybe_h1(DPA_U_G(struct dpa__u_a_bo_unique, (X))), \
     struct dpa__u_a_bo_any       : (dpa_u_a_bo_any_t){dpa__u_bo_copy_maybe_h(DPA_U_G(struct dpa__u_a_bo_any,        (X)).p)}, \
-    struct dpa__u_a_bo_gc        : (dpa_u_a_bo_any_t){dpa__u_bo_copy_maybe_h(DPA_U_G(struct dpa__u_a_bo_gc,         (X)).p)}, \
-    struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_any_t){dpa__u_bo_copy_maybe_h(DPA_U_G(struct dpa__u_a_bo_hashed,     (X)).p)}, \
-    struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_any_t){dpa__u_bo_copy_bo_maybe_h3(DPA_U_G(struct dpa__u_a_bo_refcounted, (X)).p)} \
+    struct dpa__u_a_bo_gc        : (dpa_u_a_bo_gc_t){dpa__u_bo_copy_maybe_h(DPA_U_G(struct dpa__u_a_bo_gc,         (X)).p)}, \
+    struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_hashed_t){dpa__u_bo_copy_maybe_h(DPA_U_G(struct dpa__u_a_bo_hashed,     (X)).p)}, \
+    struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_refcounted_t){dpa__u_bo_copy_bo_maybe_h3(DPA_U_G(struct dpa__u_a_bo_refcounted, (X)).p)} \
   )
 
 
