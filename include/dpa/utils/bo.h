@@ -735,8 +735,10 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_maybe_h(const dpa__u_boptr_t bo)
   if(type & DPA_U_BO_HASHED)
     size += sizeof(uint64_t);
   void*restrict dest = dpa_u_copy_p(src, size);
-  if(type & DPA_U_BO_REFCOUNTED)
+  if(type & DPA_U_BO_REFCOUNTED){
+    dpa_u_refcount_ref(((dpa__u_bo_refcounted_t*)dest)->refcount);
     dest = &((dpa__u_bo_refcounted_t*)dest)->bo;
+  }
   dpa_u_bo_t*const ret = (dpa_u_bo_t*)dest;
   if(!(type & (DPA_U_BO_REFCOUNTED|DPA_U_BO_STATIC)))
     ret->data = dpa_u_copy_p(ret->data, ret->size);
@@ -757,6 +759,7 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t
   const dpa__u_bo_refcounted_t*restrict src = dpa_u_container_of(DPA__U_BO_UNTAG(dpa_u_bo_t*, bo), dpa__u_bo_refcounted_t, bo);
   dpa__u_bo_refcounted_t*restrict dest = dpa_u_copy_p(src, type & DPA_U_BO_HASHED ? sizeof(dpa__u_bo_refcounted_hashed_t) : sizeof(dpa__u_bo_refcounted_t));
   dest->bo.data = dpa_u_copy_p(dest->bo.data, dest->bo.size);
+  dpa_u_refcount_ref(dest->refcount);
   return DPA__U_BO_TAG(&dest->bo, type);
 }
 
@@ -765,6 +768,11 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t
  * Otherwise a new BO object is allocated. The refcount of the data of a refcounted BO is also incremented,
  * in addition to a new BO object being allocated.
  * If a BO is neither unique, nor refcounted, nor static, the data is also copied.
+ * 
+ * You may want to use \ref dpa_u_bo_copy_auto instead.
+ * 
+ * \see dpa_u_bo_copy_auto
+ * \returns The same kind of bo passed to it
  */
 #define dpa_u_bo_copy_maybe(X) dpa_u_assert_selection(dpa_u_bo_copy_maybe_g((X)))
 #define dpa_u_bo_copy_maybe_g(X) dpa_u_generic((X), \
@@ -776,6 +784,30 @@ dpa__u_api inline dpa__u_boptr_t dpa__u_bo_copy_bo_maybe_h3(const dpa__u_boptr_t
     struct dpa__u_a_bo_gc        : (dpa_u_a_bo_gc_t){dpa__u_bo_copy_maybe_h(DPA_U_G(struct dpa__u_a_bo_gc,         (X)).p)}, \
     struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_hashed_t){dpa__u_bo_copy_maybe_h(DPA_U_G(struct dpa__u_a_bo_hashed,     (X)).p)}, \
     struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_refcounted_t){dpa__u_bo_copy_bo_maybe_h3(DPA_U_G(struct dpa__u_a_bo_refcounted, (X)).p)} \
+  )
+
+
+/**
+ * If the BO is a unique BO, this function just increments the BOs refcount.
+ * Otherwise a new BO object is allocated. The refcount of the data of a refcounted BO is also incremented,
+ * in addition to a new BO object being allocated.
+ * If a BO is neither unique, nor refcounted, nor static, the data is also copied.
+ * 
+ * The type of the bo allocated may be changed in order to reduce excessive copying. (But currently, that's not done yet).
+ * 
+ * \see dpa_u_bo_copy_maybe
+ * \returns dpa_u_a_bo_any_t
+ */
+#define dpa_u_bo_copy_auto(X) dpa_u_assert_selection(dpa_u_bo_copy_auto_g((X)))
+#define dpa_u_bo_copy_auto_g(X) dpa_u_generic((X), \
+    struct dpa_u_bo*: dpa__u_bo_copy_maybe_h2(*DPA_U_G(struct dpa_u_bo*, (X))), \
+    const struct dpa_u_bo*: dpa__u_bo_copy_maybe_h2(*DPA_U_G(const struct dpa_u_bo*, (X))), \
+    \
+    struct dpa__u_a_bo_unique    : (dpa_u_a_bo_any_t){dpa__u_bo_copy_maybe_h1(DPA_U_G(struct dpa__u_a_bo_unique, (X))).p}, \
+    struct dpa__u_a_bo_any       : (dpa_u_a_bo_any_t){dpa__u_bo_copy_maybe_h(DPA_U_G(struct dpa__u_a_bo_any,        (X)).p)}, \
+    struct dpa__u_a_bo_gc        : (dpa_u_a_bo_any_t){dpa__u_bo_copy_maybe_h(DPA_U_G(struct dpa__u_a_bo_gc,         (X)).p)}, \
+    struct dpa__u_a_bo_hashed    : (dpa_u_a_bo_any_t){dpa__u_bo_copy_maybe_h(DPA_U_G(struct dpa__u_a_bo_hashed,     (X)).p)}, \
+    struct dpa__u_a_bo_refcounted: (dpa_u_a_bo_any_t){dpa__u_bo_copy_bo_maybe_h3(DPA_U_G(struct dpa__u_a_bo_refcounted, (X)).p)} \
   )
 
 
