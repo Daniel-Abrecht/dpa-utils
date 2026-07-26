@@ -626,6 +626,8 @@ dpa__u_api dpa_u_unsequenced inline dpa_u_refcount_freeable_t* dpa__u_bo_get_ref
  * If it is a unique BO, the unique BO is removed from the set of unique BOs,
  * and the refcount of the data is decremented if there is one, and freed once nothing references it anymore.
  * This function is thread safe.
+ * 
+ * \see dpa_u_bo_free_data does all the same things, but frees the data
  */
 #define dpa_u_bo_put(X) dpa_u_assert_selection(dpa_u_bo_put_g((X)))
 #define dpa_u_bo_put_g(X) dpa_u_generic((X), \
@@ -633,6 +635,38 @@ dpa__u_api dpa_u_unsequenced inline dpa_u_refcount_freeable_t* dpa__u_bo_get_ref
     struct dpa__u_a_bo_any       : dpa__u_bo_put_h (DPA_U_G(struct dpa__u_a_bo_any,       (X)).p), \
     struct dpa__u_a_bo_gc        : dpa__u_bo_put_h (DPA_U_G(struct dpa__u_a_bo_gc,        (X)).p), \
     struct dpa__u_a_bo_hashed    : dpa__u_bo_put_h (DPA_U_G(struct dpa__u_a_bo_hashed,    (X)).p), \
+    struct dpa__u_a_bo_refcounted: dpa__u_bo_put_h2(DPA_U_G(struct dpa__u_a_bo_refcounted,(X)).p) \
+  )
+
+dpa__u_api inline void dpa__u_bo_free_data_h(const dpa__u_boptr_t bo){
+  if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_SIMPLE))
+    return;
+  dpa_u_bo_t* pbo = DPA__U_BO_UNTAG(dpa_u_bo_t*, bo);
+  if(dpa_u_bo_is_any_type(bo, DPA_U_BO_REFCOUNTED)){
+    if(dpa_u_bo_is_any_type(bo, DPA_U_BO_UNIQUE)){
+      dpa_u_refcount_put(((dpa_u_refcount_freeable_t*)pbo)-1);
+    }else{
+      dpa_u_refcount_put(dpa_u_container_of(pbo, dpa__u_bo_refcounted_t, bo)->refcount);
+    }
+  }else if(!dpa_u_bo_is_any_type(bo, DPA_U_BO_STATIC)){
+    free((void*)pbo->data);
+    *pbo = (dpa_u_bo_t){0};
+  }
+}
+
+/**
+ * If if the bo is not static, refcounted, or unique/inline, it's data is freed.
+ * Otherwise, works like \ref dpa_u_bo_put.
+ * Does not free the BO itself, see \ref dpa_u_bo_free for that.
+ * 
+ * \see dpa_u_bo_put
+ */
+#define dpa_u_bo_free_data(X) dpa_u_assert_selection(dpa_u_bo_free_data_g((X)))
+#define dpa_u_bo_free_data_g(X) dpa_u_generic((X), \
+    struct dpa__u_a_bo_unique    : dpa__u_bo_put_h1(DPA_U_G(struct dpa__u_a_bo_unique,    (X))), \
+    struct dpa__u_a_bo_any       : dpa__u_bo_free_data_h (DPA_U_G(struct dpa__u_a_bo_any,       (X)).p), \
+    struct dpa__u_a_bo_gc        : dpa__u_bo_put_h (DPA_U_G(struct dpa__u_a_bo_gc,        (X)).p), \
+    struct dpa__u_a_bo_hashed    : dpa__u_bo_free_data_h (DPA_U_G(struct dpa__u_a_bo_hashed,    (X)).p), \
     struct dpa__u_a_bo_refcounted: dpa__u_bo_put_h2(DPA_U_G(struct dpa__u_a_bo_refcounted,(X)).p) \
   )
 

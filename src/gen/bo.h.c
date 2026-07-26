@@ -61,6 +61,7 @@ extern int dpa_u_bo_compare_data_p(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b);
 extern int dpa_u_bo_is_same_p(dpa_u_a_bo_any_t a, dpa_u_a_bo_any_t b);
 extern uint64_t dpa__u_bo_get_hash(const dpa__u_boptr_t boptr);
 extern uint64_t dpa__u_bo_hash(dpa_u_bo_t bo);
+extern void dpa__u_bo_free_data_h(const dpa__u_boptr_t bo);
 extern void dpa__u_bo_free_h(const dpa__u_boptr_t bo);
 extern void dpa__u_bo_free_h2(const dpa__u_boptr_t bo);
 extern void dpa__u_bo_put_h(const dpa__u_boptr_t bo);
